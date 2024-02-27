@@ -234,6 +234,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
         subghz->remove_duplicates = false;
     }
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+    subghz_txrx_receiver_set_ignore_filter(subghz->txrx, subghz->ignore_filter);
     subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);
 
     if(!alloc_for_tx_only) {

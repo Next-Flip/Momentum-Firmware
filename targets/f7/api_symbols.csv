@@ -3421,6 +3421,7 @@ Function,+,subghz_receiver_free,void,SubGhzReceiver*
 Function,+,subghz_receiver_reset,void,SubGhzReceiver*
 Function,+,subghz_receiver_search_decoder_base_by_name,SubGhzProtocolDecoderBase*,"SubGhzReceiver*, const char*"
 Function,+,subghz_receiver_set_filter,void,"SubGhzReceiver*, SubGhzProtocolFlag"
+Function,+,subghz_receiver_set_ignore_filter,void,"SubGhzReceiver*, SubGhzProtocolFilter"
 Function,+,subghz_receiver_set_rx_callback,void,"SubGhzReceiver*, SubGhzReceiverCallback, void*"
 Function,+,subghz_setting_alloc,SubGhzSetting*,
 Function,+,subghz_setting_customs_presets_to_log,uint8_t,SubGhzSetting*
