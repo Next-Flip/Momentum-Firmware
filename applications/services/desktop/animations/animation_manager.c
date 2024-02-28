@@ -13,14 +13,13 @@
 #include "animation_storage.h"
 #include "animation_manager.h"
 
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 #define TAG "AnimationManager"
 
 #define HARDCODED_ANIMATION_NAME "L1_AnimationError_128x64"
 #define NO_SD_ANIMATION_NAME "L1_NoSd_128x49"
 #define BAD_BATTERY_ANIMATION_NAME "L1_BadBattery_128x47"
-#define CREDITS_ANIMATION_NAME "Credits_128x64"
 
 #define NO_DB_ANIMATION_NAME "L0_NoDb_128x51"
 #define BAD_SD_ANIMATION_NAME "L0_SdBad_128x51"
@@ -148,7 +147,7 @@ void animation_manager_check_blocking_process(AnimationManager* animation_manage
             const StorageAnimationManifestInfo* manifest_info =
                 animation_storage_get_meta(animation_manager->current_animation);
             bool valid = animation_manager_is_valid_idle_animation(
-                manifest_info, &stats, xtreme_settings.unlock_anims);
+                manifest_info, &stats, momentum_settings.unlock_anims);
 
             if(!valid) {
                 animation_manager_start_new_idle(animation_manager);
@@ -203,8 +202,8 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
     const BubbleAnimation* bubble_animation =
         animation_storage_get_bubble_animation(animation_manager->current_animation);
     animation_manager->state = AnimationManagerStateIdle;
-    int32_t duration = (xtreme_settings.cycle_anims == 0) ? (bubble_animation->duration) :
-                                                            (xtreme_settings.cycle_anims);
+    int32_t duration = (momentum_settings.cycle_anims == 0) ? (bubble_animation->duration) :
+                                                              (momentum_settings.cycle_anims);
     furi_timer_start(
         animation_manager->idle_animation_timer, (duration > 0) ? (duration * 1000) : 0);
 }
@@ -389,8 +388,7 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     // Filter valid animations
-    bool skip_credits = !xtreme_settings.credits_anim && xtreme_settings.asset_pack[0] == '\0';
-    bool unlock = xtreme_settings.unlock_anims;
+    bool unlock = momentum_settings.unlock_anims;
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
@@ -400,9 +398,6 @@ static StorageAnimation*
 
         if(strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) == 0) {
             // Dont pick error anim randomly
-            valid = false;
-        } else if(skip_credits && strcmp(manifest_info->name, CREDITS_ANIMATION_NAME) == 0) {
-            // Dont pick credits anim if disabled
             valid = false;
         }
 
@@ -546,7 +541,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                 const StorageAnimationManifestInfo* manifest_info =
                     animation_storage_get_meta(restore_animation);
                 bool valid = animation_manager_is_valid_idle_animation(
-                    manifest_info, &stats, xtreme_settings.unlock_anims);
+                    manifest_info, &stats, momentum_settings.unlock_anims);
                 // Restore only if anim is valid and not the error anim
                 if(valid && strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) != 0) {
                     animation_manager_replace_current_animation(
@@ -561,9 +556,9 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                         const BubbleAnimation* bubble_animation =
                             animation_storage_get_bubble_animation(
                                 animation_manager->current_animation);
-                        int32_t duration = (xtreme_settings.cycle_anims == 0) ?
+                        int32_t duration = (momentum_settings.cycle_anims == 0) ?
                                                (bubble_animation->duration) :
-                                               (xtreme_settings.cycle_anims);
+                                               (momentum_settings.cycle_anims);
                         furi_timer_start(
                             animation_manager->idle_animation_timer,
                             (duration > 0) ? (duration * 1000) : 0);

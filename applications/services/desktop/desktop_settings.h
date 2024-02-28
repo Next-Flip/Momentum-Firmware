@@ -6,12 +6,10 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define DESKTOP_SETTINGS_OLD_PATH CFG_PATH("desktop.settings")
 #define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
 #define DESKTOP_SETTINGS_MAGIC (0x17)
 #define DESKTOP_SETTINGS_VER (11)
 
-#define DESKTOP_KEYBINDS_OLD_PATH CFG_PATH(".desktop.keybinds")
 #define DESKTOP_KEYBINDS_PATH CFG_PATH("desktop.keybinds")
 #define DESKTOP_KEYBINDS_MAGIC (0x14)
 #define DESKTOP_KEYBINDS_VER (1)

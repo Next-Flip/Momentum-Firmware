@@ -5,7 +5,7 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
@@ -137,15 +137,15 @@ uint8_t canvas_current_font_width(const Canvas* canvas) {
 const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
-    if(xtreme_assets.font_params[font]) {
-        return xtreme_assets.font_params[font];
+    if(asset_packs.font_params[font]) {
+        return asset_packs.font_params[font];
     }
     return &canvas_font_params[font];
 }
 
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
-    if(xtreme_settings.dark_mode) {
+    if(momentum_settings.dark_mode) {
         u8g2_FillBuffer(&canvas->fb);
     } else {
         u8g2_ClearBuffer(&canvas->fb);
@@ -154,7 +154,7 @@ void canvas_clear(Canvas* canvas) {
 
 void canvas_set_color(Canvas* canvas, Color color) {
     furi_assert(canvas);
-    if(xtreme_settings.dark_mode) {
+    if(momentum_settings.dark_mode) {
         if(color == ColorBlack) {
             color = ColorWhite;
         } else if(color == ColorWhite) {
@@ -176,8 +176,8 @@ void canvas_invert_color(Canvas* canvas) {
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_assert(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
-    if(xtreme_assets.fonts[font]) {
-        u8g2_SetFont(&canvas->fb, xtreme_assets.fonts[font]);
+    if(asset_packs.fonts[font]) {
+        u8g2_SetFont(&canvas->fb, asset_packs.fonts[font]);
         return;
     }
     switch(font) {

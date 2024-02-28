@@ -42,7 +42,7 @@ libs = env.BuildModules(
         "mjs",
         "nanopb",
         "update_util",
-        "xtreme",
+        "momentum",
         "heatshrink",
         "ble_profile",
         "bit_lib",

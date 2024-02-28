@@ -1,6 +1,6 @@
 [submodule "applications/external"]
 	path = applications/external
-	url = https://github.com/Flipper-XFW/Xtreme-Apps.git
+	url = https://github.com/Next-Flip/Momentum-Apps.git
 [submodule "lib/mlib"]
 	path = lib/mlib
 	url = https://github.com/P-p-H-d/mlib.git

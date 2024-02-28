@@ -5,7 +5,7 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <furi.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 #define TAG "Dolphin"
@@ -156,7 +156,7 @@ int32_t dolphin_srv(void* p) {
     furi_record_create(RECORD_DOLPHIN, dolphin);
 
     dolphin_state_load(dolphin->state);
-    uint32_t butthurt_interval = xtreme_settings.butthurt_timer * 1000;
+    uint32_t butthurt_interval = momentum_settings.butthurt_timer * 1000;
     if(butthurt_interval) furi_timer_restart(dolphin->butthurt_timer, butthurt_interval);
     dolphin_update_clear_limits_timer_period(dolphin);
     furi_timer_restart(dolphin->clear_limits_timer, HOURS_IN_TICKS(24));

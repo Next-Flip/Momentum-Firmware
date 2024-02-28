@@ -1,8 +1,8 @@
 #include <furi_hal.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include <expansion/expansion.h>
 
-#define UART_CH (xtreme_settings.uart_nmea_channel)
+#define UART_CH (momentum_settings.uart_nmea_channel)
 
 #define RX_BUF_SIZE 1024
 

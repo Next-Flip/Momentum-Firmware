@@ -1,7 +1,7 @@
 #include <furi_hal.h>
 
 #include "../desktop_i.h"
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 #define DesktopFaultEventExit 0x00FF00FF
 
@@ -15,23 +15,13 @@ void desktop_scene_fault_on_enter(void* context) {
 
     Popup* popup = desktop->hw_mismatch_popup;
     popup_set_context(popup, desktop);
-    if(xtreme_assets.is_nsfw) {
-        popup_set_header(
-            popup,
-            "Slut passed out\n but is now back",
-            60,
-            14 + STATUS_BAR_Y_SHIFT,
-            AlignCenter,
-            AlignCenter);
-    } else {
-        popup_set_header(
-            popup,
-            "Flipper crashed\n but has been rebooted",
-            60,
-            14 + STATUS_BAR_Y_SHIFT,
-            AlignCenter,
-            AlignCenter);
-    }
+    popup_set_header(
+        popup,
+        "Flipper crashed\n but has been rebooted",
+        60,
+        14 + STATUS_BAR_Y_SHIFT,
+        AlignCenter,
+        AlignCenter);
 
     char* message = (char*)furi_hal_rtc_get_fault_data();
     popup_set_text(popup, message, 60, 37 + STATUS_BAR_Y_SHIFT, AlignCenter, AlignCenter);

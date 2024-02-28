@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 #include "../desktop.h"
 #include "../desktop_i.h"
@@ -57,7 +57,7 @@ static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void*
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventUnlocked);
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails() + 1;
-        if(pin_fails >= 10 && xtreme_settings.bad_pins_format) {
+        if(pin_fails >= 10 && momentum_settings.bad_pins_format) {
             furi_hal_rtc_reset_registers();
             furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
             storage_sd_format(furi_record_open(RECORD_STORAGE));

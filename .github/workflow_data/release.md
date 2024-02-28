@@ -1,30 +1,32 @@
 ## ⬇️ Download
->### [🖥️ Web Updater (chrome)](https://flipper-xtre.me/update) [recommended]
+>### [🖥️ Web Updater (chrome)](https://momentum-fw.dev/update) [recommended]
 
->### [🐬 qFlipper Package (.tgz)](https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/{VERSION_TAG}/{ARTIFACT_TGZ})
+>### [🐬 qFlipper Package (.tgz)](https://github.com/Next-Flip/Momentum-Firmware/releases/download/{VERSION_TAG}/{ARTIFACT_TGZ})
 
->### [📦 Zipped Archive (.zip)](https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/{VERSION_TAG}/{ARTIFACT_ZIP})
+>### [📦 Zipped Archive (.zip)](https://github.com/Next-Flip/Momentum-Firmware/releases/download/{VERSION_TAG}/{ARTIFACT_ZIP})
 
-**Check the [install guide](https://github.com/Flipper-XFW/Xtreme-Firmware#install) if you're not sure, or [join our Discord](https://discord.gg/flipper-xtreme) if you have questions or encounter issues!**
+**Check the [install guide](https://github.com/Next-Flip/Momentum-Firmware#install) if you're not sure, or [join our Discord](https://discord.gg/momentum) if you have questions or encounter issues!**
 
 ## ❤️ Support
-If you like what you're seeing, **please consider donating to us**. We won't ever put this behind a paywall, but we'd still appreciate a few bucks!
+If you enjoy the firmware, please consider donating to the team, or sharing it with others! :D
 
-- **[Patreon](https://patreon.com/CynthiaLabs)**: ❤️ Account needed, subscription with perks across my entire org.
-- **[Wire-transfer](https://bunq.me/ClaraK)**: No account needed, one-time
-- **[Paypal](https://paypal.me/RdX2020)**: Account needed, one-time
-- **[ko-fi](https://ko-fi.com/cynthialabs)**: No account needed, one-time
-- **Monero**: `41kyWeeoVdK4quzQ4M9ikVGs6tCQCLfdx8jLExTNsAu2SF1QAyDqRdjfGM6EL8L9NpXwt89HJeAoGf1aoArk7nDr4AMMV4T`
+> **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
 
-**Thanks for all your support <3**
+> **[Bank transfer](https://bunq.me/WillyJL)**: One-off, No signup required
+
+> **[PayPal](https://paypal.me/willyjl1)**: One-off, Signup required
+
+> **BCH**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
+
+> **ETH**: `0x90b8284c3eba44108427e3148ff8efa0ae7a61a8`
+
+> **BTC**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
+
+> **SHIB**: `0x90b8284c3eba44108427e3148ff8efa0ae7a61a8`
+
+> **DOGE**: `DNUdUqtmWaAiJ6yoV6hRNEh6Nn1Tg4Aorr`
+
+**Thank you <3**
 
 ## 🚀 Changelog
 {CHANGELOG}
-
-<!--- <HOTFIXES>
-### Hotfixes:
-
-  [//]: <NEXT_HOTFIX>
-
-  **If you have any of the above issues, please re-download and re-install!**
-<HOTFIXES> -->

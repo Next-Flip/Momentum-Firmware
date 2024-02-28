@@ -15,7 +15,7 @@ static bool bad_kb_file_select(BadKbApp* bad_kb) {
         dialog_message_set_text(
             message,
             "A badusb folder was found!\n"
-            "XFW uses the badkb folder.\n"
+            "Momentum uses the badkb folder.\n"
             "Want to transfer the files?",
             64,
             32,

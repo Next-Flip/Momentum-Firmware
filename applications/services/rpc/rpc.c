@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <m-dict.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 #include <bt/bt_service/bt.h>
 
@@ -386,7 +386,8 @@ static void rpc_session_thread_state_callback(FuriThreadState thread_state, void
 }
 
 RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) && !xtreme_settings.allow_locked_rpc_commands)
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) &&
+       !momentum_settings.allow_locked_rpc_commands)
         return NULL;
 
     furi_assert(rpc);

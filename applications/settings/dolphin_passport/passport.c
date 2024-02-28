@@ -6,7 +6,7 @@
 #include <gui/gui.h>
 #include <furi_hal_version.h>
 #include "dolphin/dolphin.h"
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include "math.h"
 
 typedef struct {
@@ -38,28 +38,15 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
 
-    if(xtreme_assets.is_nsfw) {
-        if(stats->butthurt <= 4) {
-            portrait = &I_passport_happy_46x49;
-            mood_str = "Status: Wet";
-        } else if(stats->butthurt <= 9) {
-            portrait = &I_passport_okay_46x49;
-            mood_str = "Status: Horny";
-        } else {
-            portrait = &I_passport_bad_46x49;
-            mood_str = "Status: Desperate";
-        }
+    if(stats->butthurt <= 4) {
+        portrait = &I_passport_happy_46x49;
+        mood_str = "Mood: Happy";
+    } else if(stats->butthurt <= 9) {
+        portrait = &I_passport_okay_46x49;
+        mood_str = "Mood: Okay";
     } else {
-        if(stats->butthurt <= 4) {
-            portrait = &I_passport_happy_46x49;
-            mood_str = "Mood: Happy";
-        } else if(stats->butthurt <= 9) {
-            portrait = &I_passport_okay_46x49;
-            mood_str = "Mood: Okay";
-        } else {
-            portrait = &I_passport_bad_46x49;
-            mood_str = "Mood: Angry";
-        }
+        portrait = &I_passport_bad_46x49;
+        mood_str = "Mood: Angry";
     }
     uint32_t xp_progress = 0;
     uint32_t xp_need = dolphin_state_xp_to_levelup(stats->icounter);

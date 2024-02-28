@@ -1,0 +1,12 @@
+App(
+    appid="momentum_app",
+    name="Momentum",
+    apptype=FlipperAppType.MENUEXTERNAL,
+    entry_point="momentum_app",
+    stack_size=2 * 1024,
+    flags=["InsomniaSafe"],
+    icon="A_Momentum_14",
+    order=90,
+    fap_icon="icon.png",
+    fap_category="assets",
+)

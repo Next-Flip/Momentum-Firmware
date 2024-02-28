@@ -3,7 +3,7 @@
 #include <furi_hal_light.h>
 #include <lp5562.h>
 #include <stdint.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include <rgb_backlight.h>
 
 #define LED_CURRENT_RED 50
@@ -44,7 +44,7 @@ void furi_hal_light_set(Light light, uint8_t value) {
         lp5562_set_channel_value(&furi_hal_i2c_handle_power, LP5562ChannelBlue, value);
     }
     if(light & LightBacklight) {
-        if(xtreme_settings.rgb_backlight) {
+        if(momentum_settings.rgb_backlight) {
             rgb_backlight_update(value, false);
         } else {
             uint8_t prev =

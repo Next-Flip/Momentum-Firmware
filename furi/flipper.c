@@ -42,8 +42,8 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <applications/main/u2f/u2f_data.h>
 #include <expansion/expansion_settings_filename.h>
 #include <applications/main/archive/helpers/archive_favorites.h>
-#include <xtreme/namespoof.h>
-#include <xtreme/xtreme.h>
+#include <momentum/namespoof.h>
+#include <momentum/momentum.h>
 
 void flipper_migrate_files() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -51,44 +51,49 @@ void flipper_migrate_files() {
     // Revert cringe
     FURI_LOG_I(TAG, "Migrate: Remove unused files");
     storage_common_remove(storage, INT_PATH(".passport.settings"));
-    storage_common_remove(storage, INT_PATH(".region_data"));
 
-    // Migrate files (use copy+remove to not overwrite dst but still delete src)
-    FURI_LOG_I(TAG, "Migrate: Renames on external");
-    storage_common_copy(storage, ARCHIVE_FAV_OLD_PATH, ARCHIVE_FAV_PATH);
-    storage_common_remove(storage, ARCHIVE_FAV_OLD_PATH);
-    storage_common_copy(storage, DESKTOP_KEYBINDS_OLD_PATH, DESKTOP_KEYBINDS_PATH);
-    storage_common_remove(storage, DESKTOP_KEYBINDS_OLD_PATH);
-    // Int -> Ext
-    FURI_LOG_I(TAG, "Migrate: Internal to External");
-    storage_common_copy(storage, BT_SETTINGS_OLD_PATH, BT_SETTINGS_PATH);
-    storage_common_remove(storage, BT_SETTINGS_OLD_PATH);
-    storage_common_copy(storage, DOLPHIN_STATE_OLD_PATH, DOLPHIN_STATE_PATH);
-    storage_common_remove(storage, DOLPHIN_STATE_OLD_PATH);
-    storage_common_copy(storage, POWER_SETTINGS_OLD_PATH, POWER_SETTINGS_PATH);
-    storage_common_remove(storage, POWER_SETTINGS_OLD_PATH);
-    storage_common_copy(storage, BT_KEYS_STORAGE_OLD_PATH, BT_KEYS_STORAGE_PATH);
-    storage_common_remove(storage, BT_KEYS_STORAGE_OLD_PATH);
-    storage_common_copy(storage, EXPANSION_SETTINGS_OLD_PATH, EXPANSION_SETTINGS_PATH);
-    storage_common_remove(storage, EXPANSION_SETTINGS_OLD_PATH);
-    // storage_common_copy(storage, NOTIFICATION_SETTINGS_OLD_PATH, NOTIFICATION_SETTINGS_PATH); // Not compatible anyway
-    storage_common_remove(storage, NOTIFICATION_SETTINGS_OLD_PATH);
-    // Ext -> Int
-    FURI_LOG_I(TAG, "Migrate: External to Internal");
-    storage_common_copy(storage, DESKTOP_SETTINGS_OLD_PATH, DESKTOP_SETTINGS_PATH);
-    storage_common_remove(storage, DESKTOP_SETTINGS_OLD_PATH);
+    // Migrate files
+    FURI_LOG_I(TAG, "Migrate: Rename old paths");
+    const struct {
+        const char* src;
+        const char* dst;
+        bool delete;
+    } renames[] = {
+        // Renames on ext
+        {CFG_PATH("favorites.txt"), ARCHIVE_FAV_PATH, true}, // Adapt to OFW/UL
+        {CFG_PATH(".desktop.keybinds"), DESKTOP_KEYBINDS_PATH, true}, // Old naming
+        {CFG_PATH("xtreme_menu.txt"), MAINMENU_APPS_PATH, false}, // Keep both
+        {CFG_PATH("xtreme_settings.txt"), MOMENTUM_SETTINGS_PATH, false}, // Keep both
+        // Int -> Ext
+        {INT_PATH(".bt.settings"), BT_SETTINGS_PATH, true},
+        {INT_PATH(".dolphin.state"), DOLPHIN_STATE_PATH, true},
+        {INT_PATH(".power.settings"), POWER_SETTINGS_PATH, true},
+        {INT_PATH(".bt.keys"), BT_KEYS_STORAGE_PATH, true},
+        {INT_PATH(".expansion.settings"), EXPANSION_SETTINGS_PATH, true},
+        {INT_PATH(".notification.settings"), NOTIFICATION_SETTINGS_PATH, true},
+        // Ext -> Int
+        {CFG_PATH("desktop.settings"), DESKTOP_SETTINGS_PATH, true},
+    };
+    for(size_t i = 0; i < COUNT_OF(renames); ++i) {
+        // Use copy+remove to not overwrite dst but still delete src
+        storage_common_copy(storage, renames[i].src, renames[i].dst);
+        if(renames[i].delete) {
+            storage_common_remove(storage, renames[i].src);
+        }
+    }
 
     // Special care for U2F
     FURI_LOG_I(TAG, "Migrate: U2F");
     FileInfo file_info;
-    if(storage_common_stat(storage, U2F_CNT_OLD_FILE, &file_info) == FSE_OK &&
+    if(storage_common_stat(storage, INT_PATH(".cnt.u2f"), &file_info) == FSE_OK &&
        file_info.size > 200) { // Is on Int and has content
-        storage_common_rename(storage, U2F_CNT_OLD_FILE, U2F_CNT_FILE); // Int -> Ext
+        storage_common_rename(storage, INT_PATH(".cnt.u2f"), U2F_CNT_FILE); // Int -> Ext
     }
-    storage_common_copy(storage, U2F_KEY_OLD_FILE, U2F_KEY_FILE); // Ext -> Int
+    storage_common_copy(storage, U2F_DATA_FOLDER "key.u2f", U2F_KEY_FILE); // Ext -> Int
 
+    // Asset packs migrate, merges together
     FURI_LOG_I(TAG, "Migrate: Asset Packs");
-    storage_common_migrate(storage, XTREME_ASSETS_OLD_PATH, XTREME_ASSETS_PATH);
+    storage_common_migrate(storage, EXT_PATH("dolphin_custom"), ASSET_PACKS_PATH);
 
     furi_record_close(RECORD_STORAGE);
 }
@@ -98,7 +103,7 @@ static void flipper_boot_status(Canvas* canvas, const char* text) {
     canvas_reset(canvas);
     canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, text);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Xtreme is Booting");
+    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Momentum is Booting");
     canvas_commit(canvas);
 }
 #endif
@@ -138,12 +143,12 @@ void flipper_init() {
         flipper_boot_status(canvas, "Starting Namespoof");
         namespoof_init();
 
-        flipper_boot_status(canvas, "Loading Xtreme Settings");
-        xtreme_settings_load();
+        flipper_boot_status(canvas, "Loading Momentum Settings");
+        momentum_settings_load();
         furi_hal_light_sequence("rgb RB");
 
-        flipper_boot_status(canvas, "Loading Xtreme Assets");
-        xtreme_assets_init();
+        flipper_boot_status(canvas, "Loading Asset Packs");
+        asset_packs_init();
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }

@@ -5,26 +5,21 @@ import requests
 import json
 import os
 
-dev_share = os.environ["NC_HOST"] + "s/sGHsQB94a9x5CRs/download?path=/&files={files}"
+dev_share_id = ""
+dev_share = os.environ["NC_HOST"] + f"s/{dev_share_id}/download?path=/&files={{files}}"
 
 if __name__ == "__main__":
     with open(os.environ["GITHUB_EVENT_PATH"], "r") as f:
         event = json.load(f)
 
     client = nextcloud_client.Client(os.environ["NC_HOST"])
-    _session = requests.session
-    def session(*args, **kwargs):
-        s = _session(*args, **kwargs)
-        s.headers["User-Agent"] = os.environ["NC_USERAGENT"]
-        return s
-    requests.session = session
     client.login(os.environ["NC_USER"], os.environ["NC_PASS"])
 
     for file in (
         os.environ["ARTIFACT_TGZ"],
         os.environ["ARTIFACT_SDK"],
     ):
-        path = f"XFW-Dev/{file}"
+        path = f"MNTM-Dev/{file}"
         # try:
         #     client.delete(path)
         # except Exception:
@@ -38,7 +33,7 @@ if __name__ == "__main__":
             "content": None,
             "embeds": [
                 {
-                    "title": "Devbuild infos:",
+                    "title": "New Devbuild:",
                     "description": "",
                     "url": "",
                     "color": 16734443,
@@ -58,12 +53,12 @@ if __name__ == "__main__":
                     ],
                     "author": {
                         "name": "Build Succeeded!",
-                        "icon_url": "https://cdn.discordapp.com/emojis/1080005692485795930.png"
+                        # "icon_url": ""
                     },
-                    "footer": {
-                        "text": "Build go brrrr",
-                        "icon_url": "https://cdn.discordapp.com/emojis/1059798228725403719.png"
-                    },
+                    # "footer": {
+                    #     "text": "Build go brrrr",
+                    #     "icon_url": ""
+                    # },
                     "timestamp": dt.datetime.utcnow().isoformat()
                 }
             ],

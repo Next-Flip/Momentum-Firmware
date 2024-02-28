@@ -9,7 +9,6 @@
 extern "C" {
 #endif
 
-#define DOLPHIN_STATE_OLD_PATH INT_PATH(".dolphin.state")
 #define DOLPHIN_STATE_PATH CFG_PATH("dolphin.state")
 
 extern const uint32_t DOLPHIN_LEVELS[];

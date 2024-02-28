@@ -33,7 +33,6 @@ typedef struct {
 
 #define NOTIFICATION_SETTINGS_VERSION 0x02
 #define NOTIFICATION_SETTINGS_MAGIC 0x16
-#define NOTIFICATION_SETTINGS_OLD_PATH INT_PATH(".notification.settings")
 #define NOTIFICATION_SETTINGS_PATH CFG_PATH("notification.settings")
 
 typedef struct {

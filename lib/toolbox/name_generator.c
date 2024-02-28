@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <furi.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 const char* const name_generator_left[] = {
     "super",
@@ -52,10 +52,10 @@ void name_generator_make_auto_datetime(
     DateTime* custom_time) {
     if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagRandomFilename)) {
         name_generator_make_detailed_datetime(
-            name, max_name_size, prefix, custom_time, xtreme_settings.file_naming_prefix_after);
+            name, max_name_size, prefix, custom_time, momentum_settings.file_naming_prefix_after);
     } else {
         name_generator_make_random_prefixed(
-            name, max_name_size, prefix, xtreme_settings.file_naming_prefix_after);
+            name, max_name_size, prefix, momentum_settings.file_naming_prefix_after);
     }
 }
 
@@ -100,7 +100,7 @@ void name_generator_make_random_prefixed(
 
 void name_generator_make_random(char* name, size_t max_name_size) {
     name_generator_make_random_prefixed(
-        name, max_name_size, NULL, xtreme_settings.file_naming_prefix_after);
+        name, max_name_size, NULL, momentum_settings.file_naming_prefix_after);
 }
 
 void name_generator_make_detailed_datetime(
@@ -152,5 +152,5 @@ void name_generator_make_detailed_datetime(
 
 void name_generator_make_detailed(char* name, size_t max_name_size, const char* prefix) {
     name_generator_make_detailed_datetime(
-        name, max_name_size, prefix, NULL, xtreme_settings.file_naming_prefix_after);
+        name, max_name_size, prefix, NULL, momentum_settings.file_naming_prefix_after);
 }

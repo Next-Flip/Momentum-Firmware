@@ -3,7 +3,6 @@
 
 #define POWER_SETTINGS_VER (1)
 
-#define POWER_SETTINGS_OLD_PATH INT_PATH(".power.settings")
 #define POWER_SETTINGS_PATH CFG_PATH("power.settings")
 #define POWER_SETTINGS_MAGIC (0x21)
 

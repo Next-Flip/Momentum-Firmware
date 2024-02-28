@@ -7,7 +7,6 @@
 extern "C" {
 #endif
 
-#define BT_SETTINGS_OLD_PATH INT_PATH(".bt.settings")
 #define BT_SETTINGS_PATH CFG_PATH("bt.settings")
 
 typedef struct {

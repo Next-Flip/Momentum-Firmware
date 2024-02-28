@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <bt/bt_service/bt_i.h>
 #include "helpers/ducky_script_i.h"
@@ -267,11 +267,11 @@ void bad_kb_config_refresh(BadKbApp* app) {
     scene_manager_previous_scene(app->scene_manager);
 
     // Update settings
-    if(xtreme_settings.bad_bt != app->is_bt ||
-       xtreme_settings.bad_bt_remember != app->bt_remember) {
-        xtreme_settings.bad_bt = app->is_bt;
-        xtreme_settings.bad_bt_remember = app->bt_remember;
-        xtreme_settings_save();
+    if(momentum_settings.bad_bt != app->is_bt ||
+       momentum_settings.bad_bt_remember != app->bt_remember) {
+        momentum_settings.bad_bt = app->is_bt;
+        momentum_settings.bad_bt_remember = app->bt_remember;
+        momentum_settings_save();
     }
 }
 
@@ -308,8 +308,8 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
     app->bt->suppress_pin_screen = true;
-    app->is_bt = xtreme_settings.bad_bt;
-    app->bt_remember = xtreme_settings.bad_bt_remember;
+    app->is_bt = momentum_settings.bad_bt;
+    app->bt_remember = momentum_settings.bad_bt_remember;
     bad_kb_config_adjust(&app->config);
 
     // Save prev config

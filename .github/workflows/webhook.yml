@@ -13,7 +13,6 @@ on:
   workflow_run:
     workflows:
       - "Build"
-      - "Hotfix"
       - "Lint"
       - "Release"
       - "SonarCloud"

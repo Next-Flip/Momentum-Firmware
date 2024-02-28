@@ -4,7 +4,7 @@
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include <bt/bt_service/bt_i.h>
 
 #define MAX_NAME_LEN 64
@@ -57,11 +57,7 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
 
     if((state == BadKbStateIdle) || (state == BadKbStateDone) ||
        (state == BadKbStateNotConnected)) {
-        if(xtreme_assets.is_nsfw) {
-            elements_button_center(canvas, "Cum");
-        } else {
-            elements_button_center(canvas, "Run");
-        }
+        elements_button_center(canvas, "Run");
         elements_button_left(canvas, "Config");
     } else if((state == BadKbStateRunning) || (state == BadKbStateDelay)) {
         elements_button_center(canvas, "Stop");
@@ -80,21 +76,12 @@ static void bad_kb_draw_callback(Canvas* canvas, void* _model) {
     if(state == BadKbStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if(xtreme_assets.is_nsfw) {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Plug me");
-            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "in, Daddy");
-        } else {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
-            canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
-        }
+        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
+        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
     } else if(state == BadKbStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
-        if(xtreme_assets.is_nsfw) {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will cum");
-        } else {
-            canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
-        }
+        canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");
     } else if(state == BadKbStateFileError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);

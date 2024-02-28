@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include <furi_hal_rtc.h>
 
 #include "../desktop_i.h"
@@ -20,7 +20,7 @@ typedef enum {
     DesktopLockMenuIndexDarkMode,
     DesktopLockMenuIndexLock,
     DesktopLockMenuIndexBluetooth,
-    DesktopLockMenuIndexXtreme,
+    DesktopLockMenuIndexMomentum,
     DesktopLockMenuIndexBrightness,
     DesktopLockMenuIndexVolume,
 
@@ -101,7 +101,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             break;
         case DesktopLockMenuIndexDarkMode:
             icon = &I_CC_DarkMode_16x16;
-            enabled = xtreme_settings.dark_mode;
+            enabled = momentum_settings.dark_mode;
             break;
         case DesktopLockMenuIndexLock:
             icon = &I_CC_Lock_16x16;
@@ -110,8 +110,8 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             icon = &I_CC_Bluetooth_16x16;
             enabled = m->lock_menu->bt->bt_settings.enabled;
             break;
-        case DesktopLockMenuIndexXtreme:
-            icon = &I_CC_Xtreme_16x16;
+        case DesktopLockMenuIndexMomentum:
+            icon = &I_CC_Momentum_16x16;
             break;
         case DesktopLockMenuIndexBrightness:
             icon = &I_Pin_star_7x7;
@@ -287,8 +287,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 desktop_event = DesktopLockMenuEventSettings;
                 break;
             case DesktopLockMenuIndexDarkMode:
-                xtreme_settings.dark_mode = !xtreme_settings.dark_mode;
-                lock_menu->save_xtreme = true;
+                momentum_settings.dark_mode = !momentum_settings.dark_mode;
+                lock_menu->save_momentum = true;
                 break;
             case DesktopLockMenuIndexBluetooth:
                 lock_menu->bt->bt_settings.enabled = !lock_menu->bt->bt_settings.enabled;
@@ -299,8 +299,8 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 }
                 lock_menu->save_bt = true;
                 break;
-            case DesktopLockMenuIndexXtreme:
-                desktop_event = DesktopLockMenuEventXtreme;
+            case DesktopLockMenuIndexMomentum:
+                desktop_event = DesktopLockMenuEventMomentum;
                 break;
             case DesktopLockMenuIndexVolume:
                 desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :

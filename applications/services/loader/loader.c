@@ -3,7 +3,7 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
@@ -206,8 +206,8 @@ bool loader_menu_load_fap_meta(
 
 static void loader_make_menu_file(Storage* storage) {
     Stream* new = file_stream_alloc(storage);
-    if(!storage_file_exists(storage, XTREME_MENU_PATH)) {
-        if(file_stream_open(new, XTREME_MENU_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(!storage_file_exists(storage, MAINMENU_APPS_PATH)) {
+        if(file_stream_open(new, MAINMENU_APPS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
             stream_write_format(new, "MenuAppList Version %u\n", 0);
             for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
                 stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
@@ -215,13 +215,14 @@ static void loader_make_menu_file(Storage* storage) {
             for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
                 stream_write_format(new, "%s\n", FLIPPER_EXTERNAL_APPS[i].name);
             }
+            // Old additional external apps
             Stream* old = file_stream_alloc(storage);
-            if(file_stream_open(old, XTREME_MENU_OLD_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            if(file_stream_open(old, CFG_PATH("xtreme_apps.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
                 stream_copy(old, new, stream_size(old));
             }
             file_stream_close(old);
             stream_free(old);
-            storage_common_remove(storage, XTREME_MENU_OLD_PATH);
+            storage_common_remove(storage, CFG_PATH("xtreme_apps.txt"));
         }
         file_stream_close(new);
     }
@@ -247,10 +248,10 @@ static Loader* loader_alloc() {
     FuriString* line = furi_string_alloc();
     FuriString* name = furi_string_alloc();
     do {
-        if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+        if(!file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
             file_stream_close(stream);
             loader_make_menu_file(storage);
-            if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
+            if(!file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
                 break;
         }
 
@@ -259,9 +260,9 @@ static Loader* loader_alloc() {
            sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
            version > 0) {
             file_stream_close(stream);
-            storage_common_remove(storage, XTREME_MENU_PATH);
+            storage_common_remove(storage, MAINMENU_APPS_PATH);
             loader_make_menu_file(storage);
-            if(!file_stream_open(stream, XTREME_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
+            if(!file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
                 break;
             if(!stream_read_line(stream, line) ||
                sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||

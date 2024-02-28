@@ -553,7 +553,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         } else {
             tab = (tab + 1) % ArchiveTabTotal;
         }
-        if(tab == ArchiveTabInternal && !xtreme_settings.show_internal_tab) continue;
+        if(tab == ArchiveTabInternal && !momentum_settings.show_internal_tab) continue;
         break;
     }
 
@@ -587,7 +587,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
             // Hide dot files everywhere except Browser if in debug mode
             bool hide_dot_files = !is_browser               ? true :
                                   tab == ArchiveTabInternal ? false :
-                                                              !xtreme_settings.show_hidden_files;
+                                                              !momentum_settings.show_hidden_files;
             archive_file_browser_set_path(
                 browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
             tab_empty = false; // Empty check will be performed later

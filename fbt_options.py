@@ -4,7 +4,7 @@ import posixpath
 
 # For more details on these options, run 'fbt -h'
 
-FIRMWARE_ORIGIN = "Xtreme"
+FIRMWARE_ORIGIN = "Momentum"
 
 # Default hardware target
 TARGET_HW = 7
@@ -18,8 +18,7 @@ DEBUG = 0
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
 
-# How about we add the timestamp automatically. Solves some problems
-DIST_SUFFIX = f"XFW-DEV_@{subprocess.check_output(['git', 'rev-parse', '--short=7', 'HEAD']).decode().strip().upper()}"
+DIST_SUFFIX = f"MNTM-DEV_@{subprocess.check_output(['git', 'rev-parse', '--short=7', 'HEAD']).decode().strip().upper()}"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"

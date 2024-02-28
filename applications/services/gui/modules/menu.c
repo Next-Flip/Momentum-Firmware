@@ -9,7 +9,7 @@
 #include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
 #include <m-array.h>
-#include <xtreme/xtreme.h>
+#include <momentum/momentum.h>
 #include <m-string.h>
 
 struct Menu {
@@ -90,7 +90,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         MenuItem* item;
         size_t shift_position;
         FuriString* name = furi_string_alloc();
-        switch(xtreme_settings.menu_style) {
+        switch(momentum_settings.menu_style) {
         case MenuStyleList: {
             for(uint8_t i = 0; i < 3; i++) {
                 canvas_set_font(canvas, i == 1 ? FontPrimary : FontSecondary);
@@ -403,7 +403,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 static bool menu_input_callback(InputEvent* event, void* context) {
     Menu* menu = context;
     bool consumed = true;
-    if(xtreme_settings.menu_style == MenuStyleVertical &&
+    if(momentum_settings.menu_style == MenuStyleVertical &&
        furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
         if(event->key == InputKeyLeft) {
             event->key = InputKeyRight;
@@ -612,7 +612,7 @@ static void menu_process_up(Menu* menu) {
             size_t count = MenuItemArray_size(model->items);
             size_t vertical_offset = model->vertical_offset;
 
-            switch(xtreme_settings.menu_style) {
+            switch(momentum_settings.menu_style) {
             case MenuStyleList:
             case MenuStyleTerminal:
                 if(position > 0) {
@@ -663,7 +663,7 @@ static void menu_process_down(Menu* menu) {
             size_t count = MenuItemArray_size(model->items);
             size_t vertical_offset = model->vertical_offset;
 
-            switch(xtreme_settings.menu_style) {
+            switch(momentum_settings.menu_style) {
             case MenuStyleList:
             case MenuStyleTerminal:
                 if(position < count - 1) {
@@ -714,7 +714,7 @@ static void menu_process_left(Menu* menu) {
             size_t count = MenuItemArray_size(model->items);
             size_t vertical_offset = model->vertical_offset;
 
-            switch(xtreme_settings.menu_style) {
+            switch(momentum_settings.menu_style) {
             case MenuStyleWii:
                 if(position < 2) {
                     if(count % 2) {
@@ -777,7 +777,7 @@ static void menu_process_right(Menu* menu) {
             size_t count = MenuItemArray_size(model->items);
             size_t vertical_offset = model->vertical_offset;
 
-            switch(xtreme_settings.menu_style) {
+            switch(momentum_settings.menu_style) {
             case MenuStyleWii:
                 if(count % 2) {
                     if(position == count - 1) {

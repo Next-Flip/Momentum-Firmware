@@ -148,10 +148,10 @@ class Main(App):
                     "-i",
                     str(
                         pathlib.Path(self.args.resources)
-                        / "../../../assets/slideshow/xfwfirstboot"
+                        / "../../../assets/slideshow/firstboot"
                     ),
                     "-o",
-                    str(pathlib.Path(self.args.resources) / "dolphin/xfwfirstboot.bin"),
+                    str(pathlib.Path(self.args.resources) / "dolphin/firstboot.bin"),
                 ]
             )
             if not self.package_resources(
@@ -169,9 +169,9 @@ class Main(App):
             SlideshowMain(no_exit=True)(
                 [
                     "-i",
-                    str(pathlib.Path(self.args.splash).parent / "xfwfirstboot"),
+                    str(pathlib.Path(self.args.splash).parent / "firstboot"),
                     "-o",
-                    join(self.args.directory, "xfwfirstboot.bin"),
+                    join(self.args.directory, "firstboot.bin"),
                 ]
             )
             splash_args = [

@@ -86,17 +86,16 @@ void bt_keys_storage_set_default_path(Bt* bt);
 
 bool bt_remote_rssi(Bt* bt, uint8_t* rssi);
 
-/**
- * 
- * (Probably bad) way of opening the RPC connection, everywhereTM
-*/
-
+/** Open a new RPC connection
+ *
+ * @param bt                    Bt instance
+ */
 void bt_open_rpc_connection(Bt* bt);
 
-/**
- * 
- * Closing the RPC connection, everywhereTM
-*/
+/** Close the active RPC connection
+ *
+ * @param bt                    Bt instance
+ */
 void bt_close_rpc_connection(Bt* bt);
 
 #ifdef __cplusplus
