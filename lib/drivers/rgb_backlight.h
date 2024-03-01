@@ -98,12 +98,6 @@ uint8_t rgb_backlight_get_rainbow_saturation();
 void rgb_backlight_reconfigure(bool enabled);
 
 /**
- * @brief Run the RGB rainbowmode
- *
- */
-void rgb_backlight_rainbow_mode();
-
-/**
  * @brief Apply current RGB lighting settings
  *
  * @param brightness Backlight intensity (0-255)

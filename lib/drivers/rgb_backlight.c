@@ -18,8 +18,6 @@
 */
 
 #include "rgb_backlight.h"
-#include "colors.h"
-#include "core/timer.h"
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <toolbox/saved_struct.h>
@@ -205,35 +203,7 @@ uint8_t rgb_backlight_get_rainbow_saturation() {
     return rainbow_saturation;
 }
 
-static void rainbow_timer(void* ctx) {
-    UNUSED(ctx);
-    rgb_backlight_rainbow_mode();
-}
-
-void rgb_backlight_reconfigure(bool enabled) {
-    if(!rgb_state.settings_loaded) return;
-    furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
-
-    rgb_state.enabled = enabled;
-    if(rgb_state.enabled && rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff) {
-        if(rgb_state.rainbow_timer == NULL) {
-            rgb_state.rainbow_timer = furi_timer_alloc(rainbow_timer, FuriTimerTypePeriodic, NULL);
-        } else {
-            furi_timer_stop(rgb_state.rainbow_timer);
-        }
-        furi_timer_start(rgb_state.rainbow_timer, rgb_settings.rainbow_interval);
-    } else if(rgb_state.rainbow_timer != NULL) {
-        furi_timer_stop(rgb_state.rainbow_timer);
-        furi_timer_free(rgb_state.rainbow_timer);
-        rgb_state.rainbow_timer = NULL;
-    }
-    rgb_state.rainbow_hsv.s = rgb_settings.rainbow_saturation;
-    rgb_backlight_update(rgb_state.last_brightness, true);
-
-    furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
-}
-
-void rgb_backlight_rainbow_mode() {
+void rainbow_timer(void* ctx) {
     if(!rgb_state.settings_loaded) return;
     furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
 
@@ -275,6 +245,30 @@ void rgb_backlight_rainbow_mode() {
 
     if(rgb_state.enabled && rgb_settings.rainbow_mode == RGBBacklightRainbowModeOff)
         SK6805_update();
+
+    furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
+    UNUSED(ctx);
+}
+
+void rgb_backlight_reconfigure(bool enabled) {
+    if(!rgb_state.settings_loaded) return;
+    furi_check(furi_mutex_acquire(rgb_state.mutex, FuriWaitForever) == FuriStatusOk);
+
+    rgb_state.enabled = enabled;
+    if(rgb_state.enabled && rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff) {
+        if(rgb_state.rainbow_timer == NULL) {
+            rgb_state.rainbow_timer = furi_timer_alloc(rainbow_timer, FuriTimerTypePeriodic, NULL);
+        } else {
+            furi_timer_stop(rgb_state.rainbow_timer);
+        }
+        furi_timer_start(rgb_state.rainbow_timer, rgb_settings.rainbow_interval);
+    } else if(rgb_state.rainbow_timer != NULL) {
+        furi_timer_stop(rgb_state.rainbow_timer);
+        furi_timer_free(rgb_state.rainbow_timer);
+        rgb_state.rainbow_timer = NULL;
+    }
+    rgb_state.rainbow_hsv.s = rgb_settings.rainbow_saturation;
+    rgb_backlight_update(rgb_state.last_brightness, true);
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
