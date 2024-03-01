@@ -55,6 +55,7 @@ void expansion_disable(Expansion* instance);
  *
  * @param[in,out] instance pointer to the Expansion instance.
  *
+ * @return Boolean indicating if the expansion module is connected.
  */
 bool expansion_is_connected(Expansion* instance);
 
