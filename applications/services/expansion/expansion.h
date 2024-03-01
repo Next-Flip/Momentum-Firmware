@@ -51,6 +51,14 @@ void expansion_enable(Expansion* instance);
 void expansion_disable(Expansion* instance);
 
 /**
+ * @brief Check support for expansion modules if its currently connected.
+ *
+ * @param[in,out] instance pointer to the Expansion instance.
+ *
+ */
+bool expansion_is_connected(Expansion* instance);
+
+/**
  * @brief Enable support for expansion modules on designated serial port.
  *
  * Only one serial port can be used to communicate with an expansion

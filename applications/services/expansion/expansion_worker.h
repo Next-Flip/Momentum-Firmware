@@ -17,6 +17,11 @@
  */
 typedef struct ExpansionWorker ExpansionWorker;
 
+typedef enum {
+    ExpansionWorkerCallbackReasonExit,
+    ExpansionWorkerCallbackReasonConnected,
+} ExpansionWorkerCallbackReason;
+
 /**
  * @brief Worker callback type.
  *
@@ -24,7 +29,7 @@ typedef struct ExpansionWorker ExpansionWorker;
  *
  * @param[in,out] context pointer to a user-defined object.
  */
-typedef void (*ExpansionWorkerCallback)(void* context);
+typedef void (*ExpansionWorkerCallback)(void* context, ExpansionWorkerCallbackReason reason);
 
 /**
  * @brief Create an expansion worker instance.
