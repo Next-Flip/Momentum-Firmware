@@ -1,6 +1,6 @@
 ## Intro
 
-Asset Packs are an exclusive feature of Xtreme Firmware that allows you to load custom Animation and Icon sets without recompiling the firmware or messing with manifest.txt files (as a user). Here you can find info on how to install Asset Packs and also how to make your own.
+Asset Packs are an exclusive feature of Momentum Firmware that allows you to load custom Animation and Icon sets without recompiling the firmware or messing with manifest.txt files (as a user). Here you can find info on how to install Asset Packs and also how to make your own.
 
 <br>
 
@@ -14,7 +14,7 @@ Installing Asset Packs is quite easy and straightforward. First, make sure you'r
 
   If you did this correctly, you should see `SD/asset_packs/PackName/Anims` and/or `SD/asset_packs/PackName/Icons`.
 
-- Now simply open the Xtreme Settings app (from the home screen press `Arrow UP` and then `Xtreme Settings`) and select the asset pack you want. When you back out, Flipper will restart and your animations and icons will use the ones from the selected pack!
+- Now simply open the Momentum Settings app (from the home screen press `Arrow UP` and then `Momentum Settings`) and select the asset pack you want. When you back out, Flipper will restart and your animations and icons will use the ones from the selected pack!
 
 <br>
 
