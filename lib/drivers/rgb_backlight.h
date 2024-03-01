@@ -98,12 +98,18 @@ uint8_t rgb_backlight_get_rainbow_saturation();
 void rgb_backlight_reconfigure(bool enabled);
 
 /**
+ * @brief Run the RGB rainbowmode
+ *
+ */
+void rgb_backlight_rainbow_mode();
+
+/**
  * @brief Apply current RGB lighting settings
  *
  * @param brightness Backlight intensity (0-255)
- * @param tick       Whether this update was a tick (for rainbow)
+ * @param forced force a update even brightness doesnt changed
  */
-void rgb_backlight_update(uint8_t brightness, bool tick);
+void rgb_backlight_update(uint8_t brightness, bool forced);
 
 #ifdef __cplusplus
 }
