@@ -8,7 +8,7 @@
 **Check the [install guide](https://github.com/Next-Flip/Momentum-Firmware#install) if you're not sure, or [join our Discord](https://discord.gg/momentum) if you have questions or encounter issues!**
 
 ## ❤️ Support
-If you enjoy the firmware, please consider donating to the team, or sharing it with others! :D
+If you enjoy the firmware, please consider donating to the team, or spreading the word! :D
 
 > **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
 

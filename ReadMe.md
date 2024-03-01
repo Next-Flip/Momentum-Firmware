@@ -7,7 +7,7 @@
   <a href="#Install">Install</a> | <a href="#list-of-changes">Features</a> | <a href="https://discord.gg/momentum">Discord</a> | <a href="#%EF%B8%8F-support">Donate</a>
 </h2>
 
-This custom firmware is based on the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and features most of the awesome features from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware). It is a direct continuation of the Xtreme firmware, built by the same (and only) developers who made that project special, until being unfairly thrown out.
+This custom firmware is based on the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and includes most of the awesome features from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware). It is a direct continuation of the Xtreme firmware, built by the same (and only) developers who made that project special, until being unfairly thrown out.
 
 -----
 <br>
@@ -192,7 +192,7 @@ $ ./fbt launch APPSRC=your_appid
 
 
 ## ❤️ Support
-If you enjoy the firmware, please consider donating to the team, or sharing it with others! :D
+If you enjoy the firmware, please consider donating to the team, or spreading the word! :D
 
 > **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
 
