@@ -83,7 +83,7 @@ In USB mode it also enables additional functionality to spoof the manufacturer a
 
 There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**. For a more detailed list, you can read through the [**changelogs**](https://github.com/Next-Flip/Momentum-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://momentum-fw.dev/#features).
 
-Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams! 
+Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams!
 
 ```txt
 [Added]
@@ -192,22 +192,12 @@ $ ./fbt launch APPSRC=your_appid
 
 
 ## ❤️ Support
-If you enjoy the firmware, please consider donating to the team, or spreading the word! :D
+If you enjoy the firmware please __**spread the word!**__ And if you really love it, maybe consider donating to the team? :D
 
 > **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
 
-> **[Bank transfer](https://bunq.me/WillyJL)**: One-off, No signup required
-
 > **[PayPal](https://paypal.me/willyjl1)**: One-off, Signup required
 
-> **BCH**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
-
-> **ETH**: `0x90b8284c3eba44108427e3148ff8efa0ae7a61a8`
-
 > **BTC**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
-
-> **SHIB**: `0x90b8284c3eba44108427e3148ff8efa0ae7a61a8`
-
-> **DOGE**: `DNUdUqtmWaAiJ6yoV6hRNEh6Nn1Tg4Aorr`
 
 **Thank you <3**
