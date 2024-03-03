@@ -93,7 +93,7 @@ SD/
                                           |...
                                |-Passport/
                                         |-passport_happy_46x49.bmx
-                                        |-passport_DB.bmx
+                                        |-passport_128x64.bmx
                                         |...
                                |-RFID/
                                     |-RFIDDolphinReceive_97x61.bmx
@@ -107,7 +107,6 @@ Which is the same you can find in the firmware source code, in `assets/icons`. T
 - The pixel numbers in the filename are ignored, they are there purely because of the original Flipper icon names and for a hint as to how you should size your icons, but they are not enforced.
 - We kept the original naming scheme and file structure for compatibility, but the original setup is quite bad, so bear with us. Some icons in subfolders (like `SubGhz/Scanning_123x52`) are used in other unrelated apps/places.
 - Some icons in the official firmware have different versions with different numbers to indicate the flipper level they target. Since our system has so many levels, we decided to keep it simple and remove the level progression from icons. For example `Passport/passport_happy1_46x49` becomes `Passport/passport_happy_46x49` and `Animations/Levelup1_128x64` becomes `Animations/Levelup_128x64`.
-- The `Passport/passport_DB` is the background for the passport page, it doesn't mention a pixel size because it should be the same as the Flipper screen size (128x64).
 
 This system supports **all** internal assets!
 

@@ -66,7 +66,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     }
 
     // multipass
-    canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
+    canvas_draw_icon(canvas, 0, 0, &I_passport_128x64);
 
     // portrait
     furi_assert((stats->level > 0) && (stats->level <= DOLPHIN_LEVEL_COUNT + 1));
