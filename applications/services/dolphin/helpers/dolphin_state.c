@@ -15,7 +15,7 @@
 
 const uint32_t DOLPHIN_LEVELS[] = {100,  200,  300,  450,  600,  750,  950,  1150, 1350, 1600,
                                    1850, 2100, 2400, 2700, 3000, 3350, 3700, 4050, 4450, 4850,
-                                   5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9200};
+                                   5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9999};
 const size_t DOLPHIN_LEVEL_COUNT = COUNT_OF(DOLPHIN_LEVELS);
 
 DolphinState* dolphin_state_alloc() {

@@ -8,23 +8,13 @@
 **Check the [install guide](https://github.com/Next-Flip/Momentum-Firmware#install) if you're not sure, or [join our Discord](https://discord.gg/momentum) if you have questions or encounter issues!**
 
 ## ❤️ Support
-If you enjoy the firmware, please consider donating to the team, or spreading the word! :D
+If you enjoy the firmware please __**spread the word!**__ And if you really love it, maybe consider donating to the team? :D
 
 > **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
 
-> **[Bank transfer](https://bunq.me/WillyJL)**: One-off, No signup required
-
 > **[PayPal](https://paypal.me/willyjl1)**: One-off, Signup required
 
-> **BCH**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
-
-> **ETH**: `0x90b8284c3eba44108427e3148ff8efa0ae7a61a8`
-
 > **BTC**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
-
-> **SHIB**: `0x90b8284c3eba44108427e3148ff8efa0ae7a61a8`
-
-> **DOGE**: `DNUdUqtmWaAiJ6yoV6hRNEh6Nn1Tg4Aorr`
 
 **Thank you <3**
 
