@@ -217,12 +217,12 @@ static void loader_make_menu_file(Storage* storage) {
             }
             // Old additional external apps
             Stream* old = file_stream_alloc(storage);
-            if(file_stream_open(old, CFG_PATH("xtreme_apps.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+            if(file_stream_open(old, CFG_PATH("momentum_apps.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
                 stream_copy(old, new, stream_size(old));
             }
             file_stream_close(old);
             stream_free(old);
-            storage_common_remove(storage, CFG_PATH("xtreme_apps.txt"));
+            storage_common_remove(storage, CFG_PATH("momentum_apps.txt"));
         }
         file_stream_close(new);
     }
