@@ -62,8 +62,8 @@ void flipper_migrate_files() {
         // Renames on ext
         {CFG_PATH("favorites.txt"), ARCHIVE_FAV_PATH, true}, // Adapt to OFW/UL
         {CFG_PATH(".desktop.keybinds"), DESKTOP_KEYBINDS_PATH, true}, // Old naming
-        {CFG_PATH("xtreme_menu.txt"), MAINMENU_APPS_PATH, false}, // Keep both
-        {CFG_PATH("xtreme_settings.txt"), MOMENTUM_SETTINGS_PATH, false}, // Keep both
+        {CFG_PATH("momentum_menu.txt"), MAINMENU_APPS_PATH, false}, // Keep both
+        {CFG_PATH("momentum_settings.txt"), MOMENTUM_SETTINGS_PATH, false}, // Keep both
         // Int -> Ext
         {INT_PATH(".bt.settings"), BT_SETTINGS_PATH, true},
         {INT_PATH(".dolphin.state"), DOLPHIN_STATE_PATH, true},
