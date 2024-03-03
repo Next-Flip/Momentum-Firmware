@@ -33,7 +33,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     PassportContext* ctx = _ctx;
     DolphinStats* stats = ctx->stats;
 
-    char level_str[20];
+    char level_str[12];
     char xp_str[12];
     const char* mood_str = NULL;
     const Icon* portrait = NULL;
@@ -48,21 +48,25 @@ static void render_callback(Canvas* canvas, void* _ctx) {
         portrait = &I_passport_bad_46x49;
         mood_str = "Mood: Angry";
     }
+
     uint32_t xp_progress = 0;
-    uint32_t xp_need = dolphin_state_xp_to_levelup(stats->icounter);
+    uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
-    uint32_t xp_levelup = 0;
+
+    uint32_t xp_have = 0;
+    uint32_t xp_target = 0;
     if(ctx->progress_total) {
-        xp_levelup = xp_need + stats->icounter;
+        xp_have = stats->icounter;
+        xp_target = DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT - 1];
     } else {
-        xp_levelup = xp_need + xp_above_last_levelup;
+        xp_have = xp_above_last_levelup;
+        xp_target = xp_to_levelup + xp_above_last_levelup;
     }
-    uint32_t xp_have = xp_levelup - xp_need;
 
     if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
         xp_progress = 0;
     } else {
-        xp_progress = xp_need * 64 / xp_levelup;
+        xp_progress = xp_to_levelup * 64 / xp_target;
     }
 
     // multipass
@@ -73,18 +77,16 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_draw_icon(canvas, 11, 2, portrait);
 
     const char* my_name = furi_hal_version_get_name_ptr();
-    snprintf(level_str, 12, "Level: %hu", stats->level);
-    if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
-        snprintf(xp_str, 12, "Max Level!");
-    } else {
-        snprintf(xp_str, 12, "%lu/%lu", xp_have, xp_levelup);
-    }
-    canvas_set_font(canvas, FontSecondary);
+    snprintf(level_str, sizeof(level_str), "Level: %hu", stats->level);
     canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 22, mood_str);
-    canvas_set_color(canvas, ColorBlack);
-
     canvas_draw_str(canvas, 58, 34, level_str);
+
+    if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
+        snprintf(xp_str, sizeof(xp_str), "Max Level!");
+    } else {
+        snprintf(xp_str, sizeof(xp_str), "%lu/%lu", xp_have, xp_target);
+    }
     canvas_set_font(canvas, FontBatteryPercent);
     canvas_draw_str(canvas, 58, 42, xp_str);
     canvas_set_font(canvas, FontSecondary);
@@ -92,10 +94,6 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + (xp_progress > 0), 5);
     canvas_set_color(canvas, ColorBlack);
-
-    canvas_draw_icon(canvas, 52, 51, &I_Ok_btn_9x9);
-    canvas_draw_str(
-        canvas, ctx->progress_total ? 37 : 36, 59, ctx->progress_total ? "Lvl" : "Tot");
 }
 
 int32_t passport_app(void* p) {
