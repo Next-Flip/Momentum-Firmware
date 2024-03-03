@@ -78,9 +78,9 @@ static void render_callback(Canvas* canvas, void* _ctx) {
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, sizeof(level_str), "Level: %hu", stats->level);
-    canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
-    canvas_draw_str(canvas, 58, 22, mood_str);
-    canvas_draw_str(canvas, 58, 34, level_str);
+    canvas_draw_str(canvas, 59, 10, my_name ? my_name : "Unknown");
+    canvas_draw_str(canvas, 59, 22, mood_str);
+    canvas_draw_str(canvas, 59, 34, level_str);
 
     if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
         snprintf(xp_str, sizeof(xp_str), "Max Level!");
@@ -88,7 +88,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
         snprintf(xp_str, sizeof(xp_str), "%lu/%lu", xp_have, xp_target);
     }
     canvas_set_font(canvas, FontBatteryPercent);
-    canvas_draw_str(canvas, 58, 42, xp_str);
+    canvas_draw_str(canvas, 59, 42, xp_str);
     canvas_set_font(canvas, FontSecondary);
 
     canvas_set_color(canvas, ColorWhite);
