@@ -66,7 +66,7 @@ static void render_callback(Canvas* canvas, void* _ctx) {
     if(stats->level == DOLPHIN_LEVEL_COUNT + 1) {
         xp_progress = 0;
     } else {
-        xp_progress = xp_to_levelup * 64 / xp_target;
+        xp_progress = (xp_target - xp_have) * 64 / xp_target;
     }
 
     // multipass
