@@ -83,7 +83,6 @@ typedef struct {
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;
     FuriHalSerialId uart_nmea_channel;
-    FuriHalSerialId uart_general_channel;
     bool file_naming_prefix_after;
 } MomentumSettings;
 

@@ -58,18 +58,6 @@ static void momentum_app_scene_protocols_gpio_nmea_channel_changed(VariableItem*
     app->save_settings = true;
 }
 
-static void momentum_app_scene_protocols_gpio_general_channel_changed(VariableItem* item) {
-    MomentumApp* app = variable_item_get_context(item);
-    momentum_settings.uart_general_channel = variable_item_get_current_value_index(item) == 0 ?
-                                                 FuriHalSerialIdUsart :
-                                                 FuriHalSerialIdLpuart;
-    variable_item_set_current_value_text(
-        item,
-        momentum_settings.uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT :
-                                                                         UART_EXTRA);
-    app->save_settings = true;
-}
-
 void momentum_app_scene_protocols_gpio_on_enter(void* context) {
     MomentumApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
@@ -112,18 +100,6 @@ void momentum_app_scene_protocols_gpio_on_enter(void* context) {
     variable_item_set_current_value_text(
         item,
         momentum_settings.uart_nmea_channel == FuriHalSerialIdUsart ? UART_DEFAULT : UART_EXTRA);
-
-    item = variable_item_list_add(
-        var_item_list,
-        "General UART",
-        2,
-        momentum_app_scene_protocols_gpio_general_channel_changed,
-        app);
-    variable_item_set_current_value_index(item, momentum_settings.uart_general_channel);
-    variable_item_set_current_value_text(
-        item,
-        momentum_settings.uart_general_channel == FuriHalSerialIdUsart ? UART_DEFAULT :
-                                                                         UART_EXTRA);
 
     variable_item_list_set_enter_callback(
         var_item_list, momentum_app_scene_protocols_gpio_var_item_list_callback, app);

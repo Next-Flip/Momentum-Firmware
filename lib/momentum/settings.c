@@ -40,7 +40,6 @@ MomentumSettings momentum_settings = {
     .spi_nrf24_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
     .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
-    .uart_general_channel = FuriHalSerialIdUsart, // pin 13,14
     .file_naming_prefix_after = false, // Before
 };
 
@@ -110,7 +109,6 @@ static const struct {
     {setting_enum(spi_nrf24_handle, SpiCount)},
     {setting_enum(uart_esp_channel, FuriHalSerialIdMax)},
     {setting_enum(uart_nmea_channel, FuriHalSerialIdMax)},
-    {setting_enum(uart_general_channel, FuriHalSerialIdMax)},
     {setting_bool(file_naming_prefix_after)},
 };
 
