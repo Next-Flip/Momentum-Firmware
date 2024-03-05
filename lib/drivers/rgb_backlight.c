@@ -313,6 +313,7 @@ void rgb_backlight_update(uint8_t brightness, bool forced) {
         return;
     }
 
+    rgb_state.last_brightness = brightness;
     SK6805_update();
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
