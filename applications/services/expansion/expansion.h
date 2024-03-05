@@ -51,11 +51,11 @@ void expansion_enable(Expansion* instance);
 void expansion_disable(Expansion* instance);
 
 /**
- * @brief Check support for expansion modules if its currently connected.
+ * @brief Check if an expansion module is connected.
  *
  * @param[in,out] instance pointer to the Expansion instance.
  *
- * @return Boolean indicating if the expansion module is connected.
+ * @returns true if the module is connected and initialized, false otherwise.
  */
 bool expansion_is_connected(Expansion* instance);
 

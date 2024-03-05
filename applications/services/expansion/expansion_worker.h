@@ -28,6 +28,7 @@ typedef enum {
  * @see expansion_worker_set_callback()
  *
  * @param[in,out] context pointer to a user-defined object.
+ * @param[in] reason reason for the callback.
  */
 typedef void (*ExpansionWorkerCallback)(void* context, ExpansionWorkerCallbackReason reason);
 

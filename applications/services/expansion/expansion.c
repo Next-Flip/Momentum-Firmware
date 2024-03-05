@@ -184,7 +184,7 @@ static void expansion_control_handler_module_disconnected(
         instance->serial_id, expansion_detect_callback, instance);
 }
 
-static void expansion_control_handler_module_connection_established(
+static void expansion_control_handler_connection_established(
     Expansion* instance,
     const ExpansionMessageData* data) {
     UNUSED(data);
@@ -204,8 +204,7 @@ static const ExpansionControlHandler expansion_control_handlers[] = {
     [ExpansionMessageTypeSetListenSerial] = expansion_control_handler_set_listen_serial,
     [ExpansionMessageTypeModuleConnected] = expansion_control_handler_module_connected,
     [ExpansionMessageTypeModuleDisconnected] = expansion_control_handler_module_disconnected,
-    [ExpansionMessageTypeConnectionEstablished] =
-        expansion_control_handler_module_connection_established,
+    [ExpansionMessageTypeConnectionEstablished] = expansion_control_handler_connection_established,
 };
 
 static int32_t expansion_control(void* context) {
