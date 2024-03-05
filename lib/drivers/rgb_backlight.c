@@ -243,9 +243,6 @@ void rainbow_timer(void* ctx) {
 
     SK6805_update();
 
-    if(rgb_state.enabled && rgb_settings.rainbow_mode == RGBBacklightRainbowModeOff)
-        SK6805_update();
-
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
     UNUSED(ctx);
 }
@@ -313,10 +310,8 @@ void rgb_backlight_update(uint8_t brightness, bool forced) {
         return;
     }
 
-    bool brightness_changed = brightness != rgb_state.last_brightness;
     rgb_state.last_brightness = brightness;
-    if(rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff || brightness_changed)
-        SK6805_update();
+    SK6805_update();
 
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
 }
