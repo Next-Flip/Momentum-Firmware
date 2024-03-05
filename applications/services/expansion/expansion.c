@@ -28,10 +28,14 @@ typedef enum {
     ExpansionMessageTypeModuleConnected,
     ExpansionMessageTypeModuleDisconnected,
     ExpansionMessageTypeConnectionEstablished,
+    ExpansionMessageTypeIsConnected,
 } ExpansionMessageType;
 
 typedef union {
-    FuriHalSerialId serial_id;
+    union {
+        FuriHalSerialId serial_id;
+        bool* is_connected;
+    };
 } ExpansionMessageData;
 
 typedef struct {
@@ -196,6 +200,11 @@ static void expansion_control_handler_connection_established(
     instance->state = ExpansionStateConnectionEstablished;
 }
 
+static void
+    expansion_control_handler_is_connected(Expansion* instance, const ExpansionMessageData* data) {
+    *data->is_connected = instance->state == ExpansionStateConnectionEstablished;
+}
+
 typedef void (*ExpansionControlHandler)(Expansion*, const ExpansionMessageData*);
 
 static const ExpansionControlHandler expansion_control_handlers[] = {
@@ -205,6 +214,7 @@ static const ExpansionControlHandler expansion_control_handlers[] = {
     [ExpansionMessageTypeModuleConnected] = expansion_control_handler_module_connected,
     [ExpansionMessageTypeModuleDisconnected] = expansion_control_handler_module_disconnected,
     [ExpansionMessageTypeConnectionEstablished] = expansion_control_handler_connection_established,
+    [ExpansionMessageTypeIsConnected] = expansion_control_handler_is_connected,
 };
 
 static int32_t expansion_control(void* context) {
@@ -278,7 +288,18 @@ void expansion_disable(Expansion* instance) {
 
 bool expansion_is_connected(Expansion* instance) {
     furi_check(instance);
-    return instance->state == ExpansionStateConnectionEstablished;
+    bool is_connected;
+
+    ExpansionMessage message = {
+        .type = ExpansionMessageTypeIsConnected,
+        .data.is_connected = &is_connected,
+        .api_lock = api_lock_alloc_locked(),
+    };
+
+    furi_message_queue_put(instance->queue, &message, FuriWaitForever);
+    api_lock_wait_unlock_and_free(message.api_lock);
+
+    return is_connected;
 }
 
 void expansion_set_listen_serial(Expansion* instance, FuriHalSerialId serial_id) {
