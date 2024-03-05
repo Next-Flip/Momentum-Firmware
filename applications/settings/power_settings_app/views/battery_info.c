@@ -83,16 +83,16 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
     }
 
     if(data->alt) {
-        if(!strcmp(value, "")) {
+        if(!value[0]) {
             canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, header);
-        } else if(!strcmp(header, "")) {
+        } else if(!header[0]) {
             canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, value);
         } else {
             canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
             canvas_draw_str_aligned(canvas, x + 92, y + 19, AlignCenter, AlignCenter, value);
         }
     } else {
-        if(!strcmp(emote, "")) {
+        if(!emote[0] && header[0] && value[0]) {
             canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
             canvas_draw_str_aligned(canvas, x + 92, y + 21, AlignCenter, AlignCenter, value);
         } else {

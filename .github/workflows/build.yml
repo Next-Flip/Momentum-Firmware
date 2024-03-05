@@ -54,14 +54,14 @@ jobs:
       - name: "Make tgz, zip and sdk"
         run: bash .github/workflow_data/package.sh
 
-      - name: Send devbuild webhook
-        if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
-        env:
-          NC_HOST: "https://cloud.cynthialabs.net/"
-          NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
-          NC_USER: "${{ secrets.NC_USER }}"
-          NC_PASS: "${{ secrets.NC_PASS }}"
-          BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
-        run: |
-          python -m pip install pyncclient
-          python .github/workflow_data/devbuild.py
+      # - name: Send devbuild webhook
+      #   if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
+      #   env:
+      #     NC_HOST: "https://cloud.cynthialabs.net/"
+      #     NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
+      #     NC_USER: "${{ secrets.NC_USER }}"
+      #     NC_PASS: "${{ secrets.NC_PASS }}"
+      #     BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
+      #   run: |
+      #     python -m pip install pyncclient
+      #     python .github/workflow_data/devbuild.py
