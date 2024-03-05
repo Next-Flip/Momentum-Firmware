@@ -243,9 +243,6 @@ void rainbow_timer(void* ctx) {
 
     SK6805_update();
 
-    if(rgb_state.enabled && rgb_settings.rainbow_mode == RGBBacklightRainbowModeOff)
-        SK6805_update();
-
     furi_check(furi_mutex_release(rgb_state.mutex) == FuriStatusOk);
     UNUSED(ctx);
 }
