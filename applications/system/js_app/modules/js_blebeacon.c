@@ -9,7 +9,7 @@ typedef struct {
     GapExtraBeaconConfig beacon_config;
 } JSblebeaconInst;
 
-// Define the OUI Map as a constant array of structs
+
 struct OUI_MAP_ENTRY {
     const char *brand;
     const char *oui;
