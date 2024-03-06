@@ -18,22 +18,6 @@ function byteToHex(byte) {
     return hex;
 }
 
-function getNextByteValue() {
-    let value = currentByteValue;
-    currentByteValue = (currentByteValue + 1) % 256;
-    return value;
-}
-
-function generateRandomMac() {
-    let mac = '';
-    for (let i = 0; i < 6; i++) {
-        if (mac.length) mac += ':';
-        let byte = getNextByteValue();
-        mac += byteToHex(byte);
-    }
-    return mac;
-}
-
 function bytesToHexString(bytes) {
     if (!bytes) {
         print("Invalid input for bytesToHexString");
@@ -66,7 +50,9 @@ function sendRandomModelAdvertisement() {
         return;
     }
 
-    bleBeacon.setMac(generateRandomMac());
+    let Mac = bleBeacon.genMac();
+
+    bleBeacon.setMac(Mac);
     bleBeacon.setData(packetString);
     bleBeacon.send();
 

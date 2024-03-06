@@ -9,6 +9,78 @@ typedef struct {
     GapExtraBeaconConfig beacon_config;
 } JSblebeaconInst;
 
+// Define the OUI Map as a constant array of structs
+struct OUI_MAP_ENTRY {
+    const char *brand;
+    const char *oui;
+};
+
+struct OUI_MAP_ENTRY OUI_MAP[] = {
+    {"Apple", "00:1F:7F"},
+    {"Dell", "00:14:5F"},
+    {"HP", "00:4C:6F"},
+    {"Lenovo", "00:50:C2"},
+    {"Microsoft", "00:0C:29"},
+    {"Samsung", "00:1C:42"},
+    {"Sony", "00:0A:95"},
+    {"Acer", "00:26:A9"},
+    {"Asus", "00:19:D8"},
+    {"Google", "08:00:27"},
+    {"HTC", "00:1F:B5"},
+    {"Intel", "00:19:5D"},
+    {"LG", "00:1C:61"},
+    {"Motorola", "00:1F:42"},
+    {"Toshiba", "00:1E:67"},
+    {"Xiaomi", "00:26:A8"},
+};
+
+#define OUI_MAP_SIZE (sizeof(OUI_MAP) / sizeof(OUI_MAP[0]))
+
+
+int rand_range(int min, int max) {
+    return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+}
+
+void byte_to_hex(char *output, unsigned char byte) {
+    static const char hex_chars[] = "0123456789ABCDEF";
+    output[0] = hex_chars[byte >> 4];
+    output[1] = hex_chars[byte & 0x0F];
+}
+
+static char* generate_mac_address(const char *brand) {
+    char *mac_address = (char*)malloc(18 * sizeof(char));
+    if (mac_address == NULL) {
+        FURI_LOG_D("BLE", "Memory allocation failed.\n");
+        return NULL;
+    }
+
+    const char *oui = NULL;
+    for (unsigned int i = 0; i < OUI_MAP_SIZE; ++i) {
+        if (strcmp(brand, OUI_MAP[i].brand) == 0) {
+            oui = OUI_MAP[i].oui;
+            break;
+        }
+    }
+
+    if (oui == NULL) {
+        FURI_LOG_D("BLE", "Brand not found.\n");
+        free(mac_address);
+        return NULL;
+    }
+
+    
+    char last_bytes[6];
+    for (int i = 0; i < 3; ++i) {
+        unsigned char byte = rand_range(0x00, 0xFF);
+        byte_to_hex(&last_bytes[i * 2], byte);
+    }
+
+    strcpy(mac_address, oui);
+    strcat(mac_address, ":");
+    strcat(mac_address, last_bytes);
+    return mac_address;
+}
+
 static JSblebeaconInst* get_this_ctx(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
     JSblebeaconInst* storage = mjs_get_ptr(mjs, obj_inst);
@@ -129,6 +201,18 @@ static void js_blebeacon_set_data(struct mjs *mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
+static void js_blebeacon_generate_mac(struct mjs *mjs)
+{
+    char* company = "";
+    if (!get_str_arg(mjs, 0, &company)) return; 
+
+    char* mac = generate_mac_address(company);
+
+    mjs_val_t js_mac_address = mjs_mk_string(mjs, mac, strlen(mac), 1);
+
+    return mjs_return(mjs, js_mac_address);
+}
+
 static void js_blebeacon_set_mac(struct mjs *mjs) {
     FURI_LOG_D("BLE", "Setting Mac");
     if (!check_arg_count(mjs, 1)) 
@@ -183,6 +267,7 @@ static void* js_blebeacon_create(struct mjs *mjs, mjs_val_t* object) {
     mjs_set(mjs, blebeacon_obj, "setMac", ~0, MJS_MK_FN(js_blebeacon_set_mac));
     mjs_set(mjs, blebeacon_obj, "send", ~0, MJS_MK_FN(js_blebeacon_send));
     mjs_set(mjs, blebeacon_obj, "stop", ~0, MJS_MK_FN(js_blebeacon_stop));
+    mjs_set(mjs, blebeacon_obj, "genMac", ~0, MJS_MK_FN(js_blebeacon_generate_mac));
     *object = blebeacon_obj;
     return inst;
 }
