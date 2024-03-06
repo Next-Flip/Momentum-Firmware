@@ -87,4 +87,12 @@ App(
     sources=["modules/js_math.c"],
 )
 
+App(
+    appid="js_keyboard",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_keyboard_ep",
+    requires=["js_app"],
+    sources=["modules/js_keyboard.c"],
+)
+
 
