@@ -38,13 +38,13 @@ static bool get_str_arg(struct mjs* mjs, size_t index, const char** value, bool 
     return true;
 }
 
-static bool get_int_arg(struct mjs* mjs, size_t index, int* value, bool error) {
+static bool get_int_arg(struct mjs* mjs, size_t index, size_t* value, bool error) {
     mjs_val_t int_obj = mjs_arg(mjs, index);
     if(!mjs_is_number(int_obj)) {
         if(error) ret_bad_args(mjs, "Argument must be a number");
         return false;
     }
-    *value = (int)mjs_get_int(mjs, int_obj);
+    *value = mjs_get_int(mjs, int_obj);
     return true;
 }
 
@@ -80,7 +80,7 @@ static void js_keyboard_set_header(struct mjs* mjs) {
 static void js_keyboard_text(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    int input_length;
+    size_t input_length;
     if(!get_int_arg(mjs, 0, &input_length, true)) return;
     char* buffer = malloc(input_length);
 
@@ -112,14 +112,19 @@ static void js_keyboard_text(struct mjs* mjs) {
 static void js_keyboard_byte(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    int input_length;
+    size_t input_length;
     if(!get_int_arg(mjs, 0, &input_length, true)) return;
     uint8_t* buffer = malloc(input_length);
 
-    // const char* default_data;
-    // if(get_str_arg(mjs, 1, &default_data, false)) {
-    //     strlcpy(buffer, default_data, input_length);
-    // }
+    mjs_val_t default_data_arg = mjs_arg(mjs, 1);
+    if(mjs_is_typed_array(default_data_arg)) {
+        if(mjs_is_data_view(default_data_arg)) {
+            default_data_arg = mjs_dataview_get_buf(mjs, default_data_arg);
+        }
+        size_t default_data_len = 0;
+        char* default_data = mjs_array_buf_get_ptr(mjs, default_data_arg, &default_data_len);
+        memcpy(buffer, (uint8_t*)default_data, MIN((size_t)input_length, default_data_len));
+    }
 
     view_dispatcher_attach_to_gui(
         keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
@@ -135,7 +140,7 @@ static void js_keyboard_byte(struct mjs* mjs) {
     byte_input_set_result_callback(keyboard->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(keyboard->byte_input, "");
 
-    mjs_return(mjs, mjs_mk_string(mjs, (char*)buffer, ~0, true));
+    mjs_return(mjs, mjs_mk_array_buf(mjs, (char*)buffer, input_length));
     free(buffer);
 }
 
