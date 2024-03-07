@@ -1,3 +1,4 @@
+#include <expansion/expansion.h>
 #include "../momentum_app.h"
 
 enum VarItemListIndex {
@@ -55,6 +56,10 @@ static void momentum_app_scene_misc_screen_lcd_color_changed(VariableItem* item,
     variable_item_set_current_value_text(item, lcd_colors[index].name);
     rgb_backlight_set_color(led, &lcd_colors[index].color);
     app->save_backlight = true;
+
+    Expansion* expansion = furi_record_open(RECORD_EXPANSION);
+    expansion_disable(expansion);
+    expansion_enable(expansion);
 }
 static void momentum_app_scene_misc_screen_lcd_color_0_changed(VariableItem* item) {
     momentum_app_scene_misc_screen_lcd_color_changed(item, 0);
