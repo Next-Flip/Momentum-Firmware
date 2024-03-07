@@ -70,3 +70,11 @@ App(
     requires=["js_app"],
     sources=["modules/js_submenu.c"],
 )
+
+App(
+    appid="js_subghz",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_subghz_ep",
+    requires=["js_app"],
+    sources=["modules/js_subghz/*.c"],
+)
