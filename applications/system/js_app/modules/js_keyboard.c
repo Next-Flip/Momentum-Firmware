@@ -187,12 +187,14 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
 }
 
 static void js_keyboard_destroy(void* inst) {
-    JsKeyboardInst* insts = (JsKeyboardInst*)inst;
-    byte_input_free(insts->byte_input);
-    text_input_free(insts->text_input);
-    view_dispatcher_free(insts->view_dispatcher);
-    free(insts->data);
-    free(insts);
+    JsKeyboardInst* keyboard = (JsKeyboardInst*)inst;
+    view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
+    byte_input_free(keyboard->byte_input);
+    view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
+    text_input_free(keyboard->text_input);
+    view_dispatcher_free(keyboard->view_dispatcher);
+    free(keyboard->data);
+    free(keyboard);
 }
 
 static const JsModuleDescriptor js_keyboard_desc = {

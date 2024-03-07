@@ -129,6 +129,7 @@ static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
 
 static void js_submenu_destroy(void* inst) {
     JsSubmenuInst* submenu = inst;
+    view_dispatcher_remove_view(submenu->view_dispatcher, JsSubmenuViewSubmenu);
     submenu_free(submenu->submenu);
     view_dispatcher_free(submenu->view_dispatcher);
     free(submenu);
