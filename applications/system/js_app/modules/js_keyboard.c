@@ -23,49 +23,25 @@ static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-char nibble_to_hex_character(uint8_t nibble) {
-    nibble &= 0xF;
-    if(nibble < 10) {
-        return '0' + nibble;
-    } else {
-        return 'A' + (nibble - 10);
-    }
-}
-
-char* bytes_to_hex_string(uint8_t* bytes, size_t num_bytes) {
-    char* hex_string = (char*)malloc(num_bytes * 2 + 1);
-    if(hex_string == NULL) {
-        FURI_LOG_D("LOG", "Memory allocation failed\n");
-        return NULL;
-    }
-
-    for(size_t i = 0; i < num_bytes; ++i) {
-        hex_string[i * 2] = nibble_to_hex_character(bytes[i] >> 4);
-        hex_string[i * 2 + 1] = nibble_to_hex_character(bytes[i] & 0xF);
-    }
-    hex_string[num_bytes * 2] = '\0';
-
-    return hex_string;
-}
-
-static bool get_str_arg(struct mjs* mjs, size_t index, const char** value) {
+static bool get_str_arg(struct mjs* mjs, size_t index, const char** value, bool error) {
     mjs_val_t str_obj = mjs_arg(mjs, index);
     if(!mjs_is_string(str_obj)) {
-        ret_bad_args(mjs, "Argument must be a string");
+        if(error) ret_bad_args(mjs, "Argument must be a string");
         return false;
     }
     size_t str_len = 0;
     *value = mjs_get_string(mjs, &str_obj, &str_len);
     if((str_len == 0) || (*value == NULL)) {
-        ret_bad_args(mjs, "Bad string argument");
+        if(error) ret_bad_args(mjs, "Bad string argument");
         return false;
     }
     return true;
 }
 
-static bool get_int_arg(struct mjs* mjs, size_t index, int* value) {
+static bool get_int_arg(struct mjs* mjs, size_t index, int* value, bool error) {
     mjs_val_t int_obj = mjs_arg(mjs, index);
     if(!mjs_is_number(int_obj)) {
+        if(error) ret_bad_args(mjs, "Argument must be a number");
         return false;
     }
     *value = (int)mjs_get_int(mjs, int_obj);
@@ -92,74 +68,73 @@ void byte_input_callback(void* context) {
 static void js_keyboard_text(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    int MaxInputLength;
-    if(!get_int_arg(mjs, 0, &MaxInputLength)) return;
+    int input_length;
+    if(!get_int_arg(mjs, 0, &input_length, true)) return;
+    char* buffer = malloc(input_length);
 
-    const char* defaultText = "";
-    get_str_arg(mjs, 1, &defaultText);
-
-    int ShouldSelect;
-    mjs_val_t bool_obj = mjs_arg(mjs, 2);
-    ShouldSelect = (int)mjs_get_bool(mjs, bool_obj);
-
-    if(keyboard->text_input && keyboard->view_dispatcher) {
-        if(strlen(defaultText) > 0) {
-            text_input_set_header_text(keyboard->text_input, defaultText);
-        }
-
-        view_dispatcher_attach_to_gui(
-            keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
-        furi_record_close(RECORD_GUI);
-
-        text_input_set_result_callback(
-            keyboard->text_input,
-            text_input_callback,
-            keyboard,
-            keyboard->data,
-            MaxInputLength,
-            ShouldSelect);
-
-        view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
-
-        view_dispatcher_run(keyboard->view_dispatcher);
+    const char* default_text = "";
+    bool clear_default = false;
+    if(get_str_arg(mjs, 1, &default_text, false)) {
+        strlcpy(buffer, default_text, input_length);
+        mjs_val_t bool_obj = mjs_arg(mjs, 2);
+        clear_default = mjs_get_bool(mjs, bool_obj);
     }
+
+    // TODO: own function
+    // if(strlen(default_text) > 0) {
+    //     text_input_set_header_text(keyboard->text_input, default_text);
+    // }
+
+    view_dispatcher_attach_to_gui(
+        keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
+    furi_record_close(RECORD_GUI);
+
+    text_input_set_result_callback(
+        keyboard->text_input, text_input_callback, keyboard, buffer, input_length, clear_default);
+
+    view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
+
+    view_dispatcher_run(keyboard->view_dispatcher);
 
     text_input_reset(keyboard->text_input);
 
-    mjs_return(mjs, mjs_mk_string(mjs, keyboard->data, strlen(keyboard->data), 1));
+    mjs_return(mjs, mjs_mk_string(mjs, buffer, ~0, true));
+    free(buffer);
 }
 
 static void js_keyboard_byte(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    int MaxInputLength;
-    if(!get_int_arg(mjs, 0, &MaxInputLength)) return;
+    int input_length;
+    if(!get_int_arg(mjs, 0, &input_length, true)) return;
+    uint8_t* buffer = malloc(input_length);
 
-    const char* defaultText;
-    get_str_arg(mjs, 1, &defaultText);
+    // const char* default_data;
+    // if(get_str_arg(mjs, 1, &default_data, false)) {
+    //     strlcpy(buffer, default_data, input_length);
+    // }
 
-    if(keyboard->byte_input && keyboard->view_dispatcher) {
-        if(strlen(defaultText) > 0) {
-            byte_input_set_header_text(keyboard->byte_input, defaultText);
-        }
+    // TODO: own function
+    // if(strlen(default_data) > 0) {
+    //     byte_input_set_header_text(keyboard->byte_input, default_data);
+    // }
 
-        view_dispatcher_attach_to_gui(
-            keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
-        furi_record_close(RECORD_GUI);
+    view_dispatcher_attach_to_gui(
+        keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
+    furi_record_close(RECORD_GUI);
 
-        byte_input_set_result_callback(
-            keyboard->byte_input, byte_input_callback, NULL, keyboard, keyboard->byteinput, 10);
+    byte_input_set_result_callback(
+        keyboard->byte_input, byte_input_callback, NULL, keyboard, buffer, input_length);
 
-        view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
+    view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
 
-        view_dispatcher_run(keyboard->view_dispatcher);
-    }
+    view_dispatcher_run(keyboard->view_dispatcher);
 
-    FURI_LOG_D("SHIT", "DID THING");
-    keyboard->data = bytes_to_hex_string(keyboard->byteinput, 10);
-    FURI_LOG_D("SHIT", "DID THING 1");
-    mjs_return(mjs, mjs_mk_string(mjs, keyboard->data, strlen(keyboard->data), 1));
-    FURI_LOG_D("SHIT", "DID THING 2");
+    byte_input_set_result_callback(keyboard->byte_input, NULL, NULL, NULL, NULL, 0);
+    byte_input_set_header_text(keyboard->byte_input, "");
+
+    mjs_return(mjs, mjs_mk_string(mjs, (char*)buffer, ~0, true));
+    free(buffer);
 }
 
 static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
@@ -171,8 +146,6 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
     keyboard->byte_input = byte_input_alloc();
     keyboard->text_input = text_input_alloc();
     keyboard->view_dispatcher = view_dispatcher_alloc();
-    keyboardinst->data = malloc(100);
-    keyboardinst->byteinput = malloc(100);
     view_dispatcher_enable_queue(keyboard->view_dispatcher);
     view_dispatcher_add_view(
         keyboard->view_dispatcher,
