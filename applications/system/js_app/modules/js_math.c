@@ -287,6 +287,7 @@ static void* js_math_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, math_obj, "sqrt", ~0, MJS_MK_FN(js_math_sqrt));
     mjs_set(mjs, math_obj, "trunc", ~0, MJS_MK_FN(js_math_trunc));
     mjs_set(mjs, math_obj, "PI", ~0, mjs_mk_number(mjs, JS_MATH_PI));
+    mjs_set(mjs, math_obj, "E", ~0, mjs_mk_number(mjs, JS_MATH_E));
     *object = math_obj;
     return (void*)1;
 }
