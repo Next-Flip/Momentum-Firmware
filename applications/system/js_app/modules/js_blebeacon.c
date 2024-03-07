@@ -48,6 +48,14 @@ static bool get_int_arg(struct mjs* mjs, size_t index, uint8_t* value, bool erro
     return true;
 }
 
+static void js_blebeacon_is_active(struct mjs* mjs) {
+    JsBlebeaconInst* blebeacon = get_this_ctx(mjs);
+    if(!check_arg_count(mjs, 0)) return;
+    UNUSED(blebeacon);
+
+    mjs_return(mjs, mjs_mk_boolean(mjs, furi_hal_bt_extra_beacon_is_active()));
+}
+
 static void js_blebeacon_set_config(struct mjs* mjs) {
     JsBlebeaconInst* blebeacon = get_this_ctx(mjs);
     if(mjs_nargs(mjs) < 1 || mjs_nargs(mjs) > 4) {
@@ -148,6 +156,10 @@ static void js_blebeacon_stop(struct mjs* mjs) {
     if(!check_arg_count(mjs, 0)) return;
     UNUSED(blebeacon);
 
+    if(!blebeacon->saved_prev_active) {
+        blebeacon->saved_prev_active = true;
+        blebeacon->prev_active = furi_hal_bt_extra_beacon_is_active();
+    }
     furi_hal_bt_extra_beacon_stop();
 
     mjs_return(mjs, MJS_UNDEFINED);
@@ -167,6 +179,7 @@ static void* js_blebeacon_create(struct mjs* mjs, mjs_val_t* object) {
     JsBlebeaconInst* blebeacon = malloc(sizeof(JsBlebeaconInst));
     mjs_val_t blebeacon_obj = mjs_mk_object(mjs);
     mjs_set(mjs, blebeacon_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, blebeacon));
+    mjs_set(mjs, blebeacon_obj, "isActive", ~0, MJS_MK_FN(js_blebeacon_is_active));
     mjs_set(mjs, blebeacon_obj, "setConfig", ~0, MJS_MK_FN(js_blebeacon_set_config));
     mjs_set(mjs, blebeacon_obj, "setData", ~0, MJS_MK_FN(js_blebeacon_set_data));
     mjs_set(mjs, blebeacon_obj, "start", ~0, MJS_MK_FN(js_blebeacon_start));
