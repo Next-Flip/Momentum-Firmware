@@ -8,6 +8,7 @@
 #include "js_thread.h"
 #include "js_thread_i.h"
 #include "js_modules.h"
+#include "modules/js_string.h"
 
 #define TAG "JS"
 
@@ -202,6 +203,40 @@ static void js_global_to_string(struct mjs* mjs) {
     mjs_return(mjs, ret);
 }
 
+static void js_parse_int(struct mjs* mjs) {
+    mjs_val_t arg = mjs_arg(mjs, 0);
+    size_t str_len;
+    const char* str = NULL;
+    if(mjs_is_string(arg)) {
+        str = mjs_get_string(mjs, &arg, &str_len);
+    } else {
+        mjs_return(mjs, mjs_mk_number(mjs, 0));
+        return;
+    }
+
+    int num = 0;
+    int sign = 1;
+    size_t i = 0;
+
+    if(str[0] == '-') {
+        sign = -1;
+        i = 1;
+    } else if(str[0] == '+') {
+        i = 1;
+    }
+
+    for(; i < str_len; i++) {
+        if(str[i] >= '0' && str[i] <= '9') {
+            num = num * 10 + (str[i] - '0');
+        } else {
+            break;
+        }
+    }
+    num *= sign;
+
+    mjs_return(mjs, mjs_mk_number(mjs, num));
+}
+
 static void js_global_to_hex_string(struct mjs* mjs) {
     double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
     char tmp_str[] = "-FFFFFFFF";
@@ -237,12 +272,16 @@ static int32_t js_thread(void* arg) {
     struct mjs* mjs = mjs_create(worker);
     worker->modules = js_modules_create(mjs, worker->resolver);
     mjs_val_t global = mjs_get_global(mjs);
+
     mjs_set(mjs, global, "print", ~0, MJS_MK_FN(js_print));
     mjs_set(mjs, global, "delay", ~0, MJS_MK_FN(js_delay));
     mjs_set(mjs, global, "to_string", ~0, MJS_MK_FN(js_global_to_string));
     mjs_set(mjs, global, "to_hex_string", ~0, MJS_MK_FN(js_global_to_hex_string));
     mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
     mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
+    mjs_set(mjs, global, "parseint", ~0, MJS_MK_FN(js_parse_int));
+
+    string_utils_init(mjs);
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
     mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
