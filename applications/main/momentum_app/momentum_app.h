@@ -25,6 +25,7 @@
 #include <flipper_application/flipper_application.h>
 #include <notification/notification_app.h>
 #include <power/power_service/power.h>
+#include <expansion/expansion.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include <momentum/namespoof.h>
@@ -35,6 +36,7 @@ ARRAY_DEF(CharList, char*)
 typedef struct {
     Gui* gui;
     DialogsApp* dialogs;
+    Expansion* expansion;
     NotificationApp* notification;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;

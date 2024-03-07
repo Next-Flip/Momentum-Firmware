@@ -1,6 +1,3 @@
-#include "SK6805.h"
-#include "colors.h"
-#include "property.h"
 #include <furi_hal_info.h>
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
@@ -12,8 +9,10 @@
 #include <furi.h>
 #include <protobuf_version.h>
 
-#include "momentum/momentum.h"
-#include "rgb_backlight.h"
+#include <momentum/momentum.h>
+#include <rgb_backlight.h>
+#include <SK6805.h>
+#include <colors.h>
 #include <stdint.h>
 
 FURI_WEAK void furi_hal_info_get_api_version(uint16_t* major, uint16_t* minor) {
