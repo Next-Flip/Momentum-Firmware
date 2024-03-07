@@ -7,7 +7,7 @@ typedef struct {
     char* mac_addr;
     size_t beacon_data_len;
     GapExtraBeaconConfig beacon_config;
-} JSblebeaconInst;
+} JsBlebeaconInst;
 
 struct OUI_MAP_ENTRY {
     const char* brand;
@@ -78,9 +78,9 @@ static char* generate_mac_address(const char* brand) {
     return mac_address;
 }
 
-static JSblebeaconInst* get_this_ctx(struct mjs* mjs) {
+static JsBlebeaconInst* get_this_ctx(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JSblebeaconInst* storage = mjs_get_ptr(mjs, obj_inst);
+    JsBlebeaconInst* storage = mjs_get_ptr(mjs, obj_inst);
     furi_assert(storage);
     return storage;
 }
@@ -167,7 +167,7 @@ static uint8_t* hexstr_to_uint8(const char* hexstr, size_t* out_length) {
 static void js_blebeacon_set_data(struct mjs* mjs) {
     FURI_LOG_D("BLE", "Setting data");
     if(!check_arg_count(mjs, 1)) return;
-    JSblebeaconInst* inst = get_this_ctx(mjs);
+    JsBlebeaconInst* inst = get_this_ctx(mjs);
     if(!inst) {
         FURI_LOG_D("BLE", "Beacon instance is null");
         ret_bad_args(mjs, "Beacon instance is null");
@@ -214,7 +214,7 @@ static void js_blebeacon_set_mac(struct mjs* mjs) {
         return;
     }
 
-    JSblebeaconInst* inst = get_this_ctx(mjs);
+    JsBlebeaconInst* inst = get_this_ctx(mjs);
     char* mac_addr = "";
     if(!get_str_arg(mjs, 0, &mac_addr)) return;
     inst->mac_addr = mac_addr;
@@ -251,7 +251,7 @@ static void js_blebeacon_stop(struct mjs* mjs) {
 }
 
 static void* js_blebeacon_create(struct mjs* mjs, mjs_val_t* object) {
-    JSblebeaconInst* inst = malloc(sizeof(JSblebeaconInst));
+    JsBlebeaconInst* inst = malloc(sizeof(JsBlebeaconInst));
     mjs_val_t blebeacon_obj = mjs_mk_object(mjs);
     mjs_set(mjs, blebeacon_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, inst));
     mjs_set(mjs, blebeacon_obj, "setData", ~0, MJS_MK_FN(js_blebeacon_set_data));
@@ -264,7 +264,7 @@ static void* js_blebeacon_create(struct mjs* mjs, mjs_val_t* object) {
 }
 
 static void js_blebeacon_destroy(void* ptr) {
-    JSblebeaconInst* inst = (JSblebeaconInst*)ptr;
+    JsBlebeaconInst* inst = (JsBlebeaconInst*)ptr;
     if(inst) {
         free(inst->data);
         free(inst->mac_addr);
@@ -278,12 +278,12 @@ static const JsModuleDescriptor js_blebeacon_desc = {
     js_blebeacon_destroy,
 };
 
-static const FlipperAppPluginDescriptor blebeacon_plugin_descriptor = {
+static const FlipperAppPluginDescriptor plugin_descriptor = {
     .appid = PLUGIN_APP_ID,
     .ep_api_version = PLUGIN_API_VERSION,
     .entry_point = &js_blebeacon_desc,
 };
 
 const FlipperAppPluginDescriptor* js_blebeacon_ep(void) {
-    return &blebeacon_plugin_descriptor;
+    return &plugin_descriptor;
 }

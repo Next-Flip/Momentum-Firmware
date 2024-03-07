@@ -11,7 +11,7 @@ typedef struct {
     ByteInput* byteinputview;
     ViewDispatcher* view_dispatcher;
     uint8_t* byteinput;
-} JSkeyboardInst;
+} JsKeyboardInst;
 
 static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "%s", error);
@@ -67,25 +67,25 @@ static bool get_int_arg(struct mjs* mjs, size_t index, int* value) {
     return true;
 }
 
-static JSkeyboardInst* get_this_ctx(struct mjs* mjs) {
+static JsKeyboardInst* get_this_ctx(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JSkeyboardInst* storage = mjs_get_ptr(mjs, obj_inst);
+    JsKeyboardInst* storage = mjs_get_ptr(mjs, obj_inst);
     furi_assert(storage);
     return storage;
 }
 
 void text_input_callback(void* context) {
-    JSkeyboardInst* keyboardinst = (JSkeyboardInst*)context;
+    JsKeyboardInst* keyboardinst = (JsKeyboardInst*)context;
     view_dispatcher_stop(keyboardinst->view_dispatcher);
 }
 
 void byte_input_callback(void* context) {
-    JSkeyboardInst* keyboardinst = (JSkeyboardInst*)context;
+    JsKeyboardInst* keyboardinst = (JsKeyboardInst*)context;
     view_dispatcher_stop(keyboardinst->view_dispatcher);
 }
 
 static void js_keyboard_text(struct mjs* mjs) {
-    JSkeyboardInst* keyboardinst = get_this_ctx(mjs);
+    JsKeyboardInst* keyboardinst = get_this_ctx(mjs);
 
     int MaxInputLength;
     if(!get_int_arg(mjs, 0, &MaxInputLength)) return;
@@ -127,7 +127,7 @@ static void js_keyboard_text(struct mjs* mjs) {
 }
 
 static void js_keyboard_byte(struct mjs* mjs) {
-    JSkeyboardInst* keyboardinst = get_this_ctx(mjs);
+    JsKeyboardInst* keyboardinst = get_this_ctx(mjs);
 
     int MaxInputLength;
     if(!get_int_arg(mjs, 0, &MaxInputLength)) return;
@@ -167,7 +167,7 @@ static void js_keyboard_byte(struct mjs* mjs) {
 }
 
 static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
-    JSkeyboardInst* keyboardinst = malloc(sizeof(JSkeyboardInst));
+    JsKeyboardInst* keyboardinst = malloc(sizeof(JsKeyboardInst));
     mjs_val_t keyboard_obj = mjs_mk_object(mjs);
     mjs_set(mjs, keyboard_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, keyboardinst));
     mjs_set(mjs, keyboard_obj, "text", ~0, MJS_MK_FN(js_keyboard_text));
@@ -187,7 +187,7 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
 }
 
 static void js_keyboard_destroy(void* inst) {
-    JSkeyboardInst* insts = (JSkeyboardInst*)inst;
+    JsKeyboardInst* insts = (JsKeyboardInst*)inst;
     byte_input_free(insts->byteinputview);
     text_input_free(insts->textinput);
     view_dispatcher_free(insts->view_dispatcher);
@@ -201,13 +201,12 @@ static const JsModuleDescriptor js_keyboard_desc = {
     js_keyboard_destroy,
 };
 
-static const FlipperAppPluginDescriptor keyboard_plugin_descriptor = {
+static const FlipperAppPluginDescriptor plugin_descriptor = {
     .appid = PLUGIN_APP_ID,
     .ep_api_version = PLUGIN_API_VERSION,
     .entry_point = &js_keyboard_desc,
 };
 
 const FlipperAppPluginDescriptor* js_keyboard_ep(void) {
-    UNUSED(js_keyboard_byte);
-    return &keyboard_plugin_descriptor;
+    return &plugin_descriptor;
 }
