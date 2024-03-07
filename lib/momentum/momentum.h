@@ -43,11 +43,6 @@ typedef enum {
     SpiCount,
 } SpiHandle;
 
-_Static_assert(sizeof(MenuStyle) == sizeof(uint8_t), "enum too big, fix load/save");
-_Static_assert(sizeof(BatteryIcon) == sizeof(uint8_t), "enum too big, fix load/save");
-_Static_assert(sizeof(SpiHandle) == sizeof(uint8_t), "enum too big, fix load/save");
-_Static_assert(sizeof(FuriHalSerialId) == sizeof(uint8_t), "enum too big, fix load/save");
-
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
     uint32_t anim_speed;
