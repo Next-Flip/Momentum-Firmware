@@ -10,16 +10,16 @@
 #define tag "js_subghz"
 
 typedef enum {
-    stateRx,
-    stateTx,
-    stateIdle,
-} SubghzRadioState;
+    JsSubghzRadioStateRX,
+    JsSubghzRadioStateTX,
+    JsSubghzRadioStateIDLE,
+} JsSubghzRadioState;
 
 typedef struct {
     const SubGhzDevice* radio_device;
     int frequency;
     bool is_external;
-    SubghzRadioState state;
+    JsSubghzRadioState state;
 } JsSubghzInst;
 
 // from subghz cli
@@ -57,13 +57,13 @@ static void js_subghz_set_rx(struct mjs* mjs) {
     JsSubghzInst* js_subghz = mjs_get_ptr(mjs, obj_inst);
     furi_assert(js_subghz);
 
-    if(js_subghz->state == stateRx) {
+    if(js_subghz->state == JsSubghzRadioStateRX) {
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
     subghz_devices_set_rx(js_subghz->radio_device);
-    js_subghz->state = stateRx;
+    js_subghz->state = JsSubghzRadioStateRX;
 }
 
 static void js_subgjz_set_idle(struct mjs* mjs) {
@@ -71,13 +71,13 @@ static void js_subgjz_set_idle(struct mjs* mjs) {
     JsSubghzInst* js_subghz = mjs_get_ptr(mjs, obj_inst);
     furi_assert(js_subghz);
 
-    if(js_subghz->state == stateIdle) {
+    if(js_subghz->state == JsSubghzRadioStateIDLE) {
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
 
     subghz_devices_idle(js_subghz->radio_device);
-    js_subghz->state = stateIdle;
+    js_subghz->state = JsSubghzRadioStateIDLE;
 }
 
 static void js_subghz_get_rssi(struct mjs* mjs) {
@@ -85,7 +85,7 @@ static void js_subghz_get_rssi(struct mjs* mjs) {
     JsSubghzInst* js_subghz = mjs_get_ptr(mjs, obj_inst);
     furi_assert(js_subghz);
 
-    if(js_subghz->state != stateRx) {
+    if(js_subghz->state != JsSubghzRadioStateRX) {
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
@@ -99,24 +99,23 @@ static void js_subghz_get_state(struct mjs* mjs) {
     JsSubghzInst* js_subghz = mjs_get_ptr(mjs, obj_inst);
     furi_assert(js_subghz);
 
-    FuriString* state_str = furi_string_alloc();
-
+    const char* state;
     switch(js_subghz->state) {
-    case stateRx:
-        furi_string_set(state_str, "RX");
+    case JsSubghzRadioStateRX:
+        state = "RX";
         break;
-    case stateTx:
-        furi_string_set(state_str, "TX");
+    case JsSubghzRadioStateTX:
+        state = "TX";
         break;
-    case stateIdle:
-        furi_string_set(state_str, "IDLE");
+    case JsSubghzRadioStateIDLE:
+        state = "IDLE";
         break;
+    default:
+        state = "";
+        break
     }
 
-    mjs_return(
-        mjs, mjs_mk_string(mjs, furi_string_get_cstr(state_str), furi_string_size(state_str), 1));
-
-    furi_string_free(state_str);
+    mjs_return(mjs, mjs_mk_string(mjs, state, ~0, true));
 }
 
 static void js_subghz_is_external(struct mjs* mjs) {
@@ -132,7 +131,7 @@ static void js_subghz_set_frequency(struct mjs* mjs) {
     JsSubghzInst* js_subghz = mjs_get_ptr(mjs, obj_inst);
     furi_assert(js_subghz);
 
-    if(js_subghz->state != stateIdle) {
+    if(js_subghz->state != JsSubghzRadioStateIDLE) {
         mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Radio is not in IDLE state");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
@@ -276,7 +275,7 @@ static void js_subghz_transmit_file(struct mjs* mjs) {
         } else {
             FURI_LOG_I(tag, "failed to allocate transmitter");
             subghz_devices_idle(js_subghz->radio_device);
-            js_subghz->state = stateIdle;
+            js_subghz->state = JsSubghzRadioStateIDLE;
         }
     } while(false);
 
@@ -303,7 +302,7 @@ static void js_subghz_transmit_file(struct mjs* mjs) {
         } while(repeat && !strcmp(furi_string_get_cstr(temp_str), "RAW"));
 
         subghz_devices_idle(js_subghz->radio_device);
-        js_subghz->state = stateIdle;
+        js_subghz->state = JsSubghzRadioStateIDLE;
 
         if(!js_subghz->is_external) {
             furi_hal_power_suppress_charge_exit();
@@ -336,7 +335,7 @@ static void js_subghz_setup(struct mjs* mjs) {
         js_subghz->is_external = false;
     }
 
-    js_subghz->state = stateIdle;
+    js_subghz->state = JsSubghzRadioStateIDLE;
     js_subghz->frequency = 433920000;
 
     subghz_devices_reset(js_subghz->radio_device);
