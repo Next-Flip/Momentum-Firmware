@@ -25,6 +25,15 @@ int hsvcmp(const HsvColor* a, const HsvColor* b);
 void hsv2rgb(const HsvColor* hsv, RgbColor* rgb);
 void rgb2hsv(const RgbColor* rgb, HsvColor* hsv);
 
+typedef union {
+    uint16_t value;
+    struct {
+        uint8_t r : 5;
+        uint8_t g : 6;
+        uint8_t b : 5;
+    };
+} Rgb565Color;
+
 #ifdef __cplusplus
 }
 #endif

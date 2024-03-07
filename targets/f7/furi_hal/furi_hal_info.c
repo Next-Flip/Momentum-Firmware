@@ -86,6 +86,35 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         property_value_out(&property_context, "%06X", 4, "hardware", "rgb", "led", id_string, __REV(led_value));
     }
 
+    // VGM Settings
+    property_value_out(
+        &property_context,
+        "%d",
+        4,
+        "hardware",
+        "vgm",
+        "color",
+        "mode",
+        momentum_settings.vgm_color_mode);
+    property_value_out(
+        &property_context,
+        "%04X",
+        4,
+        "hardware",
+        "vgm",
+        "color",
+        "fg",
+        momentum_settings.vgm_color_fg.value);
+    property_value_out(
+        &property_context,
+        "%04X",
+        4,
+        "hardware",
+        "vgm",
+        "color",
+        "bg",
+        momentum_settings.vgm_color_bg.value);
+
     if(sep == '.') {
         property_value_out(
             &property_context,

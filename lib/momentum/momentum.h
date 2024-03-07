@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <toolbox/colors.h>
 #include <gui/canvas.h>
 
 #ifdef __cplusplus
@@ -43,6 +44,13 @@ typedef enum {
     SpiCount,
 } SpiHandle;
 
+typedef enum {
+    VgmColorModeDefault,
+    VgmColorModeRgbBacklight,
+    VgmColorModeCustom,
+    VgmColorModeCount,
+} VgmColorMode;
+
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
     uint32_t anim_speed;
@@ -79,6 +87,9 @@ typedef struct {
     FuriHalSerialId uart_esp_channel;
     FuriHalSerialId uart_nmea_channel;
     bool file_naming_prefix_after;
+    VgmColorMode vgm_color_mode;
+    Rgb565Color vgm_color_fg;
+    Rgb565Color vgm_color_bg;
 } MomentumSettings;
 
 typedef struct {
