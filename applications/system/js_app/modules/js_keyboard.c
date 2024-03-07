@@ -168,7 +168,7 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
 }
 
 static void js_keyboard_destroy(void* inst) {
-    JsKeyboardInst* keyboard = (JsKeyboardInst*)inst;
+    JsKeyboardInst* keyboard = inst;
     view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
     byte_input_free(keyboard->byte_input);
     view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
