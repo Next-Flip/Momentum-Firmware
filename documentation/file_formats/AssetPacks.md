@@ -66,7 +66,7 @@ With icons there are quite a few differences and issues we had to solve. In part
 
 #### Static icons
 
-The `.bm` format does not include image width and height, with animations that is stored in `meta.txt`, so for static icons we made a special format: `.bmx`, which is `[ int32 width ] + [ int32 height ] + [ standard .bm pixel data ]`, but this is handled by the packer (see below) so don't worry abou it.
+The `.bm` format does not include image width and height, with animations that is stored in `meta.txt`, so for static icons we made a special format: `.bmx`, which is `[ int32 width ] + [ int32 height ] + [ standard .bm pixel data ]`, but this is handled by the packer (see below) so don't worry about it.
 
 #### Animated icons
 
@@ -149,7 +149,7 @@ All the .bm and .bmx struggles are dealt with by the packer system, which is in 
 
 - Now upload the packed packs from that folder onto your flipper in `SD/asset_packs`.
 
-- Done! Just select it from the Xtreme Settings app now. And if you're generous share your (packed) asset pack in #asset-packs on discord.
+- Done! Just select it from the Momentum Settings app now. And if you're generous share your (packed) asset pack in #asset-packs on discord.
 
 #### Building with Firmware
 
