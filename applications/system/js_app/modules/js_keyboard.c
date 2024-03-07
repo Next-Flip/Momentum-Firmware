@@ -65,6 +65,18 @@ void byte_input_callback(void* context) {
     view_dispatcher_stop(keyboard->view_dispatcher);
 }
 
+static void js_keyboard_set_header(struct mjs* mjs) {
+    JsKeyboardInst* keyboard = get_this_ctx(mjs);
+
+    const char* header;
+    if(!get_str_arg(mjs, 0, &header, true)) return;
+
+    text_input_set_header_text(keyboard->text_input, header);
+    byte_input_set_header_text(keyboard->byte_input, header);
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
 static void js_keyboard_text(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
@@ -79,11 +91,6 @@ static void js_keyboard_text(struct mjs* mjs) {
         mjs_val_t bool_obj = mjs_arg(mjs, 2);
         clear_default = mjs_get_bool(mjs, bool_obj);
     }
-
-    // TODO: own function
-    // if(strlen(default_text) > 0) {
-    //     text_input_set_header_text(keyboard->text_input, default_text);
-    // }
 
     view_dispatcher_attach_to_gui(
         keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
@@ -114,11 +121,6 @@ static void js_keyboard_byte(struct mjs* mjs) {
     //     strlcpy(buffer, default_data, input_length);
     // }
 
-    // TODO: own function
-    // if(strlen(default_data) > 0) {
-    //     byte_input_set_header_text(keyboard->byte_input, default_data);
-    // }
-
     view_dispatcher_attach_to_gui(
         keyboard->view_dispatcher, furi_record_open(RECORD_GUI), ViewDispatcherTypeFullscreen);
     furi_record_close(RECORD_GUI);
@@ -141,6 +143,7 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
     JsKeyboardInst* keyboard = malloc(sizeof(JsKeyboardInst));
     mjs_val_t keyboard_obj = mjs_mk_object(mjs);
     mjs_set(mjs, keyboard_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, keyboard));
+    mjs_set(mjs, keyboard_obj, "setHeader", ~0, MJS_MK_FN(js_keyboard_set_header));
     mjs_set(mjs, keyboard_obj, "text", ~0, MJS_MK_FN(js_keyboard_text));
     mjs_set(mjs, keyboard_obj, "byte", ~0, MJS_MK_FN(js_keyboard_byte));
     keyboard->byte_input = byte_input_alloc();

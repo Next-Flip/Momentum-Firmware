@@ -1,6 +1,7 @@
 let keyboard = require("keyboard");
 
-// Default text is optional
-let text = keyboard.text(100, "Some default text", true);
+keyboard.setHeader("Example Text Input");
 
+// Default text is optional
+let text = keyboard.text(100, "Default text", true);
 print("Got text:", text);
