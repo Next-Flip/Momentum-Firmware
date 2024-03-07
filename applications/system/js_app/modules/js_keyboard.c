@@ -13,6 +13,11 @@ typedef struct {
     uint8_t* byteinput;
 } JsKeyboardInst;
 
+typedef enum {
+    JsKeyboardViewTextInput,
+    JsKeyboardViewByteInput,
+} JsKeyboardView;
+
 static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "%s", error);
     mjs_return(mjs, MJS_UNDEFINED);
@@ -114,7 +119,7 @@ static void js_keyboard_text(struct mjs* mjs) {
             MaxInputLength,
             ShouldSelect);
 
-        view_dispatcher_switch_to_view(keyboard->view_dispatcher, 0);
+        view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
 
         view_dispatcher_run(keyboard->view_dispatcher);
     }
@@ -145,7 +150,7 @@ static void js_keyboard_byte(struct mjs* mjs) {
         byte_input_set_result_callback(
             keyboard->byte_input, byte_input_callback, NULL, keyboard, keyboard->byteinput, 10);
 
-        view_dispatcher_switch_to_view(keyboard->view_dispatcher, 1);
+        view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
 
         view_dispatcher_run(keyboard->view_dispatcher);
     }
@@ -170,9 +175,13 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
     keyboardinst->byteinput = malloc(100);
     view_dispatcher_enable_queue(keyboard->view_dispatcher);
     view_dispatcher_add_view(
-        keyboard->view_dispatcher, 0, text_input_get_view(keyboard->text_input));
+        keyboard->view_dispatcher,
+        JsKeyboardViewTextInput,
+        text_input_get_view(keyboard->text_input));
     view_dispatcher_add_view(
-        keyboard->view_dispatcher, 1, byte_input_get_view(keyboard->byte_input));
+        keyboard->view_dispatcher,
+        JsKeyboardViewByteInput,
+        byte_input_get_view(keyboard->byte_input));
     *object = keyboard_obj;
     return keyboard;
 }
