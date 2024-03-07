@@ -112,7 +112,7 @@ static void js_subghz_get_state(struct mjs* mjs) {
         break;
     default:
         state = "";
-        break
+        break;
     }
 
     mjs_return(mjs, mjs_mk_string(mjs, state, ~0, true));
