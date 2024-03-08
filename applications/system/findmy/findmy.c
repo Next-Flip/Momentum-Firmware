@@ -95,32 +95,14 @@ static void findmy_start(FindMy* app) {
     *it++ = 0x1E; // Length
     *it++ = 0xFF; // Manufacturer Specific Data
     *it++ = 0x4C; // Company ID (Apple, Inc.)
-    *it++ = 0x00; // State
-    *it++ = 0x12; // Data - Public Key without the MAC address
-    *it++ = 0x19;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
-    *it++ = 0x00;
+    *it++ = 0x00; // ...
+    *it++ = 0x12; // Type (FindMy)
+    *it++ = 0x19; // Length
+    *it++ = 0x00; // Status
+    // Placeholder Empty Public Key without the MAC address
+    for(size_t i = 0; i < 22; ++i) {
+        *it++ = 0x00;
+    }
     *it++ = 0x00; // First 2 bits are the version, the rest is the battery level
     *it++ = 0x00; // Hint (0x00)
 
