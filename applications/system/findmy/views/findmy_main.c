@@ -34,7 +34,7 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
     snprintf(interval_str, sizeof(interval_str), "Ping Interval: %ds", model->interval);
     canvas_draw_str(canvas, 4, 62, interval_str);
     canvas_set_font(canvas, FontPrimary);
-    if(model->apple){
+    if(model->apple) {
         canvas_draw_str(canvas, 4, 32, "Apple Network");
         canvas_draw_icon(canvas, 80, 24, &I_Lock_7x8);
     } else {
@@ -56,30 +56,32 @@ static bool findmy_main_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypePress) {
         consumed = true;
-        // FIXME: finish implementing handlers in scene side
+        FindMyMainEvent event;
+
         switch(event->key) {
         case InputKeyBack:
-            findmy_main->callback(FindMyMainEventQuit, findmy_main->context);
-            // furi_hal_bt_extra_beacon_stop();
+            event = FindMyMainEventQuit;
             break;
         case InputKeyOk:
-            findmy_main->callback(FindMyMainEventToggle, findmy_main->context);
+            event = FindMyMainEventToggle;
             break;
         case InputKeyLeft:
-            findmy_main->callback(FindMyMainEventBackground, findmy_main->context);
+            event = FindMyMainEventBackground;
             break;
         case InputKeyRight:
-            findmy_main->callback(FindMyMainEventConfig, findmy_main->context);
+            event = FindMyMainEventConfig;
             break;
         case InputKeyUp:
-            findmy_main->callback(FindMyMainEventIntervalUp, findmy_main->context);
+            event = FindMyMainEventIntervalUp;
             break;
         case InputKeyDown:
-            findmy_main->callback(FindMyMainEventIntervalDown, findmy_main->context);
+            event = FindMyMainEventIntervalDown;
             break;
         default:
-            break;
+            return consumed;
         }
+
+        findmy_main->callback(event, findmy_main->context);
     }
 
     return consumed;

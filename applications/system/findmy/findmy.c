@@ -92,7 +92,7 @@ static void findmy_start(FindMy* app) {
     uint8_t* it = data;
 
     // For Apple AirTags
-    *it++ = 0x1E, // Length
+    *it++ = 0x1E; // Length
     *it++ = 0xFF; // Manufacturer Specific Data
     *it++ = 0x4C; // Company ID (Apple, Inc.)
     *it++ = 0x00; // State
