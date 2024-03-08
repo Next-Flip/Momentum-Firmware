@@ -90,6 +90,7 @@ void findmy_change_broadcast_interval(FindMy* app, uint8_t value) {
         return;
     }
     app->state.broadcast_interval = value;
+    findmy_state_save(&app->state);
     findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
     if(furi_hal_bt_extra_beacon_is_active()) {
         // Always check if beacon is active before changing config
@@ -108,6 +109,7 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value) {
         return;
     }
     app->state.transmit_power = value;
+    findmy_state_save(&app->state);
     if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
@@ -120,6 +122,7 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value) {
 
 void findmy_toggle_beacon(FindMy* app) {
     app->state.beacon_active = !app->state.beacon_active;
+    findmy_state_save(&app->state);
     if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }

@@ -25,6 +25,8 @@ bool findmy_scene_main_on_event(void* context, SceneManagerEvent event) {
             findmy_toggle_beacon(app);
             break;
         case FindMyMainEventBackground:
+            app->state.beacon_active = true;
+            findmy_state_save(&app->state);
             if(!furi_hal_bt_extra_beacon_is_active()) {
                 furi_check(furi_hal_bt_extra_beacon_start());
             }
@@ -40,6 +42,8 @@ bool findmy_scene_main_on_event(void* context, SceneManagerEvent event) {
             findmy_change_broadcast_interval(app, app->state.broadcast_interval - 1);
             break;
         case FindMyMainEventQuit:
+            app->state.beacon_active = false;
+            findmy_state_save(&app->state);
             if(furi_hal_bt_extra_beacon_is_active()) {
                 furi_check(furi_hal_bt_extra_beacon_stop());
             }

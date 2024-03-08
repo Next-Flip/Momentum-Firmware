@@ -40,6 +40,7 @@ bool findmy_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
         case ByteInputResultOk:
             furi_hal_bt_reverse_mac_addr(app->mac_buf);
             memcpy(&app->state.mac, app->mac_buf, sizeof(app->state.mac));
+            findmy_state_save(&app->state);
             memcpy(&app->state.config.address, app->mac_buf, sizeof(app->state.config.address));
             if(furi_hal_bt_extra_beacon_is_active()) {
                 furi_check(furi_hal_bt_extra_beacon_stop());
