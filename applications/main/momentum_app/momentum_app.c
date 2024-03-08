@@ -163,6 +163,7 @@ MomentumApp* momentum_app_alloc() {
     MomentumApp* app = malloc(sizeof(MomentumApp));
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
+    app->expansion = furi_record_open(RECORD_EXPANSION);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
 
     // View Dispatcher and Scene Manager
@@ -361,6 +362,7 @@ void momentum_app_free(MomentumApp* app) {
 
     // Records
     furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_GUI);
     free(app);

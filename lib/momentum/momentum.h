@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <toolbox/colors.h>
 #include <gui/canvas.h>
 
 #ifdef __cplusplus
@@ -43,10 +44,12 @@ typedef enum {
     SpiCount,
 } SpiHandle;
 
-_Static_assert(sizeof(MenuStyle) == sizeof(uint8_t), "enum too big, fix load/save");
-_Static_assert(sizeof(BatteryIcon) == sizeof(uint8_t), "enum too big, fix load/save");
-_Static_assert(sizeof(SpiHandle) == sizeof(uint8_t), "enum too big, fix load/save");
-_Static_assert(sizeof(FuriHalSerialId) == sizeof(uint8_t), "enum too big, fix load/save");
+typedef enum {
+    VgmColorModeDefault,
+    VgmColorModeCustom,
+    VgmColorModeRgbBacklight,
+    VgmColorModeCount,
+} VgmColorMode;
 
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
@@ -84,6 +87,9 @@ typedef struct {
     FuriHalSerialId uart_esp_channel;
     FuriHalSerialId uart_nmea_channel;
     bool file_naming_prefix_after;
+    VgmColorMode vgm_color_mode;
+    Rgb565Color vgm_color_fg;
+    Rgb565Color vgm_color_bg;
 } MomentumSettings;
 
 typedef struct {
