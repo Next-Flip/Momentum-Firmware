@@ -38,8 +38,11 @@ static const struct {
     char* name;
     Rgb565Color color;
 } vgm_colors[] = {
-    {"Orange", {0xFC00}},
-    {"Black", {0x0000}},
+    {"Orange", {0xFC00}}, {"Black", {0x0000}}, {"Red", {0xF800}},    {"Maroon", {0x8000}},
+    {"Yellow", {0xFFE0}}, {"Olive", {0x8400}}, {"Lime", {0x07E0}},   {"Green", {0x0400}},
+    {"Aqua", {0x07EF}},   {"Cyan", {0x069A}},  {"Azure", {0x03FF}},  {"Teal", {0x0410}},
+    {"Blue", {0x001F}},   {"Navy", {0x0010}},  {"Purple", {0x8010}}, {"Fuchsia", {0xF81F}},
+    {"Pink", {0xA8F5}},   {"Brown", {0xA145}}, {"White", {0xFFFF}},
 };
 static const size_t vgm_colors_count = COUNT_OF(vgm_colors);
 static void momentum_app_scene_misc_vgm_foreground_changed(VariableItem* item) {
