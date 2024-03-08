@@ -44,6 +44,7 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <applications/main/archive/helpers/archive_favorites.h>
 #include <momentum/namespoof.h>
 #include <momentum/momentum.h>
+#include <assets_icons.h>
 
 void flipper_migrate_files() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -101,9 +102,8 @@ void flipper_migrate_files() {
 static void flipper_boot_status(Canvas* canvas, const char* text) {
     FURI_LOG_I(TAG, text);
     canvas_reset(canvas);
-    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, text);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, "Momentum is Booting");
+    canvas_draw_icon(canvas, 33, 16, &I_Updating_Logo_62x15);
+    canvas_draw_str_aligned(canvas, 64, 44, AlignCenter, AlignCenter, text);
     canvas_commit(canvas);
 }
 #endif
@@ -143,7 +143,7 @@ void flipper_init() {
         flipper_boot_status(canvas, "Starting Namespoof");
         namespoof_init();
 
-        flipper_boot_status(canvas, "Loading Momentum Settings");
+        flipper_boot_status(canvas, "Loading Settings");
         momentum_settings_load();
         furi_hal_light_sequence("rgb RB");
 
