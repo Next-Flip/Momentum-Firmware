@@ -43,6 +43,10 @@ bool momentum_app_scene_misc_screen_color_on_event(void* context, SceneManagerEv
                 scene_manager_get_scene_state(app->scene_manager, MomentumAppSceneMiscScreenColor),
                 &app->lcd_color);
             app->save_backlight = true;
+            if(momentum_settings.vgm_color_mode == VgmColorModeRgbBacklight) {
+                expansion_disable(app->expansion);
+                expansion_enable(app->expansion);
+            }
             scene_manager_previous_scene(app->scene_manager);
             break;
         default:

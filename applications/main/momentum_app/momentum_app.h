@@ -25,6 +25,7 @@
 #include <flipper_application/flipper_application.h>
 #include <notification/notification_app.h>
 #include <power/power_service/power.h>
+#include <expansion/expansion.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include <momentum/namespoof.h>
@@ -35,6 +36,7 @@ ARRAY_DEF(CharList, char*)
 typedef struct {
     Gui* gui;
     DialogsApp* dialogs;
+    Expansion* expansion;
     NotificationApp* notification;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -58,6 +60,7 @@ typedef struct {
     char subghz_freq_buffer[7];
     bool subghz_extend;
     RgbColor lcd_color;
+    Rgb565Color vgm_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     int32_t dolphin_level;
     int32_t dolphin_angry;

@@ -41,13 +41,15 @@ MomentumSettings momentum_settings = {
     .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
     .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
     .file_naming_prefix_after = false, // Before
+    .vgm_color_mode = VgmColorModeDefault, // Default
+    .vgm_color_fg.value = 0x0000, // Default Black
+    .vgm_color_bg.value = 0xFC00, // Default Orange
 };
 
 typedef enum {
     momentum_settings_type_str,
     momentum_settings_type_int,
     momentum_settings_type_uint,
-    momentum_settings_type_enum,
     momentum_settings_type_bool,
 } momentum_settings_type;
 
@@ -60,19 +62,20 @@ static const struct {
         struct {
             int32_t i_min;
             int32_t i_max;
+            uint8_t i_sz;
         };
         struct {
             uint32_t u_min;
             uint32_t u_max;
+            uint8_t u_sz;
         };
-        uint8_t e_cnt;
     };
-#define clamp(t, min, max) .t##_min = min, .t##_max = max
 #define setting(t, n) .type = momentum_settings_type##t, .key = #n, .val = &momentum_settings.n
 #define setting_str(n) setting(_str, n), .str_len = sizeof(momentum_settings.n)
-#define setting_int(n, min, max) setting(_int, n), clamp(i, min, max)
-#define setting_uint(n, min, max) setting(_uint, n), clamp(u, min, max)
-#define setting_enum(n, cnt) setting(_enum, n), .e_cnt = cnt
+#define num(t, n, min, max) .t##_min = min, .t##_max = max, .t##_sz = sizeof(momentum_settings.n)
+#define setting_int(n, min, max) setting(_int, n), num(i, n, min, max)
+#define setting_uint(n, min, max) setting(_uint, n), num(u, n, min, max)
+#define setting_enum(n, cnt) setting_uint(n, 0, cnt - 1)
 #define setting_bool(n) setting(_bool, n)
 } momentum_settings_entries[] = {
     {setting_str(asset_pack)},
@@ -110,6 +113,9 @@ static const struct {
     {setting_enum(uart_esp_channel, FuriHalSerialIdMax)},
     {setting_enum(uart_nmea_channel, FuriHalSerialIdMax)},
     {setting_bool(file_naming_prefix_after)},
+    {setting_enum(vgm_color_mode, VgmColorModeCount)},
+    {setting_uint(vgm_color_fg, 0x0000, 0xFFFF)},
+    {setting_uint(vgm_color_bg, 0x0000, 0xFFFF)},
 };
 
 void momentum_settings_load() {
@@ -131,15 +137,13 @@ void momentum_settings_load() {
                 break;
             case momentum_settings_type_int:
                 ok = flipper_format_read_int32(file, entry.key, &val_int, 1);
-                if(ok) *(int32_t*)entry.val = CLAMP(val_int, entry.i_max, entry.i_min);
+                val_int = CLAMP(val_int, entry.i_max, entry.i_min);
+                if(ok) memcpy(entry.val, &val_int, entry.i_sz);
                 break;
             case momentum_settings_type_uint:
                 ok = flipper_format_read_uint32(file, entry.key, &val_uint, 1);
-                if(ok) *(uint32_t*)entry.val = CLAMP(val_uint, entry.u_max, entry.u_min);
-                break;
-            case momentum_settings_type_enum:
-                ok = flipper_format_read_uint32(file, entry.key, &val_uint, 1);
-                if(ok) *(uint8_t*)entry.val = CLAMP(val_uint, entry.e_cnt - 1U, 0U);
+                val_uint = CLAMP(val_uint, entry.u_max, entry.u_min);
+                if(ok) memcpy(entry.val, &val_uint, entry.u_sz);
                 break;
             case momentum_settings_type_bool:
                 ok = flipper_format_read_bool(file, entry.key, &val_bool, 1);
@@ -164,7 +168,8 @@ void momentum_settings_save() {
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
     if(flipper_format_file_open_always(file, MOMENTUM_SETTINGS_PATH)) {
-        uint32_t tmp_enum;
+        int32_t tmp_int;
+        uint32_t tmp_uint;
         for(size_t entry_i = 0; entry_i < COUNT_OF(momentum_settings_entries); entry_i++) {
 #define entry momentum_settings_entries[entry_i]
             switch(entry.type) {
@@ -172,14 +177,14 @@ void momentum_settings_save() {
                 flipper_format_write_string_cstr(file, entry.key, (char*)entry.val);
                 break;
             case momentum_settings_type_int:
-                flipper_format_write_int32(file, entry.key, (int32_t*)entry.val, 1);
+                tmp_int = 0;
+                memcpy(&tmp_int, entry.val, entry.i_sz);
+                flipper_format_write_int32(file, entry.key, &tmp_int, 1);
                 break;
             case momentum_settings_type_uint:
-                flipper_format_write_uint32(file, entry.key, (uint32_t*)entry.val, 1);
-                break;
-            case momentum_settings_type_enum:
-                tmp_enum = *(uint8_t*)entry.val;
-                flipper_format_write_uint32(file, entry.key, &tmp_enum, 1);
+                tmp_uint = 0;
+                memcpy(&tmp_uint, entry.val, entry.u_sz);
+                flipper_format_write_uint32(file, entry.key, &tmp_uint, 1);
                 break;
             case momentum_settings_type_bool:
                 flipper_format_write_bool(file, entry.key, (bool*)entry.val, 1);
