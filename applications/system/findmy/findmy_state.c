@@ -67,12 +67,11 @@ bool findmy_state_load(FindMyState* out_state) {
     }
 
     // Sync values to config
-    state.config.min_adv_interval_ms = state.broadcast_interval * 1000; // Converting s to ms
-    state.config.max_adv_interval_ms = (state.broadcast_interval * 1000) + 150;
+    findmy_state_sync_config(&state);
+
+    // Set constants
     state.config.adv_channel_map = GapAdvChannelMapAll;
-    state.config.adv_power_level = GapAdvPowerLevel_0dBm + state.transmit_power;
     state.config.address_type = GapAddressTypePublic;
-    memcpy(state.config.address, state.mac, sizeof(state.config.address));
 
     // Copy to caller state before popping stack
     memcpy(out_state, &state, sizeof(state));
@@ -94,6 +93,13 @@ void findmy_state_apply(FindMyState* state) {
     if(state->beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
+}
+
+void findmy_state_sync_config(FindMyState* state) {
+    state.config.min_adv_interval_ms = state.broadcast_interval * 1000; // Converting s to ms
+    state.config.max_adv_interval_ms = (state.broadcast_interval * 1000) + 150;
+    state.config.adv_power_level = GapAdvPowerLevel_0dBm + state.transmit_power;
+    memcpy(state.config.address, state.mac, sizeof(state.config.address));
 }
 
 void findmy_state_save(FindMyState* state) {

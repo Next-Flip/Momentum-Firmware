@@ -90,14 +90,13 @@ void findmy_change_broadcast_interval(FindMy* app, uint8_t value) {
         return;
     }
     app->state.broadcast_interval = value;
+    findmy_state_sync_config(&app->state);
     findmy_state_save(&app->state);
     findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
     if(furi_hal_bt_extra_beacon_is_active()) {
         // Always check if beacon is active before changing config
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
-    app->state.config.min_adv_interval_ms = app->state.broadcast_interval * 1000;
-    app->state.config.max_adv_interval_ms = app->state.config.min_adv_interval_ms + 150;
     furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
     if(app->state.beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
@@ -109,11 +108,11 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value) {
         return;
     }
     app->state.transmit_power = value;
+    findmy_state_sync_config(&app->state);
     findmy_state_save(&app->state);
     if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
-    app->state.config.adv_power_level = GapAdvPowerLevel_0dBm + app->state.transmit_power;
     furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
     if(app->state.beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
