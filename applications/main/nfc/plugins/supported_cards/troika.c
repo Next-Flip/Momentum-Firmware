@@ -1,11 +1,13 @@
 #include "nfc_supported_card_plugin.h"
-#include <flipper_application.h>
+#include <core/check.h>
 
+#include <flipper_application/flipper_application.h>
+
+#include <nfc/nfc_device.h>
+#include <bit_lib/bit_lib.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include "../../api/mosgortrans/mosgortrans_util.h"
-
-#include <bit_lib.h>
-#include <datetime.h>
+#include "furi_hal_rtc.h"
 
 #define TAG "Troika"
 
@@ -88,7 +90,7 @@ static bool troika_get_card_config(TroikaCardConfig* config, MfClassicType type)
         config->data_sector = 11;
         config->keys = troika_1k_keys;
     } else if(type == MfClassicType4k) {
-        config->data_sector = 11;
+        config->data_sector = 8; // Further testing needed
         config->keys = troika_4k_keys;
     } else {
         success = false;
