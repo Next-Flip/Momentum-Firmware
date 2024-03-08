@@ -56,32 +56,32 @@ static bool findmy_main_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypePress) {
         consumed = true;
-        FindMyMainEvent event;
+        FindMyMainEvent cb_event;
 
         switch(event->key) {
         case InputKeyBack:
-            event = FindMyMainEventQuit;
+            cb_event = FindMyMainEventQuit;
             break;
         case InputKeyOk:
-            event = FindMyMainEventToggle;
+            cb_event = FindMyMainEventToggle;
             break;
         case InputKeyLeft:
-            event = FindMyMainEventBackground;
+            cb_event = FindMyMainEventBackground;
             break;
         case InputKeyRight:
-            event = FindMyMainEventConfig;
+            cb_event = FindMyMainEventConfig;
             break;
         case InputKeyUp:
-            event = FindMyMainEventIntervalUp;
+            cb_event = FindMyMainEventIntervalUp;
             break;
         case InputKeyDown:
-            event = FindMyMainEventIntervalDown;
+            cb_event = FindMyMainEventIntervalDown;
             break;
         default:
             return consumed;
         }
 
-        findmy_main->callback(event, findmy_main->context);
+        findmy_main->callback(cb_event, findmy_main->context);
     }
 
     return consumed;
