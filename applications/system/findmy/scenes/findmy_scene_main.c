@@ -38,6 +38,7 @@ bool findmy_scene_main_on_event(void* context, SceneManagerEvent event) {
             findmy_change_broadcast_interval(app, app->broadcast_interval - 1);
             break;
         case FindMyMainEventQuit:
+            furi_hal_bt_extra_beacon_stop();
             break;
         default:
             consumed = false;
@@ -51,5 +52,4 @@ bool findmy_scene_main_on_event(void* context, SceneManagerEvent event) {
 void findmy_scene_main_on_exit(void* context) {
     FindMy* app = context;
     UNUSED(app);
-    furi_hal_bt_extra_beacon_stop();
 }
