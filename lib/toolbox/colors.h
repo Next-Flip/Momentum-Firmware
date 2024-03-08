@@ -28,10 +28,10 @@ void rgb2hsv(const RgbColor* rgb, HsvColor* hsv);
 typedef union {
     uint16_t value;
     struct {
-        uint8_t r : 5;
-        uint8_t g : 6;
-        uint8_t b : 5;
-    };
+        uint16_t r : 5;
+        uint16_t g : 6;
+        uint16_t b : 5;
+    } FURI_PACKED;
 } Rgb565Color;
 
 int rgb565cmp(const Rgb565Color* a, const Rgb565Color* b);
