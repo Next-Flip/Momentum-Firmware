@@ -34,6 +34,8 @@ typedef union {
     };
 } Rgb565Color;
 
+int rgb565cmp(const Rgb565Color* a, const Rgb565Color* b);
+
 #ifdef __cplusplus
 }
 #endif
