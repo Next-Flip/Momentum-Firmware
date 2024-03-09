@@ -14,6 +14,7 @@ void momentum_app_scene_misc_vgm_var_item_list_callback(void* context, uint32_t 
 const char* const colors_names[VgmColorModeCount] = {
     "Default",
     "Custom",
+    "Rainbow",
     "RGB Backlight",
 };
 static void momentum_app_scene_misc_vgm_colors_changed(VariableItem* item) {
