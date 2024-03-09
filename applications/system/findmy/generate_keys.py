@@ -23,11 +23,16 @@ def convert_key_to_hex(private_key, public_key):
     return private_key_hex, public_key_hex
 
 def generate_mac_and_payload(public_key):
-    public_key_bytes = public_key.public_numbers().x.to_bytes(28, byteorder='big')
-    mac = public_key_bytes[:6].hex()
-    payload = advertisement_template()
-    payload[7:29] = public_key_bytes[6:22]
-    return mac, payload.hex()
+    key = public_key.public_numbers().x.to_bytes(28, byteorder='big')
+
+    addr = bytearray(key[:6])
+    addr[0] |= 0b11000000
+
+    adv = advertisement_template()
+    adv[7:29] = key[6:28]
+    adv[29] = key[0] >> 6
+
+    return addr.hex(), adv.hex()
 
 def main():
     nkeys = int(input('Enter the number of keys to generate: '))
@@ -57,14 +62,14 @@ def main():
 
             if '/' not in s256_b64[:7]:
                 fname = f"{prefix}_{s256_b64[:7]}.keys" if prefix else f"{s256_b64[:7]}.keys"
-                    
+
                 print(f'{i + 1})')
                 print('Private key (Base64):', private_key_b64)
                 print('Public key (Base64):', public_key_b64)
                 print('Hashed adv key (Base64):', s256_b64)
                 print('---------------------------------------------------------------------------------')
                 print('Private key (Hex):', private_key_hex)
-                print('Public key (Hex):', public_key_hex)                    
+                print('Public key (Hex):', public_key_hex)
                 print('---------------------------------------------------------------------------------')
                 print('MAC:', mac)
                 print('Payload:', payload)
