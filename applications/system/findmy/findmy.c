@@ -145,7 +145,7 @@ FindMyType findmy_data_get_type(uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE]) {
     if(data[0] == 0x1E && // Length
        data[1] == 0xFF && // Manufacturer Specific Data
        data[2] == 0x4C && // Company ID (Apple, Inc.)
-       //data[3] == 0x00 && // The state of the tag can vary, if we can find all known states this could work. I think its safe to ignore for now
+       data[3] == 0x00 && // ...
        data[4] == 0x12 && // Type (FindMy)
        data[5] == 0x19 // Length
     ) {
