@@ -348,47 +348,68 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
             break;
         }
-        case MenuStyleTerminal: {
-            // Draw a border around the screen
+        case MenuStyleMNTM: {
+            // Reset canvas and set background
+            canvas_reset(canvas);
+            canvas_set_color(canvas, ColorBlack);
+            canvas_clear(canvas);
+            canvas_set_bitmap_mode(canvas, true);
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str(canvas, 5, 13, "Momentum");
+            canvas_draw_icon(canvas, 62, 4, &I_Release_arrow_18x15);
+            canvas_draw_line(canvas, 5, 15, 59, 15);
+            canvas_draw_line(canvas, 7, 17, 61, 17);
+            canvas_draw_line(canvas, 10, 19, 63, 19);
+            char title[20];
+            snprintf(title, sizeof(title), "%s", furi_hal_version_get_name_ptr());
+            canvas_draw_str(canvas, 5, 34, title);
+            DateTime curr_dt;
+            furi_hal_rtc_get_datetime(&curr_dt);
+            int hour = curr_dt.hour;
+            int min = curr_dt.minute;
+            if(hour > 12) {
+                hour -= 12;
+            }
+            if(hour == 0) {
+                hour = 12;
+            }
+            canvas_set_font(canvas, FontSecondary);
+            char clk[20];
+            snprintf(clk, sizeof(clk), "%02u:%02u", hour, min);
+            canvas_draw_str(canvas, 5, 46, clk);
+
+            // Draw the selected menu item
+            MenuItem* item = MenuItemArray_get(model->items, position);
+            FuriString* name = furi_string_alloc();
+            menu_short_name(item, name);
+            canvas_set_font(canvas, FontSecondary);
+            canvas_set_color(canvas, ColorBlack);
+            elements_bold_rounded_frame(canvas, 42, 23, 35, 33);
+            menu_centered_icon(canvas, item, 43, 24, 35, 32);
             canvas_draw_frame(canvas, 0, 0, 128, 64);
 
-            // current dir on the title bar
-            canvas_set_font(canvas, FontSecondary);
-            char title[20];
-            snprintf(title, sizeof(title), "%s@fz: ~/Home", furi_hal_version_get_name_ptr());
-            canvas_draw_str(canvas, 20, 10, title);
+            int startY = 15;
+            int itemHeight = 10;
+            int itemMaxVisible = 5;
+            size_t startItem = model->vertical_offset;
+            size_t endItem = startItem + itemMaxVisible;
+            endItem = (endItem > MenuItemArray_size(model->items)) ?
+                          MenuItemArray_size(model->items) :
+                          endItem;
+            size_t scroll_counter = menu_scroll_counter(model, item);
 
-            canvas_draw_str(canvas, 118, 9, "x"); // "X" button on the top-right corner
-            canvas_draw_frame(canvas, 116, 2, 8, 9);
-            canvas_draw_frame(canvas, 0, 0, 128, 13);
-
-            // Display the user's name line at the bottom
-            canvas_set_font(canvas, FontBatteryPercent);
-            char prefix[15];
-            snprintf(prefix, sizeof(prefix), "%s@fz:~$", furi_hal_version_get_name_ptr());
-            canvas_draw_str(canvas, 2, 56, prefix);
-
-            size_t name_start_x = 2 + (strlen(prefix) - 1) * 6;
-
-            for(size_t i = 0; i < 4 && (position + i) < items_count; i++) {
-                item = MenuItemArray_get(model->items, position + i);
+            for(size_t i = startItem; i < endItem; i++) {
+                MenuItem* item = MenuItemArray_get(model->items, i);
+                FuriString* name = furi_string_alloc();
                 menu_short_name(item, name);
-
-                size_t scroll_counter = menu_scroll_counter(model, item);
-                if(i == 0) {
-                    // Display selected item to the right of the $ symbol
-                    // May want to reduce spacing
-                    elements_scrollable_text_line(
-                        canvas, name_start_x, 56, 60, name, scroll_counter, false);
-                } else {
-                    // Display the previous items above the user's name line
-                    canvas_draw_str(canvas, 2, 56 - i * 12, item->label);
-                }
+                int yPos = startY + ((i - startItem) * itemHeight);
+                elements_scrollable_text_line(canvas, 83, yPos, 62, name, scroll_counter, false);
+                furi_string_free(name);
             }
-
+            furi_string_free(name);
+            canvas_commit(canvas);
             break;
         }
-
         default:
             break;
         }
@@ -614,16 +635,13 @@ static void menu_process_up(Menu* menu) {
 
             switch(momentum_settings.menu_style) {
             case MenuStyleList:
-            case MenuStyleTerminal:
+            case MenuStyleMNTM:
                 if(position > 0) {
                     position--;
-                    if(vertical_offset && vertical_offset == position) {
-                        vertical_offset--;
-                    }
                 } else {
                     position = count - 1;
-                    vertical_offset = count - 8;
                 }
+                vertical_offset = position;
                 break;
             case MenuStyleWii:
                 if(position % 2 || (position == count - 1 && count % 2)) {
@@ -665,16 +683,13 @@ static void menu_process_down(Menu* menu) {
 
             switch(momentum_settings.menu_style) {
             case MenuStyleList:
-            case MenuStyleTerminal:
+            case MenuStyleMNTM:
                 if(position < count - 1) {
                     position++;
-                    if(vertical_offset < count - 8 && vertical_offset == position - 7) {
-                        vertical_offset++;
-                    }
                 } else {
                     position = 0;
-                    vertical_offset = 0;
                 }
+                vertical_offset = position;
                 break;
             case MenuStyleWii:
                 if(position % 2 || (position == count - 1 && count % 2)) {
