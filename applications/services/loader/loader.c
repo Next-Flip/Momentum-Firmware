@@ -208,7 +208,7 @@ static void loader_make_menu_file(Storage* storage) {
     Stream* new = file_stream_alloc(storage);
     if(!storage_file_exists(storage, MAINMENU_APPS_PATH)) {
         if(file_stream_open(new, MAINMENU_APPS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-            stream_write_format(new, "MenuAppList Version %u\n", 0);
+            stream_write_format(new, "MenuAppList Version %u\n", 1);
             for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
                 stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
             }
@@ -258,7 +258,7 @@ static Loader* loader_alloc() {
         uint32_t version;
         if(!stream_read_line(stream, line) ||
            sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
-           version > 0) {
+           version > 1) {
             file_stream_close(stream);
             storage_common_remove(storage, MAINMENU_APPS_PATH);
             loader_make_menu_file(storage);
@@ -266,13 +266,20 @@ static Loader* loader_alloc() {
                 break;
             if(!stream_read_line(stream, line) ||
                sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
-               version > 0)
+               version > 1)
                 break;
         }
 
         while(stream_read_line(stream, line)) {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
+            if(version == 0) {
+                if(!furi_string_cmp(line, "RFID")) {
+                    furi_string_set(line, "125 kHz RFID");
+                } else if(!furi_string_cmp(line, "SubGHz")) {
+                    furi_string_set(line, "Sub-GHz");
+                }
+            }
             const char* label = NULL;
             const Icon* icon = NULL;
             const char* exe = NULL;
@@ -574,15 +581,10 @@ static LoaderStatus loader_do_start_by_name(
             break;
         }
 
-        // Translate app names (mainly for RPC, thanks OFW for not using a smart system like appid's :/)
-        if(!strncmp(name, "Bad USB", strlen("Bad USB")))
+        // Translate app names (mainly for RPC)
+        if(!strncmp(name, "Bad USB", strlen("Bad USB"))) {
             name = "Bad KB";
-        else if(!strncmp(name, "Applications", strlen("Applications")))
-            name = "Apps";
-        else if(!strncmp(name, "125 kHz RFID", strlen("125 kHz RFID")))
-            name = "RFID";
-        else if(!strncmp(name, "Sub-GHz", strlen("Sub-GHz")))
-            name = "SubGHz";
+        }
 
         // check internal apps
         {
