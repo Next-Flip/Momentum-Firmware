@@ -247,6 +247,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         case MenuStyleVertical: {
             canvas_set_orientation(canvas, CanvasOrientationVertical);
             shift_position = model->vertical_offset;
+            if(shift_position >= position || shift_position + 7 <= position) {
+                // In case vertical_offset is out of sync due to changing menu styles
+                shift_position = CLAMP(
+                    MAX((int32_t)position - 4, 0),
+                    MAX((int32_t)MenuItemArray_size(model->items) - 8, 0),
+                    0);
+                model->vertical_offset = shift_position;
+            }
             canvas_set_font(canvas, FontSecondary);
             size_t item_i;
             size_t y_off;
@@ -349,11 +357,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             break;
         }
         case MenuStyleMNTM: {
-            // Reset canvas and set background
-            canvas_reset(canvas);
-            canvas_set_color(canvas, ColorBlack);
-            canvas_clear(canvas);
-            canvas_set_bitmap_mode(canvas, true);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 5, 13, "Momentum");
             canvas_draw_icon(canvas, 62, 4, &I_Release_arrow_18x15);
@@ -365,8 +368,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             canvas_draw_str(canvas, 5, 34, title);
             DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
-            int hour = curr_dt.hour;
-            int min = curr_dt.minute;
+            uint8_t hour = curr_dt.hour;
+            uint8_t min = curr_dt.minute;
             if(hour > 12) {
                 hour -= 12;
             }
@@ -380,34 +383,26 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
             // Draw the selected menu item
             MenuItem* item = MenuItemArray_get(model->items, position);
-            FuriString* name = furi_string_alloc();
             menu_short_name(item, name);
-            canvas_set_font(canvas, FontSecondary);
-            canvas_set_color(canvas, ColorBlack);
             elements_bold_rounded_frame(canvas, 42, 23, 35, 33);
             menu_centered_icon(canvas, item, 43, 24, 35, 32);
             canvas_draw_frame(canvas, 0, 0, 128, 64);
 
-            int startY = 15;
-            int itemHeight = 10;
-            int itemMaxVisible = 5;
-            size_t startItem = model->vertical_offset;
-            size_t endItem = startItem + itemMaxVisible;
+            uint8_t startY = 15;
+            uint8_t itemHeight = 10;
+            uint8_t itemMaxVisible = 5;
+            size_t endItem = position + itemMaxVisible;
             endItem = (endItem > MenuItemArray_size(model->items)) ?
                           MenuItemArray_size(model->items) :
                           endItem;
-            size_t scroll_counter = menu_scroll_counter(model, item);
 
-            for(size_t i = startItem; i < endItem; i++) {
+            for(size_t i = position; i < endItem; i++) {
                 MenuItem* item = MenuItemArray_get(model->items, i);
-                FuriString* name = furi_string_alloc();
                 menu_short_name(item, name);
-                int yPos = startY + ((i - startItem) * itemHeight);
-                elements_scrollable_text_line(canvas, 83, yPos, 62, name, scroll_counter, false);
-                furi_string_free(name);
+                uint8_t yPos = startY + ((i - position) * itemHeight);
+                size_t scroll_counter = menu_scroll_counter(model, i == position);
+                elements_scrollable_text_line(canvas, 83, yPos, 43, name, scroll_counter, false);
             }
-            furi_string_free(name);
-            canvas_commit(canvas);
             break;
         }
         default:
@@ -433,7 +428,7 @@ static bool menu_input_callback(InputEvent* event, void* context) {
         }
     }
 
-    if(event->type == InputTypeShort) {
+    if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
         switch(event->key) {
         case InputKeyUp:
             menu_process_up(menu);
@@ -448,25 +443,9 @@ static bool menu_input_callback(InputEvent* event, void* context) {
             menu_process_right(menu);
             break;
         case InputKeyOk:
-            menu_process_ok(menu);
-            break;
-        default:
-            consumed = false;
-            break;
-        }
-    } else if(event->type == InputTypeRepeat) {
-        switch(event->key) {
-        case InputKeyUp:
-            menu_process_up(menu);
-            break;
-        case InputKeyDown:
-            menu_process_down(menu);
-            break;
-        case InputKeyLeft:
-            menu_process_left(menu);
-            break;
-        case InputKeyRight:
-            menu_process_right(menu);
+            if(event->type != InputTypeRepeat) {
+                menu_process_ok(menu);
+            }
             break;
         default:
             consumed = false;
@@ -631,7 +610,6 @@ static void menu_process_up(Menu* menu) {
         {
             position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            size_t vertical_offset = model->vertical_offset;
 
             switch(momentum_settings.menu_style) {
             case MenuStyleList:
@@ -641,7 +619,6 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     position = count - 1;
                 }
-                vertical_offset = position;
                 break;
             case MenuStyleWii:
                 if(position % 2 || (position == count - 1 && count % 2)) {
@@ -649,7 +626,6 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     position++;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleC64:
             case MenuStyleCompact:
@@ -658,14 +634,11 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     position = count - 1;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
 
             default:
                 break;
             }
-
-            model->vertical_offset = vertical_offset;
         },
         false);
     menu_set_selected_item(menu, position);
@@ -679,7 +652,6 @@ static void menu_process_down(Menu* menu) {
         {
             position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            size_t vertical_offset = model->vertical_offset;
 
             switch(momentum_settings.menu_style) {
             case MenuStyleList:
@@ -689,7 +661,6 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     position = 0;
                 }
-                vertical_offset = position;
                 break;
             case MenuStyleWii:
                 if(position % 2 || (position == count - 1 && count % 2)) {
@@ -697,7 +668,6 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     position++;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleC64:
             case MenuStyleCompact:
@@ -706,14 +676,11 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     position = 0;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
 
             default:
                 break;
             }
-
-            model->vertical_offset = vertical_offset;
         },
         false);
     menu_set_selected_item(menu, position);
@@ -727,7 +694,6 @@ static void menu_process_left(Menu* menu) {
         {
             position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            size_t vertical_offset = model->vertical_offset;
 
             switch(momentum_settings.menu_style) {
             case MenuStyleWii:
@@ -740,11 +706,11 @@ static void menu_process_left(Menu* menu) {
                 } else {
                     position -= 2;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
             case MenuStylePs4:
             case MenuStyleVertical:
+                size_t vertical_offset = model->vertical_offset;
                 if(position > 0) {
                     position--;
                     if(vertical_offset && vertical_offset == position) {
@@ -754,6 +720,7 @@ static void menu_process_left(Menu* menu) {
                     position = count - 1;
                     vertical_offset = count - 8;
                 }
+                model->vertical_offset = vertical_offset;
                 break;
             case MenuStyleC64:
                 if((position % 10) < 5) {
@@ -761,7 +728,6 @@ static void menu_process_left(Menu* menu) {
                 } else {
                     position = position - 5;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleCompact:
                 if((position % 16) < 8) {
@@ -769,14 +735,11 @@ static void menu_process_left(Menu* menu) {
                 } else {
                     position = position - 8;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
 
             default:
                 break;
             }
-
-            model->vertical_offset = vertical_offset;
         },
         false);
     menu_set_selected_item(menu, position);
@@ -790,7 +753,6 @@ static void menu_process_right(Menu* menu) {
         {
             position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            size_t vertical_offset = model->vertical_offset;
 
             switch(momentum_settings.menu_style) {
             case MenuStyleWii:
@@ -808,11 +770,11 @@ static void menu_process_right(Menu* menu) {
                         position = position % 2;
                     }
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
             case MenuStylePs4:
             case MenuStyleVertical:
+                size_t vertical_offset = model->vertical_offset;
                 if(position < count - 1) {
                     position++;
                     if(vertical_offset < count - 8 && vertical_offset == position - 7) {
@@ -822,6 +784,7 @@ static void menu_process_right(Menu* menu) {
                     position = 0;
                     vertical_offset = 0;
                 }
+                model->vertical_offset = vertical_offset;
                 break;
             case MenuStyleC64:
                 if((position % 10) < 5) {
@@ -829,7 +792,6 @@ static void menu_process_right(Menu* menu) {
                 } else {
                     position = position - 5;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleCompact:
                 if((position % 16) < 8) {
@@ -837,14 +799,11 @@ static void menu_process_right(Menu* menu) {
                 } else {
                     position = position - 8;
                 }
-                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
 
             default:
                 break;
             }
-
-            model->vertical_offset = vertical_offset;
         },
         false);
     menu_set_selected_item(menu, position);
