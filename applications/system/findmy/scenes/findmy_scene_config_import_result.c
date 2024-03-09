@@ -23,7 +23,7 @@ void findmy_scene_config_import_result_on_enter(void* context) {
         popup_disable_timeout(popup);
     } else {
         popup_set_icon(popup, 36, 5, &I_DolphinDone_80x58);
-        popup_set_header(popup, "Imported!", 13, 22, AlignLeft, AlignBottom);
+        popup_set_header(popup, "Imported!", 7, 14, AlignLeft, AlignBottom);
         popup_enable_timeout(popup);
     }
     popup_set_timeout(popup, 1500);
