@@ -1,8 +1,75 @@
 #include "../findmy_i.h"
 
 enum VarItemListIndex {
+    VarItemListIndexNrfConnect,
     VarItemListIndexOpenHaystack,
 };
+
+static const char* parse_nrf_connect(FindMy* app, const char* path) {
+    const char* error = NULL;
+
+    Stream* stream = file_stream_alloc(app->storage);
+    FuriString* line = furi_string_alloc();
+    do {
+        // XX-XX-XX-XX-XX-XX_YYYY-MM-DD HH_MM_SS.txt
+        error = "Filename must\nhave MAC\naddress";
+        uint8_t mac[EXTRA_BEACON_MAC_ADDR_SIZE];
+        path_extract_filename_no_ext(path, line);
+        if(furi_string_size(line) < sizeof(mac) * 3 - 1) break;
+        error = NULL;
+        for(size_t i = 0; i < sizeof(mac); i++) {
+            char a = furi_string_get_char(line, i * 3);
+            char b = furi_string_get_char(line, i * 3 + 1);
+            if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') ||
+               (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &mac[i])) {
+                error = "Filename must\nhave MAC\naddress";
+                break;
+            }
+        }
+        if(error) break;
+        furi_hal_bt_reverse_mac_addr(mac);
+
+        error = "Can't open file";
+        if(!file_stream_open(stream, path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+
+        // YYYY-MM-DD HH:MM:SS.ms, XX dBm, 0xXXXXX
+        error = "Wrong file format";
+        if(!stream_read_line(stream, line)) break;
+        const char* marker = " dBm, 0x";
+        size_t pos = furi_string_search(line, marker);
+        if(pos == FURI_STRING_FAILURE) break;
+        furi_string_right(line, pos + strlen(marker));
+        furi_string_trim(line);
+
+        error = "Wrong payload size";
+        uint8_t data[EXTRA_BEACON_MAX_DATA_SIZE];
+        if(furi_string_size(line) != sizeof(data) * 2) break;
+        error = NULL;
+        for(size_t i = 0; i < sizeof(data); i++) {
+            char a = furi_string_get_char(line, i * 2);
+            char b = furi_string_get_char(line, i * 2 + 1);
+            if((a < 'A' && a > 'F') || (a < '0' && a > '9') || (b < 'A' && b > 'F') ||
+               (b < '0' && b > '9') || !hex_char_to_uint8(a, b, &data[i])) {
+                error = "Invalid payload";
+                break;
+            }
+        }
+        if(error) break;
+
+        memcpy(app->state.mac, mac, sizeof(app->state.mac));
+        memcpy(app->state.data, data, sizeof(app->state.data));
+        findmy_state_sync_config(&app->state);
+        findmy_state_save(&app->state);
+
+        error = NULL;
+
+    } while(false);
+    furi_string_free(line);
+    file_stream_close(stream);
+    stream_free(stream);
+
+    return error;
+}
 
 static const char* parse_open_haystack(FindMy* app, const char* path) {
     const char* error = NULL;
@@ -78,6 +145,8 @@ void findmy_scene_config_import_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
+    item = variable_item_list_add(var_item_list, "nRF Connect .txt", 0, NULL, NULL);
+
     item = variable_item_list_add(var_item_list, "OpenHaystack .keys", 0, NULL, NULL);
 
     // This scene acts more like a submenu than a var item list tbh
@@ -101,6 +170,9 @@ bool findmy_scene_config_import_on_event(void* context, SceneManagerEvent event)
 
         const char* extension = NULL;
         switch(event.event) {
+        case VarItemListIndexNrfConnect:
+            extension = ".txt";
+            break;
         case VarItemListIndexOpenHaystack:
             extension = ".keys";
             break;
@@ -123,6 +195,9 @@ bool findmy_scene_config_import_on_event(void* context, SceneManagerEvent event)
             // Used in result to show success or error message
             const char* error = NULL;
             switch(event.event) {
+            case VarItemListIndexNrfConnect:
+                error = parse_nrf_connect(app, furi_string_get_cstr(path));
+                break;
             case VarItemListIndexOpenHaystack:
                 error = parse_open_haystack(app, furi_string_get_cstr(path));
                 break;

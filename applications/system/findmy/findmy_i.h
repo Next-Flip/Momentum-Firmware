@@ -8,6 +8,7 @@
 #include "findmy_icons.h"
 #include <toolbox/stream/file_stream.h>
 #include <toolbox/hex.h>
+#include <toolbox/path.h>
 #include <gui/gui.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
