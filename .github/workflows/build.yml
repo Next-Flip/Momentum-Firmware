@@ -82,7 +82,7 @@ jobs:
           mkdir artifacts
           cp dist/${TARGET}-*/flipper-z-${TARGET}-{update,sdk}-* artifacts/
           cd dist/${TARGET}-*/${TARGET}-update-*/
-          artifact="$basename "$(realpath .)")"
+          artifact="$(basename "$(realpath .)")"
           7z a ../../../artifacts/flipper-z-${artifact}.zip .
 
       - name: "Upload artifacts to update server"

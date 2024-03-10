@@ -93,7 +93,7 @@ Note that this repo is always updated with the great work from our friends at [U
 - More UI customization, redesigns and optimizations
 - Bad-Keyboard App
 - BLE Spam App
-- FindMy App
+- FindMy Flipper App
 - NFC Maker App
 - Wardriver App
 - File Search across SD Card
