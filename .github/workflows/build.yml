@@ -97,7 +97,7 @@ jobs:
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: Send devbuild webhook
-        if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
+        if: "github.event_name == 'push' && github.ref_name == 'dev'"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
           BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
