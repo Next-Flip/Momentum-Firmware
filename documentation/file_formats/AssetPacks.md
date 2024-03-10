@@ -6,7 +6,7 @@ Asset Packs are an exclusive feature of Momentum Firmware that allows you to loa
 
 ## How to install Asset Packs?
 
-Installing Asset Packs is quite easy and straightforward. First, make sure you're on an updated version of XFW before you begin, Asset Packs were added in v40! Then, find some packs to install (we have a channel in our discord where you can find some) or make your own (see below). Once you have some packs to install:
+Installing Asset Packs is quite easy and straightforward. First, make sure you're on an updated version of Momentum before you begin, Asset Packs were added in v40! Then, find some packs to install (we have a channel in our discord where you can find some) or make your own (see below). Once you have some packs to install:
 
 - Open qFlipper and navigate to `SD Card` and into `asset_packs`; if you do not see this folder, try reinstalling the firmware, or create it yourself.
 
@@ -56,7 +56,7 @@ SD/
 Again, this is all fairly standard Flipper animation stuff, there are plenty of tutorials on YouTube. The key differences with the Asset Pack animation system are:
 
 - They go in `SD/asset_packs/PackName/Anims` instead of `SD/dolphin`.
-- XFW has up to level 30, so make sure to update your manifest.txt accordingly!
+- Momentum has up to level 30, so make sure to update your manifest.txt accordingly!
 
 <br>
 
