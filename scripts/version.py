@@ -36,7 +36,7 @@ class GitVersion:
         )
 
         version = (
-            self.suffix.split("_")[0]
+            self.suffix
             or os.environ.get("DIST_SUFFIX", None)
             or "unknown"
         )
