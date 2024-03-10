@@ -1,4 +1,4 @@
-name: 'Generate documentation with Doxygen'
+name: "Docs"
 
 on:
   push:
@@ -10,21 +10,21 @@ env:
   DEFAULT_TARGET: f7
 
 jobs:
-  doxygen:
+  docs:
     if: ${{ !github.event.pull_request.head.repo.fork }}
     runs-on: ubuntu-latest
     steps:
-      - name: 'Wipe workspace'
+      - name: "Wipe workspace"
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Get commit details'
+      - name: "Get commit details"
         id: names
         run: |
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
@@ -36,13 +36,13 @@ jobs:
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
 
-      - name: 'Generate documentation'
+      - name: "Generate documentation"
         uses: mattnotmitt/doxygen-action@v1.9.8
         with:
-          working-directory: 'documentation/'
-          doxyfile-path: './doxygen/Doxyfile-awesome.cfg'
+          working-directory: "documentation/"
+          doxyfile-path: "./doxygen/Doxyfile-awesome.cfg"
 
-      - name: 'Upload documentation'
+      - name: "Upload documentation"
         uses: jakejarvis/s3-sync-action@v0.5.1
         env:
           AWS_S3_BUCKET: "${{ secrets.FW_DOCS_AWS_BUCKET }}"
@@ -53,4 +53,3 @@ jobs:
           DEST_DIR: "${{steps.names.outputs.branch_name}}"
         with:
           args: "--delete"
-

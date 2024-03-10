@@ -17,7 +17,7 @@ env:
   FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
-  main:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

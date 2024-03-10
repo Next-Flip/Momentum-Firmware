@@ -2,11 +2,6 @@ name: "Webhook"
 
 on:
   push:
-  # pull_request:
-  #   types:
-  #     - "opened"
-  #     - "closed"
-  #     - "reopened"
   release:
     types:
       - "published"
