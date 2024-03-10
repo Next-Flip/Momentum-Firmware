@@ -42,7 +42,7 @@ if __name__ == "__main__":
                     desc = desc.rsplit("\n", 1)[0] + f"\n+ {count - i} more commits"
                     break
             url = event["compare"]
-            color = 16723712 if event["forced"] else 3669797
+            color = 16723712 if event["forced"] else 11761899
 
         case "release":
             webhook = "RELEASE_WEBHOOK"
