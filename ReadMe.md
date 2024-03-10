@@ -93,12 +93,14 @@ Note that this repo is always updated with the great work from our friends at [U
 - More UI customization, redesigns and optimizations
 - Bad-Keyboard App
 - BLE Spam App
+- FindMy App
 - NFC Maker App
 - Wardriver App
 - File Search across SD Card
 - Additional NFC parsers and protocols
 - Subdriving (saving GPS coordinates for Sub-GHz)
 - Easy spoofing (Name, MAC address, Serial number)
+- Video Game Module color configuration right from Flipper
 - Enhanced RGB Backlight modes (Full customization & Rainbow mode)
 - File management on device (Cut, Copy, Paste, Show, New Dir, etc.)
 - Remember Infrared GPIO settings and add IR Blaster support in apps
