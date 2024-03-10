@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import datetime as dt
 import requests
 import json
 import sys
@@ -41,97 +42,16 @@ if __name__ == "__main__":
                     desc = desc.rsplit("\n", 1)[0] + f"\n+ {count - i} more commits"
                     break
             url = event["compare"]
-            color = 16723712 if event["forced"] else 3669797
-
-        # case "pull_request":
-        #     pr = event["pull_request"]
-        #     url = pr["html_url"]
-        #     branch = pr["base"]["ref"] + (
-        #         ""
-        #         if pr["base"]["repo"]["full_name"] != pr["head"]["repo"]["full_name"]
-        #         else f" <- {pr['head']['ref']}"
-        #     )
-        #     name = pr["title"][:50] + ("..." if len(pr["title"]) > 50 else "")
-        #     title = f"Pull Request {event['action'].title()} ({branch}): {name}"
-        #     match event["action"]:
-        #         case "opened":
-        #             desc = (pr["body"][:2045] + "...") if len(pr["body"]) > 2048 else pr["body"]
-        #             color = 3669797
-
-        #             fields.append(
-        #                 {
-        #                     "name": "Changed Files:",
-        #                     "value": str(pr["changed_files"]),
-        #                     "inline": True,
-        #                 }
-        #             )
-        #             fields.append(
-        #                 {
-        #                     "name": "Added:",
-        #                     "value": "+" + str(pr["additions"]),
-        #                     "inline": True,
-        #                 }
-        #             )
-        #             fields.append(
-        #                 {
-        #                     "name": "Removed:",
-        #                     "value": "-" + str(pr["deletions"]),
-        #                     "inline": True,
-        #                 }
-        #             )
-
-        #         case "closed":
-        #             color = 16723712
-        #         case "reopened":
-        #             color = 16751872
-        #         case _:
-        #             sys.exit(1)
+            color = 16723712 if event["forced"] else 11761899
 
         case "release":
-            match event["action"]:
-                case "published":
-                    webhook = "RELEASE_WEBHOOK"
-                    color = 13845998
-                    title = f"New Release published: {event['name']}"
-                    desc += f"Changelog:"
-
-                    changelog = "".join(
-                        event["body"]
-                        .split("Changelog")[1]
-                        .split("<!---")[0]
-                        .split("###")
-                    )
-                    downloads = [
-                        option
-                        for option in [
-                            Type.replace("\n\n>", "")
-                            for Type in event["body"]
-                            .split("Download\n>")[1]
-                            .split("### ")[:3]
-                        ]
-                        if option
-                    ]
-
-                    for category in changelog:
-                        group = category.split(":")[0].replace(" ", "")
-                        data = category.split(":")[1:].join(":")
-                        fields.append(
-                            {
-                                "name": {group},
-                                "value": {
-                                    (data[:2045] + "...") if len(data) > 2048 else data
-                                },
-                            }
-                        )
-                        fields.append(
-                            {
-                                "name": "Downloads:",
-                                "value": "\n".join(downloads),
-                                "inline": True,
-                            }
-                        )
-                case _:
-                    sys.exit(1)
+            webhook = "RELEASE_WEBHOOK"
+            color = 9471191
+            version_tag = event['release']['tag_name']
+            title = f"New Release: `{version_tag}`"
+            desc += f"> 💻 [**Web Installer**](https://momentum-fw.dev/update)\n\n"
+            desc += f"> 🐬 [**Changelog & Download**](https://github.com/Next-Flip/Momentum-Firmware/releases/tag/{version_tag})\n\n"
+            desc += f"> 🛞 [**Project Page**](https://github.com/Next-Flip/Momentum-Firmware)"
 
         case "workflow_run":
             run = event["workflow_run"]
@@ -192,6 +112,7 @@ if __name__ == "__main__":
                         "url": event["sender"]["html_url"],
                         "icon_url": event["sender"]["avatar_url"],
                     },
+                    "timestamp": dt.datetime.utcnow().isoformat()
                 }
             ],
             "attachments": [],

@@ -34,7 +34,7 @@ typedef enum {
     MenuStyleVertical,
     MenuStyleC64,
     MenuStyleCompact,
-    MenuStyleTerminal,
+    MenuStyleMNTM,
     MenuStyleCount,
 } MenuStyle;
 
@@ -47,6 +47,7 @@ typedef enum {
 typedef enum {
     VgmColorModeDefault,
     VgmColorModeCustom,
+    VgmColorModeRainbow,
     VgmColorModeRgbBacklight,
     VgmColorModeCount,
 } VgmColorMode;

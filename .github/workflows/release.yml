@@ -1,83 +1,49 @@
-name: 'Release'
+name: "Release"
 
 on:
-  pull_request_review:
-    types: [submitted]
-
-env:
-  TARGETS: f7
-  DEFAULT_TARGET: f7
+  release:
+    types:
+      - released
 
 jobs:
   release:
-    if: |
-      github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name &&
-      endsWith(github.event.pull_request.title, ' Release') &&
-      github.event.review.author_association == 'MEMBER' &&
-      startsWith(github.event.pull_request.title, 'V') &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.ref == 'dev' &&
-      github.event.pull_request.state == 'open' &&
-      github.event.pull_request.draft == false &&
-      github.event.review.state == 'APPROVED'
-    runs-on: ubuntu-latest
     permissions:
       contents: write
+    runs-on: ubuntu-latest
     steps:
-
-      - name: 'Checkout code'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: "Read version tag"
-        run: bash .github/workflow_data/version.sh
-
-      - name: 'Build the firmware'
-        run: |
-          set -e
-          for TARGET in ${TARGETS}; do
-            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET_HW DIST_SUFFIX=$VERSION_TAG updater_package
-          done
-
-      - name: "Check for uncommitted changes"
-        run: |
-          git diff --exit-code
-
-      - name: "Make tgz, zip and sdk"
-        run: bash .github/workflow_data/package.sh
+      - name: "Checkout code"
+        uses: actions/checkout@v4
 
       - name: "Update release notes"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         run: python .github/workflow_data/release.py
 
-      - name: "Upload to webupdater"
-        env:
-          NC_HOST: "https://cloud.cynthialabs.net/"
-          NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
-          NC_USER: "${{ secrets.NC_USER }}"
-          NC_PASS: "${{ secrets.NC_PASS }}"
+      - name: "Download release assets from tag build"
         run: |
-          python -m pip install pyncclient
-          python .github/workflow_data/webupdater.py
+          set -e
+          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.tgz
+          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.zip
+          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-sdk-${{ github.event.release.tag_name }}.zip
 
-      - name: "Merge pull request"
-        uses: "pascalgn/automerge-action@v0.15.6"
+      - name: "Update release with assets and notes"
+        uses: "softprops/action-gh-release@v1"
         env:
-          MERGE_LABELS: ""
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: "Make release"
-        uses: softprops/action-gh-release@v1
         with:
-          body_path: ".github/workflow_data/release.md"
-          draft: false
-          prerelease: false
+          body_path: .github/workflow_data/release.md
           files: |
-            ${{ env.ARTIFACT_TGZ }}
-            ${{ env.ARTIFACT_ZIP }}
-            ${{ env.ARTIFACT_SDK }}
-          name: "${{ env.VERSION_TAG }}"
-          tag_name: "${{ env.VERSION_TAG }}"
-          target_commitish: ${{ github.event.pull_request.base.ref }}
+            flipper-z-f7-update-${{ github.event.release.tag_name }}.tgz
+            flipper-z-f7-update-${{ github.event.release.tag_name }}.zip
+            flipper-z-f7-sdk-${{ github.event.release.tag_name }}.zip
+
+      - name: "Trigger reindex"
+        run: |
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              "${{ secrets.INDEXER_URL }}"/firmware/reindex;
+
+      - name: "Send release notification"
+        env:
+          RELEASE_WEBHOOK: ${{ secrets.RELEASE_WEBHOOK }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: python .github/workflow_data/webhook.py

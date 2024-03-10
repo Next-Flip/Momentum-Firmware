@@ -1,12 +1,11 @@
-name: 'Lint'
+name: "Lint"
 
 on:
   push:
     branches:
       - dev
-      - main
     tags:
-      - '*'
+      - "*"
   pull_request:
 
 env:
@@ -16,12 +15,11 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Check code formatting'
+      - name: "Check code formatting"
         run: ./fbt lint lint_py

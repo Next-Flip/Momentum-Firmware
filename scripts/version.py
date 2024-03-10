@@ -35,11 +35,7 @@ class GitVersion:
             or "unknown"
         )
 
-        version = (
-            self.suffix.split("_")[0]
-            or os.environ.get("DIST_SUFFIX", None)
-            or "unknown"
-        )
+        version = self.suffix or os.environ.get("DIST_SUFFIX", None) or "unknown"
 
         if "SOURCE_DATE_EPOCH" in os.environ:
             commit_date = datetime.utcfromtimestamp(

@@ -1,30 +1,16 @@
 #!/usr/bin/env python
-import nextcloud_client
 import datetime as dt
 import requests
 import json
 import os
 
-dev_share_id = ""
-dev_share = os.environ["NC_HOST"] + f"s/{dev_share_id}/download?path=/&files={{files}}"
+artifact_tgz = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG']}.tgz"
+artifact_sdk = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG'].replace('update', 'sdk')}.zip"
+
 
 if __name__ == "__main__":
     with open(os.environ["GITHUB_EVENT_PATH"], "r") as f:
         event = json.load(f)
-
-    client = nextcloud_client.Client(os.environ["NC_HOST"])
-    client.login(os.environ["NC_USER"], os.environ["NC_PASS"])
-
-    for file in (
-        os.environ["ARTIFACT_TGZ"],
-        os.environ["ARTIFACT_SDK"],
-    ):
-        path = f"MNTM-Dev/{file}"
-        # try:
-        #     client.delete(path)
-        # except Exception:
-        #     pass
-        client.put_file(path, file)
 
     requests.post(
         os.environ["BUILD_WEBHOOK"],
@@ -33,10 +19,10 @@ if __name__ == "__main__":
             "content": None,
             "embeds": [
                 {
-                    "title": "New Devbuild:",
+                    "title": "New Devbuild!",
                     "description": "",
                     "url": "",
-                    "color": 16734443,
+                    "color": 16751147,
                     "fields": [
                         {
                             "name": "Changes since last commit:",
@@ -44,21 +30,13 @@ if __name__ == "__main__":
                         },
                         {
                             "name": "Changes since last release:",
-                            "value": f"[Compare release to {event['after'][:7]}]({event['compare'].rsplit('/', 1)[0] + '/main...' + event['after']})"
+                            "value": f"[Compare release to {event['after'][:7]}]({event['compare'].rsplit('/', 1)[0] + '/release...' + event['after']})"
                         },
                         {
-                            "name": "Firmware download:",
-                            "value": f"- [Download SDK for development]({dev_share.format(files=os.environ['ARTIFACT_SDK'])})\n- [Download Firmware TGZ]({dev_share.format(files=os.environ['ARTIFACT_TGZ'])})"
+                            "name": "Download artifacts:",
+                            "value": f"- [Download Firmware TGZ]({artifact_tgz})\n- [SDK (for development)]({artifact_sdk})"
                         }
                     ],
-                    "author": {
-                        "name": "Build Succeeded!",
-                        # "icon_url": ""
-                    },
-                    # "footer": {
-                    #     "text": "Build go brrrr",
-                    #     "icon_url": ""
-                    # },
                     "timestamp": dt.datetime.utcnow().isoformat()
                 }
             ],

@@ -19,9 +19,9 @@ const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
     case ArchiveFileTypeNFC:
         return "NFC";
     case ArchiveFileTypeSubGhz:
-        return "SubGHz";
+        return "Sub-GHz";
     case ArchiveFileTypeLFRFID:
-        return "RFID";
+        return "125 kHz RFID";
     case ArchiveFileTypeInfrared:
         return "Infrared";
     case ArchiveFileTypeSubghzPlaylist:

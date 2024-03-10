@@ -1,12 +1,11 @@
-name: 'Build'
+name: "Build"
 
 on:
   push:
     branches:
       - dev
-      - main
     tags:
-      - '*'
+      - "*"
   pull_request:
 
 concurrency:
@@ -14,54 +13,93 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TARGETS: f7
   DEFAULT_TARGET: f7
   FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [f7]
     steps:
-
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: "Read version tag"
-        run: bash .github/workflow_data/commit.sh
+      - name: "Get commit details"
+        id: names
+        run: |
+          BUILD_TYPE='DEBUG=0 COMPACT=1'
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            TYPE="pull"
+          elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            TYPE="tag"
+          else
+            TYPE="other"
+          fi
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
+          echo "event_type=$TYPE" >> $GITHUB_OUTPUT
+          echo "FBT_BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
+          echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
+          echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
 
-      - name: 'Build the firmware'
+      - name: "Check API versions for consistency between targets"
         run: |
           set -e
-          for TARGET in ${TARGETS}; do
-            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET_HW DIST_SUFFIX=$VERSION_TAG updater_package
-          done
+          N_API_HEADER_SIGNATURES=`ls -1 targets/f*/api_symbols.csv | xargs -I {} sh -c "head -n2 {} | md5sum" | sort -u | wc -l`
+          if [ $N_API_HEADER_SIGNATURES != 1 ] ; then
+            echo API versions aren\'t matching for available targets. Please update!
+            echo API versions are:
+            head -n2 targets/f*/api_symbols.csv
+            exit 1
+          fi
+
+      - name: "Build the firmware and apps"
+        id: build-fw
+        run: |
+          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE updater_package
+          echo "firmware_api=$(./fbt TARGET_HW=$TARGET_HW get_apiversion)" >> $GITHUB_OUTPUT
 
       - name: "Check for uncommitted changes"
         run: |
           git diff --exit-code
 
-      - name: 'Dist artifact'
+      - name: "Upload artifacts to GitHub"
         uses: actions/upload-artifact@v3
         with:
-          name: dist
           path: |
-            dist/${{ env.DEFAULT_TARGET }}-*/
+            dist/${TARGET}-*/flipper-z-${TARGET}-update-*
+            dist/${TARGET}-*/flipper-z-${TARGET}-sdk-*
 
-      - name: "Make tgz, zip and sdk"
-        run: bash .github/workflow_data/package.sh
+      - name: "Copy build output"
+        run: |
+          set -e
+          rm -rf artifacts || true
+          mkdir artifacts
+          cp dist/${TARGET}-*/flipper-z-${TARGET}-{update,sdk}-* artifacts/
+          cd dist/${TARGET}-*/${TARGET}-update-*/
+          ARTIFACT_TAG=flipper-z-"$(basename "$(realpath .)")"
+          7z a ../../../artifacts/${ARTIFACT_TAG}.zip .
+          echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
 
-      # - name: Send devbuild webhook
-      #   if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
-      #   env:
-      #     NC_HOST: "https://cloud.cynthialabs.net/"
-      #     NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
-      #     NC_USER: "${{ secrets.NC_USER }}"
-      #     NC_PASS: "${{ secrets.NC_PASS }}"
-      #     BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
-      #   run: |
-      #     python -m pip install pyncclient
-      #     python .github/workflow_data/devbuild.py
+      - name: "Upload artifacts to update server"
+        if: ${{ !github.event.pull_request.head.repo.fork }} && !contains(github.event.head_commit.message, '--nobuild')
+        run: |
+          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              -F "branch=${BRANCH_NAME}" \
+              -F "version_token=${COMMIT_SHA}" \
+              ${FILES[@]} \
+              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
+
+      - name: Send devbuild webhook
+        if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+          BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
+        run: |
+          python .github/workflow_data/devbuild.py

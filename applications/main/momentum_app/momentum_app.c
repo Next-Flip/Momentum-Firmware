@@ -17,7 +17,7 @@ bool momentum_app_apply(MomentumApp* app) {
     if(app->save_mainmenu_apps) {
         Stream* stream = file_stream_alloc(storage);
         if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
-            stream_write_format(stream, "MenuAppList Version %u\n", 0);
+            stream_write_format(stream, "MenuAppList Version %u\n", 1);
             CharList_it_t it;
             CharList_it(it, app->mainmenu_app_exes);
             for(size_t i = 0; i < CharList_size(app->mainmenu_app_exes); i++) {
@@ -249,7 +249,13 @@ MomentumApp* momentum_app_alloc() {
             furi_string_replace_all(line, "\n", "");
             CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
             flipper_application_load_name_and_icon(line, storage, NULL, line);
-            if(furi_string_start_with_str(line, "[")) {
+            if(!furi_string_cmp(line, "Momentum")) {
+                furi_string_set(line, "MNTM");
+            } else if(!furi_string_cmp(line, "125 kHz RFID")) {
+                furi_string_set(line, "RFID");
+            } else if(!furi_string_cmp(line, "Sub-GHz")) {
+                furi_string_set(line, "SubGHz");
+            } else if(furi_string_start_with_str(line, "[")) {
                 size_t trim = furi_string_search_str(line, "] ", 1);
                 if(trim != FURI_STRING_FAILURE) {
                     furi_string_right(line, trim + 2);
@@ -303,15 +309,16 @@ MomentumApp* momentum_app_alloc() {
     app->dolphin_angry = stats.butthurt;
     furi_record_close(RECORD_DOLPHIN);
 
-    if(strcmp(version_get_version(NULL), "MNTM-DEV") == 0) {
-        app->version_tag = furi_string_alloc_printf("%s  ", version_get_version(NULL));
+    app->version_tag = furi_string_alloc_printf("%s ", version_get_version(NULL));
+    if(furi_string_start_with(app->version_tag, "mntm-dev")) {
+        furi_string_set(app->version_tag, "MNTM-DEV  ");
         const char* sha = version_get_githash(NULL);
         for(size_t i = 0; i < strlen(sha); ++i) {
             furi_string_push_back(app->version_tag, toupper(sha[i]));
         }
     } else {
-        app->version_tag = furi_string_alloc_printf(
-            "%s %s", version_get_version(NULL), version_get_builddate(NULL));
+        furi_string_replace(app->version_tag, "mntm", "MNTM");
+        furi_string_cat(app->version_tag, version_get_builddate(NULL));
     }
 
     return app;

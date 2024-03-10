@@ -18,7 +18,7 @@ DEBUG = 0
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
 
-DIST_SUFFIX = f"MNTM-DEV_@{subprocess.check_output(['git', 'rev-parse', '--short=7', 'HEAD']).decode().strip().upper()}"
+DIST_SUFFIX = f"mntm-dev-{subprocess.check_output(['git', 'rev-parse', '--short=7', 'HEAD']).decode().strip()}"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"

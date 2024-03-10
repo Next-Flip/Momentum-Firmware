@@ -1,15 +1,7 @@
-name: 'Webhook'
+name: "Webhook"
 
 on:
   push:
-  # pull_request:
-  #   types:
-  #     - "opened"
-  #     - "closed"
-  #     - "reopened"
-  release:
-    types:
-      - "published"
   workflow_run:
     workflows:
       - "Build"
@@ -32,8 +24,7 @@ jobs:
   webhook:
     runs-on: ubuntu-latest
     steps:
-
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v3
 
       - name: Send webhook
