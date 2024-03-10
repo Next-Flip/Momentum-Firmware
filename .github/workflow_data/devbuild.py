@@ -22,7 +22,7 @@ if __name__ == "__main__":
                     "title": "New Devbuild!",
                     "description": "",
                     "url": "",
-                    "color": 11761899,
+                    "color": 16751147,
                     "fields": [
                         {
                             "name": "Changes since last commit:",

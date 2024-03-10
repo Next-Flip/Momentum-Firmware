@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import datetime as dt
 import requests
 import json
 import sys
@@ -44,50 +45,13 @@ if __name__ == "__main__":
             color = 16723712 if event["forced"] else 3669797
 
         case "release":
-            match event["action"]:
-                case "published":
-                    webhook = "RELEASE_WEBHOOK"
-                    color = 13845998
-                    title = f"New Release published: {event['name']}"
-                    desc += f"Changelog:"
-
-                    changelog = "".join(
-                        event["body"]
-                        .split("Changelog")[1]
-                        .split("<!---")[0]
-                        .split("###")
-                    )
-                    downloads = [
-                        option
-                        for option in [
-                            Type.replace("\n\n>", "")
-                            for Type in event["body"]
-                            .split("Download\n>")[1]
-                            .split("### ")[:3]
-                        ]
-                        if option
-                    ]
-
-                    for category in changelog:
-                        group = category.split(":")[0].replace(" ", "")
-                        data = category.split(":")[1:].join(":")
-                        fields.append(
-                            {
-                                "name": {group},
-                                "value": {
-                                    (data[:2045] + "...") if len(data) > 2048 else data
-                                },
-                            }
-                        )
-                        fields.append(
-                            {
-                                "name": "Downloads:",
-                                "value": "\n".join(downloads),
-                                "inline": True,
-                            }
-                        )
-                case _:
-                    sys.exit(1)
+            webhook = "RELEASE_WEBHOOK"
+            color = 9471191
+            version_tag = event['release']['tag_name']
+            title = f"New Release: `{version_tag}`"
+            desc += f"> 💻 [**Web Installer**](https://momentum-fw.dev/update)\n\n"
+            desc += f"> 🐬 [**Changelog & Download**](https://github.com/Next-Flip/Momentum-Firmware/releases/tag/{version_tag})\n\n"
+            desc += f"> 🛞 [**Project Page**](https://github.com/Next-Flip/Momentum-Firmware)"
 
         case "workflow_run":
             run = event["workflow_run"]
@@ -148,6 +112,7 @@ if __name__ == "__main__":
                         "url": event["sender"]["html_url"],
                         "icon_url": event["sender"]["avatar_url"],
                     },
+                    "timestamp": dt.datetime.utcnow().isoformat()
                 }
             ],
             "attachments": [],

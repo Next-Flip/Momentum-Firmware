@@ -1,0 +1,47 @@
+name: "Release"
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Update release notes"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: python .github/workflow_data/release.py
+
+      - name: "Download release assets from tag build"
+        run: |
+          set -e
+          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.tgz
+          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.zip
+          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-sdk-${{ github.event.release.tag_name }}.zip
+
+      - name: "Update release with assets and notes"
+        uses: "softprops/action-gh-release@v1"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          body_path: .github/workflow_data/release.md
+          files: |
+            flipper-z-f7-update-${{ github.event.release.tag_name }}.tgz
+            flipper-z-f7-update-${{ github.event.release.tag_name }}.zip
+            flipper-z-f7-sdk-${{ github.event.release.tag_name }}.zip
+
+      - name: "Trigger reindex"
+        run: |
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              "${{ secrets.INDEXER_URL }}"/firmware/reindex;
+
+      - name: "Send release notification"
+        env:
+          RELEASE_WEBHOOK: ${{ secrets.RELEASE_WEBHOOK }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: python .github/workflow_data/webhook.py

@@ -2,9 +2,6 @@ name: "Webhook"
 
 on:
   push:
-  release:
-    types:
-      - "published"
   workflow_run:
     workflows:
       - "Build"
