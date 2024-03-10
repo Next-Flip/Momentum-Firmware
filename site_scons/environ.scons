@@ -55,10 +55,10 @@ coreenv = VAR_ENV.Clone(
 )
 
 # If DIST_SUFFIX is set in environment, is has precedence (set by CI)
-if os_suffix := os.environ.get("DIST_SUFFIX", None):
-    coreenv.Replace(
-        DIST_SUFFIX=os_suffix,
-    )
+# if os_suffix := os.environ.get("DIST_SUFFIX", None):
+#     coreenv.Replace(
+#         DIST_SUFFIX=os_suffix,
+#     )
 
 # Default value for commandline options
 
