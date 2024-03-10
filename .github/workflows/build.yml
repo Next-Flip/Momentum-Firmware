@@ -87,7 +87,7 @@ jobs:
           echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
 
       - name: "Upload artifacts to update server"
-        if: ${{ !github.event.pull_request.head.repo.fork }} && !contains(github.event.head_commit.message, '--nobuild')
+        if: ${{ !github.event.pull_request.head.repo.fork && !contains(github.event.head_commit.message, '--nobuild') }}
         run: |
           FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
           curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
