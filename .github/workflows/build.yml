@@ -82,8 +82,9 @@ jobs:
           mkdir artifacts
           cp dist/${TARGET}-*/flipper-z-${TARGET}-{update,sdk}-* artifacts/
           cd dist/${TARGET}-*/${TARGET}-update-*/
-          artifact="$(basename "$(realpath .)")"
-          7z a ../../../artifacts/flipper-z-${artifact}.zip .
+          ARTIFACT_TAG=flipper-z-"$(basename "$(realpath .)")"
+          7z a ../../../artifacts/${ARTIFACT_TAG}.zip .
+          echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
 
       - name: "Upload artifacts to update server"
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -95,14 +96,10 @@ jobs:
               ${FILES[@]} \
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
-      # - name: Send devbuild webhook
-      #   if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
-      #   env:
-      #     NC_HOST: "https://cloud.cynthialabs.net/"
-      #     NC_USERAGENT: "${{ secrets.NC_USERAGENT }}"
-      #     NC_USER: "${{ secrets.NC_USER }}"
-      #     NC_PASS: "${{ secrets.NC_PASS }}"
-      #     BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
-      #   run: |
-      #     python -m pip install pyncclient
-      #     python .github/workflow_data/devbuild.py
+      - name: Send devbuild webhook
+        if: "github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')"
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+          BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
+        run: |
+          python .github/workflow_data/devbuild.py
