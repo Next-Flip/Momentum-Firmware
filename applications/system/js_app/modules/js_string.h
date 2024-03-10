@@ -137,14 +137,13 @@ static void js_string_to_lower_case(struct mjs* mjs) {
     mjs_return(mjs, resultStr);
 }
 
-static void string_utils_init(struct mjs* mjs) {
-    mjs_val_t string_utils_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, string_utils_obj, "substring", ~0, MJS_MK_FN(js_string_substring));
-    mjs_set(mjs, string_utils_obj, "slice", ~0, MJS_MK_FN(js_string_slice));
-    mjs_set(mjs, string_utils_obj, "indexOf", ~0, MJS_MK_FN(js_string_index_of));
-    mjs_set(mjs, string_utils_obj, "toUpperCase", ~0, MJS_MK_FN(js_string_to_upper_case));
-    mjs_set(mjs, string_utils_obj, "toLowerCase", ~0, MJS_MK_FN(js_string_to_lower_case));
-    mjs_set(mjs, string_utils_obj, "GetLength", ~0, MJS_MK_FN(js_string_get_length));
+static void string_utils_init(struct mjs* mjs) 
+{
     mjs_val_t global = mjs_get_global(mjs);
-    mjs_set(mjs, global, "StringUtils", ~0, string_utils_obj);
+    mjs_set(mjs, global, "substring", ~0, MJS_MK_FN(js_string_substring));
+    mjs_set(mjs, global, "slice", ~0, MJS_MK_FN(js_string_slice));
+    mjs_set(mjs, global, "indexOf", ~0, MJS_MK_FN(js_string_index_of));
+    mjs_set(mjs, global, "toUpperCase", ~0, MJS_MK_FN(js_string_to_upper_case));
+    mjs_set(mjs, global, "toLowerCase", ~0, MJS_MK_FN(js_string_to_lower_case));
+    mjs_set(mjs, global, "GetLength", ~0, MJS_MK_FN(js_string_get_length));
 }
