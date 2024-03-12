@@ -1,5 +1,7 @@
 #include "../infrared_app_i.h"
 
+#include <furi_hal_infrared.h>
+
 uint8_t value_index_ir;
 
 #define DEB_PINS_COUNT (sizeof(infrared_debug_cfg_variables_text) / sizeof(char* const))
