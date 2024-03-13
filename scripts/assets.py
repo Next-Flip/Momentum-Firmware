@@ -139,9 +139,10 @@ class Main(App):
         icons = []
         paths = []
         is_main_assets = self.args.filename == "assets_icons"
-        symbols = (
-            pathlib.Path(__file__).parent / "../targets/f7/api_symbols.csv"
-        ).read_text()
+        symbols = pathlib.Path(__file__).parent.parent
+        if "UFBT_HOME" in os.environ:
+            symbols /= "sdk_headers/f7_sdk"
+        symbols = (symbols / "targets/f7/api_symbols.csv").read_text()
         api_has_icon = lambda name: f"Variable,+,{name},Icon," in symbols
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
