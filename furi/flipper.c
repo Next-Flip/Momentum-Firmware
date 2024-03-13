@@ -98,14 +98,6 @@ void flipper_migrate_files() {
 
     furi_record_close(RECORD_STORAGE);
 }
-
-static void flipper_boot_status(Canvas* canvas, const char* text) {
-    FURI_LOG_I(TAG, text);
-    canvas_reset(canvas);
-    canvas_draw_icon(canvas, 33, 16, &I_Updating_Logo_62x15);
-    canvas_draw_str_aligned(canvas, 64, 44, AlignCenter, AlignCenter, text);
-    canvas_commit(canvas);
-}
 #endif
 
 void flipper_start_service(const FlipperInternalApplication* service) {
@@ -123,12 +115,17 @@ void flipper_init() {
     furi_hal_light_sequence("rgb WB");
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
     FURI_LOG_I(TAG, "Boot mode %d", furi_hal_rtc_get_boot_mode());
+
 #ifndef FURI_RAM_EXEC
     Canvas* canvas = canvas_init();
+    canvas_draw_icon(canvas, 33, 16, &I_Updating_Logo_62x15);
+    if(furi_hal_is_normal_boot()) {
+        canvas_draw_icon(canvas, 19, 44, &I_SDcardMounted_11x8);
+    }
+    canvas_commit(canvas);
+#endif
 
     // Start storage service first, thanks OFW :/
-    flipper_boot_status(canvas, "Initializing Storage");
-#endif
     flipper_start_service(&FLIPPER_SERVICES[0]);
 
 #ifndef FURI_RAM_EXEC
@@ -137,28 +134,32 @@ void flipper_init() {
         furi_record_open(RECORD_STORAGE);
         furi_record_close(RECORD_STORAGE);
 
-        flipper_boot_status(canvas, "Migrating Files");
+        canvas_draw_icon(canvas, 39, 43, &I_dir_10px);
+        canvas_commit(canvas);
         flipper_migrate_files();
 
-        flipper_boot_status(canvas, "Starting Namespoof");
+        canvas_draw_icon(canvas, 59, 42, &I_Apps_10px);
+        canvas_commit(canvas);
         namespoof_init();
 
-        flipper_boot_status(canvas, "Loading Settings");
+        canvas_draw_icon(canvas, 79, 44, &I_Rpc_active_7x8);
+        canvas_commit(canvas);
         momentum_settings_load();
-        furi_hal_light_sequence("rgb RB");
 
-        flipper_boot_status(canvas, "Loading Asset Packs");
+        furi_hal_light_sequence("rgb RB");
+        canvas_draw_icon(canvas, 99, 44, &I_Hidden_window_9x8);
+        canvas_commit(canvas);
         asset_packs_init();
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }
-    flipper_boot_status(canvas, "Initializing Services");
 #endif
 
     // Everything else
     for(size_t i = 1; i < FLIPPER_SERVICES_COUNT; i++) {
         flipper_start_service(&FLIPPER_SERVICES[i]);
     }
+
 #ifndef FURI_RAM_EXEC
     canvas_free(canvas);
 #endif
