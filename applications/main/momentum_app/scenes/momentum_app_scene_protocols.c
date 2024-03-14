@@ -1,8 +1,6 @@
 #include "../momentum_app.h"
 
 enum VarItemListIndex {
-    VarItemListIndexBadkbMode,
-    VarItemListIndexBadbtRemember,
     VarItemListIndexSubghzFreqs,
     VarItemListIndexSubghzExtend,
     VarItemListIndexGpioPins,
@@ -11,22 +9,6 @@ enum VarItemListIndex {
 void momentum_app_scene_protocols_var_item_list_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
-}
-
-static void momentum_app_scene_protocols_bad_bt_changed(VariableItem* item) {
-    MomentumApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "BT" : "USB");
-    momentum_settings.bad_bt = value;
-    app->save_settings = true;
-}
-
-static void momentum_app_scene_protocols_bad_bt_remember_changed(VariableItem* item) {
-    MomentumApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    momentum_settings.bad_bt_remember = value;
-    app->save_settings = true;
 }
 
 static void momentum_app_scene_protocols_subghz_extend_changed(VariableItem* item) {
@@ -48,20 +30,6 @@ void momentum_app_scene_protocols_on_enter(void* context) {
     MomentumApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
-
-    item = variable_item_list_add(
-        var_item_list, "BadKB Mode", 2, momentum_app_scene_protocols_bad_bt_changed, app);
-    variable_item_set_current_value_index(item, momentum_settings.bad_bt);
-    variable_item_set_current_value_text(item, momentum_settings.bad_bt ? "BT" : "USB");
-
-    item = variable_item_list_add(
-        var_item_list,
-        "BadBT Remember",
-        2,
-        momentum_app_scene_protocols_bad_bt_remember_changed,
-        app);
-    variable_item_set_current_value_index(item, momentum_settings.bad_bt_remember);
-    variable_item_set_current_value_text(item, momentum_settings.bad_bt_remember ? "ON" : "OFF");
 
     item = variable_item_list_add(var_item_list, "SubGHz Freqs", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");

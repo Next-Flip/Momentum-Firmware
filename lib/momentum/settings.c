@@ -30,8 +30,6 @@ MomentumSettings momentum_settings = {
     .show_hidden_files = false, // OFF
     .show_internal_tab = false, // OFF
     .favorite_timeout = 0, // OFF
-    .bad_bt = false, // USB
-    .bad_bt_remember = false, // OFF
     .dark_mode = false, // OFF
     .rgb_backlight = false, // OFF
     .butthurt_timer = 21600, // 6 H
@@ -102,8 +100,6 @@ static const struct {
     {setting_bool(show_hidden_files)},
     {setting_bool(show_internal_tab)},
     {setting_uint(favorite_timeout, 0, 60)},
-    {setting_bool(bad_bt)},
-    {setting_bool(bad_bt_remember)},
     {setting_bool(dark_mode)},
     {setting_bool(rgb_backlight)},
     {setting_uint(butthurt_timer, 0, 172800)},

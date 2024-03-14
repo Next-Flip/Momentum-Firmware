@@ -77,8 +77,6 @@ typedef struct {
     bool show_hidden_files;
     bool show_internal_tab;
     uint32_t favorite_timeout;
-    bool bad_bt;
-    bool bad_bt_remember;
     bool dark_mode;
     bool rgb_backlight;
     uint32_t butthurt_timer;
