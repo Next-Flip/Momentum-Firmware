@@ -399,6 +399,40 @@ static void js_badusb_println(struct mjs* mjs) {
     badusb_print(mjs, true);
 }
 
+// Adding the altPrintln functionality
+static void js_badusb_altPrintln(struct mjs* mjs) {
+    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
+    JsBadusbInst* badusb = mjs_get_ptr(mjs, obj_inst);
+    furi_assert(badusb);
+
+    mjs_val_t str_val = mjs_arg(mjs, 0);
+    size_t str_len;
+    const char* str = mjs_get_string(mjs, &str_val, &str_len);
+
+    for(size_t i = 0; i < str_len; ++i) {
+        uint8_t ascii_code = (uint8_t)str[i];
+        // Simulating pressing the ALT key
+        furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
+        // Inputting the ASCII code numbers
+        char ascii_str[5];
+        snprintf(ascii_str, sizeof(ascii_str), "%u", ascii_code);
+        for(size_t j = 0; ascii_str[j] != '\0'; ++j) {
+            uint16_t numpad_keycode = get_keycode_by_name((const char[]){'NUMPAD_', ascii_str[j], '\0'}, 3);
+            if(numpad_keycode != HID_KEYBOARD_NONE) {
+                furi_hal_hid_kb_press(numpad_keycode);
+                furi_hal_hid_kb_release(numpad_keycode);
+            }
+        }
+        // Releasing the ALT key
+        furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
+    }
+    // Adding a new line
+    furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
+    furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
 static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     JsBadusbInst* badusb = malloc(sizeof(JsBadusbInst));
     mjs_val_t badusb_obj = mjs_mk_object(mjs);
@@ -411,6 +445,9 @@ static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, badusb_obj, "release", ~0, MJS_MK_FN(js_badusb_release));
     mjs_set(mjs, badusb_obj, "print", ~0, MJS_MK_FN(js_badusb_print));
     mjs_set(mjs, badusb_obj, "println", ~0, MJS_MK_FN(js_badusb_println));
+    // Register the altPrintln method for calling from JavaScript
+    mjs_set(mjs, badusb_obj, "altPrintln", ~0, MJS_MK_FN(js_badusb_altPrintln));
+
     *object = badusb_obj;
     return badusb;
 }
