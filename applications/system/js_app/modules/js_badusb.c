@@ -52,6 +52,17 @@ static const struct {
     {"F10", HID_KEYBOARD_F10},
     {"F11", HID_KEYBOARD_F11},
     {"F12", HID_KEYBOARD_F12},
+
+    {"NUMPAD_0", HID_KEYPAD_0},
+    {"NUMPAD_1", HID_KEYPAD_1},
+    {"NUMPAD_2", HID_KEYPAD_2},
+    {"NUMPAD_3", HID_KEYPAD_3},
+    {"NUMPAD_4", HID_KEYPAD_4},
+    {"NUMPAD_5", HID_KEYPAD_5},
+    {"NUMPAD_6", HID_KEYPAD_6},
+    {"NUMPAD_7", HID_KEYPAD_7},
+    {"NUMPAD_8", HID_KEYPAD_8},
+    {"NUMPAD_9", HID_KEYPAD_9},
 };
 
 static void js_badusb_quit_free(JsBadusbInst* badusb) {
