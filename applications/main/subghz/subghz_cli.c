@@ -1197,17 +1197,14 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-void subghz_on_system_start() {
-#ifdef SRV_CLI
-    Cli* cli = furi_record_open(RECORD_CLI);
+#include <flipper_application/flipper_application.h>
 
-    cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = "subghz_cli",
+    .ep_api_version = 1,
+    .entry_point = &subghz_cli_command,
+};
 
-    // psst RM... i know you dont care much about errors, but if you ever see this... incompatible pointer type :3
-    cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat, NULL);
-
-    furi_record_close(RECORD_CLI);
-#else
-    UNUSED(subghz_cli_command);
-#endif
+const FlipperAppPluginDescriptor* subghz_cli_plugin_ep() {
+    return &plugin_descriptor;
 }
