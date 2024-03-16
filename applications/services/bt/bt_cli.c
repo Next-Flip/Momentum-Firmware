@@ -5,7 +5,7 @@
 
 #include <ble/ble.h>
 #include "bt_settings.h"
-#include "bt_service/bt.h"
+#include "bt_service/bt_i.h"
 #include <profiles/serial_profile.h>
 
 static void bt_cli_command_hci_info(Cli* cli, FuriString* args, void* context) {
@@ -181,12 +181,10 @@ static void bt_cli_print_usage() {
 
 static void bt_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
-    furi_record_open(RECORD_BT);
+    Bt* bt = furi_record_open(RECORD_BT);
 
     FuriString* cmd;
     cmd = furi_string_alloc();
-    BtSettings bt_settings;
-    bt_settings_load(&bt_settings);
 
     do {
         if(!args_read_string_and_trim(args, cmd)) {
@@ -219,7 +217,7 @@ static void bt_cli(Cli* cli, FuriString* args, void* context) {
         bt_cli_print_usage();
     } while(false);
 
-    if(bt_settings.enabled) {
+    if(bt->bt_settings.enabled) {
         furi_hal_bt_start_advertising();
     }
 
