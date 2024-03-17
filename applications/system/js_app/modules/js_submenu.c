@@ -7,6 +7,7 @@ typedef struct {
     Submenu* submenu;
     ViewDispatcher* view_dispatcher;
     uint32_t result;
+    bool accepted;
 } JsSubmenuInst;
 
 typedef enum {
@@ -35,10 +36,18 @@ static bool check_arg_count(struct mjs* mjs, size_t count) {
 }
 
 static void submenu_callback(void* context, uint32_t id) {
-    UNUSED(id);
     JsSubmenuInst* submenu = context;
     submenu->result = id;
+    submenu->accepted = true;
     view_dispatcher_stop(submenu->view_dispatcher);
+}
+
+static bool submenu_exit(void* context) {
+    JsSubmenuInst* submenu = context;
+    submenu->result = 0;
+    submenu->accepted = false;
+    view_dispatcher_stop(submenu->view_dispatcher);
+    return true;
 }
 
 static void js_submenu_add_item(struct mjs* mjs) {
@@ -95,7 +104,11 @@ static void js_submenu_show(struct mjs* mjs) {
 
     submenu_reset(submenu->submenu);
 
-    mjs_return(mjs, mjs_mk_number(mjs, submenu->result));
+    if(submenu->accepted) {
+        mjs_return(mjs, mjs_mk_number(mjs, submenu->result));
+    } else {
+        mjs_return(mjs, MJS_UNDEFINED);
+    }
 }
 
 static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
@@ -110,6 +123,8 @@ static void* js_submenu_create(struct mjs* mjs, mjs_val_t* object) {
     view_dispatcher_enable_queue(submenu->view_dispatcher);
     view_dispatcher_add_view(
         submenu->view_dispatcher, JsSubmenuViewSubmenu, submenu_get_view(submenu->submenu));
+    view_dispatcher_set_event_callback_context(submenu->view_dispatcher, submenu);
+    view_dispatcher_set_navigation_event_callback(submenu->view_dispatcher, submenu_exit);
     *object = submenu_obj;
     return submenu;
 }
