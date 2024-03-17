@@ -166,7 +166,11 @@ def pack(
 
         if (source / "Fonts").is_dir():
             for font in (source / "Fonts").iterdir():
-                if not font.is_file() or font.name.startswith(".") or font.suffix != ".c":
+                if (
+                    not font.is_file()
+                    or font.name.startswith(".")
+                    or font.suffix != ".c"
+                ):
                     continue
                 logger(f"Compile: font for pack '{source.name}': {font.name}")
                 pack_font(font, packed / "Fonts" / font.name)

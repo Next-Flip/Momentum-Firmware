@@ -72,7 +72,7 @@ def _packs_emitter(target, source, env):
     target_dir = target[0]
     env.Replace(_PACKS_OUT_DIR=target_dir)
     env.Replace(_PACKS_SRC_DIR=source_dir)
-    target = set();
+    target = set()
 
     target.update(
         source_dir.rel_path(node)
