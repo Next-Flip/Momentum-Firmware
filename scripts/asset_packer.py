@@ -56,7 +56,10 @@ def pack_anim(src: pathlib.Path, dst: pathlib.Path):
             shutil.copyfile(src / "meta.txt", dst / "meta.txt")
             continue
         elif frame.name.startswith("frame_"):
-            (dst / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
+            if frame.suffix == ".bm":
+                shutil.copyfile(frame, dst / frame.name)
+            elif frame.suffix == ".png":
+                (dst / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
 
 
 def pack_icon_animated(src: pathlib.Path, dst: pathlib.Path):
@@ -141,9 +144,11 @@ def pack(
 
         if (source / "Icons").is_dir():
             for icons in (source / "Icons").iterdir():
-                if not icons.is_dir():
+                if not icons.is_dir() or icons.name.startswith("."):
                     continue
                 for icon in icons.iterdir():
+                    if icon.name.startswith("."):
+                        continue
                     if icon.is_dir():
                         logger(
                             f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
@@ -151,7 +156,7 @@ def pack(
                         pack_icon_animated(
                             icon, packed / "Icons" / icons.name / icon.name
                         )
-                    elif icon.is_file():
+                    elif icon.is_file() and icon.suffix == ".png":
                         logger(
                             f"Compile: icon for pack '{source.name}': {icons.name}/{icon.name}"
                         )
@@ -161,7 +166,7 @@ def pack(
 
         if (source / "Fonts").is_dir():
             for font in (source / "Fonts").iterdir():
-                if not font.is_file():
+                if not font.is_file() or font.name.startswith(".") or font.suffix != ".c":
                     continue
                 logger(f"Compile: font for pack '{source.name}': {font.name}")
                 pack_font(font, packed / "Fonts" / font.name)
