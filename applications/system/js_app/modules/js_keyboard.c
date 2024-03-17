@@ -6,11 +6,10 @@
 #define membersof(x) (sizeof(x) / sizeof(x[0]))
 
 typedef struct {
-    char* data;
     TextInput* text_input;
     ByteInput* byte_input;
     ViewDispatcher* view_dispatcher;
-    uint8_t* byteinput;
+    bool accepted;
 } JsKeyboardInst;
 
 typedef enum {
@@ -55,14 +54,17 @@ static JsKeyboardInst* get_this_ctx(struct mjs* mjs) {
     return storage;
 }
 
-void text_input_callback(void* context) {
+static void keyboard_callback(void* context) {
     JsKeyboardInst* keyboard = (JsKeyboardInst*)context;
+    keyboard->accepted = true;
     view_dispatcher_stop(keyboard->view_dispatcher);
 }
 
-void byte_input_callback(void* context) {
+static bool keyboard_exit(void* context) {
     JsKeyboardInst* keyboard = (JsKeyboardInst*)context;
+    keyboard->accepted = false;
     view_dispatcher_stop(keyboard->view_dispatcher);
+    return true;
 }
 
 static void js_keyboard_set_header(struct mjs* mjs) {
@@ -97,7 +99,9 @@ static void js_keyboard_text(struct mjs* mjs) {
     furi_record_close(RECORD_GUI);
 
     text_input_set_result_callback(
-        keyboard->text_input, text_input_callback, keyboard, buffer, input_length, clear_default);
+        keyboard->text_input, keyboard_callback, keyboard, buffer, input_length, clear_default);
+    text_input_add_illegal_symbols(keyboard->text_input);
+    text_input_set_minimum_length(keyboard->text_input, 0);
 
     view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
 
@@ -105,7 +109,11 @@ static void js_keyboard_text(struct mjs* mjs) {
 
     text_input_reset(keyboard->text_input);
 
-    mjs_return(mjs, mjs_mk_string(mjs, buffer, ~0, true));
+    if(keyboard->accepted) {
+        mjs_return(mjs, mjs_mk_string(mjs, buffer, ~0, true));
+    } else {
+        mjs_return(mjs, MJS_UNDEFINED);
+    }
     free(buffer);
 }
 
@@ -131,7 +139,7 @@ static void js_keyboard_byte(struct mjs* mjs) {
     furi_record_close(RECORD_GUI);
 
     byte_input_set_result_callback(
-        keyboard->byte_input, byte_input_callback, NULL, keyboard, buffer, input_length);
+        keyboard->byte_input, keyboard_callback, NULL, keyboard, buffer, input_length);
 
     view_dispatcher_switch_to_view(keyboard->view_dispatcher, JsKeyboardViewByteInput);
 
@@ -140,7 +148,11 @@ static void js_keyboard_byte(struct mjs* mjs) {
     byte_input_set_result_callback(keyboard->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(keyboard->byte_input, "");
 
-    mjs_return(mjs, mjs_mk_array_buf(mjs, (char*)buffer, input_length));
+    if(keyboard->accepted) {
+        mjs_return(mjs, mjs_mk_array_buf(mjs, (char*)buffer, input_length));
+    } else {
+        mjs_return(mjs, MJS_UNDEFINED);
+    }
     free(buffer);
 }
 
@@ -163,6 +175,8 @@ static void* js_keyboard_create(struct mjs* mjs, mjs_val_t* object) {
         keyboard->view_dispatcher,
         JsKeyboardViewByteInput,
         byte_input_get_view(keyboard->byte_input));
+    view_dispatcher_set_event_callback_context(keyboard->view_dispatcher, keyboard);
+    view_dispatcher_set_navigation_event_callback(keyboard->view_dispatcher, keyboard_exit);
     *object = keyboard_obj;
     return keyboard;
 }
@@ -174,7 +188,6 @@ static void js_keyboard_destroy(void* inst) {
     view_dispatcher_remove_view(keyboard->view_dispatcher, JsKeyboardViewTextInput);
     text_input_free(keyboard->text_input);
     view_dispatcher_free(keyboard->view_dispatcher);
-    free(keyboard->data);
     free(keyboard);
 }
 
