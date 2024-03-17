@@ -22,31 +22,6 @@ static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
-static bool get_str_arg(struct mjs* mjs, size_t index, const char** value, bool error) {
-    mjs_val_t str_obj = mjs_arg(mjs, index);
-    if(!mjs_is_string(str_obj)) {
-        if(error) ret_bad_args(mjs, "Argument must be a string");
-        return false;
-    }
-    size_t str_len = 0;
-    *value = mjs_get_string(mjs, &str_obj, &str_len);
-    if((str_len == 0) || (*value == NULL)) {
-        if(error) ret_bad_args(mjs, "Bad string argument");
-        return false;
-    }
-    return true;
-}
-
-static bool get_int_arg(struct mjs* mjs, size_t index, size_t* value, bool error) {
-    mjs_val_t int_obj = mjs_arg(mjs, index);
-    if(!mjs_is_number(int_obj)) {
-        if(error) ret_bad_args(mjs, "Argument must be a number");
-        return false;
-    }
-    *value = mjs_get_int(mjs, int_obj);
-    return true;
-}
-
 static JsKeyboardInst* get_this_ctx(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
     JsKeyboardInst* storage = mjs_get_ptr(mjs, obj_inst);
@@ -70,8 +45,12 @@ static bool keyboard_exit(void* context) {
 static void js_keyboard_set_header(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    const char* header;
-    if(!get_str_arg(mjs, 0, &header, true)) return;
+    mjs_val_t header_arg = mjs_arg(mjs, 0);
+    const char* header = mjs_get_string(mjs, &header_arg, NULL);
+    if(!header) {
+        ret_bad_args(mjs, "Header must be a string");
+        return;
+    }
 
     text_input_set_header_text(keyboard->text_input, header);
     byte_input_set_header_text(keyboard->byte_input, header);
@@ -82,13 +61,18 @@ static void js_keyboard_set_header(struct mjs* mjs) {
 static void js_keyboard_text(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    size_t input_length;
-    if(!get_int_arg(mjs, 0, &input_length, true)) return;
+    mjs_val_t input_length_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_number(input_length_arg)) {
+        ret_bad_args(mjs, "Input length must be a number");
+        return;
+    }
+    int32_t input_length = mjs_get_int32(mjs, input_length_arg);
     char* buffer = malloc(input_length);
 
-    const char* default_text = "";
+    mjs_val_t default_text_arg = mjs_arg(mjs, 1);
+    const char* default_text = mjs_get_string(mjs, &default_text_arg, NULL);
     bool clear_default = false;
-    if(get_str_arg(mjs, 1, &default_text, false)) {
+    if(default_text) {
         strlcpy(buffer, default_text, input_length);
         mjs_val_t bool_obj = mjs_arg(mjs, 2);
         clear_default = mjs_get_bool(mjs, bool_obj);
@@ -120,8 +104,12 @@ static void js_keyboard_text(struct mjs* mjs) {
 static void js_keyboard_byte(struct mjs* mjs) {
     JsKeyboardInst* keyboard = get_this_ctx(mjs);
 
-    size_t input_length;
-    if(!get_int_arg(mjs, 0, &input_length, true)) return;
+    mjs_val_t input_length_arg = mjs_arg(mjs, 0);
+    if(!mjs_is_number(input_length_arg)) {
+        ret_bad_args(mjs, "Input length must be a number");
+        return;
+    }
+    int32_t input_length = mjs_get_int32(mjs, input_length_arg);
     uint8_t* buffer = malloc(input_length);
 
     mjs_val_t default_data_arg = mjs_arg(mjs, 1);
