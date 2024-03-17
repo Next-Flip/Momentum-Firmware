@@ -8,15 +8,16 @@ static bool bad_kb_file_select(BadKbApp* bad_kb) {
 
     bad_kb_app_show_loading_popup(bad_kb, true);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    if(storage_dir_exists(storage, EXT_PATH("badusb"))) {
+    if(storage_dir_exists(storage, EXT_PATH("badkb"))) {
         DialogMessage* message = dialog_message_alloc();
-        dialog_message_set_header(message, "Migrate BadUSB?", 64, 0, AlignCenter, AlignTop);
+        dialog_message_set_header(message, "Migrate Scripts?", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, "No", NULL, "Yes");
         dialog_message_set_text(
             message,
-            "A badusb folder was found!\n"
-            "Momentum uses the badkb folder.\n"
-            "Want to transfer the files?",
+            "Momentum uses the 'badusb'\n"
+            "folder for compatibility.\n"
+            "Want to migrate from\n"
+            "'badkb' folder?",
             64,
             32,
             AlignCenter,
@@ -25,7 +26,12 @@ static bool bad_kb_file_select(BadKbApp* bad_kb) {
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
         if(res == DialogMessageButtonRight) {
-            storage_common_migrate(storage, EXT_PATH("badusb"), BAD_KB_APP_BASE_FOLDER);
+            storage_common_migrate(storage, EXT_PATH("badkb"), BAD_KB_APP_BASE_FOLDER);
+            if(bad_kb->conn_init_thread) {
+                furi_thread_join(bad_kb->conn_init_thread);
+            }
+            bad_kb_load_settings(bad_kb);
+            bad_kb_config_adjust(&bad_kb->config);
         }
     }
     storage_simply_mkdir(storage, BAD_KB_APP_BASE_FOLDER);

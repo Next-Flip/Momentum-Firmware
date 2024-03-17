@@ -3,7 +3,6 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include <momentum/momentum.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <bt/bt_service/bt_i.h>
 #include "helpers/ducky_script_i.h"
@@ -29,7 +28,7 @@ static void bad_kb_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-static void bad_kb_load_settings(BadKbApp* app) {
+void bad_kb_load_settings(BadKbApp* app) {
     furi_string_reset(app->keyboard_layout);
     BadKbConfig* cfg = &app->config;
 
@@ -37,35 +36,59 @@ static void bad_kb_load_settings(BadKbApp* app) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, BAD_KB_SETTINGS_PATH)) {
         FuriString* tmp_str = furi_string_alloc();
+
         if(!flipper_format_read_string(file, "Keyboard_Layout", app->keyboard_layout)) {
             furi_string_reset(app->keyboard_layout);
+            flipper_format_rewind(file);
         }
-        if(flipper_format_read_string(file, "Bt_Name", tmp_str) && !furi_string_empty(tmp_str)) {
+
+        if(!flipper_format_read_bool(file, "Is_Bt", &app->is_bt, 1)) {
+            app->is_bt = false;
+            flipper_format_rewind(file);
+        }
+
+        if(!flipper_format_read_bool(file, "Bt_Remember", &app->bt_remember, 1)) {
+            app->bt_remember = false;
+            flipper_format_rewind(file);
+        }
+
+        if(flipper_format_read_string(file, "Bt_Name", tmp_str)) {
             strlcpy(cfg->ble.name, furi_string_get_cstr(tmp_str), sizeof(cfg->ble.name));
         } else {
-            strcpy(cfg->ble.name, "");
+            cfg->ble.name[0] = '\0';
+            flipper_format_rewind(file);
         }
+
         if(!flipper_format_read_hex(
                file, "Bt_Mac", (uint8_t*)&cfg->ble.mac, sizeof(cfg->ble.mac))) {
             memset(cfg->ble.mac, 0, sizeof(cfg->ble.mac));
+            flipper_format_rewind(file);
         }
-        if(flipper_format_read_string(file, "Usb_Manuf", tmp_str) && !furi_string_empty(tmp_str)) {
+
+        if(flipper_format_read_string(file, "Usb_Manuf", tmp_str)) {
             strlcpy(cfg->usb.manuf, furi_string_get_cstr(tmp_str), sizeof(cfg->usb.manuf));
         } else {
-            strcpy(cfg->usb.manuf, "");
+            cfg->usb.manuf[0] = '\0';
+            flipper_format_rewind(file);
         }
-        if(flipper_format_read_string(file, "Usb_Product", tmp_str) &&
-           !furi_string_empty(tmp_str)) {
+
+        if(flipper_format_read_string(file, "Usb_Product", tmp_str)) {
             strlcpy(cfg->usb.product, furi_string_get_cstr(tmp_str), sizeof(cfg->usb.product));
         } else {
-            strcpy(cfg->usb.product, "");
+            cfg->usb.product[0] = '\0';
+            flipper_format_rewind(file);
         }
+
         if(!flipper_format_read_uint32(file, "Usb_Vid", &cfg->usb.vid, 1)) {
             cfg->usb.vid = 0;
+            flipper_format_rewind(file);
         }
+
         if(!flipper_format_read_uint32(file, "Usb_Pid", &cfg->usb.pid, 1)) {
             cfg->usb.pid = 0;
+            flipper_format_rewind(file);
         }
+
         furi_string_free(tmp_str);
         flipper_format_file_close(file);
     }
@@ -93,6 +116,8 @@ static void bad_kb_save_settings(BadKbApp* app) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_always(file, BAD_KB_SETTINGS_PATH)) {
         flipper_format_write_string(file, "Keyboard_Layout", app->keyboard_layout);
+        flipper_format_write_bool(file, "Is_Bt", &app->is_bt, 1);
+        flipper_format_write_bool(file, "Bt_Remember", &app->bt_remember, 1);
         flipper_format_write_string_cstr(file, "Bt_Name", cfg->ble.name);
         flipper_format_write_hex(file, "Bt_Mac", (uint8_t*)&cfg->ble.mac, sizeof(cfg->ble.mac));
         flipper_format_write_string_cstr(file, "Usb_Manuf", cfg->usb.manuf);
@@ -265,14 +290,6 @@ void bad_kb_config_refresh(BadKbApp* app) {
     // Reload config page
     scene_manager_next_scene(app->scene_manager, BadKbSceneConfig);
     scene_manager_previous_scene(app->scene_manager);
-
-    // Update settings
-    if(momentum_settings.bad_bt != app->is_bt ||
-       momentum_settings.bad_bt_remember != app->bt_remember) {
-        momentum_settings.bad_bt = app->is_bt;
-        momentum_settings.bad_bt_remember = app->bt_remember;
-        momentum_settings_save();
-    }
 }
 
 BadKbApp* bad_kb_app_alloc(char* arg) {
@@ -308,8 +325,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     Bt* bt = furi_record_open(RECORD_BT);
     app->bt = bt;
     app->bt->suppress_pin_screen = true;
-    app->is_bt = momentum_settings.bad_bt;
-    app->bt_remember = momentum_settings.bad_bt_remember;
     bad_kb_config_adjust(&app->config);
 
     // Save prev config

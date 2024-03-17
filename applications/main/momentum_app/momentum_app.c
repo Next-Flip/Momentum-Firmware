@@ -242,11 +242,21 @@ MomentumApp* momentum_app_alloc() {
     CharList_init(app->mainmenu_app_exes);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
-    if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        stream_read_line(stream, line);
+    uint32_t version;
+    if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
+       stream_read_line(stream, line) &&
+       sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
+       version <= 1) {
         while(stream_read_line(stream, line)) {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
+            if(version == 0) {
+                if(!furi_string_cmp(line, "RFID")) {
+                    furi_string_set(line, "125 kHz RFID");
+                } else if(!furi_string_cmp(line, "SubGHz")) {
+                    furi_string_set(line, "Sub-GHz");
+                }
+            }
             CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
             flipper_application_load_name_and_icon(line, storage, NULL, line);
             if(!furi_string_cmp(line, "Momentum")) {
