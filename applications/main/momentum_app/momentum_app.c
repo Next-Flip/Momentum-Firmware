@@ -76,6 +76,8 @@ bool momentum_app_apply(MomentumApp* app) {
             if(!flipper_format_write_bool(
                    file, "use_ext_range_at_own_risk", &app->subghz_extend, 1))
                 break;
+            if(!flipper_format_write_bool(file, "ignore_default_tx_region", &app->subghz_bypass, 1))
+                break;
         } while(0);
         flipper_format_free(file);
     }
@@ -307,6 +309,7 @@ MomentumApp* momentum_app_alloc() {
     file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
         flipper_format_read_bool(file, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
+        flipper_format_read_bool(file, "ignore_default_tx_region", &app->subghz_bypass, 1);
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);

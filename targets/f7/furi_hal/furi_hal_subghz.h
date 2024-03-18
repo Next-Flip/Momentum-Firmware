@@ -287,6 +287,8 @@ void furi_hal_subghz_set_ext_power_amp(bool enabled);
 
 bool furi_hal_subghz_get_ext_power_amp();
 
+void furi_hal_subghz_set_bypass_regio(bool enabled);
+
 #ifdef __cplusplus
 }
 #endif

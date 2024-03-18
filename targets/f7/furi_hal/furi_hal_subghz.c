@@ -8,6 +8,7 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_bus.h>
+#include <furi_hal_region.h>
 
 #include <stm32wbxx_ll_dma.h>
 
@@ -54,6 +55,7 @@ typedef struct {
     int8_t rolling_counter_mult;
     bool ext_power_amp : 1;
     bool extended_frequency_i : 1;
+    bool bypass_regio : 1;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
@@ -63,6 +65,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .rolling_counter_mult = 1,
     .ext_power_amp = false,
     .extended_frequency_i = false,
+    .bypass_regio = false,
 };
 
 int8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -75,6 +78,10 @@ void furi_hal_subghz_set_rolling_counter_mult(int8_t mult) {
 
 void furi_hal_subghz_set_extended_frequency(bool state_i) {
     furi_hal_subghz.extended_frequency_i = state_i;
+}
+
+void furi_hal_subghz_set_bypass_regio(bool enabled) {
+    furi_hal_subghz.bypass_regio = enabled;
 }
 
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
@@ -355,10 +362,21 @@ uint8_t furi_hal_subghz_get_lqi() {
  These changes are at your own risk. The PLL may not lock and FZ devs have warned of possible damage!
  */
 
-bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
+bool furi_hal_subghz_is_frequency_valid_extended(uint32_t value) {
     if(!(value >= 281000000 && value <= 361000000) &&
        !(value >= 378000000 && value <= 481000000) &&
        !(value >= 749000000 && value <= 962000000)) {
+        return false;
+    }
+
+    return true;
+}
+
+// "safe" frequency range
+bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
+    if(!(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
+       !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
+       !(value >= 778999847 && value <= 928000000)) {
         return false;
     }
 
@@ -382,21 +400,35 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     bool allow_extended_for_int = furi_hal_subghz.extended_frequency_i;
+    bool bypass_regio = furi_hal_subghz.bypass_regio;
 
-    if(!(allow_extended_for_int) &&
-       !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
-       !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
-       !(value >= 778999847 && value <= 928000000)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside default range");
-        return false;
-    } else if(
-        (allow_extended_for_int) && //
-        !furi_hal_subghz_is_frequency_valid(value)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
-        return false;
-    }
+    bool allowed = false;
 
-    return true;
+    do {
+        if(bypass_regio) {
+            if(!allow_extended_for_int && !furi_hal_subghz_is_frequency_valid(value)) {
+                FURI_LOG_I(TAG, "Frequency blocked - outside default range");
+                break;
+            } else if(allow_extended_for_int && !furi_hal_subghz_is_frequency_valid_extended(value)) {
+                FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
+                break;
+            }
+        } else {
+            if(!furi_hal_region_is_provisioned()) {
+                FURI_LOG_E(TAG, "Frequency blocked - region not provisioned");
+                break;
+            }
+
+            if(!furi_hal_region_is_frequency_allowed(value)) {
+                FURI_LOG_I(TAG, "Frequency blocked - outside region");
+                break;
+            }
+        }
+
+        allowed = true;
+    } while(false);
+
+    return allowed;
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
