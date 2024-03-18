@@ -292,14 +292,14 @@ MomentumApp* momentum_app_alloc() {
 
         if(!flipper_format_rewind(file)) break;
         while(flipper_format_read_uint32(file, "Frequency", &temp, 1)) {
-            if(furi_hal_subghz_is_frequency_valid(temp)) {
+            if(furi_hal_subghz_is_frequency_valid_extended(temp)) {
                 FrequencyList_push_back(app->subghz_static_freqs, temp);
             }
         }
 
         if(!flipper_format_rewind(file)) break;
         while(flipper_format_read_uint32(file, "Hopper_frequency", &temp, 1)) {
-            if(furi_hal_subghz_is_frequency_valid(temp)) {
+            if(furi_hal_subghz_is_frequency_valid_extended(temp)) {
                 FrequencyList_push_back(app->subghz_hopper_freqs, temp);
             }
         }

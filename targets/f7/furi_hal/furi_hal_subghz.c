@@ -372,12 +372,19 @@ bool furi_hal_subghz_is_frequency_valid_extended(uint32_t value) {
     return true;
 }
 
-// "safe" frequency range
 bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
-    if(!(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
-       !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
-       !(value >= 778999847 && value <= 928000000)) {
-        return false;
+    bool allow_extended_for_int = furi_hal_subghz.extended_frequency_i;
+
+    if(!allow_extended_for_int) {
+        if(!(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
+           !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
+           !(value >= 778999847 && value <= 928000000)) {
+            return false;
+        }
+    } else {
+        if(!furi_hal_subghz_is_frequency_valid_extended(value)) {
+            return false;
+        }
     }
 
     return true;

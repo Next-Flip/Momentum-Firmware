@@ -10,7 +10,7 @@ static void momentum_app_scene_protocols_freqs_add_text_input_callback(void* con
 
     char* end;
     uint32_t value = strtol(app->subghz_freq_buffer, &end, 0) * 1000;
-    if(*end || !furi_hal_subghz_is_frequency_valid(value)) {
+    if(*end || !furi_hal_subghz_is_frequency_valid_extended(value)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultError);
         return;
     }
