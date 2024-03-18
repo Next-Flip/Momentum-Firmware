@@ -412,20 +412,24 @@ static void js_badusb_altPrintln(struct mjs* mjs) {
     for(size_t i = 0; i < str_len; ++i) {
         uint8_t ascii_code = (uint8_t)str[i];
         
-        // Convert each character's ASCII code to a series of Numpad key presses with ALT key
-        char ascii_str[5]; // Enough to hold up to 4 digits plus a null terminator
+        // Convert the ASCII code of each character into a string of digits
+        char ascii_str[5]; // Sufficient to hold up to 4 digits plus a null terminator
         snprintf(ascii_str, sizeof(ascii_str), "%u", ascii_code);
 
-        // For each digit of the ASCII code, simulate pressing ALT + Numpad key
-        furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
         for(size_t j = 0; ascii_str[j] != '\0'; ++j) {
-            uint16_t keycode = get_keycode_by_name((const char[]){"NUMPAD_", ascii_str[j], '\0'}, 3);
+            // Construct the keycode name string for the current digit
+            char keycode_name[11]; // "NUMPAD_" + one digit + '\0'
+            snprintf(keycode_name, sizeof(keycode_name), "NUMPAD_%c", ascii_str[j]);
+
+            // Find the corresponding keycode for the Numpad key
+            uint16_t keycode = get_keycode_by_name(keycode_name, strlen(keycode_name));
             if(keycode != HID_KEYBOARD_NONE) {
-                furi_hal_hid_kb_press(keycode);  // Press the Numpad key
-                furi_hal_hid_kb_release(keycode);  // Release the Numpad key
+                furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);  // Press the ALT key
+                furi_hal_hid_kb_press(keycode);           // Press the Numpad key
+                furi_hal_hid_kb_release(keycode);         // Release the Numpad key
+                furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT); // Release the ALT key
             }
         }
-        furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT); // Release the ALT key after each character
     }
 
     // Simulate pressing the Enter key to mimic println behavior
