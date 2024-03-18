@@ -450,6 +450,7 @@ static void js_badusb_altPrint(struct mjs* mjs) {
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
+// Ensure js_badusb_altPrintln is only defined once and correctly calls js_badusb_altPrint
 static void js_badusb_altPrintln(struct mjs* mjs) {
     mjs_val_t obj_string = mjs_arg(mjs, 0);
     if (!mjs_is_string(obj_string)) {
