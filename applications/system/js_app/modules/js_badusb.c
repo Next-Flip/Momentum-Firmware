@@ -399,31 +399,33 @@ static void js_badusb_println(struct mjs* mjs) {
     badusb_print(mjs, true);
 }
 
-// Simulates typing a character using the ALT key and Numpad ASCII code
-static void alt_numpad_type_character(struct mjs* mjs, char character) {
-    const uint32_t delay_ms = 200; // Example delay
-
-    // Press and hold the ALT key
+static bool ducky_altchar(struct mjs* mjs, const char* ascii_code) {
+    // Hold the ALT key
     furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
-    js_delay_with_flags(mjs, delay_ms);
+    js_delay_with_flags(mjs, 200);
 
-    // Convert the character to its ASCII value and then to a string
-    char ascii_str[4];
-    snprintf(ascii_str, sizeof(ascii_str), "%03d", character);
-
-    // For each digit in the ASCII string, press and release the corresponding numpad key
-    for(size_t i = 0; ascii_str[i] != '\0'; i++) {
-        char digitStr[2] = {ascii_str[i], '\0'};
-        uint16_t numpad_keycode = get_keycode_by_name(digitStr, 1);
+    // Loop through each digit of the ASCII code and press the corresponding numpad key
+    for(size_t i = 0; ascii_code[i] != '\0'; i++) {
+        char digit = ascii_code[i] - '0'; // Convert char to digit
+        uint16_t numpad_keycode = get_keycode_by_digit(digit);
         furi_hal_hid_kb_press(numpad_keycode);
-        js_delay_with_flags(mjs, delay_ms);
+        js_delay_with_flags(mjs, 200);
         furi_hal_hid_kb_release(numpad_keycode);
-        js_delay_with_flags(mjs, delay_ms);
+        js_delay_with_flags(mjs, 200);
     }
 
     // Release the ALT key
     furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
-    js_delay_with_flags(mjs, delay_ms);
+    js_delay_with_flags(mjs, 200);
+
+    return true; // Indicate success
+}
+
+static void alt_numpad_type_character(struct mjs* mjs, char character) {
+    char ascii_str[4];
+    snprintf(ascii_str, sizeof(ascii_str), "%u", (unsigned char)character);
+
+    ducky_altchar(mjs, ascii_str);
 }
 
 static void js_badusb_altPrintln(struct mjs* mjs) {
