@@ -402,7 +402,7 @@ static void js_badusb_println(struct mjs* mjs) {
 static bool ducky_altchar(struct mjs* mjs, const char* ascii_code) {
     // Hold the ALT key
     furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
-    js_delay_with_flags(mjs, 50);
+    // js_delay_with_flags(mjs, 50);
 
     // Loop through each digit of the ASCII code and press the corresponding numpad key
     for(size_t i = 0; ascii_code[i] != '\0'; i++) {
@@ -413,14 +413,14 @@ static bool ducky_altchar(struct mjs* mjs, const char* ascii_code) {
             continue;
         }
         furi_hal_hid_kb_press(numpad_keycode);
-        js_delay_with_flags(mjs, 50);
+        // js_delay_with_flags(mjs, 50);
         furi_hal_hid_kb_release(numpad_keycode);
-        js_delay_with_flags(mjs, 50);
+        // js_delay_with_flags(mjs, 50);
     }
 
     // Release the ALT key
     furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
-    js_delay_with_flags(mjs, 50);
+    // js_delay_with_flags(mjs, 50);
 
     return true; // Indicate success
 }
