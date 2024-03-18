@@ -61,7 +61,7 @@ typedef struct {
     bool subghz_extend;
     bool subghz_bypass;
     RgbColor lcd_color;
-    Rgb565Color vgm_color;
+    RgbColor vgm_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     int32_t dolphin_level;
     int32_t dolphin_angry;

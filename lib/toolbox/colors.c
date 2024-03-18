@@ -2,6 +2,9 @@
 
 #include "colors.h"
 
+_Static_assert(sizeof(RgbColor) == 3, "RGB color must be 24-bit");
+_Static_assert(sizeof(HsvColor) == 3, "HSV color must be 24-bit");
+
 inline int rgbcmp(const RgbColor* a, const RgbColor* b) {
     return memcmp(a, b, sizeof(RgbColor));
 }

@@ -88,9 +88,9 @@ typedef struct {
     FuriHalSerialId uart_nmea_channel;
     bool file_naming_prefix_after;
     VgmColorMode vgm_color_mode;
-    Rgb565Color vgm_color_fg;
-    Rgb565Color vgm_color_bg;
     FuriHalVersionColor spoof_color;
+    RgbColor vgm_color_fg;
+    RgbColor vgm_color_bg;
 } MomentumSettings;
 
 typedef struct {
