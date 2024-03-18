@@ -406,8 +406,12 @@ static bool ducky_altchar(struct mjs* mjs, const char* ascii_code) {
 
     // Loop through each digit of the ASCII code and press the corresponding numpad key
     for(size_t i = 0; ascii_code[i] != '\0'; i++) {
-        char digit = ascii_code[i] - '0'; // Convert char to digit
-        uint16_t numpad_keycode = get_keycode_by_digit(digit);
+        char digitChar[5] = {'N', 'U', 'M', ascii_code[i], '\0'}; // Construct the numpad key name
+        uint16_t numpad_keycode = get_keycode_by_name(digitChar, strlen(digitChar));
+        if(numpad_keycode == HID_KEYBOARD_NONE) {
+            // Handle error or unsupported keycode
+            continue;
+        }
         furi_hal_hid_kb_press(numpad_keycode);
         js_delay_with_flags(mjs, 200);
         furi_hal_hid_kb_release(numpad_keycode);
