@@ -401,7 +401,7 @@ static void js_badusb_println(struct mjs* mjs) {
 
 // Simulates typing a character using the ALT key and Numpad ASCII code
 static void alt_numpad_type_character(struct mjs* mjs, char character) {
-    const uint32_t delay_ms = 50; // Example delay
+    const uint32_t delay_ms = 200; // Example delay
 
     // Press and hold the ALT key
     furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
