@@ -49,10 +49,6 @@ bool momentum_app_scene_misc_vgm_color_on_event(void* context, SceneManagerEvent
                 momentum_settings.vgm_color_fg = app->vgm_color;
             }
             app->save_settings = true;
-            if(momentum_settings.vgm_color_mode == VgmColorModeCustom) {
-                expansion_disable(app->expansion);
-                expansion_enable(app->expansion);
-            }
             scene_manager_previous_scene(app->scene_manager);
             break;
         default:

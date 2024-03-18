@@ -31,19 +31,19 @@ static void momentum_app_scene_misc_vgm_colors_changed(VariableItem* item) {
         variable_item_list_get(app->var_item_list, VarItemListIndexBackground),
         index != VgmColorModeCustom,
         NULL);
-    expansion_disable(app->expansion);
-    expansion_enable(app->expansion);
 }
 
 static const struct {
     char* name;
-    Rgb565Color color;
+    RgbColor color;
 } vgm_colors[] = {
-    {"Orange", {0xFC00}}, {"Black", {0x0000}}, {"Red", {0xF800}},    {"Maroon", {0x8000}},
-    {"Yellow", {0xFFE0}}, {"Olive", {0x8400}}, {"Lime", {0x07E0}},   {"Green", {0x0400}},
-    {"Aqua", {0x07EF}},   {"Cyan", {0x069A}},  {"Azure", {0x03FF}},  {"Teal", {0x0410}},
-    {"Blue", {0x001F}},   {"Navy", {0x0010}},  {"Purple", {0x8010}}, {"Fuchsia", {0xF81F}},
-    {"Pink", {0xA8F5}},   {"Brown", {0xA145}}, {"White", {0xFFFF}},
+    {"Off", {{0, 0, 0}}},         {"Orange", {{255, 69, 0}}},  {"Red", {{255, 0, 0}}},
+    {"Maroon", {{128, 0, 0}}},    {"Yellow", {{255, 255, 0}}}, {"Olive", {{128, 128, 0}}},
+    {"Lime", {{0, 255, 0}}},      {"Green", {{0, 128, 0}}},    {"Aqua", {{0, 255, 127}}},
+    {"Cyan", {{0, 210, 210}}},    {"Azure", {{0, 127, 255}}},  {"Teal", {{0, 128, 128}}},
+    {"Blue", {{0, 0, 255}}},      {"Navy", {{0, 0, 128}}},     {"Purple", {{128, 0, 128}}},
+    {"Fuchsia", {{255, 0, 255}}}, {"Pink", {{173, 31, 173}}},  {"Brown", {{165, 42, 42}}},
+    {"White", {{255, 192, 203}}},
 };
 static const size_t vgm_colors_count = COUNT_OF(vgm_colors);
 static void momentum_app_scene_misc_vgm_foreground_changed(VariableItem* item) {
@@ -52,10 +52,6 @@ static void momentum_app_scene_misc_vgm_foreground_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, vgm_colors[index].name);
     momentum_settings.vgm_color_fg = vgm_colors[index].color;
     app->save_settings = true;
-    if(momentum_settings.vgm_color_mode == VgmColorModeCustom) {
-        expansion_disable(app->expansion);
-        expansion_enable(app->expansion);
-    }
 }
 static void momentum_app_scene_misc_vgm_background_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
@@ -63,10 +59,6 @@ static void momentum_app_scene_misc_vgm_background_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, vgm_colors[index].name);
     momentum_settings.vgm_color_bg = vgm_colors[index].color;
     app->save_settings = true;
-    if(momentum_settings.vgm_color_mode == VgmColorModeCustom) {
-        expansion_disable(app->expansion);
-        expansion_enable(app->expansion);
-    }
 }
 
 void momentum_app_scene_misc_vgm_on_enter(void* context) {
@@ -91,10 +83,10 @@ void momentum_app_scene_misc_vgm_on_enter(void* context) {
         vgm_colors_count,
         momentum_app_scene_misc_vgm_foreground_changed,
         app);
-    Rgb565Color color = momentum_settings.vgm_color_fg;
+    RgbColor color = momentum_settings.vgm_color_fg;
     bool found = false;
     for(size_t i = 0; i < vgm_colors_count; i++) {
-        if(rgb565cmp(&color, &vgm_colors[i].color) != 0) continue;
+        if(rgbcmp(&color, &vgm_colors[i].color) != 0) continue;
         value_index = i;
         found = true;
         break;
@@ -103,8 +95,8 @@ void momentum_app_scene_misc_vgm_on_enter(void* context) {
     if(found) {
         variable_item_set_current_value_text(item, vgm_colors[value_index].name);
     } else {
-        char str[5];
-        snprintf(str, sizeof(str), "%04X", color.value);
+        char str[7];
+        snprintf(str, sizeof(str), "%06X", color.value);
         variable_item_set_current_value_text(item, str);
     }
     variable_item_set_locked(
@@ -119,7 +111,7 @@ void momentum_app_scene_misc_vgm_on_enter(void* context) {
     color = momentum_settings.vgm_color_bg;
     found = false;
     for(size_t i = 0; i < vgm_colors_count; i++) {
-        if(rgb565cmp(&color, &vgm_colors[i].color) != 0) continue;
+        if(rgbcmp(&color, &vgm_colors[i].color) != 0) continue;
         value_index = i;
         found = true;
         break;
@@ -128,8 +120,8 @@ void momentum_app_scene_misc_vgm_on_enter(void* context) {
     if(found) {
         variable_item_set_current_value_text(item, vgm_colors[value_index].name);
     } else {
-        char str[5];
-        snprintf(str, sizeof(str), "%04X", color.value);
+        char str[7];
+        snprintf(str, sizeof(str), "%06X", color.value);
         variable_item_set_current_value_text(item, str);
     }
     variable_item_set_locked(

@@ -7,16 +7,22 @@
 extern "C" {
 #endif
 
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+typedef union __attribute__((packed)) {
+    struct {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+    };
+    uint32_t value : 24;
 } RgbColor;
 
-typedef struct {
-    uint8_t h;
-    uint8_t s;
-    uint8_t v;
+typedef union __attribute__((packed)) {
+    struct {
+        uint8_t h;
+        uint8_t s;
+        uint8_t v;
+    };
+    uint32_t value : 24;
 } HsvColor;
 
 int rgbcmp(const RgbColor* a, const RgbColor* b);
