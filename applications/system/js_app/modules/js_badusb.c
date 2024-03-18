@@ -53,16 +53,16 @@ static const struct {
     {"F11", HID_KEYBOARD_F11},
     {"F12", HID_KEYBOARD_F12},
 
-    {"NUMPAD_0", HID_KEYPAD_0},
-    {"NUMPAD_1", HID_KEYPAD_1},
-    {"NUMPAD_2", HID_KEYPAD_2},
-    {"NUMPAD_3", HID_KEYPAD_3},
-    {"NUMPAD_4", HID_KEYPAD_4},
-    {"NUMPAD_5", HID_KEYPAD_5},
-    {"NUMPAD_6", HID_KEYPAD_6},
-    {"NUMPAD_7", HID_KEYPAD_7},
-    {"NUMPAD_8", HID_KEYPAD_8},
-    {"NUMPAD_9", HID_KEYPAD_9},
+    {"NUM0", HID_KEYPAD_0},
+    {"NUM1", HID_KEYPAD_1},
+    {"NUM2", HID_KEYPAD_2},
+    {"NUM3", HID_KEYPAD_3},
+    {"NUM4", HID_KEYPAD_4},
+    {"NUM5", HID_KEYPAD_5},
+    {"NUM6", HID_KEYPAD_6},
+    {"NUM7", HID_KEYPAD_7},
+    {"NUM8", HID_KEYPAD_8},
+    {"NUM9", HID_KEYPAD_9},
 };
 
 static void js_badusb_quit_free(JsBadusbInst* badusb) {
@@ -399,7 +399,7 @@ static void js_badusb_println(struct mjs* mjs) {
     badusb_print(mjs, true);
 }
 
-// Adjusting the altPrintln functionality to release the ALT key after each character
+// Adding the altPrintln functionality with delay after each key press
 static void js_badusb_altPrintln(struct mjs* mjs) {
     mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
     JsBadusbInst* badusb = mjs_get_ptr(mjs, obj_inst);
@@ -411,32 +411,42 @@ static void js_badusb_altPrintln(struct mjs* mjs) {
 
     for(size_t i = 0; i < str_len; ++i) {
         uint8_t ascii_code = (uint8_t)str[i];
-        
+
         // Convert the ASCII code of each character into a string of digits
-        char ascii_str[5]; // Sufficient to hold up to 4 digits plus a null terminator
+        char ascii_str[5]; // Enough to hold up to 4 digits plus a null terminator
         snprintf(ascii_str, sizeof(ascii_str), "%u", ascii_code);
 
         for(size_t j = 0; ascii_str[j] != '\0'; ++j) {
-            // Construct the keycode name string for the current digit
-            char keycode_name[11]; // "NUMPAD_" + one digit + '\0'
-            snprintf(keycode_name, sizeof(keycode_name), "NUMPAD_%c", ascii_str[j]);
+            furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT); // Press the ALT key
+            // Insert delay after pressing ALT key
+            delay(50);
 
-            // Find the corresponding keycode for the Numpad key
-            uint16_t keycode = get_keycode_by_name(keycode_name, strlen(keycode_name));
+            uint16_t keycode = get_keycode_by_name((const char[]){"NUMPAD_", ascii_str[j], '\0'}, 3);
             if(keycode != HID_KEYBOARD_NONE) {
-                furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);  // Press the ALT key
-                furi_hal_hid_kb_press(keycode);           // Press the Numpad key
-                furi_hal_hid_kb_release(keycode);         // Release the Numpad key
-                furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT); // Release the ALT key
+                furi_hal_hid_kb_press(keycode); // Press the Numpad key
+                delay(20); // Delay after pressing the Numpad key
+                furi_hal_hid_kb_release(keycode); // Release the Numpad key
+                delay(20); // Delay after releasing the Numpad key
             }
+
+            furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT); // Release the ALT key
+            delay(50); // Delay after releasing the ALT key
         }
     }
 
     // Simulate pressing the Enter key to mimic println behavior
     furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
+    delay(20);
     furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
+    delay(50); // Optional delay after pressing Enter
 
     mjs_return(mjs, MJS_UNDEFINED);
+}
+
+void delay(int milliseconds) {
+    // Implementation depends on your environment
+    // For example, in a POSIX environment, you might use usleep
+    usleep(milliseconds * 1000); // usleep takes microseconds
 }
 
 static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
