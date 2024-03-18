@@ -52,7 +52,7 @@ static const struct {
     {"F10", HID_KEYBOARD_F10},
     {"F11", HID_KEYBOARD_F11},
     {"F12", HID_KEYBOARD_F12},
-
+    
     {"NUM0", HID_KEYPAD_0},
     {"NUM1", HID_KEYPAD_1},
     {"NUM2", HID_KEYPAD_2},
@@ -399,54 +399,46 @@ static void js_badusb_println(struct mjs* mjs) {
     badusb_print(mjs, true);
 }
 
-// Adding the altPrintln functionality with delay after each key press
-static void js_badusb_altPrintln(struct mjs* mjs) {
-    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
-    JsBadusbInst* badusb = mjs_get_ptr(mjs, obj_inst);
-    furi_assert(badusb);
+// Simulates typing a character using the ALT key and Numpad ASCII code
+static void alt_numpad_type_character(char character) {
+    // Press and hold the ALT key
+    furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
 
-    mjs_val_t str_val = mjs_arg(mjs, 0);
-    size_t str_len;
-    const char* str = mjs_get_string(mjs, &str_val, &str_len);
+    // Convert the character to its ASCII value and then to a string
+    char ascii_str[4];
+    snprintf(ascii_str, sizeof(ascii_str), "%03d", character);
 
-    for(size_t i = 0; i < str_len; ++i) {
-        uint8_t ascii_code = (uint8_t)str[i];
-
-        // Convert the ASCII code of each character into a string of digits
-        char ascii_str[5]; // Enough to hold up to 4 digits plus a null terminator
-        snprintf(ascii_str, sizeof(ascii_str), "%u", ascii_code);
-
-        for(size_t j = 0; ascii_str[j] != '\0'; ++j) {
-            furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT); // Press the ALT key
-            // Insert delay after pressing ALT key
-            delay(50);
-
-            uint16_t keycode = get_keycode_by_name((const char[]){"NUMPAD_", ascii_str[j], '\0'}, 3);
-            if(keycode != HID_KEYBOARD_NONE) {
-                furi_hal_hid_kb_press(keycode); // Press the Numpad key
-                delay(20); // Delay after pressing the Numpad key
-                furi_hal_hid_kb_release(keycode); // Release the Numpad key
-                delay(20); // Delay after releasing the Numpad key
-            }
-
-            furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT); // Release the ALT key
-            delay(50); // Delay after releasing the ALT key
-        }
+    // For each digit in the ASCII string, create a temp string and press/release the corresponding numpad key
+    for(size_t i = 0; ascii_str[i] != '\0'; i++) {
+        char temp_str[2] = {ascii_str[i], '\0'}; // Create a temporary string for each digit
+        uint16_t numpad_keycode = get_keycode_by_name(temp_str, 1);
+        furi_hal_hid_kb_press(numpad_keycode);
+        furi_hal_hid_kb_release(numpad_keycode);
     }
 
-    // Simulate pressing the Enter key to mimic println behavior
-    furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
-    delay(20);
-    furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
-    delay(50); // Optional delay after pressing Enter
-
-    mjs_return(mjs, MJS_UNDEFINED);
+    // Release the ALT key
+    furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
 }
 
-void delay(int milliseconds) {
-    // Implementation depends on your environment
-    // For example, in a POSIX environment, you might use usleep
-    usleep(milliseconds * 1000); // usleep takes microseconds
+static void js_badusb_altPrintln(struct mjs* mjs) {
+    mjs_val_t obj_string = mjs_arg(mjs, 0);
+    if (!mjs_is_string(obj_string)) {
+        mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "Expected a string argument");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    size_t text_len;
+    const char* text = mjs_get_string(mjs, &obj_string, &text_len);
+    for (size_t i = 0; i < text_len; ++i) {
+        alt_numpad_type_character(text[i]);
+    }
+
+    // Simulate pressing the ENTER key at the end
+    furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
+    furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
+
+    mjs_return(mjs, MJS_UNDEFINED);
 }
 
 static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
@@ -463,7 +455,6 @@ static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, badusb_obj, "println", ~0, MJS_MK_FN(js_badusb_println));
     // Register the altPrintln method for calling from JavaScript
     mjs_set(mjs, badusb_obj, "altPrintln", ~0, MJS_MK_FN(js_badusb_altPrintln));
-
     *object = badusb_obj;
     return badusb;
 }
