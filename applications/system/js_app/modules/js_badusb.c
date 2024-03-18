@@ -493,6 +493,8 @@ static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, badusb_obj, "release", ~0, MJS_MK_FN(js_badusb_release));
     mjs_set(mjs, badusb_obj, "print", ~0, MJS_MK_FN(js_badusb_print));
     mjs_set(mjs, badusb_obj, "println", ~0, MJS_MK_FN(js_badusb_println));
+    // Register the altPrint method for calling from JavaScript
+    mjs_set(mjs, badusb_obj, "altPrint", ~0, MJS_MK_FN(js_badusb_altPrint));
     // Register the altPrintln method for calling from JavaScript
     mjs_set(mjs, badusb_obj, "altPrintln", ~0, MJS_MK_FN(js_badusb_altPrintln));
     *object = badusb_obj;
