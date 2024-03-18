@@ -409,18 +409,25 @@ static void js_badusb_altPrintln(struct mjs* mjs) {
     size_t str_len;
     const char* str = mjs_get_string(mjs, &str_val, &str_len);
 
+    // Corrected part in the js_badusb_altPrintln function
     for(size_t i = 0; i < str_len; ++i) {
         uint8_t ascii_code = (uint8_t)str[i];
         // Simulating pressing the ALT key
         furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
-        // Inputting the ASCII code numbers
-        char ascii_str[5];
-        snprintf(ascii_str, sizeof(ascii_str), "%u", ascii_code);
-        for(size_t j = 0; ascii_str[j] != '\0'; ++j) {
-            uint16_t numpad_keycode = get_keycode_by_name((const char[]){'NUMPAD_', ascii_str[j], '\0'}, 3);
+        // Preparing to input the ASCII code numbers
+        char numpad_sequence[16]; // Adjust to a larger array size to accommodate the complete string
+
+        // For each character's ASCII code, convert it to a string with NUMPAD_ prefix
+        int num_digits = snprintf(NULL, 0, "%u", ascii_code); // Determine the number of digits in the ASCII code
+        snprintf(numpad_sequence, sizeof(numpad_sequence), "NUMPAD_%u", ascii_code); // Construct the string for numpad sequence
+        
+        // For each digit in the constructed NUMPAD_ string, find the corresponding keycode and simulate key press
+        for(int digit_index = 7; digit_index < 7 + num_digits; ++digit_index) {
+            char digit_str[2] = {numpad_sequence[digit_index], '\0'}; // Create a string for each digit
+            uint16_t numpad_keycode = get_keycode_by_name(digit_str, 1); // Get the keycode for the digit
             if(numpad_keycode != HID_KEYBOARD_NONE) {
-                furi_hal_hid_kb_press(numpad_keycode);
-                furi_hal_hid_kb_release(numpad_keycode);
+                furi_hal_hid_kb_press(numpad_keycode); // Press the digit key
+                furi_hal_hid_kb_release(numpad_keycode); // Release the digit key
             }
         }
         // Releasing the ALT key
