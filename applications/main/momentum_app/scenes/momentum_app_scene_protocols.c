@@ -17,6 +17,7 @@ static void momentum_app_scene_protocols_subghz_extend_changed(VariableItem* ite
     app->subghz_extend = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
     app->save_subghz = true;
+    app->require_reboot = true;
 }
 
 static void xtreme_app_scene_protocols_subghz_bypass_changed(VariableItem* item) {
