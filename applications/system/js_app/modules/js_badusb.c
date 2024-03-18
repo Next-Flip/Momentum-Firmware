@@ -432,7 +432,7 @@ static void alt_numpad_type_character(struct mjs* mjs, char character) {
     ducky_altchar(mjs, ascii_str);
 }
 
-// Function to simulate typing text using ALT key + Numpad ASCII code without adding a newline at the end
+// Correctly defined js_badusb_altPrint function
 static void js_badusb_altPrint(struct mjs* mjs) {
     mjs_val_t obj_string = mjs_arg(mjs, 0);
     if (!mjs_is_string(obj_string)) {
@@ -448,16 +448,6 @@ static void js_badusb_altPrint(struct mjs* mjs) {
     }
 
     mjs_return(mjs, MJS_UNDEFINED);
-}
-
-// Updated js_badusb_altPrintln function, now simply calls js_badusb_altPrint for the text part
-static void js_badusb_altPrintln(struct mjs* mjs) {
-    // First, print the text without a newline
-    js_badusb_altPrint(mjs);
-
-    // Then, simulate pressing the ENTER key to add a newline
-    furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
-    furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
 }
 
 static void js_badusb_altPrintln(struct mjs* mjs) {
