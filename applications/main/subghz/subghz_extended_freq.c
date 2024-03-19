@@ -16,7 +16,7 @@ void subghz_extended_freq() {
     }
 
     furi_hal_subghz_set_extended_frequency(is_extended_i);
-    furi_hal_subghz_set_bypass_regio(is_bypassed);
+    furi_hal_subghz_set_bypass_region(is_bypassed);
 
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);

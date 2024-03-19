@@ -55,7 +55,7 @@ typedef struct {
     int8_t rolling_counter_mult;
     bool ext_power_amp : 1;
     bool extended_frequency_i : 1;
-    bool bypass_regio : 1;
+    bool bypass_region : 1;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
@@ -65,7 +65,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .rolling_counter_mult = 1,
     .ext_power_amp = false,
     .extended_frequency_i = false,
-    .bypass_regio = false,
+    .bypass_region = false,
 };
 
 int8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -80,8 +80,8 @@ void furi_hal_subghz_set_extended_frequency(bool state_i) {
     furi_hal_subghz.extended_frequency_i = state_i;
 }
 
-void furi_hal_subghz_set_bypass_regio(bool enabled) {
-    furi_hal_subghz.bypass_regio = enabled;
+void furi_hal_subghz_set_bypass_region(bool enabled) {
+    furi_hal_subghz.bypass_region = enabled;
 }
 
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
@@ -407,12 +407,12 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     bool allow_extended_for_int = furi_hal_subghz.extended_frequency_i;
-    bool bypass_regio = furi_hal_subghz.bypass_regio;
+    bool bypass_region = furi_hal_subghz.bypass_region;
 
     bool allowed = false;
 
     do {
-        if(bypass_regio) {
+        if(bypass_region) {
             if(!allow_extended_for_int && !furi_hal_subghz_is_frequency_valid(value)) {
                 FURI_LOG_I(TAG, "Frequency blocked - outside default range");
                 break;
