@@ -141,25 +141,25 @@ FuriHalVersionColor furi_hal_version_get_hw_color();
  */
 uint8_t furi_hal_version_get_hw_connect();
 
-/** Get hardware region (fake) = 0
+/** Get hardware region
  *
- * @return     Hardware Region (fake)
+ * @return     Hardware Region
  */
 FuriHalVersionRegion furi_hal_version_get_hw_region();
 
-/** Get hardware region name (fake) = R00
+/** Get hardware region name
  *
- * @return     Hardware Region name (fake)
+ * @return     Hardware Region name
  */
 const char* furi_hal_version_get_hw_region_name();
 
-/** Get hardware region (OTP)
+/** Get hardware region (compatibility with Unleashed API)
  *
  * @return     Hardware Region
  */
 FuriHalVersionRegion furi_hal_version_get_hw_region_otp();
 
-/** Get hardware region name (OTP)
+/** Get hardware region name (compatibility with Unleashed API)
  *
  * @return     Hardware Region name
  */

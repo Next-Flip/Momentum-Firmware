@@ -1,6 +1,5 @@
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
-#include <furi.h>
 
 const FuriHalRegion furi_hal_region_zero = {
     .country_code = "00",
@@ -74,7 +73,7 @@ const FuriHalRegion furi_hal_region_jp = {
 static const FuriHalRegion* furi_hal_region = NULL;
 
 void furi_hal_region_init() {
-    FuriHalVersionRegion region = furi_hal_version_get_hw_region_otp();
+    FuriHalVersionRegion region = furi_hal_version_get_hw_region();
 
     if(region == FuriHalVersionRegionUnknown) {
         furi_hal_region = &furi_hal_region_zero;
@@ -95,19 +94,16 @@ void furi_hal_region_set(FuriHalRegion* region) {
     furi_hal_region = region;
 }
 
-const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency) {
-    if(!furi_hal_region) {
-        return NULL;
-    }
+bool furi_hal_region_is_provisioned() {
+    return furi_hal_region != NULL;
+}
 
-    for(size_t i = 0; i < furi_hal_region->bands_count; i++) {
-        if(furi_hal_region->bands[i].start <= frequency &&
-           furi_hal_region->bands[i].end >= frequency) {
-            return &furi_hal_region->bands[i];
-        }
+const char* furi_hal_region_get_name() {
+    if(furi_hal_region) {
+        return furi_hal_region->country_code;
+    } else {
+        return "--";
     }
-
-    return NULL;
 }
 
 bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
@@ -123,14 +119,17 @@ bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
     return true;
 }
 
-bool furi_hal_region_is_provisioned() {
-    return furi_hal_region != NULL;
-}
-
-const char* furi_hal_region_get_name() {
-    if(furi_hal_region) {
-        return furi_hal_region->country_code;
-    } else {
-        return "--";
+const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency) {
+    if(!furi_hal_region) {
+        return NULL;
     }
+
+    for(size_t i = 0; i < furi_hal_region->bands_count; i++) {
+        if(furi_hal_region->bands[i].start <= frequency &&
+           furi_hal_region->bands[i].end >= frequency) {
+            return &furi_hal_region->bands[i];
+        }
+    }
+
+    return NULL;
 }
