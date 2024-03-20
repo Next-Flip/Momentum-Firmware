@@ -76,7 +76,9 @@ jobs:
             dist/${{ env.TARGET }}-*/flipper-z-${{ env.TARGET }}-sdk-*
 
       - name: "Copy build output"
-        if: ${{ secrets.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
         run: |
           set -e
           rm -rf artifacts || true
@@ -88,7 +90,9 @@ jobs:
           echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
 
       - name: "Upload artifacts to update server"
-        if: ${{ secrets.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
         run: |
           FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
           curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
@@ -98,9 +102,9 @@ jobs:
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: Send devbuild webhook
-        if: ${{ secrets.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
           BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
         run: |
           python .github/workflow_data/devbuild.py
