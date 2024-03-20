@@ -13,5 +13,5 @@ void desktop_main_set_callback(
     void* context);
 
 View* desktop_main_get_view(DesktopMainView* main_view);
-DesktopMainView* desktop_main_alloc();
+DesktopMainView* desktop_main_alloc(void);
 void desktop_main_free(DesktopMainView* main_view);

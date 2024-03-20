@@ -9,7 +9,7 @@ static void subghz_cli_command_chat_wrapper(Cli* cli, FuriString* args, void* co
     subghz_cli_command_wrapper(cli, args, context);
 }
 
-void subghz_on_system_start() {
+void subghz_on_system_start(void) {
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command_wrapper, NULL);
     cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat_wrapper, NULL);

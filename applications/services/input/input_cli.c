@@ -4,7 +4,7 @@
 #include <cli/cli.h>
 #include <toolbox/args.h>
 
-static void input_cli_usage() {
+static void input_cli_usage(void) {
     printf("Usage:\r\n");
     printf("input <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -134,7 +134,7 @@ static void input_cli_keyboard(Cli* cli, FuriString* args, Input* input) {
     }
 }
 
-static void input_cli_send_print_usage() {
+static void input_cli_send_print_usage(void) {
     printf("Invalid arguments. Usage:\r\n");
     printf("\tinput send <key> <type>\r\n");
     printf("\t\t <key>\t - one of 'up', 'down', 'left', 'right', 'back', 'ok'\r\n");
@@ -231,6 +231,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &input_cli,
 };
 
-const FlipperAppPluginDescriptor* input_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* input_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

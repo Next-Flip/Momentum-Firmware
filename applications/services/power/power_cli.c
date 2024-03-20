@@ -48,7 +48,7 @@ void power_cli_3v3(Cli* cli, FuriString* args) {
     }
 }
 
-static void power_cli_command_print_usage() {
+static void power_cli_command_print_usage(void) {
     printf("Usage:\r\n");
     printf("power <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -114,6 +114,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &power_cli,
 };
 
-const FlipperAppPluginDescriptor* power_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* power_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

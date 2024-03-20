@@ -32,7 +32,7 @@
 
 #define TAG "SubGhzCli"
 
-static void subghz_cli_radio_device_power_on() {
+static void subghz_cli_radio_device_power_on(void) {
     uint8_t attempts = 5;
     while(--attempts > 0) {
         if(furi_hal_power_enable_otg()) break;
@@ -47,7 +47,7 @@ static void subghz_cli_radio_device_power_on() {
     }
 }
 
-static void subghz_cli_radio_device_power_off() {
+static void subghz_cli_radio_device_power_off(void) {
     if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
 }
 
@@ -833,7 +833,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
     subghz_environment_free(environment);
 }
 
-static void subghz_cli_command_print_usage() {
+static void subghz_cli_command_print_usage(void) {
     printf("Usage:\r\n");
     printf("subghz <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -1205,6 +1205,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &subghz_cli_command,
 };
 
-const FlipperAppPluginDescriptor* subghz_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* subghz_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

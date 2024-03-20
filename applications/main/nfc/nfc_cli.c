@@ -8,7 +8,7 @@
 
 #define FLAG_EVENT (1 << 10)
 
-static void nfc_cli_print_usage() {
+static void nfc_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("nfc <cmd>\r\n");
     printf("Cmd list:\r\n");
@@ -71,6 +71,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &nfc_cli,
 };
 
-const FlipperAppPluginDescriptor* nfc_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* nfc_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

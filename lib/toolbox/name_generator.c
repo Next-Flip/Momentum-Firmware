@@ -82,8 +82,8 @@ void name_generator_make_random_prefixed(
     size_t max_name_size,
     const char* prefix,
     bool prefix_after) {
-    furi_assert(name);
-    furi_assert(max_name_size);
+    furi_check(name);
+    furi_check(max_name_size);
 
     uint8_t name_generator_left_i = rand() % COUNT_OF(name_generator_left);
     uint8_t name_generator_right_i = rand() % COUNT_OF(name_generator_right);
@@ -123,9 +123,9 @@ void name_generator_make_detailed_datetime(
     const char* prefix,
     DateTime* custom_time,
     bool prefix_after) {
-    furi_assert(name);
-    furi_assert(max_name_size);
-    furi_assert(prefix);
+    furi_check(name);
+    furi_check(max_name_size);
+    furi_check(prefix);
 
     DateTime dateTime;
     if(custom_time) {

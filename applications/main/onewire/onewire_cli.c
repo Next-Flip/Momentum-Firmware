@@ -6,7 +6,7 @@
 
 #include <one_wire/one_wire_host.h>
 
-static void onewire_cli_print_usage() {
+static void onewire_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("onewire search\r\n");
 }
@@ -67,6 +67,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &onewire_cli,
 };
 
-const FlipperAppPluginDescriptor* onewire_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* onewire_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

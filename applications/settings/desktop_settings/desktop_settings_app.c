@@ -67,7 +67,7 @@ bool desktop_settings_app_set_keybind(DesktopSettingsApp* app, const char* value
     return true;
 }
 
-DesktopSettingsApp* desktop_settings_app_alloc() {
+DesktopSettingsApp* desktop_settings_app_alloc(void) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
 
     app->gui = furi_record_open(RECORD_GUI);

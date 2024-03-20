@@ -165,7 +165,7 @@ static void bt_cli_command_packet_rx(Cli* cli, FuriString* args, void* context) 
     } while(false);
 }
 
-static void bt_cli_print_usage() {
+static void bt_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("bt <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -233,6 +233,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &bt_cli,
 };
 
-const FlipperAppPluginDescriptor* bt_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* bt_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

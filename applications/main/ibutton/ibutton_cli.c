@@ -8,7 +8,7 @@
 #include <ibutton/ibutton_worker.h>
 #include <ibutton/ibutton_protocols.h>
 
-static void ibutton_cli_print_usage() {
+static void ibutton_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("ikey read\r\n");
     printf("ikey emulate <key_type> <key_data>\r\n");
@@ -248,6 +248,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &ibutton_cli,
 };
 
-const FlipperAppPluginDescriptor* ibutton_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* ibutton_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

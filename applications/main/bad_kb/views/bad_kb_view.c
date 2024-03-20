@@ -211,7 +211,7 @@ static bool bad_kb_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-BadKb* bad_kb_alloc() {
+BadKb* bad_kb_alloc(void) {
     BadKb* bad_kb = malloc(sizeof(BadKb));
 
     bad_kb->view = view_alloc();

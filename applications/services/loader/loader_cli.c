@@ -5,7 +5,7 @@
 #include <notification/notification_messages.h>
 #include "loader.h"
 
-static void loader_cli_print_usage() {
+static void loader_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("loader <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -14,7 +14,7 @@ static void loader_cli_print_usage() {
     printf("\tinfo\t - Show loader state\r\n");
 }
 
-static void loader_cli_list() {
+static void loader_cli_list(void) {
     printf("Apps:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
@@ -112,6 +112,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &loader_cli,
 };
 
-const FlipperAppPluginDescriptor* loader_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* loader_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

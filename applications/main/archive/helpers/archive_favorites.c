@@ -74,7 +74,7 @@ uint16_t archive_favorites_count() {
     return lines;
 }
 
-static bool archive_favourites_rescan() {
+static bool archive_favourites_rescan(void) {
     FuriString* buffer;
     buffer = furi_string_alloc();
     Storage* storage = furi_record_open(RECORD_STORAGE);

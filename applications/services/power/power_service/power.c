@@ -326,7 +326,7 @@ static void power_shutdown_time_changed_callback(const void* event, void* contex
     }
 }
 
-Power* power_alloc() {
+Power* power_alloc(void) {
     Power* power = malloc(sizeof(Power));
 
     // Records

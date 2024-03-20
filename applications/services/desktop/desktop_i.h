@@ -86,7 +86,7 @@ struct Desktop {
     FuriPubSubSubscription* ascii_events_subscription;
 };
 
-Desktop* desktop_alloc();
+Desktop* desktop_alloc(void);
 
 void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop, bool pin_lock);

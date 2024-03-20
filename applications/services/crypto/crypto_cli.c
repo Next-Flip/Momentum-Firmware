@@ -4,7 +4,7 @@
 #include <lib/toolbox/args.h>
 #include <cli/cli.h>
 
-void crypto_cli_print_usage() {
+void crypto_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("crypto <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
@@ -324,6 +324,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &crypto_cli,
 };
 
-const FlipperAppPluginDescriptor* crypto_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* crypto_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

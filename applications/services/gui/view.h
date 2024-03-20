@@ -101,7 +101,7 @@ typedef enum {
 /** Allocate and init View
  * @return View instance
  */
-View* view_alloc();
+View* view_alloc(void);
 
 /** Free View
  *

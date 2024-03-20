@@ -6,7 +6,7 @@
 typedef struct BadKb BadKb;
 typedef void (*BadKbButtonCallback)(InputKey key, void* context);
 
-BadKb* bad_kb_alloc();
+BadKb* bad_kb_alloc(void);
 
 void bad_kb_free(BadKb* bad_kb);
 

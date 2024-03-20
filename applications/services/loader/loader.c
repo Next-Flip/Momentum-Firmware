@@ -41,6 +41,9 @@ static const char*
 
 LoaderStatus
     loader_start(Loader* loader, const char* name, const char* args, FuriString* error_message) {
+    furi_check(loader);
+    furi_check(name);
+
     LoaderMessage message;
     LoaderMessageLoaderStatusResult result;
 
@@ -52,6 +55,7 @@ LoaderStatus
     message.status_value = &result;
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
     api_lock_wait_unlock_and_free(message.api_lock);
+
     return result.value;
 }
 
@@ -79,6 +83,9 @@ static void loader_show_gui_error(LoaderStatus status, FuriString* error_message
 }
 
 LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
+    furi_check(loader);
+    furi_check(name);
+
     FuriString* error_message = furi_string_alloc();
     LoaderStatus status = loader_start(loader, name, args, error_message);
     loader_show_gui_error(status, error_message);
@@ -87,6 +94,9 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
 }
 
 void loader_start_detached_with_gui_error(Loader* loader, const char* name, const char* args) {
+    furi_check(loader);
+    furi_check(name);
+
     LoaderMessage message;
 
     message.type = LoaderMessageTypeStartByNameDetachedWithGuiError;
@@ -96,6 +106,8 @@ void loader_start_detached_with_gui_error(Loader* loader, const char* name, cons
 }
 
 bool loader_lock(Loader* loader) {
+    furi_check(loader);
+
     LoaderMessage message;
     LoaderMessageBoolResult result;
     message.type = LoaderMessageTypeLock;
@@ -103,16 +115,22 @@ bool loader_lock(Loader* loader) {
     message.bool_value = &result;
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
     api_lock_wait_unlock_and_free(message.api_lock);
+
     return result.value;
 }
 
 void loader_unlock(Loader* loader) {
+    furi_check(loader);
+
     LoaderMessage message;
     message.type = LoaderMessageTypeUnlock;
+
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
 bool loader_is_locked(Loader* loader) {
+    furi_check(loader);
+
     LoaderMessage message;
     LoaderMessageBoolResult result;
     message.type = LoaderMessageTypeIsLocked;
@@ -120,23 +138,30 @@ bool loader_is_locked(Loader* loader) {
     message.bool_value = &result;
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
     api_lock_wait_unlock_and_free(message.api_lock);
+
     return result.value;
 }
 
 void loader_show_menu(Loader* loader) {
+    furi_check(loader);
+
     LoaderMessage message;
     message.type = LoaderMessageTypeShowMenu;
+
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
 void loader_show_settings(Loader* loader) {
+    furi_check(loader);
+
     LoaderMessage message;
     message.type = LoaderMessageTypeShowSettings;
+
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
 FuriPubSub* loader_get_pubsub(Loader* loader) {
-    furi_assert(loader);
+    furi_check(loader);
     // it's safe to return pubsub without locking
     // because it's never freed and loader is never exited
     // also the loader instance cannot be obtained until the pubsub is created
@@ -230,7 +255,7 @@ static void loader_make_menu_file(Storage* storage) {
     stream_free(new);
 }
 
-static Loader* loader_alloc() {
+static Loader* loader_alloc(void) {
     Loader* loader = malloc(sizeof(Loader));
     loader->pubsub = furi_pubsub_alloc();
     loader->queue = furi_message_queue_alloc(1, sizeof(LoaderMessage));

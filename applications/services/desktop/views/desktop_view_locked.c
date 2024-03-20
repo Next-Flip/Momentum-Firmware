@@ -16,11 +16,11 @@
 #define LOCKED_HINT_TIMEOUT_MS (3000)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
-#define COVER_OFFSET_START -64
-#define COVER_OFFSET_END 0
+#define COVER_OFFSET_START (-64)
+#define COVER_OFFSET_END (0)
 
-#define UNLOCK_CNT 3
-#define UNLOCK_RST_TIMEOUT 600
+#define UNLOCK_CNT (3)
+#define UNLOCK_RST_TIMEOUT (600)
 
 struct DesktopViewLocked {
     View* view;
@@ -64,7 +64,7 @@ static void locked_view_timer_callback(void* context) {
 
 void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     DesktopViewLockedModel* model = m;
-    int y = model->cover_offset;
+    int32_t y = model->cover_offset;
     char time_str[9];
     char second_str[5];
     char date_str[14];
@@ -263,7 +263,7 @@ static bool desktop_view_locked_input(InputEvent* event, void* context) {
     return true;
 }
 
-DesktopViewLocked* desktop_view_locked_alloc() {
+DesktopViewLocked* desktop_view_locked_alloc(void) {
     DesktopViewLocked* locked_view = malloc(sizeof(DesktopViewLocked));
     locked_view->view = view_alloc();
     locked_view->timer =

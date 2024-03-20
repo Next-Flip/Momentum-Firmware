@@ -14,7 +14,7 @@
 #include <lfrfid/lfrfid_raw_file.h>
 #include <toolbox/pulse_protocols/pulse_glue.h>
 
-static void lfrfid_cli_print_usage() {
+static void lfrfid_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("rfid read <optional: normal | indala>         - read in ASK/PSK mode\r\n");
     printf("rfid <write | emulate> <key_type> <key_data>  - write or emulate a card\r\n");
@@ -577,6 +577,6 @@ static const FlipperAppPluginDescriptor plugin_descriptor = {
     .entry_point = &lfrfid_cli,
 };
 
-const FlipperAppPluginDescriptor* lfrfid_cli_plugin_ep() {
+const FlipperAppPluginDescriptor* lfrfid_cli_plugin_ep(void) {
     return &plugin_descriptor;
 }

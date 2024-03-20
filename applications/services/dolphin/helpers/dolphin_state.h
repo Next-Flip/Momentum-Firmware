@@ -33,7 +33,7 @@ struct DolphinState {
     bool dirty;
 };
 
-DolphinState* dolphin_state_alloc();
+DolphinState* dolphin_state_alloc(void);
 
 void dolphin_state_free(DolphinState* dolphin_state);
 
@@ -43,7 +43,7 @@ bool dolphin_state_load(DolphinState* dolphin_state);
 
 void dolphin_state_clear_limits(DolphinState* dolphin_state);
 
-uint64_t dolphin_state_timestamp();
+uint64_t dolphin_state_timestamp(void);
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed);
 
