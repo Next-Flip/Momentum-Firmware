@@ -19,6 +19,10 @@ static void xtreme_app_scene_protocols_subghz_bypass_changed(VariableItem* item)
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
     app->save_subghz = true;
     app->require_reboot = true;
+    variable_item_set_locked(
+        variable_item_list_get(app->var_item_list, VarItemListIndexSubghzExtend),
+        !app->subghz_bypass,
+        NULL);
 }
 
 static void momentum_app_scene_protocols_subghz_extend_changed(VariableItem* item) {
@@ -46,14 +50,23 @@ void momentum_app_scene_protocols_on_enter(void* context) {
     variable_item_set_current_value_text(item, ">");
 
     item = variable_item_list_add(
-        var_item_list, "SubGHz Bypass", 2, xtreme_app_scene_protocols_subghz_bypass_changed, app);
+        var_item_list,
+        "SubGHz Bypass Region Lock",
+        2,
+        xtreme_app_scene_protocols_subghz_bypass_changed,
+        app);
     variable_item_set_current_value_index(item, app->subghz_bypass);
     variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
 
     item = variable_item_list_add(
-        var_item_list, "SubGHz Extend", 2, momentum_app_scene_protocols_subghz_extend_changed, app);
+        var_item_list,
+        "SubGHz Extend Freq Bands",
+        2,
+        momentum_app_scene_protocols_subghz_extend_changed,
+        app);
     variable_item_set_current_value_index(item, app->subghz_extend);
     variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
+    variable_item_set_locked(item, !app->subghz_bypass, "Must bypass\nregion lock\nfirst!");
 
     item = variable_item_list_add(var_item_list, "GPIO Pins", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
