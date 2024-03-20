@@ -27,7 +27,7 @@ typedef struct {
     const char* text;
 } ElementTextBoxLine;
 
-void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, float progress) {
+void elements_progress_bar(Canvas* canvas, int32_t x, int32_t y, size_t width, float progress) {
     furi_check(canvas);
     furi_check((progress >= 0.0f) && (progress <= 1.0f));
     uint8_t height = 9;
@@ -44,9 +44,9 @@ void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, 
 
 void elements_progress_bar_with_text(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     float progress,
     const char* text) {
     furi_check(canvas);
@@ -69,9 +69,9 @@ void elements_progress_bar_with_text(
 
 void elements_scrollbar_pos(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t height,
+    int32_t x,
+    int32_t y,
+    size_t height,
     uint16_t pos,
     uint16_t total) {
     furi_check(canvas);
@@ -92,9 +92,9 @@ void elements_scrollbar_pos(
 
 void elements_scrollbar_horizontal(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     uint16_t pos,
     uint16_t total) {
     furi_check(canvas);
@@ -133,7 +133,7 @@ void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total) {
     }
 }
 
-void elements_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+void elements_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height) {
     furi_check(canvas);
 
     canvas_draw_line(canvas, x + 2, y, x + width - 2, y);
@@ -284,8 +284,8 @@ static size_t
 
 void elements_multiline_text_aligned(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
+    int32_t x,
+    int32_t y,
     Align horizontal,
     Align vertical,
     const char* text) {
@@ -316,7 +316,7 @@ void elements_multiline_text_aligned(
 
         if((start[chars_fit] == '\n') || (start[chars_fit] == 0)) {
             line = furi_string_alloc_printf("%.*s", chars_fit, start);
-        } else if((y + font_height) > canvas_height(canvas)) {
+        } else if((y + font_height) > (int32_t)canvas_height(canvas)) {
             line = furi_string_alloc_printf("%.*s...\n", chars_fit, start);
         } else {
             chars_fit -= 1; // account for the dash
@@ -325,7 +325,7 @@ void elements_multiline_text_aligned(
         canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, furi_string_get_cstr(line));
         furi_string_free(line);
         y += font_height;
-        if(y > canvas_height(canvas)) {
+        if(y > (int32_t)canvas_height(canvas)) {
             break;
         }
 
@@ -334,7 +334,7 @@ void elements_multiline_text_aligned(
     }
 }
 
-void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
+void elements_multiline_text(Canvas* canvas, int32_t x, int32_t y, const char* text) {
     furi_check(canvas);
     furi_check(text);
 
@@ -357,7 +357,7 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* t
     furi_string_free(str);
 }
 
-void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
+void elements_multiline_text_framed(Canvas* canvas, int32_t x, int32_t y, const char* text) {
     furi_check(canvas);
     furi_check(text);
 
@@ -384,30 +384,25 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
 
 void elements_slightly_rounded_frame(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height) {
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height) {
     furi_check(canvas);
     canvas_draw_rframe(canvas, x, y, width, height, 1);
 }
 
 void elements_slightly_rounded_box(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height) {
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height) {
     furi_check(canvas);
     canvas_draw_rbox(canvas, x, y, width, height, 1);
 }
 
-void elements_bold_rounded_frame(
-    Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height) {
+void elements_bold_rounded_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height) {
     furi_check(canvas);
 
     canvas_set_color(canvas, ColorWhite);
@@ -456,8 +451,8 @@ void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
 
 void elements_bubble_str(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
+    int32_t x,
+    int32_t y,
     const char* text,
     Align horizontal,
     Align vertical) {
@@ -605,9 +600,9 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
 
 void elements_scrollable_text_line_str(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     const char* string,
     size_t scroll,
     bool ellipsis,
@@ -666,9 +661,9 @@ void elements_scrollable_text_line_str(
 
 void elements_scrollable_text_line(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     FuriString* string,
     size_t scroll,
     bool ellipsis) {
@@ -678,9 +673,9 @@ void elements_scrollable_text_line(
 
 void elements_scrollable_text_line_centered(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     FuriString* string,
     size_t scroll,
     bool ellipsis,
@@ -691,10 +686,10 @@ void elements_scrollable_text_line_centered(
 
 void elements_text_box(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height,
     Align horizontal,
     Align vertical,
     const char* text,
@@ -885,7 +880,7 @@ void elements_text_box(
             } else {
                 if((i == line_num - 1) && strip_to_dots) {
                     uint8_t next_symbol_width = canvas_glyph_width(canvas, line[i].text[j]);
-                    if(line[i].x + next_symbol_width + dots_width > x + width) {
+                    if(line[i].x + next_symbol_width + dots_width > x + (int32_t)width) {
                         canvas_draw_str(canvas, line[i].x, line[i].y, "...");
                         break;
                     }

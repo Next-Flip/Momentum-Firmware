@@ -29,7 +29,7 @@ extern "C" {
  * @param   width       progress bar width
  * @param   progress    progress (0.0 - 1.0)
  */
-void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, float progress);
+void elements_progress_bar(Canvas* canvas, int32_t x, int32_t y, size_t width, float progress);
 
 /** Draw progress bar with text.
  *
@@ -42,9 +42,9 @@ void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, 
  */
 void elements_progress_bar_with_text(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     float progress,
     const char* text);
 
@@ -59,9 +59,9 @@ void elements_progress_bar_with_text(
  */
 void elements_scrollbar_pos(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t height,
+    int32_t x,
+    int32_t y,
+    size_t height,
     uint16_t pos,
     uint16_t total);
 
@@ -76,9 +76,9 @@ void elements_scrollbar_pos(
  */
 void elements_scrollbar_horizontal(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     uint16_t pos,
     uint16_t total);
 
@@ -97,7 +97,7 @@ void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total);
  * @param   x, y            top left corner coordinates
  * @param   width, height   frame width and height
  */
-void elements_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+void elements_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height);
 
 /** Draw button in left corner
  *
@@ -129,8 +129,8 @@ void elements_button_center(Canvas* canvas, const char* str);
  */
 void elements_multiline_text_aligned(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
+    int32_t x,
+    int32_t y,
     Align horizontal,
     Align vertical,
     const char* text);
@@ -141,7 +141,7 @@ void elements_multiline_text_aligned(
  * @param   x, y    top left corner coordinates
  * @param   text    string (possible multiline)
  */
-void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* text);
+void elements_multiline_text(Canvas* canvas, int32_t x, int32_t y, const char* text);
 
 /** Draw framed multiline text
  *
@@ -149,7 +149,7 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* t
  * @param   x, y    top left corner coordinates
  * @param   text    string (possible multiline)
  */
-void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const char* text);
+void elements_multiline_text_framed(Canvas* canvas, int32_t x, int32_t y, const char* text);
 
 /** Draw slightly rounded frame
  *
@@ -159,10 +159,10 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
  */
 void elements_slightly_rounded_frame(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height);
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height);
 
 /** Draw slightly rounded box
  *
@@ -172,10 +172,10 @@ void elements_slightly_rounded_frame(
  */
 void elements_slightly_rounded_box(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height);
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height);
 
 /** Draw bold rounded frame
  *
@@ -183,12 +183,7 @@ void elements_slightly_rounded_box(
  * @param   x, y            top left corner coordinates
  * @param   width, height   size of frame
  */
-void elements_bold_rounded_frame(
-    Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height);
+void elements_bold_rounded_frame(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height);
 
 /** Draw bubble frame for text
  *
@@ -211,8 +206,8 @@ void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
  */
 void elements_bubble_str(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
+    int32_t x,
+    int32_t y,
     const char* text,
     Align horizontal,
     Align vertical);
@@ -238,26 +233,26 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
  */
 void elements_scrollable_text_line_str(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     const char* string,
     size_t scroll,
     bool ellipsis,
     bool centered);
 void elements_scrollable_text_line(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     FuriString* string,
     size_t scroll,
     bool ellipsis);
 void elements_scrollable_text_line_centered(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
+    int32_t x,
+    int32_t y,
+    size_t width,
     FuriString* string,
     size_t scroll,
     bool ellipsis,
@@ -280,10 +275,10 @@ void elements_scrollable_text_line_centered(
  */
 void elements_text_box(
     Canvas* canvas,
-    uint8_t x,
-    uint8_t y,
-    uint8_t width,
-    uint8_t height,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    size_t height,
     Align horizontal,
     Align vertical,
     const char* text,

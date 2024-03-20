@@ -162,8 +162,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 item = MenuItemArray_get(model->items, shift_position);
                 size_t width = 24;
                 size_t height = 26;
-                size_t pos_x = 64;
-                size_t pos_y = 36;
+                int32_t pos_x = 64;
+                int32_t pos_y = 36;
                 if(i == 0) {
                     width += 6;
                     height += 4;

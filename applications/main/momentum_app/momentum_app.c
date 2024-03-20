@@ -245,6 +245,7 @@ MomentumApp* momentum_app_alloc() {
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
     uint32_t version;
+    uint8_t* unused_icon = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
     if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
        stream_read_line(stream, line) &&
        sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
@@ -260,7 +261,7 @@ MomentumApp* momentum_app_alloc() {
                 }
             }
             CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
-            flipper_application_load_name_and_icon(line, storage, NULL, line);
+            flipper_application_load_name_and_icon(line, storage, &unused_icon, line);
             if(!furi_string_cmp(line, "Momentum")) {
                 furi_string_set(line, "MNTM");
             } else if(!furi_string_cmp(line, "125 kHz RFID")) {
@@ -276,6 +277,7 @@ MomentumApp* momentum_app_alloc() {
             CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(line)));
         }
     }
+    free(unused_icon);
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);

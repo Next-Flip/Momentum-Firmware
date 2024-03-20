@@ -364,13 +364,14 @@ bool flipper_application_load_name_and_icon(
            preload_res == FlipperApplicationPreloadStatusApiTooOld ||
            preload_res == FlipperApplicationPreloadStatusApiTooNew) {
             const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-            if(manifest->has_icon && icon_ptr != NULL && *icon_ptr != NULL) {
+            if(manifest->has_icon) {
                 memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
             }
             furi_string_set(item_name, manifest->name);
             load_success = true;
         } else {
             FURI_LOG_E(TAG, "Failed to preload %s", furi_string_get_cstr(path));
+            load_success = false;
         }
 
         flipper_application_free(app);
