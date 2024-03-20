@@ -156,8 +156,6 @@ uint8_t furi_hal_subghz_get_lqi();
  */
 bool furi_hal_subghz_is_frequency_valid(uint32_t value);
 
-bool furi_hal_subghz_is_frequency_valid_extended(uint32_t value);
-
 /** Set frequency and path This function automatically selects antenna matching
  * network
  *

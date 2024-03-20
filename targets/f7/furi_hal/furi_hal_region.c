@@ -106,7 +106,7 @@ const char* furi_hal_region_get_name() {
     }
 }
 
-bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
+bool _furi_hal_region_is_frequency_allowed(uint32_t frequency) {
     if(!furi_hal_region) {
         return false;
     }
@@ -117,6 +117,11 @@ bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
     }
 
     return true;
+}
+
+// Check furi_hal_subghz settings for region bypass, if not it uses function above
+bool furi_hal_region_is_frequency_allowed(uint32_t frequency) {
+    return furi_hal_subghz_is_tx_allowed(frequency);
 }
 
 const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency) {

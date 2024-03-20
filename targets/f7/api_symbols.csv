@@ -1653,7 +1653,6 @@ Function,+,furi_hal_subghz_idle,void,
 Function,-,furi_hal_subghz_init,void,
 Function,+,furi_hal_subghz_is_async_tx_complete,_Bool,
 Function,+,furi_hal_subghz_is_frequency_valid,_Bool,uint32_t
-Function,+,furi_hal_subghz_is_frequency_valid_extended,_Bool,uint32_t
 Function,+,furi_hal_subghz_is_rx_data_crc_valid,_Bool,
 Function,+,furi_hal_subghz_is_tx_allowed,_Bool,uint32_t
 Function,+,furi_hal_subghz_load_custom_preset,void,const uint8_t*
