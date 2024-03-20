@@ -106,7 +106,7 @@ void subghz_cli_command_tx_carrier(Cli* cli, FuriString* args, void* context) {
             furi_delay_ms(250);
         }
     } else {
-        printf("This frequency can only be used for RX in your settings\r\n");
+        printf("This frequency can only be used for RX in your settings/region\r\n");
     }
 
     furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
@@ -264,7 +264,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
         subghz_devices_stop_async_tx(device);
 
     } else {
-        printf("Frequency is outside of default range. Check docs.\r\n");
+        printf("Transmission on this frequency is restricted by your settings/region\r\n");
     }
 
     subghz_devices_sleep(device);
@@ -800,7 +800,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
                 subghz_devices_stop_async_tx(device);
 
             } else {
-                printf("Transmission on this frequency is restricted in your settings\r\n");
+                printf("Transmission on this frequency is restricted in your settings/region\r\n");
             }
 
             if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
@@ -936,8 +936,7 @@ static void subghz_cli_command_encrypt_raw(Cli* cli, FuriString* args) {
     furi_string_free(source);
 }
 
-static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
-    UNUSED(context);
+static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     uint32_t frequency = 433920000;
     uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
 
@@ -966,7 +965,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
     // TODO
     if(!furi_hal_subghz_is_tx_allowed(frequency)) {
         printf(
-            "In your settings, only reception on this frequency (%lu) is allowed,\r\n"
+            "In your settings/region, only reception on this frequency (%lu) is allowed,\r\n"
             "the actual operation of the application is not possible\r\n ",
             frequency);
         return;
@@ -1140,7 +1139,7 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "chat") == 0) {
-            subghz_cli_command_chat(cli, args, NULL);
+            subghz_cli_command_chat(cli, args);
             break;
         }
 
