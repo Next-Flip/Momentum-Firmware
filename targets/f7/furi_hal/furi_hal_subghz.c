@@ -1,6 +1,6 @@
 #include <furi_hal_subghz.h>
 #include <lib/subghz/devices/cc1101_configs.h>
-
+#include <furi_hal_region_i.h>
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_spi.h>
@@ -54,6 +54,7 @@ typedef struct {
     int8_t rolling_counter_mult;
     bool ext_power_amp : 1;
     bool extended_frequency_i : 1;
+    bool bypass_region : 1;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
@@ -63,6 +64,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .rolling_counter_mult = 1,
     .ext_power_amp = false,
     .extended_frequency_i = false,
+    .bypass_region = false,
 };
 
 int8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -75,6 +77,10 @@ void furi_hal_subghz_set_rolling_counter_mult(int8_t mult) {
 
 void furi_hal_subghz_set_extended_frequency(bool state_i) {
     furi_hal_subghz.extended_frequency_i = state_i;
+}
+
+void furi_hal_subghz_set_bypass_region(bool enabled) {
+    furi_hal_subghz.bypass_region = enabled;
 }
 
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
@@ -381,6 +387,15 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
 }
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
+    if(!furi_hal_subghz.bypass_region) {
+        if(!_furi_hal_region_is_frequency_allowed(value)) {
+            FURI_LOG_I(TAG, "Frequency blocked - outside region range");
+            return false;
+        }
+
+        return true;
+    }
+
     bool allow_extended_for_int = furi_hal_subghz.extended_frequency_i;
 
     if(!(allow_extended_for_int) &&

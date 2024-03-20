@@ -49,6 +49,7 @@ void furi_hal_init() {
     furi_hal_flash_init();
     furi_hal_resources_init();
     furi_hal_version_init();
+    furi_hal_region_init();
     furi_hal_spi_config_init();
     furi_hal_spi_dma_init();
     furi_hal_ibutton_init();

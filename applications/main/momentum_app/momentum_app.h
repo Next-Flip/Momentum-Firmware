@@ -59,6 +59,7 @@ typedef struct {
     uint8_t subghz_hopper_index;
     char subghz_freq_buffer[7];
     bool subghz_extend;
+    bool subghz_bypass;
     RgbColor lcd_color;
     Rgb565Color vgm_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
