@@ -1,5 +1,6 @@
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
+#include <furi_hal_subghz.h>
 
 const FuriHalRegion furi_hal_region_zero = {
     .country_code = "00",

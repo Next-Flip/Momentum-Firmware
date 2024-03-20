@@ -407,7 +407,7 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     } else if(
         (allow_extended_for_int) && //
         !furi_hal_subghz_is_frequency_valid(value)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside dangerous range");
+        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
         return false;
     }
 
