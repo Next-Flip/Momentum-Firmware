@@ -7,6 +7,7 @@
 #include <core/check.h>
 #include <core/common_defines.h>
 #include <furi.h>
+#include <momentum/momentum.h>
 
 #include <m-array.h>
 #include <stdbool.h>
@@ -111,7 +112,7 @@ static void browser_parse_ext_filter(ExtFilterArray_t ext_filter, const char* fi
 
 static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, bool is_folder) {
     // Skip dot files if enabled
-    if(browser->hide_dot_files) {
+    if(browser->hide_dot_files && !momentum_settings.show_hidden_files) {
         if(furi_string_start_with_str(name, ".")) {
             return false;
         }

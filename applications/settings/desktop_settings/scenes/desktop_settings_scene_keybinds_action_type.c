@@ -47,7 +47,7 @@ static void
         const DialogsFileBrowserOptions browser_options = {
             .extension = extension,
             .icon = &I_unknown_10px,
-            .hide_dot_files = !momentum_settings.show_hidden_files,
+            .hide_dot_files = true,
             .skip_assets = true,
             .hide_ext = hide_ext,
             .item_loader_callback = keybinds_fap_selector_item_callback,
