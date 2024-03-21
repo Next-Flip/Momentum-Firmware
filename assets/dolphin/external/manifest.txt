@@ -104,7 +104,7 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 17
 Max level: 30
-Weight: 4
+Weight: 3
 
 Name: L2_Wake_up_128x64
 Min butthurt: 0
@@ -139,7 +139,7 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 21
 Max level: 30
-Weight: 4
+Weight: 3
 
 Name: L3_Furippa3_128x64
 Min butthurt: 0
@@ -167,18 +167,25 @@ Min butthurt: 11
 Max butthurt: 14
 Min level: 14
 Max level: 30
-Weight: 4
+Weight: 3
 
 Name: L2_Coding_in_the_shell_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 22
 Max level: 30
-Weight: 4
+Weight: 3
 
 Name: L2_Secret_door_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 26
 Max level: 30
-Weight: 4
+Weight: 3
+
+Name: L3_Freedom_2_dolphins_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 16
+Max level: 30
+Weight: 5
