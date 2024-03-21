@@ -31,11 +31,26 @@ bool momentum_app_scene_interface_mainmenu_reset_on_event(void* context, SceneMa
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DialogExResultRight:
-            storage_common_remove(furi_record_open(RECORD_STORAGE), MAINMENU_APPS_PATH);
+            bool reset = false;
+            Stream* stream = file_stream_alloc(furi_record_open(RECORD_STORAGE));
+            if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                stream_write_format(stream, "MenuAppList Version %u\n", 1);
+                for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+                    stream_write_format(stream, "%s\n", FLIPPER_APPS[i].name);
+                }
+                for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
+                    stream_write_format(stream, "%s\n", FLIPPER_EXTERNAL_APPS[i].name);
+                }
+                reset = true;
+            }
+            file_stream_close(stream);
+            stream_free(stream);
             furi_record_close(RECORD_STORAGE);
-            app->save_mainmenu_apps = false;
-            app->require_reboot = true;
-            momentum_app_apply(app);
+            if(reset) {
+                app->save_mainmenu_apps = false;
+                app->require_reboot = true;
+                momentum_app_apply(app);
+            }
             break;
         case DialogExResultLeft:
             scene_manager_previous_scene(app->scene_manager);
