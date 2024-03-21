@@ -222,11 +222,9 @@ static bool update_task_post_update(UpdateTask* update_task) {
             } else {
                 path_append(tmp_path, furi_string_get_cstr(update_task->manifest->splash_file));
             }
-            if(storage_common_copy(
-                   update_task->storage, furi_string_get_cstr(tmp_path), SLIDESHOW_FS_PATH) !=
-               FSE_OK) {
-                // actually, not critical
-            }
+            storage_common_remove(update_task->storage, SLIDESHOW_FS_PATH); // Overwrite if exists
+            storage_common_copy(
+                update_task->storage, furi_string_get_cstr(tmp_path), SLIDESHOW_FS_PATH);
             furi_string_free(tmp_path);
             update_task_set_progress(update_task, UpdateTaskStageSplashscreenInstall, 100);
         }
