@@ -9,24 +9,9 @@
 #include <momentum/momentum.h>
 
 const char* const name_generator_left[] = {
-    "super",
-    "big",
-    "little",
-    "liquid",
-    "qq",
-    "cheeky",
-    "thick",
-    "sneaky",
-    "quick",
-    "quantum",
-    "kurwa",
-    "feral",
-    "smart",
-    "yappy",
-    "ultra",
-    "whois",
-    "random",
-    "looshite",
+    "super",  "big",   "little", "liquid",  "qq",       "cheeky", "thick",
+    "sneaky", "silly", "quick",  "quantum", "kurwa",    "feral",  "smart",
+    "yappy",  "ultra", "whois",  "random",  "looshite",
 };
 
 const char* const name_generator_right[] = {
@@ -46,6 +31,7 @@ const char* const name_generator_right[] = {
     "pp",
     "zalaz",
     "breeky",
+    "bunker"
     "pingwin",
     "kot",
 };
