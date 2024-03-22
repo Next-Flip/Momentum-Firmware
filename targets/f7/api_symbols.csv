@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,59.0,,
+Version,+,60.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -970,7 +970,7 @@ Function,-,drand48,double,
 Function,-,drem,double,"double, double"
 Function,-,dremf,float,"float, float"
 Function,+,elements_bold_rounded_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
-Function,+,elements_bubble,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
+Function,+,elements_bubble,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,elements_bubble_str,void,"Canvas*, int32_t, int32_t, const char*, Align, Align"
 Function,+,elements_button_center,void,"Canvas*, const char*"
 Function,+,elements_button_left,void,"Canvas*, const char*"
@@ -984,12 +984,12 @@ Function,+,elements_progress_bar_with_text,void,"Canvas*, int32_t, int32_t, size
 Function,+,elements_scrollable_text_line,void,"Canvas*, int32_t, int32_t, size_t, FuriString*, size_t, _Bool"
 Function,+,elements_scrollable_text_line_centered,void,"Canvas*, int32_t, int32_t, size_t, FuriString*, size_t, _Bool, _Bool"
 Function,+,elements_scrollable_text_line_str,void,"Canvas*, int32_t, int32_t, size_t, const char*, size_t, _Bool, _Bool"
-Function,+,elements_scrollbar,void,"Canvas*, uint16_t, uint16_t"
-Function,+,elements_scrollbar_horizontal,void,"Canvas*, int32_t, int32_t, size_t, uint16_t, uint16_t"
-Function,+,elements_scrollbar_pos,void,"Canvas*, int32_t, int32_t, size_t, uint16_t, uint16_t"
+Function,+,elements_scrollbar,void,"Canvas*, size_t, size_t"
+Function,+,elements_scrollbar_horizontal,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
+Function,+,elements_scrollbar_pos,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
 Function,+,elements_slightly_rounded_box,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,elements_slightly_rounded_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
-Function,+,elements_string_fit_width,void,"Canvas*, FuriString*, uint8_t"
+Function,+,elements_string_fit_width,void,"Canvas*, FuriString*, size_t"
 Function,+,elements_text_box,void,"Canvas*, int32_t, int32_t, size_t, size_t, Align, Align, const char*, _Bool"
 Function,+,elf_resolve_from_hashtable,_Bool,"const ElfApiInterface*, uint32_t, Elf32_Addr*"
 Function,+,elf_symbolname_hash,uint32_t,const char*
