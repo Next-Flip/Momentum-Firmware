@@ -40,7 +40,9 @@ static void
         if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
             CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(temp_path)));
             Storage* storage = furi_record_open(RECORD_STORAGE);
-            flipper_application_load_name_and_icon(temp_path, storage, NULL, temp_path);
+            uint8_t* unused_icon = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
+            flipper_application_load_name_and_icon(temp_path, storage, &unused_icon, temp_path);
+            free(unused_icon);
             furi_record_close(RECORD_STORAGE);
             if(furi_string_start_with_str(temp_path, "[")) {
                 size_t trim = furi_string_search_str(temp_path, "] ", 1);
