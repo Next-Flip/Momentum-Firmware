@@ -115,6 +115,8 @@ static void js_serial_deinit(JsSerialInst* js_serial) {
 
         expansion_enable(furi_record_open(RECORD_EXPANSION));
         furi_record_close(RECORD_EXPANSION);
+
+        js_serial->setup_done = false;
     }
 }
 
