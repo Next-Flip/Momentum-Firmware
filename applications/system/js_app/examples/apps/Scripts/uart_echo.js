@@ -9,3 +9,5 @@ while (1) {
         print("0x" + to_hex_string(data_view[0]));
     }
 }
+
+// There's also serial.end(), so you can serial.setup() again in same script

@@ -1,4 +1,5 @@
 #include <core/common_defines.h>
+#include <expansion/expansion.h>
 #include <furi_hal.h>
 #include "../js_modules.h"
 #include <m-array.h>
@@ -88,14 +89,47 @@ static void js_serial_setup(struct mjs* mjs) {
         return;
     }
 
-    serial->rx_stream = furi_stream_buffer_alloc(RX_BUF_LEN, 1);
+    expansion_disable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
+
     serial->serial_handle = furi_hal_serial_control_acquire(serial_id);
     if(serial->serial_handle) {
+        serial->rx_stream = furi_stream_buffer_alloc(RX_BUF_LEN, 1);
         furi_hal_serial_init(serial->serial_handle, baudrate);
         furi_hal_serial_async_rx_start(
             serial->serial_handle, js_serial_on_async_rx, serial, false);
         serial->setup_done = true;
+    } else {
+        expansion_enable(furi_record_open(RECORD_EXPANSION));
+        furi_record_close(RECORD_EXPANSION);
     }
+}
+
+static void js_serial_deinit(JsSerialInst* js_serial) {
+    if(js_serial->setup_done) {
+        furi_hal_serial_async_rx_stop(js_serial->serial_handle);
+        furi_hal_serial_deinit(js_serial->serial_handle);
+        furi_hal_serial_control_release(js_serial->serial_handle);
+        js_serial->serial_handle = NULL;
+        furi_stream_buffer_free(js_serial->rx_stream);
+
+        expansion_enable(furi_record_open(RECORD_EXPANSION));
+        furi_record_close(RECORD_EXPANSION);
+    }
+}
+
+static void js_serial_end(struct mjs* mjs) {
+    mjs_val_t obj_inst = mjs_get(mjs, mjs_get_this(mjs), INST_PROP_NAME, ~0);
+    JsSerialInst* serial = mjs_get_ptr(mjs, obj_inst);
+    furi_assert(serial);
+
+    if(!serial->setup_done) {
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Serial is not configured");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
+    js_serial_deinit(serial);
 }
 
 static void js_serial_write(struct mjs* mjs) {
@@ -578,6 +612,7 @@ static void* js_serial_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t serial_obj = mjs_mk_object(mjs);
     mjs_set(mjs, serial_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, js_serial));
     mjs_set(mjs, serial_obj, "setup", ~0, MJS_MK_FN(js_serial_setup));
+    mjs_set(mjs, serial_obj, "end", ~0, MJS_MK_FN(js_serial_end));
     mjs_set(mjs, serial_obj, "write", ~0, MJS_MK_FN(js_serial_write));
     mjs_set(mjs, serial_obj, "read", ~0, MJS_MK_FN(js_serial_read));
     mjs_set(mjs, serial_obj, "readln", ~0, MJS_MK_FN(js_serial_readln));
@@ -590,14 +625,7 @@ static void* js_serial_create(struct mjs* mjs, mjs_val_t* object) {
 
 static void js_serial_destroy(void* inst) {
     JsSerialInst* js_serial = inst;
-    if(js_serial->setup_done) {
-        furi_hal_serial_async_rx_stop(js_serial->serial_handle);
-        furi_hal_serial_deinit(js_serial->serial_handle);
-        furi_hal_serial_control_release(js_serial->serial_handle);
-        js_serial->serial_handle = NULL;
-    }
-
-    furi_stream_buffer_free(js_serial->rx_stream);
+    js_serial_deinit(js_serial);
     free(js_serial);
 }
 
