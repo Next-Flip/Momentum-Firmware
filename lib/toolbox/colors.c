@@ -90,6 +90,31 @@ void rgb2hsv(const RgbColor* rgb, HsvColor* hsv) {
     }
 }
 
-inline int rgb565cmp(const Rgb565Color* a, const Rgb565Color* b) {
-    return memcmp(a, b, sizeof(Rgb565Color));
+RgbColor interpolate_color(
+    const RgbColor* colorStart,
+    const RgbColor* colorEnd,
+    uint8_t step,
+    uint8_t maxSteps) {
+    RgbColor color;
+
+    if(step >= maxSteps) {
+        memcpy(&color, colorEnd, sizeof(RgbColor));
+        return color;
+    }
+
+    color.r = colorStart->r + (colorEnd->r - colorStart->r) * step / maxSteps;
+    color.g = colorStart->g + (colorEnd->g - colorStart->g) * step / maxSteps;
+    color.b = colorStart->b + (colorEnd->b - colorStart->b) * step / maxSteps;
+
+    return color;
+}
+
+RgbColor lerp_color(const RgbColor* colorStart, const RgbColor* colorEnd, double t) {
+    RgbColor color;
+
+    color.r = colorStart->r * ((double)1.0 - t) + colorEnd->r * t;
+    color.g = colorStart->g * ((double)1.0 - t) + colorEnd->g * t;
+    color.b = colorStart->b * ((double)1.0 - t) + colorEnd->b * t;
+
+    return color;
 }
