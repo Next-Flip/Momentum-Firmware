@@ -31,16 +31,13 @@ int hsvcmp(const HsvColor* a, const HsvColor* b);
 void hsv2rgb(const HsvColor* hsv, RgbColor* rgb);
 void rgb2hsv(const RgbColor* rgb, HsvColor* hsv);
 
-typedef union {
-    uint16_t value;
-    struct {
-        uint16_t r : 5;
-        uint16_t g : 6;
-        uint16_t b : 5;
-    } FURI_PACKED;
-} Rgb565Color;
+RgbColor interpolate_color(
+    const RgbColor* colorStart,
+    const RgbColor* colorEnd,
+    uint8_t step,
+    uint8_t maxSteps);
 
-int rgb565cmp(const Rgb565Color* a, const Rgb565Color* b);
+RgbColor lerp_color(const RgbColor* colorStart, const RgbColor* colorEnd, double t);
 
 #ifdef __cplusplus
 }
