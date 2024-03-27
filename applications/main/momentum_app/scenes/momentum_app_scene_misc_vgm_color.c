@@ -14,7 +14,7 @@ void momentum_app_scene_misc_vgm_color_on_enter(void* context) {
     MomentumApp* app = context;
     ByteInput* byte_input = app->byte_input;
 
-    byte_input_set_header_text(byte_input, "Set VGM Color (RGB565)");
+    byte_input_set_header_text(byte_input, "Set VGM Color");
 
     if(scene_manager_get_scene_state(app->scene_manager, MomentumAppSceneMiscVgmColor)) {
         app->vgm_color = momentum_settings.vgm_color_bg;
@@ -49,10 +49,6 @@ bool momentum_app_scene_misc_vgm_color_on_event(void* context, SceneManagerEvent
                 momentum_settings.vgm_color_fg = app->vgm_color;
             }
             app->save_settings = true;
-            if(momentum_settings.vgm_color_mode == VgmColorModeCustom) {
-                expansion_disable(app->expansion);
-                expansion_enable(app->expansion);
-            }
             scene_manager_previous_scene(app->scene_manager);
             break;
         default:
