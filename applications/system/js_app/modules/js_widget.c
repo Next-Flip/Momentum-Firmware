@@ -178,6 +178,7 @@ static void js_widget_load_image_xbm(struct mjs* mjs) {
     } while(false);
 
     storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
 
     if(xbm == NULL) {
         mjs_return(mjs, MJS_UNDEFINED);
