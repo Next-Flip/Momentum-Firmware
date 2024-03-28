@@ -4,8 +4,10 @@ enum VarItemListIndex {
     VarItemListIndexBroadcastInterval,
     VarItemListIndexTransmitPower,
     VarItemListIndexRegisterTag,
+    VarItemListIndexShowMac,
     VarItemListIndexAbout,
 };
+
 
 void findmy_scene_config_broadcast_interval_changed(VariableItem* item) {
     FindMy* app = variable_item_get_context(item);
@@ -25,6 +27,18 @@ void findmy_scene_config_transmit_power_changed(VariableItem* item) {
     snprintf(str, sizeof(str), "%ddBm", app->state.transmit_power);
     variable_item_set_current_value_text(item, str);
     variable_item_set_current_value_index(item, app->state.transmit_power);
+}
+
+void findmy_scene_config_show_mac(VariableItem* item) {
+    FindMy* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    findmy_toggle_show_mac(app, index);
+    if (app->state.show_mac == true) {
+        variable_item_set_current_value_text(item, "Yes");
+    } else {
+        variable_item_set_current_value_text(item, "No");
+    }
+    variable_item_set_current_value_index(item, app->state.show_mac);
 }
 
 void findmy_scene_config_callback(void* context, uint32_t index) {
@@ -58,6 +72,14 @@ void findmy_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, power_str);
 
     item = variable_item_list_add(var_item_list, "Register Tag", 0, NULL, NULL);
+
+    item = variable_item_list_add(var_item_list, "Show MAC", 2, findmy_scene_config_show_mac, app);
+    variable_item_set_current_value_index(item, app->state.show_mac);
+    if(app->state.show_mac == true)
+        variable_item_set_current_value_text(item, "Yes");
+    else
+        variable_item_set_current_value_text(item, "No");
+    
 
     item = variable_item_list_add(
         var_item_list,
