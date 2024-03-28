@@ -34,8 +34,8 @@ widget.addDot(102, 44);
 widget.addDot(104, 43);
 
 // add an icon (x, y, icon)
-widget.addIcon(100, 55, "Common/ButtonUp_7x4");
-widget.addIcon(100, 60, "Common/ButtonDown_7x4");
+widget.addIcon(100, 50, "ButtonUp_7x4");
+widget.addIcon(100, 55, "ButtonDown_7x4");
 
 // add a glyph (x, y, glyph)
 widget.addGlyph(120, 50, 0x23);
