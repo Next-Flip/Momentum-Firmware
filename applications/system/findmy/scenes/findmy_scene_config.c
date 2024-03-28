@@ -32,11 +32,7 @@ void findmy_scene_config_show_mac(VariableItem* item) {
     FindMy* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     findmy_toggle_show_mac(app, index);
-    if(app->state.show_mac == true) {
-        variable_item_set_current_value_text(item, "Yes");
-    } else {
-        variable_item_set_current_value_text(item, "No");
-    }
+    variable_item_set_current_value_text(item, app->state.show_mac ? "Yes" : "No");
     variable_item_set_current_value_index(item, app->state.show_mac);
 }
 
