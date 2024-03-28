@@ -38,7 +38,6 @@ static void findmy_main_draw_callback(Canvas* canvas, void* _model) {
         break;
     }
 
-    
     if(model->show_mac == false) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 31, network_text);
@@ -132,10 +131,7 @@ FindMyMain* findmy_main_alloc(FindMy* app) {
             model->active = app->state.beacon_active;
             model->interval = app->state.broadcast_interval;
             model->show_mac = app->state.show_mac;
-            memcpy(
-                model->mac,
-                app->state.mac,
-                sizeof(model->mac));
+            memcpy(model->mac, app->state.mac, sizeof(model->mac));
             model->type = app->state.tag_type;
         },
         false);
@@ -184,7 +180,7 @@ void findmy_main_update_mac(FindMyMain* findmy_main, uint8_t* mac) {
             memcpy(model->mac, mac, sizeof(model->mac));
             furi_hal_bt_reverse_mac_addr(model->mac);
         },
-        false);
+        true);
 }
 void findmy_main_update_interval(FindMyMain* findmy_main, uint8_t interval) {
     furi_assert(findmy_main);

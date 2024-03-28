@@ -8,7 +8,6 @@ enum VarItemListIndex {
     VarItemListIndexAbout,
 };
 
-
 void findmy_scene_config_broadcast_interval_changed(VariableItem* item) {
     FindMy* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -33,7 +32,7 @@ void findmy_scene_config_show_mac(VariableItem* item) {
     FindMy* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     findmy_toggle_show_mac(app, index);
-    if (app->state.show_mac == true) {
+    if(app->state.show_mac == true) {
         variable_item_set_current_value_text(item, "Yes");
     } else {
         variable_item_set_current_value_text(item, "No");
@@ -75,11 +74,7 @@ void findmy_scene_config_on_enter(void* context) {
 
     item = variable_item_list_add(var_item_list, "Show MAC", 2, findmy_scene_config_show_mac, app);
     variable_item_set_current_value_index(item, app->state.show_mac);
-    if(app->state.show_mac == true)
-        variable_item_set_current_value_text(item, "Yes");
-    else
-        variable_item_set_current_value_text(item, "No");
-    
+    variable_item_set_current_value_text(item, app->state.show_mac ? "Yes" : "No");
 
     item = variable_item_list_add(
         var_item_list,

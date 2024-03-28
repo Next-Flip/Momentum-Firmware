@@ -29,7 +29,11 @@ bool findmy_state_load(FindMyState* out_state) {
             if(!flipper_format_read_uint32(file, "transmit_power", &tmp, 1)) break;
             state.transmit_power = tmp;
 
-            if(!flipper_format_read_bool(file, "show_mac", &state.show_mac, 1)) break;
+            if(!flipper_format_read_bool(file, "show_mac", &state.show_mac, 1)) {
+                // Support migrating from old config
+                state.show_mac = false;
+                flipper_format_rewind(file);
+            }
 
             if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) {
                 // Support migrating from old config
@@ -103,7 +107,6 @@ void findmy_state_apply(FindMyState* state) {
 
     furi_check(
         furi_hal_bt_extra_beacon_set_data(state->data, findmy_state_data_size(state->tag_type)));
-
 
     if(state->beacon_active) {
         furi_check(furi_hal_bt_extra_beacon_start());
