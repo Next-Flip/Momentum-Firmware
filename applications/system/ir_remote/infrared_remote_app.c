@@ -569,6 +569,7 @@ int32_t infrared_remote_app(char* p) {
         }
     }
 
+    furi_hal_infrared_set_tx_output(FuriHalInfraredTxPinInternal);
     if(furi_hal_power_is_otg_enabled() != otg_was_enabled) {
         if(otg_was_enabled) {
             furi_hal_power_enable_otg();
