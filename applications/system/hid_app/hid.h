@@ -35,11 +35,6 @@
 
 #define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
 
-typedef enum {
-    HidTransportUsb,
-    HidTransportBle,
-} HidTransport;
-
 typedef struct Hid Hid;
 
 struct Hid {
@@ -49,7 +44,7 @@ struct Hid {
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    Submenu* device_type_submenu;
+    Submenu* submenu;
     DialogEx* dialog;
     Popup* popup;
     HidKeynote* hid_keynote;
@@ -64,10 +59,8 @@ struct Hid {
     HidTikTok* hid_tiktok;
     HidPushToTalk* hid_ptt;
     HidPushToTalkMenu* hid_ptt_menu;
-
-    HidTransport transport;
-    uint32_t view_id;
 };
+
 void bt_hid_remove_pairing(Hid* app);
 
 void hid_hal_keyboard_press(Hid* instance, uint16_t event);

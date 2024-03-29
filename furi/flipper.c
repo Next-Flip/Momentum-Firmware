@@ -40,6 +40,7 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <notification/notification_app.h>
 #include <dolphin/helpers/dolphin_state.h>
 #include <applications/main/u2f/u2f_data.h>
+#include <applications/main/infrared/infrared_app.h>
 #include <expansion/expansion_settings_filename.h>
 #include <applications/main/archive/helpers/archive_favorites.h>
 #include <momentum/namespoof.h>
@@ -72,6 +73,7 @@ void flipper_migrate_files() {
         {INT_PATH(".bt.keys"), BT_KEYS_STORAGE_PATH, true},
         {INT_PATH(".expansion.settings"), EXPANSION_SETTINGS_PATH, true},
         {INT_PATH(".notification.settings"), NOTIFICATION_SETTINGS_PATH, true},
+        {INT_PATH(".infrared.settings"), INFRARED_SETTINGS_PATH, true},
         // Ext -> Int
         {CFG_PATH("desktop.settings"), DESKTOP_SETTINGS_PATH, true},
     };

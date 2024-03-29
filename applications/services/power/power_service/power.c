@@ -151,7 +151,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         }
 
         if(power->state == PowerStateCharging) {
-            canvas_set_bitmap_mode(canvas, 1);
+            canvas_set_bitmap_mode(canvas, true);
             // TODO: replace -1 magic for uint8_t with re-framing
             if(battery_icon == BatteryIconPercent) {
                 canvas_set_color(canvas, ColorBlack);
@@ -234,7 +234,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
                 canvas_set_color(canvas, ColorBlack);
                 canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_9x10);
             }
-            canvas_set_bitmap_mode(canvas, 0);
+            canvas_set_bitmap_mode(canvas, false);
         }
     } else {
         canvas_draw_box(canvas, 8, 3, 8, 2);

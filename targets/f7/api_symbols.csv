@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.0,,
+Version,+,60.3,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -784,7 +784,7 @@ Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfile
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,-,bt_settings_load,_Bool,BtSettings*
-Function,+,bt_settings_save,_Bool,BtSettings*
+Function,+,bt_settings_save,_Bool,const BtSettings*
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
 Function,+,buffered_file_stream_get_error,FS_Error,Stream*
@@ -1036,7 +1036,7 @@ Function,+,expansion_get_settings,ExpansionSettings*,Expansion*
 Function,+,expansion_is_connected,_Bool,Expansion*
 Function,+,expansion_set_listen_serial,void,"Expansion*, FuriHalSerialId"
 Function,-,expansion_settings_load,_Bool,ExpansionSettings*
-Function,+,expansion_settings_save,_Bool,ExpansionSettings*
+Function,+,expansion_settings_save,_Bool,const ExpansionSettings*
 Function,-,expf,float,float
 Function,-,expl,long double,long double
 Function,-,explicit_bzero,void,"void*, size_t"
@@ -1358,6 +1358,7 @@ Function,+,furi_hal_gpio_init_simple,void,"const GpioPin*, const GpioMode"
 Function,+,furi_hal_gpio_remove_int_callback,void,const GpioPin*
 Function,+,furi_hal_hid_consumer_key_press,_Bool,uint16_t
 Function,+,furi_hal_hid_consumer_key_release,_Bool,uint16_t
+Function,+,furi_hal_hid_consumer_key_release_all,_Bool,
 Function,+,furi_hal_hid_get_led_state,uint8_t,
 Function,+,furi_hal_hid_is_connected,_Bool,
 Function,+,furi_hal_hid_kb_press,_Bool,uint16_t
@@ -1408,12 +1409,9 @@ Function,+,furi_hal_infrared_async_tx_set_signal_sent_isr_callback,void,"FuriHal
 Function,+,furi_hal_infrared_async_tx_start,void,"uint32_t, float"
 Function,+,furi_hal_infrared_async_tx_stop,void,
 Function,+,furi_hal_infrared_async_tx_wait_termination,void,
-Function,+,furi_hal_infrared_get_debug_out_status,_Bool,
-Function,+,furi_hal_infrared_is_auto_detect_enabled,_Bool,
+Function,+,furi_hal_infrared_detect_tx_output,FuriHalInfraredTxPin,
 Function,+,furi_hal_infrared_is_busy,_Bool,
-Function,+,furi_hal_infrared_is_external_connected,_Bool,
-Function,+,furi_hal_infrared_set_auto_detect,void,_Bool
-Function,+,furi_hal_infrared_set_debug_out,void,_Bool
+Function,+,furi_hal_infrared_set_tx_output,void,FuriHalInfraredTxPin
 Function,-,furi_hal_init,void,
 Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
@@ -3006,9 +3004,9 @@ Function,+,rpc_system_app_set_error_code,void,"RpcAppSystem*, uint32_t"
 Function,+,rpc_system_app_set_error_text,void,"RpcAppSystem*, const char*"
 Function,-,rpmatch,int,const char*
 Function,-,run_with_default_app,void,const char*
-Function,+,saved_struct_get_payload_size,_Bool,"const char*, uint8_t, uint8_t, size_t*"
+Function,+,saved_struct_get_metadata,_Bool,"const char*, uint8_t*, uint8_t*, size_t*"
 Function,+,saved_struct_load,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
-Function,+,saved_struct_save,_Bool,"const char*, void*, size_t, uint8_t, uint8_t"
+Function,+,saved_struct_save,_Bool,"const char*, const void*, size_t, uint8_t, uint8_t"
 Function,-,scalbln,double,"double, long int"
 Function,-,scalblnf,float,"float, long int"
 Function,-,scalblnl,long double,"long double, long"

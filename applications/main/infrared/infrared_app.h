@@ -13,3 +13,6 @@
  * @brief InfraredApp opaque type declaration.
  */
 typedef struct InfraredApp InfraredApp;
+
+#include <storage/storage.h>
+#define INFRARED_SETTINGS_PATH CFG_PATH("infrared.settings")
