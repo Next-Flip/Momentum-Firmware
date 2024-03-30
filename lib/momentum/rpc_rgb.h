@@ -1,15 +1,23 @@
 #pragma once
 
-#include "colors.h"
+#include "momentum.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef union __attribute__((packed)) {
+    struct {
+        VgmColorMode mode : 8;
+        RgbColor rgb;
+    };
+    uint32_t value;
+} RgbColorTransmit;
+
 void rpc_rgb_init();
 
-RgbColor get_screen_color_fg();
-RgbColor get_screen_color_bg();
+uint32_t get_screen_color_fg();
+uint32_t get_screen_color_bg();
 
 void rpc_rgb_deinit();
 
