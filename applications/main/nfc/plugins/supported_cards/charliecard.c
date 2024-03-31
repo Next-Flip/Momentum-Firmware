@@ -918,7 +918,9 @@ void locale_format_dt_cat(FuriString* out, const DateTime* dt) {
     // helper to print datetimes
     FuriString* s = furi_string_alloc();
 
-    locale_format_date(s, dt, locale_get_date_format(), "-");
+    LocaleDateFormat date_format = locale_get_date_format();
+    const char* separator = (date_format == LocaleDateFormatDMY) ? "." : "/";
+    locale_format_date(s, dt, date_format, separator);
     furi_string_cat(out, s);
     locale_format_time(s, dt, locale_get_time_format(), false);
     furi_string_cat_printf(out, "  ");
