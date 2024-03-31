@@ -26,26 +26,40 @@
  * – ASCII art &/or unified read function for the balance sectors, 
  *   to improve readability / interpretability by others?
  * — Improve string output formatting, esp. of transaction log
+ * — Mapping of buses to garages, and subsequently, route subsets via 
+ *   http://roster.transithistory.org/ data
+ * — Mapping of stations to lines
+ * — Add'l data fields for side of station fare gates are on? Some stations
+ *   separate inbound & outbound sides, so direction could be inferred
+ *   from gates used.
  * — Continually gather data on fare gate ID mappings, update as collected;
  *   check locations this might be scrapable / inferrable from:
  *   [X] MBTA GTFS spec (https://www.mbta.com/developers/gtfs) features & IDs 
  *       seem too-coarse-grained & uncorrelated
- *   [X] MBTA ArcGIS (https://mbta-massdot.opendata.arcgis.com/) & Tableau (https://public.tableau.com/app/profile/mbta.office.of.performance.management.and.innovation/vizzes) 
+ *   [X] MBTA ArcGIS (https://mbta-massdot.opendata.arcgis.com/) & Tableau 
+ *       (https://public.tableau.com/app/profile/mbta.office.of.performance.management.and.innovation/vizzes) 
  *       files don't seem to have anything of that resolution (only down to ridership by station)
  *   [X] (skim of) MBTA public GitHub (https://github.com/mbta) repos make no reference to fare-gate-level data
  *   [X] (skim of) MBTA public engineering docs (https://www.mbta.com/engineering) unfruitful;
- *       Closest mention spotted is 2014 "Ridership and Service Statistics" (https://cdn.mbta.com/sites/default/files/fmcb-meeting-docs/reports-policies/2014-07-mbta-bluebook-ed14.pdf)
+ *       Closest mention spotted is 2014 "Ridership and Service Statistics" 
+ *       (https://cdn.mbta.com/sites/default/files/fmcb-meeting-docs/reports-policies/2014-07-mbta-bluebook-ed14.pdf)
  *       where on pg.40, "Equipment at Stations" is enumerated, and fare gates counts are given,
- *       listed as "AFC Gates" (presumably standing for "Automated Fare Control")
+ *       listed as "AFC Gates" (presumably standing for "Automated Fare Collection")
  *   [X] Josiah Zachery criminal trial public evidence — convicted partially on 
  *       data on his CharlieCard, appeals partially on basis of legality of this search.
  *       Prev. court case (gag order mentioned in preamble) leaked some data in the files
  *       entered into evidence. Seemingly did not happen here; fare gate IDs unmentioned,
  *       only ever the nature of stored/saved data and methods of retrieval.
- *       Appelate case dockets 2019-P-0401, SJC-12952, SJ-2017-0390 (https://www.ma-appellatecourts.org/party)
- *       Trial court case 04/02/2015 #1584CR10265 @Suffolk County Criminal Superior Court (https://www.masscourts.org/eservices/home.page.16)
- *   [ ] FOIA / public records request? (https://massachusettsdot.mycusthelp.com/WEBAPP/_rs/(S(tbcygdlm0oojy35p1wv0y2y5))/supporthome.aspx)
- *   [ ] MBTA data blog? (https://www.massdottracker.com/datablog/)
+ *       Appelate case dockets 2019-P-0401, SJC-12952, SJ-2017-0390 
+ *       (https://www.ma-appellatecourts.org/party)
+ *       Trial court indictment 04/02/2015, Case# 1584CR10265 @Suffolk County Criminal Superior Court 
+ *       (https://www.masscourts.org/eservices/home.page.16)
+ *   [ ] FOIA / public records request? 
+ *       (https://massachusettsdot.mycusthelp.com/WEBAPP/_rs/(S(tbcygdlm0oojy35p1wv0y2y5))/supporthome.aspx)
+ *   [X] MBTA data blog? (https://www.massdottracker.com/datablog/)
+ *   [ ] MassDOT developers Google group? (https://groups.google.com/g/massdotdevelopers)
+ *       [X] preexisting posts
+ *       [ ] ask directly?
  *   [ ] Other?
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -164,10 +178,10 @@ static const IdMapping charliecard_types[] = {
 
     // Passes
     {.id = 135, .name = "30 Day Local Bus Pass"},
-    {.id = 136, .name = "30 Day Inner Express Bus Pass"}, //
-    {.id = 137, .name = "30 Day Outer Express Bus Pass"}, //
-    {.id = 138, .name = "30 Day LinkPass"}, //
-    {.id = 139, .name = "30 Day Senior LinkPass"}, //
+    {.id = 136, .name = "30 Day Inner Express Bus Pass"},
+    {.id = 137, .name = "30 Day Outer Express Bus Pass"},
+    {.id = 138, .name = "30 Day LinkPass"},
+    {.id = 139, .name = "30 Day Senior LinkPass"},
     {.id = 148, .name = "30 Day TAP LinkPass"},
     {.id = 150, .name = "Monthly Student LinkPass"},
     {.id = 424, .name = "Monthly TAP LinkPass"}, // 0b0110101000
@@ -713,7 +727,7 @@ static DateTime
     end_validity_parse(const MfClassicData* data, enum CharlieActiveSector active_sec) {
     // End validity field is a bit odd; shares byte 1 with another variable (the card type field),
     // occupying only the last 3 bits (and subsequent two bytes), hence bitmask
-    // TODO; what are the add'l 3 bits between type & end validity fields?
+    // TODO: what are the add'l 3 bits between type & end validity fields?
     uint32_t ts_charlie_ev =
         pos_to_num(data, (active_sec == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3, 1, 1, 3);
     ts_charlie_ev = ts_charlie_ev & 0x1FFFFF;
