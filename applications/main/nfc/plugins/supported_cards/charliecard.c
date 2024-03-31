@@ -848,7 +848,6 @@ static enum CharlieActiveSector get_active_sector(const MfClassicData* data) {
                              datetime_datetime_to_timestamp(&ds3);
 
     // with all tested cards so far, this has been true
-    // cf. type_parse() assertion comments
     furi_assert(active_trip == active_date);
 
     return active_trip ? CHARLIE_ACTIVE_SECTOR_2 : CHARLIE_ACTIVE_SECTOR_3;
@@ -863,9 +862,6 @@ static uint16_t type_parse(const MfClassicData* data) {
     // bitshift (2bytes = 16 bits) by 6bits for just first 10bits
     const uint16_t type1 = pos_to_num(data, 2, 1, 0, 2) >> 6;
     const uint16_t type2 = pos_to_num(data, 3, 1, 0, 2) >> 6;
-    // might be wise to remove the assertion; then again, it's an effective way
-    // to crowdsource research, as hopefully if this isn't universally true,
-    // someone will come running when their app crashes — probably not a best practice though haha.
     furi_assert(type1 == type2);
 
     return type1;
@@ -953,7 +949,7 @@ void trip_format_cat(FuriString* out, Trip trip) {
     if(!!(trip.g_flag & 0x1) && (trip.fare.dollars == FARE_BUS.dollars) &&
        (trip.fare.cents == FARE_BUS.cents)) {
         // if not a refill, and the fare amount is equal to bus fare (any better approach? flag bits for modality?)
-        // format for bus
+        // format for bus (gate ID on busses = posted bus #)
         furi_string_cat_printf(out, "%sBus#%u", sep, trip.gate);
     } else if(get_map_item(trip.gate, charliecard_fare_gate_ids, kNumFareGateIds, &sta)) {
         // station found in fare gate ID map, append station name
@@ -981,13 +977,17 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         if(data->type != MfClassicType1k) break;
 
         // Verify key
-        const uint8_t verify_sector = 3; // arbitrary
+        // arbitrary sector in the main data portion
+        const uint8_t verify_sector = 3;
         const MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(data, verify_sector);
 
-        const uint64_t key =
+        const uint64_t key_a =
             bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
-        if(key != charliecard_1k_keys[verify_sector].a) break;
+        const uint64_t key_b =
+            bit_lib_bytes_to_num_be(sec_tr->key_b.data, COUNT_OF(sec_tr->key_b.data));
+        if(key_a != charliecard_1k_keys[verify_sector].a) break;
+        if(key_b != charliecard_1k_keys[verify_sector].b) break;
 
         // TODO: Verify add'l?
 
