@@ -996,14 +996,14 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         DateTime last = date_parse(data, active_sector, 0, 1);
         furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
 
-        const Trip* trips = trips_parse(data);
+        Trip* trips = trips_parse(data);
         furi_string_cat_printf(parsed_data, "\nTransactions:");
         for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
             furi_string_cat_printf(parsed_data, "\n");
             trip_format_cat(parsed_data, trips[i]);
             furi_string_cat_printf(parsed_data, "\n");
         }
-        // free(trips);
+        free(trips);
 
         parsed = true;
     } while(false);
