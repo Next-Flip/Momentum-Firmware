@@ -18,6 +18,35 @@
  * — Scott Campbell; josephscottcampbell.com <scott@josephscottcampbell.com>
  * — Noah Gibson; <noahgibson06@proton.me>
  * Talk available at: https://www.youtube.com/watch?v=1JT_lTfK69Q
+ * 
+ * TODOs:
+ * — Reverse engineer passes (sectors 4 & 5?), impl.
+ * — Infer transaction flag meanings
+ * — Infer remaining unknown bytes in the balance sectors (2 & 3)
+ * – ASCII art &/or unified read function for the balance sectors, 
+ *   to improve readability / interpretability by others?
+ * — Improve string output formatting, esp. of transaction log
+ * — Continually gather data on fare gate ID mappings, update as collected;
+ *   check locations this might be scrapable / inferrable from:
+ *   [X] MBTA GTFS spec (https://www.mbta.com/developers/gtfs) features & IDs 
+ *       seem too-coarse-grained & uncorrelated
+ *   [X] MBTA ArcGIS (https://mbta-massdot.opendata.arcgis.com/) & Tableau (https://public.tableau.com/app/profile/mbta.office.of.performance.management.and.innovation/vizzes) 
+ *       files don't seem to have anything of that resolution (only down to ridership by station)
+ *   [X] (skim of) MBTA public GitHub (https://github.com/mbta) repos make no reference to fare-gate-level data
+ *   [X] (skim of) MBTA public engineering docs (https://www.mbta.com/engineering) unfruitful;
+ *       Closest mention spotted is 2014 "Ridership and Service Statistics" (https://cdn.mbta.com/sites/default/files/fmcb-meeting-docs/reports-policies/2014-07-mbta-bluebook-ed14.pdf)
+ *       where on pg.40, "Equipment at Stations" is enumerated, and fare gates counts are given,
+ *       listed as "AFC Gates" (presumably standing for "Automated Fare Control")
+ *   [X] Josiah Zachery criminal trial public evidence — convicted partially on 
+ *       data on his CharlieCard, appeals partially on basis of legality of this search.
+ *       Prev. court case (gag order mentioned in preamble) leaked some data in the files
+ *       entered into evidence. Seemingly did not happen here; fare gate IDs unmentioned,
+ *       only ever the nature of stored/saved data and methods of retrieval.
+ *       Appelate case dockets 2019-P-0401, SJC-12952, SJ-2017-0390 (https://www.ma-appellatecourts.org/party)
+ *       Trial court case 04/02/2015 #1584CR10265 @Suffolk County Criminal Superior Court (https://www.masscourts.org/eservices/home.page.16)
+ *   [ ] FOIA / public records request? (https://massachusettsdot.mycusthelp.com/WEBAPP/_rs/(S(tbcygdlm0oojy35p1wv0y2y5))/supporthome.aspx)
+ *   [ ] MBTA data blog? (https://www.massdottracker.com/datablog/)
+ *   [ ] Other?
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -809,16 +838,17 @@ static enum CharlieActiveSector get_active_sector(const MfClassicData* data) {
     */
 
     // active sector based on trip counters
-    const bool active_trip = n_uses(data, CHARLIE_ACTIVE_SECTOR_2) <
+    const bool active_trip = n_uses(data, CHARLIE_ACTIVE_SECTOR_2) <=
                              n_uses(data, CHARLIE_ACTIVE_SECTOR_3);
 
     // active sector based on transaction date
     DateTime ds2 = date_parse(data, 2, 0, 1);
     DateTime ds3 = date_parse(data, 3, 0, 1);
-    const bool active_date = datetime_datetime_to_timestamp(&ds2) >
+    const bool active_date = datetime_datetime_to_timestamp(&ds2) >=
                              datetime_datetime_to_timestamp(&ds3);
 
     // with all tested cards so far, this has been true
+    // cf. type_parse() assertion comments
     furi_assert(active_trip == active_date);
 
     return active_trip ? CHARLIE_ACTIVE_SECTOR_2 : CHARLIE_ACTIVE_SECTOR_3;
@@ -833,6 +863,9 @@ static uint16_t type_parse(const MfClassicData* data) {
     // bitshift (2bytes = 16 bits) by 6bits for just first 10bits
     const uint16_t type1 = pos_to_num(data, 2, 1, 0, 2) >> 6;
     const uint16_t type2 = pos_to_num(data, 3, 1, 0, 2) >> 6;
+    // might be wise to remove the assertion; then again, it's an effective way
+    // to crowdsource research, as hopefully if this isn't universally true,
+    // someone will come running when their app crashes — probably not a best practice though haha.
     furi_assert(type1 == type2);
 
     return type1;
@@ -871,10 +904,9 @@ static DateTime expiry(DateTime iss) {
 }*/
 
 static bool expired(DateTime expiry, DateTime last_trip) {
-    // if a card has sat unused for >2 years, expired
+    // if a card has sat unused for >2 years, expired (verify this claim?)
     // else expired if current date > expiry date
 
-    // TODO: end validity field?
     uint32_t ts_exp = datetime_datetime_to_timestamp(&expiry);
     uint32_t ts_last = datetime_datetime_to_timestamp(&last_trip);
     uint32_t ts_now = time_now();
@@ -930,7 +962,6 @@ void trip_format_cat(FuriString* out, Trip trip) {
         furi_string_cat_printf(out, "%s%u", sep, trip.gate);
     }
     // print flags for debugging purposes
-    // TODO: set up as debug-mode-only?
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         furi_string_cat_printf(out, "%s%u%s%u", sep, trip.g_flag, sep, trip.f_flag);
     }
@@ -968,7 +999,6 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         uint32_t card_number = bit_lib_bytes_to_num_be(uid, 4);
         furi_string_cat_printf(parsed_data, "\nSerial: 5-%lu", card_number);
 
-        // Money fare = money_parse(data, active_sector, 0, 4);
         Money bal = money_parse(data, active_sector, 1, 5);
         furi_string_cat_printf(parsed_data, "\nBal: ");
         money_format_cat(parsed_data, bal);
@@ -987,11 +1017,6 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         const DateTime e_v = end_validity_parse(data, active_sec_enum);
         furi_string_cat_printf(parsed_data, "\nExpiry: ");
         locale_format_dt_cat(parsed_data, &e_v);
-
-        /*
-        const DateTime exp = expiry(iss);
-        furi_string_cat_printf(parsed_data, "\nExp: ");
-        locale_format_dt_cat(parsed_data, &exp);*/
 
         DateTime last = date_parse(data, active_sector, 0, 1);
         furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
