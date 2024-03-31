@@ -161,7 +161,7 @@ typedef struct {
     const char* name;
 } IdMapping;
 
-// this should be a complete accounting of types,
+// this should be a complete accounting of types, (1 and 7 day pass types maybe missing?)
 static const IdMapping charliecard_types[] = {
     // Regular card types
     {.id = 367, .name = "Adult"},
@@ -402,9 +402,7 @@ static const IdMapping charliecard_fare_gate_ids[] = {
     {.id = 6647, .name = "Malden Center"},
     {.id = 6648, .name = "Malden Center"},
     // Chinatown
-    {.id = 6704,
-     .name =
-         "Malden Center"}, // Entry error? Placed after "Chinatown" divider, but with name Malden Center
+    {.id = 6704, .name = "Chinatown"},
     {.id = 6705, .name = "Chinatown"},
     {.id = 2099, .name = "Chinatown"},
     {.id = 7003, .name = "Chinatown"},
@@ -485,7 +483,7 @@ static const IdMapping charliecard_fare_gate_ids[] = {
     {.id = 7016, .name = "Forest Hills"},
     {.id = 6950, .name = "Forest Hills"},
     {.id = 6951, .name = "Forest Hills"},
-    {.id = 604, .name = "Forest Hills"}, // Entry error?
+    {.id = 604, .name = "Forest Hills"},
     {.id = 7096, .name = "Forest Hills"},
     // South Station
     {.id = 7039, .name = "South Station"},
