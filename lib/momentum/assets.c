@@ -148,7 +148,7 @@ static const char* font_names[] = {
     [FontBatteryPercent] = "BatteryPercent",
 };
 
-void asset_packs_init() {
+void asset_packs_init(void) {
     const char* pack = momentum_settings.asset_pack;
     if(pack[0] == '\0') return;
 
@@ -180,7 +180,7 @@ void asset_packs_init() {
     furi_record_close(RECORD_STORAGE);
 }
 
-void asset_packs_free() {
+void asset_packs_free(void) {
     for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
         if(ICON_PATHS[i].icon->original != NULL) {
             free_icon(ICON_PATHS[i].icon);

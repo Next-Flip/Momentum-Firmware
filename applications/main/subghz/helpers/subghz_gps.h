@@ -49,7 +49,7 @@ struct SubGhzGPS {
  *
  * @return SubGhzGPS* SubGhzGPS object
 */
-SubGhzGPS* subghz_gps_plugin_init();
+SubGhzGPS* subghz_gps_plugin_init(uint32_t baudrate);
 
 /**
  * Deinitialize SubGhzGPS plugin

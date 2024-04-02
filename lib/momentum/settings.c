@@ -114,7 +114,7 @@ static const struct {
     {setting_uint(vgm_color_bg, 0x0000, 0xFFFF)},
 };
 
-void momentum_settings_load() {
+void momentum_settings_load(void) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, MOMENTUM_SETTINGS_PATH)) {
@@ -159,7 +159,7 @@ void momentum_settings_load() {
     rgb_backlight_load_settings(momentum_settings.rgb_backlight);
 }
 
-void momentum_settings_save() {
+void momentum_settings_save(void) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 

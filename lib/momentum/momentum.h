@@ -96,12 +96,12 @@ typedef struct {
     CanvasFontParameters* font_params[FontTotalNumber];
 } AssetPacks;
 
-void momentum_settings_load();
-void momentum_settings_save();
+void momentum_settings_load(void);
+void momentum_settings_save(void);
 extern MomentumSettings momentum_settings;
 
-void asset_packs_init();
-void asset_packs_free();
+void asset_packs_init(void);
+void asset_packs_free(void);
 extern AssetPacks asset_packs;
 
 #ifdef __cplusplus
