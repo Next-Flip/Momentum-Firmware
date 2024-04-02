@@ -35,8 +35,8 @@ void subghz_scene_saved_menu_on_enter(void* context) {
         subghz_scene_saved_menu_submenu_callback,
         subghz);
 
-    if(!isnanf(subghz_txrx_get_latitude(subghz->txrx)) &&
-       !isnanf(subghz_txrx_get_longitude(subghz->txrx))) {
+    if(!isnanf(subghz_txrx_get_latitude(subghz->txrx)) ||
+       !isnanf(subghz_txrx_get_longitude(subghz->txrx)) || subghz->gps) {
         submenu_add_item(
             subghz->submenu,
             "Geographic info",
