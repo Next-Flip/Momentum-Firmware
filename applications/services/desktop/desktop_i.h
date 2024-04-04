@@ -80,6 +80,8 @@ struct Desktop {
 
     bool in_transition : 1;
 
+    FuriSemaphore* animation_semaphore;
+
     Keybinds keybinds;
 
     FuriPubSub* ascii_events_pubsub;
