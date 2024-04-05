@@ -11,6 +11,9 @@ SubGhzGPS* subghz_gps_plugin_init(uint32_t baudrate) {
     furi_record_close(RECORD_EXPANSION);
     if(connected) return NULL;
 
+    expansion_disable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
+
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperApplication* plugin_app = flipper_application_alloc(storage, firmware_api_interface);
     do {
@@ -60,6 +63,9 @@ SubGhzGPS* subghz_gps_plugin_init(uint32_t baudrate) {
     } while(false);
     flipper_application_free(plugin_app);
     furi_record_close(RECORD_STORAGE);
+
+    expansion_enable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
     return NULL;
 }
 
@@ -68,4 +74,7 @@ void subghz_gps_plugin_deinit(SubGhzGPS* subghz_gps) {
     flipper_application_free(subghz_gps->plugin_app);
     free(subghz_gps);
     furi_record_close(RECORD_STORAGE);
+
+    expansion_enable(furi_record_open(RECORD_EXPANSION));
+    furi_record_close(RECORD_EXPANSION);
 }

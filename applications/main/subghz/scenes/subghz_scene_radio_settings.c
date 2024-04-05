@@ -153,18 +153,12 @@ static void subghz_scene_receiver_config_set_gps(VariableItem* item) {
     }
     subghz_last_settings_save(subghz->last_settings);
 
+    if(subghz->gps) {
+        subghz_gps_plugin_deinit(subghz->gps);
+        subghz->gps = NULL;
+    }
     if(subghz->last_settings->gps_baudrate != 0) {
-        if(subghz->gps) {
-            furi_hal_serial_set_br(
-                subghz->gps->serial_handle, subghz->last_settings->gps_baudrate);
-        } else {
-            subghz->gps = subghz_gps_plugin_init(subghz->last_settings->gps_baudrate);
-        }
-    } else {
-        if(subghz->gps) {
-            subghz_gps_plugin_deinit(subghz->gps);
-            subghz->gps = NULL;
-        }
+        subghz->gps = subghz_gps_plugin_init(subghz->last_settings->gps_baudrate);
     }
 }
 
