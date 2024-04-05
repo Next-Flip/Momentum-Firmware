@@ -60,13 +60,9 @@ LoaderStatus
 
     return result.value;
 }
-LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
-    furi_check(loader);
-    furi_check(name);
 
-    FuriString* error_message = furi_string_alloc();
-    LoaderStatus status = loader_start(loader, name, args, error_message);
-
+static void
+    loader_show_gui_error(LoaderStatus status, const char* name, FuriString* error_message) {
     if(status == LoaderStatusErrorUnknownApp &&
        loader_find_external_application_by_name(name, NULL) != NULL) {
         // Special case for external apps
@@ -100,7 +96,15 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
     }
+}
 
+LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
+    furi_check(loader);
+    furi_check(name);
+
+    FuriString* error_message = furi_string_alloc();
+    LoaderStatus status = loader_start(loader, name, args, error_message);
+    loader_show_gui_error(status, name, error_message);
     furi_string_free(error_message);
     return status;
 }
@@ -749,9 +753,13 @@ int32_t loader_srv(void* p) {
                 api_lock_unlock(message.api_lock);
                 break;
             case LoaderMessageTypeStartByNameDetachedWithGuiError: {
-                loader_start_with_gui_error(loader, message.start.name, message.start.args);
+                FuriString* error_message = furi_string_alloc();
+                LoaderStatus status = loader_do_start_by_name(
+                    loader, message.start.name, message.start.args, error_message);
+                loader_show_gui_error(status, message.start.name, error_message);
                 if(message.start.name) free((void*)message.start.name);
                 if(message.start.args) free((void*)message.start.args);
+                furi_string_free(error_message);
                 break;
             }
             case LoaderMessageTypeShowMenu:
