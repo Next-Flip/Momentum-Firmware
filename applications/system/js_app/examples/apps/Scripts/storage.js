@@ -38,6 +38,9 @@ storage.remove(path);
 print("Done")
 
 // There's also:
+// storage.copy(old_path, new_path);
+// storage.move(old_path, new_path);
+// storage.mkdir(path);
 // storage.virtualInit(path);
 // storage.virtualMount();
 // storage.virtualQuit();

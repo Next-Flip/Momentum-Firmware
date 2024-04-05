@@ -32,8 +32,8 @@ static bool check_arg_count(struct mjs* mjs, size_t count) {
     return true;
 }
 
-static bool get_path_arg(struct mjs* mjs, const char** path) {
-    mjs_val_t path_obj = mjs_arg(mjs, 0);
+static bool get_path_arg(struct mjs* mjs, const char** path, size_t index) {
+    mjs_val_t path_obj = mjs_arg(mjs, index);
     if(!mjs_is_string(path_obj)) {
         ret_bad_args(mjs, "Path must be a string");
         return false;
@@ -51,7 +51,7 @@ static void js_storage_read(struct mjs* mjs) {
     JsStorageInst* storage = get_this_ctx(mjs);
 
     const char* path;
-    if(!get_path_arg(mjs, &path)) return;
+    if(!get_path_arg(mjs, &path, 0)) return;
 
     File* file = storage_file_alloc(storage->api);
     do {
@@ -93,7 +93,7 @@ static void js_storage_write(struct mjs* mjs) {
     JsStorageInst* storage = get_this_ctx(mjs);
 
     const char* path;
-    if(!get_path_arg(mjs, &path)) return;
+    if(!get_path_arg(mjs, &path, 0)) return;
 
     mjs_val_t data_arg = mjs_arg(mjs, 1);
     if(!mjs_is_typed_array(data_arg) && !mjs_is_string(data_arg)) {
@@ -137,7 +137,7 @@ static void js_storage_append(struct mjs* mjs) {
     if(!check_arg_count(mjs, 2)) return;
 
     const char* path;
-    if(!get_path_arg(mjs, &path)) return;
+    if(!get_path_arg(mjs, &path, 0)) return;
 
     mjs_val_t data_arg = mjs_arg(mjs, 1);
     if(!mjs_is_typed_array(data_arg) && !mjs_is_string(data_arg)) {
@@ -170,7 +170,7 @@ static void js_storage_exists(struct mjs* mjs) {
     if(!check_arg_count(mjs, 1)) return;
 
     const char* path;
-    if(!get_path_arg(mjs, &path)) return;
+    if(!get_path_arg(mjs, &path, 0)) return;
 
     mjs_return(mjs, mjs_mk_boolean(mjs, storage_common_exists(storage->api, path)));
 }
@@ -180,9 +180,55 @@ static void js_storage_remove(struct mjs* mjs) {
     if(!check_arg_count(mjs, 1)) return;
 
     const char* path;
-    if(!get_path_arg(mjs, &path)) return;
+    if(!get_path_arg(mjs, &path, 0)) return;
 
     mjs_return(mjs, mjs_mk_boolean(mjs, storage_simply_remove(storage->api, path)));
+}
+
+static void js_storage_copy(struct mjs* mjs) {
+    JsStorageInst* storage = get_this_ctx(mjs);
+    if(!check_arg_count(mjs, 2)) return;
+
+    const char* old_path;
+    if(!get_path_arg(mjs, &old_path, 0)) return;
+
+    const char* new_path;
+    if(!get_path_arg(mjs, &new_path, 1)) return;
+
+    FS_Error error = storage_common_copy(storage->api, old_path, new_path);
+    if(error == FSE_OK) {
+        mjs_return(mjs, MJS_UNDEFINED);
+    } else {
+        ret_int_err(mjs, storage_error_get_desc(error));
+    }
+}
+
+static void js_storage_move(struct mjs* mjs) {
+    JsStorageInst* storage = get_this_ctx(mjs);
+    if(!check_arg_count(mjs, 2)) return;
+
+    const char* old_path;
+    if(!get_path_arg(mjs, &old_path, 0)) return;
+
+    const char* new_path;
+    if(!get_path_arg(mjs, &new_path, 1)) return;
+
+    FS_Error error = storage_common_rename(storage->api, old_path, new_path);
+    if(error == FSE_OK) {
+        mjs_return(mjs, MJS_UNDEFINED);
+    } else {
+        ret_int_err(mjs, storage_error_get_desc(error));
+    }
+}
+
+static void js_storage_mkdir(struct mjs* mjs) {
+    JsStorageInst* storage = get_this_ctx(mjs);
+    if(!check_arg_count(mjs, 1)) return;
+
+    const char* path;
+    if(!get_path_arg(mjs, &path, 0)) return;
+
+    mjs_return(mjs, mjs_mk_boolean(mjs, storage_simply_mkdir(storage->api, path)));
 }
 
 static void js_storage_virtual_init(struct mjs* mjs) {
@@ -190,7 +236,7 @@ static void js_storage_virtual_init(struct mjs* mjs) {
     if(!check_arg_count(mjs, 1)) return;
 
     const char* path;
-    if(!get_path_arg(mjs, &path)) return;
+    if(!get_path_arg(mjs, &path, 0)) return;
 
     if(storage->virtual) {
         ret_int_err(mjs, "Virtual already setup");
@@ -259,6 +305,9 @@ static void* js_storage_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_set(mjs, storage_obj, "append", ~0, MJS_MK_FN(js_storage_append));
     mjs_set(mjs, storage_obj, "exists", ~0, MJS_MK_FN(js_storage_exists));
     mjs_set(mjs, storage_obj, "remove", ~0, MJS_MK_FN(js_storage_remove));
+    mjs_set(mjs, storage_obj, "copy", ~0, MJS_MK_FN(js_storage_copy));
+    mjs_set(mjs, storage_obj, "move", ~0, MJS_MK_FN(js_storage_move));
+    mjs_set(mjs, storage_obj, "mkdir", ~0, MJS_MK_FN(js_storage_mkdir));
     mjs_set(mjs, storage_obj, "virtualInit", ~0, MJS_MK_FN(js_storage_virtual_init));
     mjs_set(mjs, storage_obj, "virtualMount", ~0, MJS_MK_FN(js_storage_virtual_mount));
     mjs_set(mjs, storage_obj, "virtualQuit", ~0, MJS_MK_FN(js_storage_virtual_quit));
