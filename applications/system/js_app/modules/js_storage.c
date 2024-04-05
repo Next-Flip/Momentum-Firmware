@@ -276,11 +276,6 @@ static void js_storage_virtual_mount(struct mjs* mjs) {
         return;
     }
 
-    if(storage->virtual) {
-        storage_file_free(storage->virtual);
-        storage->virtual = NULL;
-    }
-
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -291,6 +286,11 @@ static void js_storage_virtual_quit(struct mjs* mjs) {
     if(storage_virtual_quit(storage->api) != FSE_OK) {
         ret_int_err(mjs, "Virtual quit failed");
         return;
+    }
+
+    if(storage->virtual) {
+        storage_file_free(storage->virtual);
+        storage->virtual = NULL;
     }
 
     mjs_return(mjs, MJS_UNDEFINED);
