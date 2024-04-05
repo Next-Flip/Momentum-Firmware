@@ -49,7 +49,6 @@ static bool get_path_arg(struct mjs* mjs, const char** path) {
 
 static void js_storage_read(struct mjs* mjs) {
     JsStorageInst* storage = get_this_ctx(mjs);
-    if(!check_arg_count(mjs, 1)) return;
 
     const char* path;
     if(!get_path_arg(mjs, &path)) return;
@@ -62,15 +61,26 @@ static void js_storage_read(struct mjs* mjs) {
         }
 
         uint64_t size = storage_file_size(file);
-        if(size > 128 * 1024) {
-            ret_int_err(mjs, "File too large");
+        mjs_val_t size_arg = mjs_arg(mjs, 1);
+        if(mjs_is_number(size_arg)) {
+            size = mjs_get_int32(mjs, size_arg);
+        }
+
+        mjs_val_t seek_arg = mjs_arg(mjs, 2);
+        if(mjs_is_number(seek_arg)) {
+            storage_file_seek(file, mjs_get_int32(mjs, seek_arg), true);
+            size = MIN(size, storage_file_size(file) - storage_file_tell(file));
+        }
+
+        if(size > memmgr_heap_get_max_free_block()) {
+            ret_int_err(mjs, "Read size too large");
             break;
         }
 
         uint8_t* data = malloc(size);
         size_t read = storage_file_read(file, data, size);
         if(read == size) {
-            mjs_return(mjs, mjs_mk_string(mjs, (const char*)data, size, true));
+            mjs_return(mjs, mjs_mk_array_buf(mjs, (char*)data, size));
         } else {
             ret_int_err(mjs, "File read failed");
         }
@@ -81,27 +91,41 @@ static void js_storage_read(struct mjs* mjs) {
 
 static void js_storage_write(struct mjs* mjs) {
     JsStorageInst* storage = get_this_ctx(mjs);
-    if(!check_arg_count(mjs, 2)) return;
 
     const char* path;
     if(!get_path_arg(mjs, &path)) return;
 
-    mjs_val_t data_obj = mjs_arg(mjs, 1);
-    if(!mjs_is_string(data_obj)) {
-        ret_bad_args(mjs, "Data must be a string");
+    mjs_val_t data_arg = mjs_arg(mjs, 1);
+    if(!mjs_is_typed_array(data_arg) && !mjs_is_string(data_arg)) {
+        ret_bad_args(mjs, "Data must be string, arraybuf or dataview");
         return;
+    }
+    if(mjs_is_data_view(data_arg)) {
+        data_arg = mjs_dataview_get_buf(mjs, data_arg);
     }
     size_t data_len = 0;
-    const char* data = mjs_get_string(mjs, &data_obj, &data_len);
-    if((data_len == 0) || (data == NULL)) {
-        ret_bad_args(mjs, "Bad data argument");
-        return;
+    const char* data = NULL;
+    if(mjs_is_string(data_arg)) {
+        data = mjs_get_string(mjs, &data_arg, &data_len);
+    } else if(mjs_is_typed_array(data_arg)) {
+        data = mjs_array_buf_get_ptr(mjs, data_arg, &data_len);
     }
 
+    mjs_val_t seek_arg = mjs_arg(mjs, 2);
+
     File* file = storage_file_alloc(storage->api);
-    if(!storage_file_open(file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(!storage_file_open(
+           file,
+           path,
+           FSAM_WRITE,
+           mjs_is_number(seek_arg) ? FSOM_OPEN_ALWAYS : FSOM_CREATE_ALWAYS)) {
         ret_int_err(mjs, storage_file_get_error_desc(file));
+
     } else {
+        if(mjs_is_number(seek_arg)) {
+            storage_file_seek(file, mjs_get_int32(mjs, seek_arg), true);
+        }
+
         size_t write = storage_file_write(file, data, data_len);
         mjs_return(mjs, mjs_mk_boolean(mjs, write == data_len));
     }
@@ -115,16 +139,20 @@ static void js_storage_append(struct mjs* mjs) {
     const char* path;
     if(!get_path_arg(mjs, &path)) return;
 
-    mjs_val_t data_obj = mjs_arg(mjs, 1);
-    if(!mjs_is_string(data_obj)) {
-        ret_bad_args(mjs, "Data must be a string");
+    mjs_val_t data_arg = mjs_arg(mjs, 1);
+    if(!mjs_is_typed_array(data_arg) && !mjs_is_string(data_arg)) {
+        ret_bad_args(mjs, "Data must be string, arraybuf or dataview");
         return;
     }
+    if(mjs_is_data_view(data_arg)) {
+        data_arg = mjs_dataview_get_buf(mjs, data_arg);
+    }
     size_t data_len = 0;
-    const char* data = mjs_get_string(mjs, &data_obj, &data_len);
-    if((data_len == 0) || (data == NULL)) {
-        ret_bad_args(mjs, "Bad data argument");
-        return;
+    const char* data = NULL;
+    if(mjs_is_string(data_arg)) {
+        data = mjs_get_string(mjs, &data_arg, &data_len);
+    } else if(mjs_is_typed_array(data_arg)) {
+        data = mjs_array_buf_get_ptr(mjs, data_arg, &data_len);
     }
 
     File* file = storage_file_alloc(storage->api);
