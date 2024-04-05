@@ -20,6 +20,7 @@
 
 #include <loader/loader.h>
 #include <notification/notification_app.h>
+#include <toolbox/api_lock.h>
 
 #define STATUS_BAR_Y_SHIFT 13
 
