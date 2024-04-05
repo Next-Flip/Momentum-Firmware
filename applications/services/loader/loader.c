@@ -47,7 +47,13 @@ LoaderStatus
     return result.value;
 }
 
-static void loader_show_gui_error(LoaderStatus status, FuriString* error_message) {
+LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
+    furi_check(loader);
+    furi_check(name);
+
+    FuriString* error_message = furi_string_alloc();
+    LoaderStatus status = loader_start(loader, name, args, error_message);
+
     if(status == LoaderStatusErrorUnknownApp &&
        loader_find_external_application_by_name(name) != NULL) {
         // Special case for external apps
@@ -81,15 +87,7 @@ static void loader_show_gui_error(LoaderStatus status, FuriString* error_message
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
     }
-}
 
-LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
-    furi_check(loader);
-    furi_check(name);
-
-    FuriString* error_message = furi_string_alloc();
-    LoaderStatus status = loader_start(loader, name, args, error_message);
-    loader_show_gui_error(status, error_message);
     furi_string_free(error_message);
     return status;
 }
