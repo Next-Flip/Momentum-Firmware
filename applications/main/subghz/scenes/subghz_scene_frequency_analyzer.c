@@ -60,9 +60,6 @@ bool subghz_scene_frequency_analyzer_on_event(void* context, SceneManagerEvent e
                 subghz_frequency_analyzer_get_frequency_to_save(subghz->subghz_frequency_analyzer);
             if(frequency > 0) {
                 subghz->last_settings->frequency = frequency;
-#ifdef FURI_DEBUG
-                subghz_last_settings_log(subghz->last_settings);
-#endif
                 // Disable Hopping before opening the receiver scene!
                 if(subghz->last_settings->enable_hopping) {
                     subghz->last_settings->enable_hopping = false;
