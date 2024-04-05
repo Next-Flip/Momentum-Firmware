@@ -3,7 +3,7 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <momentum/momentum.h>
+#include <assets_icons.h>
 
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
@@ -12,6 +12,8 @@
 #include <toolbox/stream/file_stream.h>
 #include <core/dangerous_defines.h>
 #include <gui/icon_i.h>
+
+#include <momentum/momentum.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -489,7 +491,7 @@ static LoaderStatus loader_start_external_app(
         if(load_status != FlipperApplicationLoadStatusSuccess) {
             const char* err_msg = flipper_application_load_status_to_string(load_status);
             status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Load failed %s: %s", path, err_msg);
+                LoaderStatusErrorInternal, error_message, "Load failed, %s: %s", path, err_msg);
             break;
         } else if(api_mismatch) {
             // Successful map, but found api mismatch -> warn user
@@ -544,12 +546,12 @@ static LoaderStatus loader_start_external_app(
         }
 
         loader_start_app_thread(loader, flags);
-
-        return status;
     } while(0);
 
-    flipper_application_free(loader->app.fap);
-    loader->app.fap = NULL;
+    if(status != LoaderStatusOk) {
+        flipper_application_free(loader->app.fap);
+        loader->app.fap = NULL;
+    }
 
     return status;
 }
