@@ -47,13 +47,7 @@ LoaderStatus
     return result.value;
 }
 
-LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
-    furi_check(loader);
-    furi_check(name);
-
-    FuriString* error_message = furi_string_alloc();
-    LoaderStatus status = loader_start(loader, name, args, error_message);
-
+static void loader_show_gui_error(LoaderStatus status, FuriString* error_message) {
     if(status == LoaderStatusErrorUnknownApp &&
        loader_find_external_application_by_name(name) != NULL) {
         // Special case for external apps
@@ -75,6 +69,7 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
         dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
+        furi_string_replace(error_message, ":", "\n");
         furi_string_replace(error_message, "/ext/apps/", "");
         furi_string_replace(error_message, ", ", "\n");
         furi_string_replace(error_message, ": ", "\n");
@@ -86,9 +81,29 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
         dialog_message_free(message);
         furi_record_close(RECORD_DIALOGS);
     }
+}
 
+LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args) {
+    furi_check(loader);
+    furi_check(name);
+
+    FuriString* error_message = furi_string_alloc();
+    LoaderStatus status = loader_start(loader, name, args, error_message);
+    loader_show_gui_error(status, error_message);
     furi_string_free(error_message);
     return status;
+}
+
+void loader_start_detached_with_gui_error(Loader* loader, const char* name, const char* args) {
+    furi_check(loader);
+    furi_check(name);
+
+    LoaderMessage message = {
+        .type = LoaderMessageTypeStartByNameDetachedWithGuiError,
+        .start.name = name ? strdup(name) : NULL,
+        .start.args = args ? strdup(args) : NULL,
+    };
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
 bool loader_lock(Loader* loader) {
@@ -536,6 +551,12 @@ int32_t loader_srv(void* p) {
                     loader, message.start.name, message.start.args, message.start.error_message);
                 api_lock_unlock(message.api_lock);
                 break;
+            case LoaderMessageTypeStartByNameDetachedWithGuiError: {
+                loader_start_with_gui_error(loader, message.start.name, message.start.args);
+                if(message.start.name) free((void*)message.start.name);
+                if(message.start.args) free((void*)message.start.args);
+                break;
+            }
             case LoaderMessageTypeShowMenu:
                 loader_do_menu_show(loader);
                 break;
