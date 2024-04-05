@@ -24,14 +24,14 @@ static const char*
     loader_find_external_application_by_name(const char* app_name, FlipperApplicationFlag* flags) {
     for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            *flags = FLIPPER_EXTERNAL_APPS[i].flags;
+            if(flags) *flags = FLIPPER_EXTERNAL_APPS[i].flags;
             return FLIPPER_EXTERNAL_APPS[i].path;
         }
     }
 
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_SETTINGS_APPS[i].name, app_name) == 0) {
-            *flags = FLIPPER_SETTINGS_APPS[i].flags;
+            if(flags) *flags = FLIPPER_SETTINGS_APPS[i].flags;
             return FLIPPER_SETTINGS_APPS[i].path;
         }
     }
@@ -68,7 +68,7 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
     LoaderStatus status = loader_start(loader, name, args, error_message);
 
     if(status == LoaderStatusErrorUnknownApp &&
-       loader_find_external_application_by_name(name) != NULL) {
+       loader_find_external_application_by_name(name, NULL) != NULL) {
         // Special case for external apps
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
