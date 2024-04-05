@@ -24,11 +24,6 @@
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
 #endif
 
-#define BATTERY_FULL 0x00
-#define BATTERY_MEDIUM 0x50
-#define BATTERY_LOW 0xA0
-#define BATTERY_CRITICAL 0xF0
-
 struct FindMy {
     Gui* gui;
     Storage* storage;
