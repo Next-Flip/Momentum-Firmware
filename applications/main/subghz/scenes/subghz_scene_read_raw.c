@@ -104,6 +104,7 @@ void subghz_scene_read_raw_on_enter(void* context) {
 
     if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateBack) {
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+
         if(furi_string_empty(file_name)) {
             subghz_txrx_set_preset_internal(
                 subghz->txrx,

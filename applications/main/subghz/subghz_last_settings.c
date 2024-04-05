@@ -4,7 +4,7 @@
 #define TAG "SubGhzLastSettings"
 
 #define SUBGHZ_LAST_SETTING_FILE_TYPE "Flipper SubGhz Last Setting File"
-#define SUBGHZ_LAST_SETTING_FILE_VERSION 2
+#define SUBGHZ_LAST_SETTING_FILE_VERSION 3
 #define SUBGHZ_LAST_SETTINGS_PATH EXT_PATH("subghz/assets/last_subghz.settings")
 
 #define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY "Frequency"
