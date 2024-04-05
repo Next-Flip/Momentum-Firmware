@@ -92,7 +92,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 desktop_lock(desktop, true);
             } else {
                 loader_start_detached_with_gui_error(
-                    desktop->loader, "Destop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                    desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
             }
             consumed = true;
@@ -107,7 +107,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 furi_record_close(RECORD_POWER);
             } else {
                 loader_start_detached_with_gui_error(
-                    desktop->loader, "Deskop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
+                    desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
             }
             consumed = true;
