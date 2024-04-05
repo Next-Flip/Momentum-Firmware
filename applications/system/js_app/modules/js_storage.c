@@ -202,6 +202,11 @@ static void js_storage_virtual_mount(struct mjs* mjs) {
         return;
     }
 
+    if(storage->virtual) {
+        storage_file_free(storage->virtual);
+        storage->virtual = NULL;
+    }
+
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
