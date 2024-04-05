@@ -1,6 +1,5 @@
 #include "findmy_state.h"
 
-#include "findmy_i.h"
 #include <string.h>
 #include <stddef.h>
 #include <furi_hal_bt.h>
