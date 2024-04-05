@@ -1,4 +1,5 @@
 #include "findmy_i.h"
+#include <furi_hal_power.h>
 
 static bool findmy_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -148,6 +149,7 @@ void findmy_toggle_beacon(FindMy* app) {
         furi_check(furi_hal_bt_extra_beacon_start());
     }
     findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
+    findmy_update_battery(app, app->state.battery_level);
 }
 
 void findmy_set_tag_type(FindMy* app, FindMyType type) {
@@ -156,6 +158,26 @@ void findmy_set_tag_type(FindMy* app, FindMyType type) {
     findmy_state_save(&app->state);
     findmy_main_update_type(app->findmy_main, type);
     FURI_LOG_I("TagType2", "Tag Type: %d", type);
+}
+
+void findmy_update_battery(FindMy* app, uint8_t battery_level) {
+    uint32_t battery_capacity = furi_hal_power_get_battery_full_capacity();
+    uint32_t battery_remaining = furi_hal_power_get_battery_remaining_capacity();
+    uint16_t battery_percent = (battery_remaining * 100) / battery_capacity;
+
+    if(battery_percent > 80) {
+        battery_level = BATTERY_FULL;
+    } else if(battery_percent > 50) {
+        battery_level = BATTERY_MEDIUM;
+    } else if(battery_percent > 20) {
+        battery_level = BATTERY_LOW;
+    } else {
+        battery_level = BATTERY_CRITICAL;
+    }
+
+    app->state.battery_level = battery_level;
+    findmy_state_sync_config(&app->state);
+    findmy_state_save(&app->state);
 }
 
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {

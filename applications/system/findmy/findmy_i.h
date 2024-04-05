@@ -24,6 +24,11 @@
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
 #endif
 
+#define BATTERY_FULL 0x00
+#define BATTERY_MEDIUM 0x50
+#define BATTERY_LOW 0xA0
+#define BATTERY_CRITICAL 0xF0
+
 struct FindMy {
     Gui* gui;
     Storage* storage;
@@ -54,3 +59,4 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value);
 void findmy_toggle_show_mac(FindMy* app, bool show_mac);
 void findmy_set_tag_type(FindMy* app, FindMyType type);
 void findmy_toggle_beacon(FindMy* app);
+void findmy_update_battery(FindMy* app, uint8_t battery_level);
