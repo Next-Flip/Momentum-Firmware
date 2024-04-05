@@ -33,8 +33,8 @@ typedef enum {
     LoaderMessageTypeLock,
     LoaderMessageTypeUnlock,
     LoaderMessageTypeIsLocked,
-
     LoaderMessageTypeStartByNameDetachedWithGuiError,
+
     LoaderMessageTypeShowSettings,
 } LoaderMessageType;
 
