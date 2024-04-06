@@ -742,9 +742,9 @@ FS_Error storage_process_virtual_format(StorageData* storage) {
     SDError error = f_mkfs(sd_data->path, FM_ANY, 0, work, _MAX_SS);
     storage_process_virtual_mount(storage);
     const char* path = storage_file_get_path(mnt_image, mnt_image_storage);
-    char* label = basename(path);
-    int len = strlen(label);
-    label[len - 4] = '\0'; // truncate the .img extension
+    const char* name = basename(path);
+    char label[strlen(name) - 3];
+    strlcpy(label, name, sizeof(label));
     f_setlabel(label);
     storage_process_virtual_unmount(storage);
     free(work);
