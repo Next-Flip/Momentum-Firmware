@@ -1,6 +1,7 @@
 #include "fatfs.h"
 #include "../filesystem_api_internal.h"
 #include "storage_ext.h"
+#include "storage/storage_glue.h"
 #include <furi_hal.h>
 #include "sd_notify.h"
 #include <furi_hal_sd.h>
@@ -740,7 +741,11 @@ FS_Error storage_process_virtual_format(StorageData* storage) {
     uint8_t* work = malloc(_MAX_SS);
     SDError error = f_mkfs(sd_data->path, FM_ANY, 0, work, _MAX_SS);
     storage_process_virtual_mount(storage);
-    f_setlabel("DOLPHIN");
+    const char* path = storage_file_get_path(mnt_image, mnt_image_storage);
+    char* label = basename(path);
+    int len = strlen(label);
+    label[len - 4] = '\0'; // truncate the .img extension
+    f_setlabel(label);
     storage_process_virtual_unmount(storage);
     free(work);
     if(error != FR_OK) return FSE_INTERNAL;
