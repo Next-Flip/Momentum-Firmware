@@ -3,8 +3,8 @@
 enum VarItemListIndex {
     VarItemListIndexScreen,
     VarItemListIndexDolphin,
+    VarItemListIndexSpoof,
     VarItemListIndexVgm,
-    VarItemListIndexChangeDeviceName,
     VarItemListIndexChargeCap,
     VarItemListIndexShowMomentumIntro,
 };
@@ -37,10 +37,11 @@ void momentum_app_scene_misc_on_enter(void* context) {
     item = variable_item_list_add(var_item_list, "Dolphin", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
 
-    item = variable_item_list_add(var_item_list, "VGM Options", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "Spoofing Options", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
 
-    variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
+    item = variable_item_list_add(var_item_list, "VGM Options", 0, NULL, app);
+    variable_item_set_current_value_text(item, ">");
 
     char cap_str[6];
     value_index = momentum_settings.charge_cap / CHARGE_CAP_INTV;
@@ -81,13 +82,13 @@ bool momentum_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscDolphin, 0);
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscDolphin);
             break;
+        case VarItemListIndexSpoof:
+            scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscSpoof, 0);
+            scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscSpoof);
+            break;
         case VarItemListIndexVgm:
             scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscVgm, 0);
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscVgm);
-            break;
-        case VarItemListIndexChangeDeviceName:
-            scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneMiscRename, 0);
-            scene_manager_next_scene(app->scene_manager, MomentumAppSceneMiscRename);
             break;
         case VarItemListIndexShowMomentumIntro: {
             for(int i = 0; i < 10; i++) {
