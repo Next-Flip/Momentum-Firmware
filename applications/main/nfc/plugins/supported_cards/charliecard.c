@@ -97,6 +97,7 @@
 #define CHARLIE_TIME_DELTA_SECS 60
 #define CHARLIE_END_VALID_DELTA_SECS 60 * 8
 #define CHARLIE_N_TRIP_HISTORY 10
+#define CHARLIE_N_PASSES 4
 
 enum CharlieActiveSector {
     CHARLIE_ACTIVE_SECTOR_2,
@@ -155,6 +156,12 @@ typedef struct {
     uint8_t f_flag;
 } Trip;
 
+typedef struct {
+    DateTime start_valid;
+    uint16_t type;
+    DateTime end_valid;
+} Pass;
+
 // IdMapping approach borrowed from Jeremy Cooper's 'clipper.c'
 typedef struct {
     uint16_t id;
@@ -168,7 +175,7 @@ static const IdMapping charliecard_types[] = {
     {.id = 366, .name = "SV Adult"},
     {.id = 418, .name = "Student"},
     {.id = 419, .name = "Senior"},
-    {.id = 420, .name = "Tap"},
+    {.id = 420, .name = "TAP"},
     {.id = 417, .name = "Blind"},
     {.id = 426, .name = "Child"},
     {.id = 410, .name = "Employee ID Without Passback"},
@@ -184,10 +191,10 @@ static const IdMapping charliecard_types[] = {
     {.id = 139, .name = "30 Day Senior LinkPass"},
     {.id = 148, .name = "30 Day TAP LinkPass"},
     {.id = 150, .name = "Monthly Student LinkPass"},
-    {.id = 424, .name = "Monthly TAP LinkPass"}, // 0b0110101000
-    {.id = 425, .name = "Monthly Senior LinkPass"}, // 0b0110101001
-    {.id = 421, .name = "Senior TAP/Permit"}, // 0b0110100101
-    {.id = 422, .name = "Senior TAP/Permit 30 Days"}, // 0b0110100110
+    {.id = 424, .name = "Monthly TAP LinkPass"},
+    {.id = 425, .name = "Monthly Senior LinkPass"},
+    {.id = 421, .name = "Senior TAP/Permit"},
+    {.id = 422, .name = "Senior TAP/Permit 30 Days"},
 
     // Commuter rail passes
     {.id = 166, .name = "30 Day Commuter Rail Zone 1A Pass"},
@@ -558,7 +565,7 @@ static const IdMapping charliecard_fare_gate_ids[] = {
     {.id = 2010, .name = "Wood Island"},
     {.id = 6971, .name = "Wood Island"},
     // Orient Heights
-    {.id = 6621, .name = "Orient Heights"}, // marked as needs checking
+    {.id = 6621, .name = "Orient Heights"},
     {.id = 6622, .name = "Orient Heights"},
     {.id = 6623, .name = "Orient Heights"},
     {.id = 2014, .name = "Orient Heights"},
@@ -590,8 +597,13 @@ static const IdMapping charliecard_fare_gate_ids[] = {
 };
 static const size_t kNumFareGateIds = COUNT_OF(charliecard_fare_gate_ids);
 
+// **********************************************************
+// ********************* MISC HELPERS ***********************
+// **********************************************************
+
 static const uint8_t*
     pos_to_ptr(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
+    // returns pointer to specified sector/block/byte of MFClassic card data
     uint8_t block_offset = mf_classic_get_first_block_num_of_sector(sector_num);
     return &data->block[block_offset + block_num].data[byte_num];
 }
@@ -602,14 +614,22 @@ static uint64_t pos_to_num(
     uint8_t block_num,
     uint8_t byte_num,
     uint8_t byte_len) {
+    // returns numeric values at specified card location, for given byte length.
+    // assumes big endian.
     return bit_lib_bytes_to_num_be(pos_to_ptr(data, sector_num, block_num, byte_num), byte_len);
 }
 
 static DateTime dt_delta(DateTime dt, uint64_t delta_secs) {
+    // returns shifted DateTime, from initial DateTime and time offset in seconds
     DateTime dt_shifted = {0};
     datetime_timestamp_to_datetime(datetime_datetime_to_timestamp(&dt) + delta_secs, &dt_shifted);
 
     return dt_shifted;
+}
+
+static bool dt_ge(DateTime dt1, DateTime dt2) {
+    // compares two DateTimes
+    return datetime_datetime_to_timestamp(&dt1) >= datetime_datetime_to_timestamp(&dt2);
 }
 
 static bool get_map_item(uint16_t id, const IdMapping* map, size_t sz, const char** out) {
@@ -626,8 +646,439 @@ static bool get_map_item(uint16_t id, const IdMapping* map, size_t sz, const cha
     return false;
 }
 
+uint32_t time_now() {
+    return furi_hal_rtc_get_timestamp();
+}
+
+// **********************************************************
+// ********************* DATA PARSING ***********************
+// **********************************************************
+
+static Money money_parse(
+    const MfClassicData* data,
+    uint8_t sector_num,
+    uint8_t block_num,
+    uint8_t byte_num) {
+    // CharlieCards store all money values in two bytes as half-cents
+    // bitmask removes sign/flag, bitshift converts half-cents to cents, div & mod yield dollars & cents
+    uint16_t amt = (pos_to_num(data, sector_num, block_num, byte_num, 2) & 0x7FFF) >> 1;
+    return (Money){amt / 100, amt % 100};
+}
+
+static DateTime
+    date_parse(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
+    // Dates are 3 bytes, in minutes since 2003/1/1 ("CHARLIE_EPOCH")
+    uint32_t ts_charlie = pos_to_num(data, sector_num, block_num, byte_num, 3);
+    return dt_delta(CHARLIE_EPOCH, ts_charlie * CHARLIE_TIME_DELTA_SECS);
+}
+
+static uint16_t n_uses(const MfClassicData* data, const enum CharlieActiveSector active_sector) {
+    /* First two bytes of applicable block (sector 1, block 1 or 2 depending on active_sector)
+    The *lower* of the two values *minus one* is the true use count,
+    per DEFCON31 researcher's findings
+    */
+    return pos_to_num(data, 1, 1 + active_sector, 0, 2) - 1;
+}
+
+static enum CharlieActiveSector get_active_sector(const MfClassicData* data) {
+    /* Card has two transaction sectors (2 & 3) containing balance data, with two
+    corresponding trip counters in 0x50:0x51 & 0x60:0x61 (sector 1, byte 0:1 of blocks 1 & 2).
+
+    The *lower* count variable corresponds to the active sector 
+    (0x5_ lower -> 2 active, 0x6_ lower -> 3 active)
+
+    Sectors 2 & 3 are (largely) identical, save for trip data.
+    Card seems to alternate between the two, with active sector storing 
+    the current balance & recent trip/transaction, & the inactive sector storing 
+    the N-1 trip/transaction version of the same data.
+
+    Here I check both the trip count and the stored transaction date,
+    for my own sanity, to confirm the active sector.
+    */
+
+    // active sector based on trip counters
+    const bool active_trip = n_uses(data, CHARLIE_ACTIVE_SECTOR_2) <=
+                             n_uses(data, CHARLIE_ACTIVE_SECTOR_3);
+
+    // active sector based on transaction date
+    DateTime ds2 = date_parse(data, 2, 0, 1);
+    DateTime ds3 = date_parse(data, 3, 0, 1);
+    const bool active_date = datetime_datetime_to_timestamp(&ds2) >=
+                             datetime_datetime_to_timestamp(&ds3);
+
+    // with all tested cards so far, this has been true
+    furi_assert(active_trip == active_date);
+
+    return active_trip ? CHARLIE_ACTIVE_SECTOR_2 : CHARLIE_ACTIVE_SECTOR_3;
+}
+
+static uint16_t type_parse(const MfClassicData* data) {
+    /* Card type data stored in the first 10bits of block 1 of sectors 2 & 3 (Block 9 & Block 13, from card start)
+    To my knowledge, card type should never change, so we can check either
+    without caring which is active. For my sanity, I check both, and assert equal.
+    */
+
+    // bitshift (2bytes = 16 bits) by 6bits for just first 10bits
+    const uint16_t type1 = pos_to_num(data, 2, 1, 0, 2) >> 6;
+    const uint16_t type2 = pos_to_num(data, 3, 1, 0, 2) >> 6;
+    furi_assert(type1 == type2);
+
+    return type1;
+}
+
+static DateTime end_validity_parse(
+    const MfClassicData* data,
+    uint8_t sector_num,
+    uint8_t block_num,
+    uint8_t byte_num) {
+    // End validity field is a bit odd; shares first byte with another variable (the card type field),
+    // occupying only the last 3 bits (and subsequent two bytes), hence bitmask
+    // TODO: what are the add'l 3 bits between type & end validity fields?
+    uint32_t ts_charlie_ev = pos_to_num(data, sector_num, block_num, byte_num, 3) & 0x1FFFFF;
+
+    // additionally, instead of minute deltas, is in 8 minute increments
+    // relative to CHARLIE_EPOCH (2003/1/1), per DEFCON31 researcher's work
+    return dt_delta(CHARLIE_EPOCH, ts_charlie_ev * CHARLIE_END_VALID_DELTA_SECS);
+}
+
+static DateTime
+    main_end_validity_parse(const MfClassicData* data, enum CharlieActiveSector active_sec) {
+    // primary card type end validity; checked in active sector (probably the same across both 2 & 3)
+    return end_validity_parse(data, (active_sec == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3, 1, 1);
+}
+
+static Pass
+    pass_parse(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
+    // WIP; testing only. Speculating it may be structured as follows
+    // Sub-byte field divisions not drawn to scale, see code for exact bit offsets
+    //
+    //       0    1    2    3    4    5    6
+    //       +----.----.----+----.-+--.----.----+
+    //       |     start    | type |    end     |
+    //       +----.----.----+----.-+--.----.----+
+
+    DateTime start = date_parse(data, sector_num, block_num, byte_num);
+    uint16_t type = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 6;
+    DateTime end = end_validity_parse(data, sector_num, block_num, byte_num + 4);
+
+    return (Pass){start, type, end};
+}
+
+static Trip
+    trip_parse(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
+    /* This function parses individual trips. Each trip packs 7 bytes, stored as follows:
+
+           0    1    2    3    4    5    6    
+           +----.----.----+----.--+-+----.----+
+           |     date     |   loc |f|   amt   |
+           +----.----.----+----.--+-+----.----+
+
+    Where date is in the typical format, loc represents the fare gate tapped, and amt is the fare amount.
+    Amount appears to contain some flag bits, however, it is unclear what precisely their function is.
+
+    Gate ID ("loc") is only the first 13 bits of 0x3:0x5, the final three bits appear to be flags ("f").
+    Least significant flag bit (ie "loc & 0x1") seems to indicate:
+    — When 0, fare (the amount by which balance is decremented)
+    — When 1, refill (the amount by which balance is incremented)
+
+    On monthly pass cards, MSB of amt will be set: 0x8000 (negative zero)
+    Seemingly randomly (irrespective of card type, last trip, etc) 0x0001 will be set on amt in addition to 
+    whatever the regular fare is (a half cent more). I am uncertain what this flag indicates.
+    */
+    const DateTime date = date_parse(data, sector_num, block_num, byte_num);
+    const uint16_t gate = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 3;
+    const uint8_t g_flag = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) & 0b111;
+    const Money fare = money_parse(data, sector_num, block_num, byte_num + 5);
+    const uint8_t f_flag = pos_to_num(data, sector_num, block_num, byte_num + 5, 2) & 0x8001;
+    return (Trip){date, gate, g_flag, fare, f_flag};
+}
+
+static Pass* passes_parse(const MfClassicData* data) {
+    // WIP. Read in all speculative passes into array
+    // Sectors 4 & 5 speculated to contain pass data,
+    // 4 separate fields? active vs inactive sector for 2 passes?
+    // Sector 4 visualized below; sector 5 layout the same.
+    //
+    //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+    //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
+    // 0x100 |         pass1?           |0   00 |         pass2?           |0   00 |   crc1  |
+    //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
+    // 0x110 | 00   00   00   00   00   00   00   00   00   00   00   00   00   00 |   crc2  |
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+    // 0x120 | 00   00   00   00   00   00   00   05   00   00   00   00   00   00 |   crc3  |
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+
+    Pass* passes = malloc(sizeof(Pass) * CHARLIE_N_PASSES);
+
+    for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
+        passes[i] = pass_parse(data, 4 + (i / 2), 1, (i % 2) * 7);
+    }
+
+    return passes;
+}
+
+static Trip* trips_parse(const MfClassicData* data) {
+    // Sectors 6 & 7 store the last 10 trips. Overall layout as follows:
+    //
+    //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+    //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
+    // 0x180 |               trip0              |               trip1              |   crc1  |
+    //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
+    //  ...                   ...                                ...                   ...
+    //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
+    // 0x1D0 |               trip8              |               trip9              |   crc5  |
+    //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
+    // 0x1E0 | 00   00   00   00   00   00   00   00   00   00   00   00   00   00 |   crc6  |
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+    //
+    //Trips are not sorted, rather, appear to get overwritten sequentially. (eg, sorted modulo array rotation)
+
+    Trip* trips = malloc(sizeof(Trip) * CHARLIE_N_TRIP_HISTORY);
+
+    // Parse each trip field using some modular math magic to get the offsets:
+    // move from sector 6 -> 7 after the first 6 trips
+    // move a block within a given sector every 2 trips, reset every 3 blocks (as sector has changed)
+    // alternate between a start byte of 0 and 7 with every iteration
+    for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
+        trips[i] = trip_parse(data, 6 + (i / 6), (i / 2) % 3, (i % 2) * 7);
+    }
+
+    // Iterate through the array to find the maximum (newest) date value
+    int max_idx = 0;
+    for(int i = 1; i < CHARLIE_N_TRIP_HISTORY; i++) {
+        if(dt_ge(trips[i].date, trips[max_idx].date)) {
+            max_idx = i;
+        }
+    }
+
+    // Sort by rotating
+    for(int r = 0; r < (max_idx + 1); r++) {
+        // Store the first element
+        Trip temp = trips[0];
+        // Shift elements to the left
+        for(int i = 0; i < CHARLIE_N_TRIP_HISTORY - 1; i++) {
+            trips[i] = trips[i + 1];
+        }
+        // Move the first element to the last
+        trips[CHARLIE_N_TRIP_HISTORY - 1] = temp;
+    }
+
+    // Reverse order, such that newest is first, oldest last
+    for(int i = 0; i < CHARLIE_N_TRIP_HISTORY / 2; i++) {
+        // Swap elements at index i and size - i - 1
+        Trip temp = trips[i];
+        trips[i] = trips[CHARLIE_N_TRIP_HISTORY - i - 1];
+        trips[CHARLIE_N_TRIP_HISTORY - i - 1] = temp;
+    }
+
+    return trips;
+}
+
+/*
+static DateTime expiry(DateTime iss) {
+    // Per Metrodroid CharlieCard parser (https://github.com/metrodroid/metrodroid/blob/master/src/commonMain/kotlin/au/id/micolous/metrodroid/transit/charlie/CharlieCardTransitData.kt)
+    // Expiry not explicitly stored in card data; rather, calculated from date of issue
+    // Cards were first issued in 2006, expired in 5 years, w/ no printed expiry date
+    // Cards issued after 2011 expire in 10 years
+    //
+    // Per DEFCON31 researcher's work (cited above):
+    // Student cards last one school year and expire at the end of August the following year
+    // Pre-2011 issued cards expire in 7 years, not 5 as claimed by Metrodroid
+    // Post-2011 expire in 10 years, less one day
+    // Redundant function given the existance of the end validity field?
+    // Any important distinctions between the two?
+    
+
+    // perhaps additionally clipping to 2030-12-__ in anticipation of upcoming system migration?
+    // need to get a new card to confirm.
+
+    // TODO add card type logic for student card expiry
+    DateTime exp;
+    if(iss.year < 2011) {
+        // add 7 years; assumes average year of 8766 hrs (to account for leap years)
+        // may be off by a few hours as a result
+        exp = dt_delta(iss, 7 * 8766 * 60 * 60);
+    } else {
+        // add 10 years, subtract a day. Same assumption as above
+        exp = dt_delta(iss, ((10 * 8766) - 24) * 60 * 60);
+    }
+
+    return exp;
+}*/
+
+static bool expired(DateTime expiry, DateTime last_trip) {
+    // if a card has sat unused for >2 years, expired (verify this claim?)
+    // else expired if current date > expiry date
+
+    uint32_t ts_exp = datetime_datetime_to_timestamp(&expiry);
+    uint32_t ts_last = datetime_datetime_to_timestamp(&last_trip);
+    uint32_t ts_now = time_now();
+
+    return (ts_exp <= ts_now) | ((ts_now - ts_last) >= (2 * 365 * 24 * 60 * 60));
+}
+
+// **********************************************************
+// ****************** STRING FORMATTING *********************
+// **********************************************************
+
+void locale_format_dt_cat(FuriString* out, const DateTime* dt) {
+    // helper to print datetimes
+    FuriString* s = furi_string_alloc();
+
+    LocaleDateFormat date_format = locale_get_date_format();
+    const char* separator = (date_format == LocaleDateFormatDMY) ? "." : "/";
+    locale_format_date(s, dt, date_format, separator);
+    furi_string_cat(out, s);
+    locale_format_time(s, dt, locale_get_time_format(), false);
+    furi_string_cat_printf(out, "  ");
+    furi_string_cat(out, s);
+
+    furi_string_free(s);
+}
+
+void type_format_cat(FuriString* out, uint16_t type) {
+    const char* s;
+    if(!get_map_item(type, charliecard_types, kNumTypes, &s)) {
+        s = "";
+        furi_string_cat_printf(out, "Unknown-%u", type);
+    }
+
+    furi_string_cat_str(out, s);
+}
+
+void pass_format_cat(FuriString* out, Pass pass) {
+    furi_string_cat_printf(out, "\nPass type: ");
+    type_format_cat(out, pass.type);
+    furi_string_cat_printf(out, "\nPass start: ");
+    locale_format_dt_cat(out, &pass.start_valid);
+    furi_string_cat_printf(out, "\nPass end: ");
+    locale_format_dt_cat(out, &pass.end_valid);
+}
+
+void passes_format_cat(FuriString* out, Pass* passes) {
+    furi_string_cat_printf(out, "\nPasses:");
+    for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
+        pass_format_cat(out, passes[i]);
+        furi_string_cat_printf(out, "\n");
+    }
+}
+
+void money_format_cat(FuriString* out, Money money) {
+    furi_string_cat_printf(out, "$%u.%02u", money.dollars, money.cents);
+}
+
+void trip_format_cat(FuriString* out, Trip trip) {
+    const char* sep = "   ";
+    const char* sta;
+
+    locale_format_dt_cat(out, &trip.date);
+    furi_string_cat_printf(out, "\n%s", !!(trip.g_flag & 0x1) ? "-" : "+");
+    money_format_cat(out, trip.fare);
+    if(!!(trip.g_flag & 0x1) && (trip.fare.dollars == FARE_BUS.dollars) &&
+       (trip.fare.cents == FARE_BUS.cents)) {
+        // if not a refill, and the fare amount is equal to bus fare (any better approach? flag bits for modality?)
+        // format for bus (gate ID on busses = posted bus #)
+        furi_string_cat_printf(out, "%sBus#%u", sep, trip.gate);
+    } else if(get_map_item(trip.gate, charliecard_fare_gate_ids, kNumFareGateIds, &sta)) {
+        // station found in fare gate ID map, append station name
+        furi_string_cat_str(out, sep);
+        furi_string_cat_str(out, sta);
+    } else {
+        // no found station in fare gate ID map & not a bus, just print ID w/o add'l info
+        furi_string_cat_printf(out, "%s%u", sep, trip.gate);
+    }
+    // print flags for debugging purposes
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        furi_string_cat_printf(out, "%s%u%s%u", sep, trip.g_flag, sep, trip.f_flag);
+    }
+}
+
+void trips_format_cat(FuriString* out, Trip* trips) {
+    furi_string_cat_printf(out, "\nTransactions:");
+    for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
+        furi_string_cat_printf(out, "\n");
+        trip_format_cat(out, trips[i]);
+        furi_string_cat_printf(out, "\n");
+    }
+}
+
+// **********************************************************
+// **************** NFC PLUGIN BOILERPLATE ******************
+// **********************************************************
+
+static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
+
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+
+    bool parsed = false;
+
+    do {
+        // Verify card type
+        if(data->type != MfClassicType1k) break;
+
+        // Verify key
+        // arbitrary sector in the main data portion
+        const uint8_t verify_sector = 3;
+        const MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
+
+        const uint64_t key_a =
+            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
+        const uint64_t key_b =
+            bit_lib_bytes_to_num_be(sec_tr->key_b.data, COUNT_OF(sec_tr->key_b.data));
+        if(key_a != charliecard_1k_keys[verify_sector].a) break;
+        if(key_b != charliecard_1k_keys[verify_sector].b) break;
+
+        // TODO: Verify add'l?
+
+        const enum CharlieActiveSector active_sec_enum = get_active_sector(data);
+        const uint8_t active_sector = (active_sec_enum == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3;
+
+        furi_string_cat_printf(parsed_data, "\e#CharlieCard");
+
+        size_t uid_len = 0;
+        const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
+        uint32_t card_number = bit_lib_bytes_to_num_be(uid, 4);
+        furi_string_cat_printf(parsed_data, "\nSerial: 5-%lu", card_number);
+
+        Money bal = money_parse(data, active_sector, 1, 5);
+        furi_string_cat_printf(parsed_data, "\nBal: ");
+        money_format_cat(parsed_data, bal);
+
+        const uint16_t type = type_parse(data);
+        furi_string_cat_printf(parsed_data, "\nType: ");
+        type_format_cat(parsed_data, type);
+
+        Pass* passes = passes_parse(data);
+        passes_format_cat(parsed_data, passes);
+        free(passes);
+
+        const uint16_t n_trips = n_uses(data, active_sec_enum);
+        furi_string_cat_printf(parsed_data, "\nTrip Count: %u", n_trips);
+
+        const DateTime iss = date_parse(data, active_sector, 0, 6);
+        furi_string_cat_printf(parsed_data, "\nIssued: ");
+        locale_format_dt_cat(parsed_data, &iss);
+
+        const DateTime e_v = main_end_validity_parse(data, active_sec_enum);
+        furi_string_cat_printf(parsed_data, "\nExpiry: ");
+        locale_format_dt_cat(parsed_data, &e_v);
+
+        DateTime last = date_parse(data, active_sector, 0, 1);
+        furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
+
+        Trip* trips = trips_parse(data);
+        trips_format_cat(parsed_data, trips);
+        free(trips);
+
+        parsed = true;
+    } while(false);
+
+    return parsed;
+}
+
 static bool charliecard_verify(Nfc* nfc) {
-    // does this suffice? Or should I check add'l keys/data/etc?
     bool verified = false;
 
     do {
@@ -697,357 +1148,6 @@ static bool charliecard_read(Nfc* nfc, NfcDevice* device) {
     mf_classic_free(data);
 
     return is_read;
-}
-
-uint32_t time_now() {
-    return furi_hal_rtc_get_timestamp();
-}
-
-static Money money_parse(
-    const MfClassicData* data,
-    uint8_t sector_num,
-    uint8_t block_num,
-    uint8_t byte_num) {
-    // CharlieCards store all money values in two bytes as half-cents
-    // bitmask removes sign/flag, bitshift converts half-cents to cents, div & mod yield dollars & cents
-    uint16_t amt = (pos_to_num(data, sector_num, block_num, byte_num, 2) & 0x7FFF) >> 1;
-    return (Money){amt / 100, amt % 100};
-}
-
-static DateTime
-    date_parse(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
-    // Dates are 3 bytes, in minutes since 2003/1/1 ("CHARLIE_EPOCH")
-    uint32_t ts_charlie = pos_to_num(data, sector_num, block_num, byte_num, 3);
-    return dt_delta(CHARLIE_EPOCH, ts_charlie * CHARLIE_TIME_DELTA_SECS);
-}
-
-static DateTime
-    end_validity_parse(const MfClassicData* data, enum CharlieActiveSector active_sec) {
-    // End validity field is a bit odd; shares byte 1 with another variable (the card type field),
-    // occupying only the last 3 bits (and subsequent two bytes), hence bitmask
-    // TODO: what are the add'l 3 bits between type & end validity fields?
-    uint32_t ts_charlie_ev =
-        pos_to_num(data, (active_sec == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3, 1, 1, 3);
-    ts_charlie_ev = ts_charlie_ev & 0x1FFFFF;
-
-    // additionally, instead of minute deltas, is in 8 minute increments
-    // relative to CHARLIE_EPOCH (2003/1/1), per DEFCON31 researcher's work
-    return dt_delta(CHARLIE_EPOCH, ts_charlie_ev * CHARLIE_END_VALID_DELTA_SECS);
-}
-
-static Trip
-    trip_parse(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
-    /* This function parses individual trips. Each trip packs 7 bytes, stored as follows:
-
-           0    1    2    3    4    5    6    
-           +----.----.----+----.--+-+----.----+
-           |     date     |   loc |f|   amt   |
-           +----.----.----+----.--+-+----.----+
-
-    Where date is in the typical format, loc represents the fare gate tapped, and amt is the fare amount.
-    Amount appears to contain some flag bits, however, it is unclear what precisely their function is.
-
-    Gate ID ("loc") is only the first 13 bits of 0x3:0x5, the final three bits appear to be flags ("f").
-    Least significant flag bit (ie "loc & 0x1") seems to indicate:
-    — When 0, fare (the amount by which balance is decremented)
-    — When 1, refill (the amount by which balance is incremented)
-
-    On monthly pass cards, MSB of amt will be set: 0x8000 (negative zero)
-    Seemingly randomly (irrespective of card type, last trip, etc) 0x0001 will be set on amt in addition to 
-    whatever the regular fare is (a half cent more). I am uncertain what this flag indicates.
-    */
-    const DateTime date = date_parse(data, sector_num, block_num, byte_num);
-    const uint16_t gate = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 3;
-    const uint8_t g_flag = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) & 0b111;
-    const Money fare = money_parse(data, sector_num, block_num, byte_num + 5);
-    const uint8_t f_flag = pos_to_num(data, sector_num, block_num, byte_num + 5, 2) & 0x8001;
-    return (Trip){date, gate, g_flag, fare, f_flag};
-}
-
-static bool date_ge(DateTime dt1, DateTime dt2) {
-    return datetime_datetime_to_timestamp(&dt1) >= datetime_datetime_to_timestamp(&dt2);
-}
-
-static Trip* trips_parse(const MfClassicData* data) {
-    /* Sectors 6 & 7 store the last 10 trips. Overall layout as follows:
-
-           0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-           +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    0x180  |               trip0              |               trip1              |   crc1  |
-           +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    ...                     ...                                ...                   ...
-           +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    0x1D0  |               trip8              |               trip9              |   crc5  |
-           +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    0x1E0  |                                empty                                |   crc6  |
-           +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
-    
-    "empty" is all 0s. Trips are not sorted, rather, appear to get overwritten sequentially. (eg, sorted modulo array rotation)
-    */
-    Trip* trips = malloc(sizeof(Trip) * CHARLIE_N_TRIP_HISTORY);
-
-    // Parse each trip field using some modular math magic to get the offsets:
-    // move from sector 6 -> 7 after the first 6 trips
-    // move a block within a given sector every 2 trips, reset every 3 blocks (as sector has changed)
-    // alternate between a start byte of 0 and 7 with every iteration
-    for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
-        trips[i] = trip_parse(data, 6 + (i / 6), (i / 2) % 3, (i % 2) * 7);
-    }
-
-    // Iterate through the array to find the maximum (newest) date value
-    int max_idx = 0;
-    for(int i = 1; i < CHARLIE_N_TRIP_HISTORY; i++) {
-        if(date_ge(trips[i].date, trips[max_idx].date)) {
-            max_idx = i;
-        }
-    }
-
-    // Sort by rotating
-    for(int r = 0; r < (max_idx + 1); r++) {
-        // Store the first element
-        Trip temp = trips[0];
-        // Shift elements to the left
-        for(int i = 0; i < CHARLIE_N_TRIP_HISTORY - 1; i++) {
-            trips[i] = trips[i + 1];
-        }
-        // Move the first element to the last
-        trips[CHARLIE_N_TRIP_HISTORY - 1] = temp;
-    }
-
-    // Reverse order, such that newest is first, oldest last
-    for(int i = 0; i < CHARLIE_N_TRIP_HISTORY / 2; i++) {
-        // Swap elements at index i and size - i - 1
-        Trip temp = trips[i];
-        trips[i] = trips[CHARLIE_N_TRIP_HISTORY - i - 1];
-        trips[CHARLIE_N_TRIP_HISTORY - i - 1] = temp;
-    }
-
-    return trips;
-}
-
-static uint16_t n_uses(const MfClassicData* data, const enum CharlieActiveSector active_sector) {
-    /* First two bytes of applicable block (sector 1, block 1 or 2 depending on active_sector)
-    The *lower* of the two values *minus one* is the true use count,
-    per DEFCON31 researcher's findings
-    */
-    return pos_to_num(data, 1, 1 + active_sector, 0, 2) - 1;
-}
-
-static enum CharlieActiveSector get_active_sector(const MfClassicData* data) {
-    /* Card has two transaction sectors (2 & 3) containing balance data, with two
-    corresponding trip counters in 0x50:0x51 & 0x60:0x61 (sector 1, byte 0:1 of blocks 1 & 2).
-
-    The *lower* count variable corresponds to the active sector 
-    (0x5_ lower -> 2 active, 0x6_ lower -> 3 active)
-
-    Sectors 2 & 3 are (largely) identical, save for trip data.
-    Card seems to alternate between the two, with active sector storing 
-    the current balance & recent trip/transaction, & the inactive sector storing 
-    the N-1 trip/transaction version of the same data.
-
-    Here I check both the trip count and the stored transaction date,
-    for my own sanity, to confirm the active sector.
-    */
-
-    // active sector based on trip counters
-    const bool active_trip = n_uses(data, CHARLIE_ACTIVE_SECTOR_2) <=
-                             n_uses(data, CHARLIE_ACTIVE_SECTOR_3);
-
-    // active sector based on transaction date
-    DateTime ds2 = date_parse(data, 2, 0, 1);
-    DateTime ds3 = date_parse(data, 3, 0, 1);
-    const bool active_date = datetime_datetime_to_timestamp(&ds2) >=
-                             datetime_datetime_to_timestamp(&ds3);
-
-    // with all tested cards so far, this has been true
-    furi_assert(active_trip == active_date);
-
-    return active_trip ? CHARLIE_ACTIVE_SECTOR_2 : CHARLIE_ACTIVE_SECTOR_3;
-}
-
-static uint16_t type_parse(const MfClassicData* data) {
-    /* Card type data stored in the first 10bits of block 1 of sectors 2 & 3 (Block 9 & Block 13, from card start)
-    To my knowledge, card type should never change, so we can check either
-    without caring which is active. For my sanity, I check both, and assert equal.
-    */
-
-    // bitshift (2bytes = 16 bits) by 6bits for just first 10bits
-    const uint16_t type1 = pos_to_num(data, 2, 1, 0, 2) >> 6;
-    const uint16_t type2 = pos_to_num(data, 3, 1, 0, 2) >> 6;
-    furi_assert(type1 == type2);
-
-    return type1;
-}
-
-/*
-static DateTime expiry(DateTime iss) {
-    // Per Metrodroid CharlieCard parser (https://github.com/metrodroid/metrodroid/blob/master/src/commonMain/kotlin/au/id/micolous/metrodroid/transit/charlie/CharlieCardTransitData.kt)
-    // Expiry not explicitly stored in card data; rather, calculated from date of issue
-    // Cards were first issued in 2006, expired in 5 years, w/ no printed expiry date
-    // Cards issued after 2011 expire in 10 years
-    //
-    // Per DEFCON31 researcher's work (cited above):
-    // Student cards last one school year and expire at the end of August the following year
-    // Pre-2011 issued cards expire in 7 years, not 5 as claimed by Metrodroid
-    // Post-2011 expire in 10 years, less one day
-    // Redundant function given the existance of the end validity field?
-    // Any important distinctions between the two?
-    
-
-    // perhaps additionally clipping to 2030-12-__ in anticipation of upcoming system migration?
-    // need to get a new card to confirm.
-
-    // TODO add card type logic for student card expiry
-    DateTime exp;
-    if(iss.year < 2011) {
-        // add 7 years; assumes average year of 8766 hrs (to account for leap years)
-        // may be off by a few hours as a result
-        exp = dt_delta(iss, 7 * 8766 * 60 * 60);
-    } else {
-        // add 10 years, subtract a day. Same assumption as above
-        exp = dt_delta(iss, ((10 * 8766) - 24) * 60 * 60);
-    }
-
-    return exp;
-}*/
-
-static bool expired(DateTime expiry, DateTime last_trip) {
-    // if a card has sat unused for >2 years, expired (verify this claim?)
-    // else expired if current date > expiry date
-
-    uint32_t ts_exp = datetime_datetime_to_timestamp(&expiry);
-    uint32_t ts_last = datetime_datetime_to_timestamp(&last_trip);
-    uint32_t ts_now = time_now();
-
-    return (ts_exp <= ts_now) | ((ts_now - ts_last) >= (2 * 365 * 24 * 60 * 60));
-}
-
-void locale_format_dt_cat(FuriString* out, const DateTime* dt) {
-    // helper to print datetimes
-    FuriString* s = furi_string_alloc();
-
-    LocaleDateFormat date_format = locale_get_date_format();
-    const char* separator = (date_format == LocaleDateFormatDMY) ? "." : "/";
-    locale_format_date(s, dt, date_format, separator);
-    furi_string_cat(out, s);
-    locale_format_time(s, dt, locale_get_time_format(), false);
-    furi_string_cat_printf(out, "  ");
-    furi_string_cat(out, s);
-
-    furi_string_free(s);
-}
-
-void type_format_cat(FuriString* out, uint16_t type) {
-    const char* s;
-    if(!get_map_item(type, charliecard_types, kNumTypes, &s)) {
-        s = "";
-        furi_string_cat_printf(out, "Unknown-%u", type);
-    }
-
-    furi_string_cat_str(out, s);
-}
-
-void money_format_cat(FuriString* out, Money money) {
-    furi_string_cat_printf(out, "$%u.%02u", money.dollars, money.cents);
-}
-
-void trip_format_cat(FuriString* out, Trip trip) {
-    const char* sep = "   ";
-    const char* sta;
-
-    locale_format_dt_cat(out, &trip.date);
-    furi_string_cat_printf(out, "\n%s", !!(trip.g_flag & 0x1) ? "-" : "+");
-    money_format_cat(out, trip.fare);
-    if(!!(trip.g_flag & 0x1) && (trip.fare.dollars == FARE_BUS.dollars) &&
-       (trip.fare.cents == FARE_BUS.cents)) {
-        // if not a refill, and the fare amount is equal to bus fare (any better approach? flag bits for modality?)
-        // format for bus (gate ID on busses = posted bus #)
-        furi_string_cat_printf(out, "%sBus#%u", sep, trip.gate);
-    } else if(get_map_item(trip.gate, charliecard_fare_gate_ids, kNumFareGateIds, &sta)) {
-        // station found in fare gate ID map, append station name
-        furi_string_cat_str(out, sep);
-        furi_string_cat_str(out, sta);
-    } else {
-        // no found station in fare gate ID map & not a bus, just print ID w/o add'l info
-        furi_string_cat_printf(out, "%s%u", sep, trip.gate);
-    }
-    // print flags for debugging purposes
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        furi_string_cat_printf(out, "%s%u%s%u", sep, trip.g_flag, sep, trip.f_flag);
-    }
-}
-
-static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) {
-    furi_assert(device);
-
-    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
-
-    bool parsed = false;
-
-    do {
-        // Verify card type
-        if(data->type != MfClassicType1k) break;
-
-        // Verify key
-        // arbitrary sector in the main data portion
-        const uint8_t verify_sector = 3;
-        const MfClassicSectorTrailer* sec_tr =
-            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
-
-        const uint64_t key_a =
-            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
-        const uint64_t key_b =
-            bit_lib_bytes_to_num_be(sec_tr->key_b.data, COUNT_OF(sec_tr->key_b.data));
-        if(key_a != charliecard_1k_keys[verify_sector].a) break;
-        if(key_b != charliecard_1k_keys[verify_sector].b) break;
-
-        // TODO: Verify add'l?
-
-        const enum CharlieActiveSector active_sec_enum = get_active_sector(data);
-        const uint8_t active_sector = (active_sec_enum == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3;
-
-        furi_string_cat_printf(parsed_data, "\e#CharlieCard");
-
-        size_t uid_len = 0;
-        const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
-        uint32_t card_number = bit_lib_bytes_to_num_be(uid, 4);
-        furi_string_cat_printf(parsed_data, "\nSerial: 5-%lu", card_number);
-
-        Money bal = money_parse(data, active_sector, 1, 5);
-        furi_string_cat_printf(parsed_data, "\nBal: ");
-        money_format_cat(parsed_data, bal);
-
-        const uint16_t type = type_parse(data);
-        furi_string_cat_printf(parsed_data, "\nType: ");
-        type_format_cat(parsed_data, type);
-
-        const uint16_t n_trips = n_uses(data, active_sec_enum);
-        furi_string_cat_printf(parsed_data, "\nTrip Count: %u", n_trips);
-
-        const DateTime iss = date_parse(data, active_sector, 0, 6);
-        furi_string_cat_printf(parsed_data, "\nIssued: ");
-        locale_format_dt_cat(parsed_data, &iss);
-
-        const DateTime e_v = end_validity_parse(data, active_sec_enum);
-        furi_string_cat_printf(parsed_data, "\nExpiry: ");
-        locale_format_dt_cat(parsed_data, &e_v);
-
-        DateTime last = date_parse(data, active_sector, 0, 1);
-        furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
-
-        Trip* trips = trips_parse(data);
-        furi_string_cat_printf(parsed_data, "\nTransactions:");
-        for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
-            furi_string_cat_printf(parsed_data, "\n");
-            trip_format_cat(parsed_data, trips[i]);
-            furi_string_cat_printf(parsed_data, "\n");
-        }
-        free(trips);
-
-        parsed = true;
-    } while(false);
-
-    return parsed;
 }
 
 /* Actual implementation of app<>plugin interface */
