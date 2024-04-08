@@ -23,8 +23,6 @@
  * — Reverse engineer passes (sectors 4 & 5?), impl.
  * — Infer transaction flag meanings
  * — Infer remaining unknown bytes in the balance sectors (2 & 3)
- * – ASCII art &/or unified read function for the balance sectors, 
- *   to improve readability / interpretability by others?
  * — Improve string output formatting, esp. of transaction log
  * — Mapping of buses to garages, and subsequently, route subsets via 
  *   http://roster.transithistory.org/ data
@@ -99,11 +97,6 @@
 #define CHARLIE_N_TRIP_HISTORY 10
 #define CHARLIE_N_PASSES 4
 
-enum CharlieActiveSector {
-    CHARLIE_ACTIVE_SECTOR_2,
-    CHARLIE_ACTIVE_SECTOR_3,
-};
-
 typedef struct {
     uint64_t a;
     uint64_t b;
@@ -162,6 +155,18 @@ typedef struct {
     DateTime start;
     DateTime end;
 } Pass;
+
+typedef struct {
+    uint16_t n_uses;
+    uint8_t active_balance_sector;
+} CounterSector;
+
+typedef struct {
+    Money balance;
+    uint16_t type;
+    DateTime issued;
+    DateTime end_validity;
+} BalanceSector;
 
 // IdMapping approach borrowed from Jeremy Cooper's 'clipper.c'
 typedef struct {
@@ -656,7 +661,7 @@ static bool is_debug() {
 }
 
 // **********************************************************
-// ********************* DATA PARSING ***********************
+// ******************** FIELD PARSING ***********************
 // **********************************************************
 
 static Money money_parse(
@@ -675,46 +680,6 @@ static DateTime
     // Dates are 3 bytes, in minutes since 2003/1/1 ("CHARLIE_EPOCH")
     uint32_t ts_charlie = pos_to_num(data, sector_num, block_num, byte_num, 3);
     return dt_delta(CHARLIE_EPOCH, ts_charlie * CHARLIE_TIME_DELTA_SECS);
-}
-
-static uint16_t n_uses(const MfClassicData* data, const enum CharlieActiveSector active_sector) {
-    /* First two bytes of applicable block (sector 1, block 1 or 2 depending on active_sector)
-    The *lower* of the two values *minus one* is the true use count,
-    per DEFCON31 researcher's findings
-    */
-    return pos_to_num(data, 1, 1 + active_sector, 0, 2) - 1;
-}
-
-static enum CharlieActiveSector get_active_sector(const MfClassicData* data) {
-    /* Card has two transaction sectors (2 & 3) containing balance data, with two
-    corresponding trip counters in 0x50:0x51 & 0x60:0x61 (sector 1, byte 0:1 of blocks 1 & 2).
-
-    The *lower* count variable corresponds to the active sector 
-    (0x5_ lower -> 2 active, 0x6_ lower -> 3 active)
-
-    Sectors 2 & 3 are (largely) identical, save for trip data.
-    Card seems to alternate between the two, with active sector storing 
-    the current balance & recent trip/transaction, & the inactive sector storing 
-    the N-1 trip/transaction version of the same data.
-
-    Here I check both the trip count and the stored transaction date,
-    for my own sanity, to confirm the active sector.
-    */
-
-    // active sector based on trip counters
-    const bool active_trip = n_uses(data, CHARLIE_ACTIVE_SECTOR_2) <=
-                             n_uses(data, CHARLIE_ACTIVE_SECTOR_3);
-
-    // active sector based on transaction date
-    DateTime ds2 = date_parse(data, 2, 0, 1);
-    DateTime ds3 = date_parse(data, 3, 0, 1);
-    const bool active_date = datetime_datetime_to_timestamp(&ds2) >=
-                             datetime_datetime_to_timestamp(&ds3);
-
-    // with all tested cards so far, this has been true
-    furi_assert(active_trip == active_date);
-
-    return active_trip ? CHARLIE_ACTIVE_SECTOR_2 : CHARLIE_ACTIVE_SECTOR_3;
 }
 
 static uint16_t type_parse(const MfClassicData* data) {
@@ -743,12 +708,6 @@ static DateTime end_validity_parse(
     // additionally, instead of minute deltas, is in 8 minute increments
     // relative to CHARLIE_EPOCH (2003/1/1), per DEFCON31 researcher's work
     return dt_delta(CHARLIE_EPOCH, ts_charlie_ev * CHARLIE_END_VALID_DELTA_SECS);
-}
-
-static DateTime
-    main_end_validity_parse(const MfClassicData* data, enum CharlieActiveSector active_sec) {
-    // primary card type end validity; checked in active sector (probably the same across both 2 & 3)
-    return end_validity_parse(data, (active_sec == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3, 1, 1);
 }
 
 static Pass
@@ -814,53 +773,100 @@ static Trip
     return (Trip){date, gate, g_flag, fare, f_flag};
 }
 
-// Manufacturer data (Sector 0)
-//
-//       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-//       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
-// 0x000 |        UID        |LRC | 88   04   00   C8 |unkn| 00   20   00   00   00 |unkn|
-//       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
-// 0x010 | 4E   0F   04   10   04   10   04   10   04   10   04   10   04   10   04   10 |
-//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
-// 0x020 |                               ...  00   00  ...                               |
-//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
+// **********************************************************
+// ******************* SECTOR PARSING ***********************
+// **********************************************************
 
-// Trip/transaction counters (Sector 1)
-//
-//       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+----+
-// 0x040 | 04   10   23   45   66   77                  ...  00   00  ...                |
-//       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----+----+
-// 0x050 |  uses1  |unkn|                     ...  00   00  ...                          |
-//       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
-// 0x060 |  uses2  |unkn|                     ...  00   00  ...                          |
-//       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+static uint32_t mfg_sector_parse(const MfClassicData* data) {
+    // Manufacturer data (Sector 0)
+    //
+    //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+    //       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
+    // 0x000 |        UID        |LRC | 88   04   00   C8 |unkn| 00   20   00   00   00 |unkn|
+    //       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
+    // 0x010 | 4E   0F   04   10   04   10   04   10   04   10   04   10   04   10   04   10 |
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
+    // 0x020 |                               ...  00   00  ...                               |
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
 
-// Balance / type / last transaction (Sector 2 & 3)
-//
-//       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-//       +----+----.----.----+----.----+----.----.----+----.----+----.----+----+----.----+
-// 0x080 | 11 |   date last  | loc last| date issued  | 65   00 | unknown | 00 |   crc   |
-//       +----+----.----.----+----+----+----+----+----+----.----+----.----+----+----.----+
-// 0x090 | type |end validity|unkn| balance | 00 |           unknown           |   crc   |
-//       +----.----.----.----+----+----.----+----+----.----.----.----.----.----+----.----+
-// 0x0A0 |      20             ...  00   00  ...             04                |   crc   |
-//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+    size_t uid_len = 0;
+    const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
+    const uint32_t card_number = bit_lib_bytes_to_num_be(uid, 4);
+
+    return card_number;
+}
+
+static CounterSector counter_sector_parse(const MfClassicData* data) {
+    // Trip/transaction counters (Sector 1)
+    //
+    //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+----+
+    // 0x040 | 04   10   23   45   66   77                  ...  00   00  ...                |
+    //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----+----+
+    // 0x050 |  uses1  |unkn|                     ...  00   00  ...                          |
+    //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+    // 0x060 |  uses2  |unkn|                     ...  00   00  ...                          |
+    //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+
+    // Card has two transaction sectors (2 & 3) containing balance data, with two
+    // corresponding trip counters in 0x50:0x51 & 0x60:0x61 (sector 1, byte 0:1 of blocks 1 & 2).
+
+    // The *lower* of the two values *minus one* is the true use count,
+    // and corresponds to the active balance sector,
+    // (0x50 counter lower -> sector 2 active, 0x60 counter lower -> 3 active)
+    // per DEFCON31 researcher's findings
+
+    const uint16_t n_uses1 = pos_to_num(data, 1, 1, 0, 2);
+    const uint16_t n_uses2 = pos_to_num(data, 1, 2, 0, 2);
+
+    const bool is_sec2_active = n_uses1 <= n_uses2;
+    const uint8_t active_sector = is_sec2_active ? 2 : 3;
+    const uint16_t n_uses = (is_sec2_active ? n_uses1 : n_uses2) - 1;
+
+    return (CounterSector){n_uses, active_sector};
+}
+
+static BalanceSector balance_sector_parse(const MfClassicData* data, uint8_t active_sector) {
+    // Balance / type / last transaction (Sector 2 or 3)
+    //
+    //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+    //       +----+----.----.----+----.----+----.----.----+----.----+----.----+----+----.----+
+    // 0x080 | 11 |   date last  | loc last| date issued  | 65   00 | unknown | 00 |   crc   | 0x0C0
+    //       +----+----.----.----+----+----+----+----+----+----.----+----.----+----+----.----+
+    // 0x090 | type |end validity|unkn| balance | 00 |           unknown           |   crc   | 0x0D0
+    //       +----.----.----.----+----+----.----+----+----.----.----.----.----.----+----.----+
+    // 0x0A0 |      20             ...  00   00  ...             04                |   crc   | 0x0E0
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+    //
+    // "Active" balance sector alternates between 2 and 3
+    // Last trip/transaction info in balance sector (date last & loc last)
+    // also included in transaction log, hence don't bother to read here
+    //
+    // Inactive balance sector represent the transaction N-1 balance data
+    // (where active sector represents data from transaction N).
+
+    const DateTime issued = date_parse(data, active_sector, 0, 6);
+    const DateTime end_validity = end_validity_parse(data, active_sector, 1, 1);
+    const uint16_t type = type_parse(data);
+    const Money bal = money_parse(data, active_sector, 1, 5);
+
+    return (BalanceSector){bal, type, issued, end_validity};
+}
 
 static Pass* passes_parse(const MfClassicData* data) {
-    // WIP. Read in all speculative passes into array
-    // Sectors 4 & 5 speculated to contain pass data,
-    // 4 separate fields? active vs inactive sector for 2 passes?
-    // Sector 4 visualized below; sector 5 layout the same.
+    // Passes, speculative (Sectors 4 &/or 5)
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
-    // 0x100 |         pass0?           |0   00 |         pass1?           |0   00 |   crc   |
+    // 0x100 |         pass0?           |0   00 |         pass1?           |0   00 |   crc   | 0x140
     //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
-    // 0x110 |                          ...  00   00  ...                          |   crc   |
+    // 0x110 |                          ...  00   00  ...                          |   crc   | 0x150
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
-    // 0x120 |                ...  00  ...                  05                     |   crc   |
+    // 0x120 |                ...  00  ...                  05                     |   crc   | 0x160
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+    //
+    // WIP. Read in all speculative passes into array
+    // 4 separate fields? active vs inactive sector for 2 passes?
 
     Pass* passes = malloc(sizeof(Pass) * CHARLIE_N_PASSES);
 
@@ -872,7 +878,7 @@ static Pass* passes_parse(const MfClassicData* data) {
 }
 
 static Trip* trips_parse(const MfClassicData* data) {
-    // Sectors 6 & 7 store the last 10 trips. Overall layout as follows:
+    // Transaction history (Sectors 6–7)
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
@@ -885,7 +891,8 @@ static Trip* trips_parse(const MfClassicData* data) {
     // 0x1E0 |                          ...  00   00  ...                          |   crc   |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
     //
-    //Trips are not sorted, rather, appear to get overwritten sequentially. (eg, sorted modulo array rotation)
+    // Transactions are not sorted, rather, appear to get overwritten
+    // sequentially. (eg, sorted modulo array rotation)
 
     Trip* trips = malloc(sizeof(Trip) * CHARLIE_N_TRIP_HISTORY);
 
@@ -958,7 +965,7 @@ static DateTime expiry(DateTime iss) {
     }
 
     return exp;
-}*/
+}
 
 static bool expired(DateTime expiry, DateTime last_trip) {
     // if a card has sat unused for >2 years, expired (verify this claim?)
@@ -970,6 +977,7 @@ static bool expired(DateTime expiry, DateTime last_trip) {
 
     return (ts_exp <= ts_now) | ((ts_now - ts_last) >= (2 * 365 * 24 * 60 * 60));
 }
+*/
 
 // **********************************************************
 // ****************** STRING FORMATTING *********************
@@ -1011,7 +1019,7 @@ void pass_format_cat(FuriString* out, Pass pass) {
 
 void passes_format_cat(FuriString* out, Pass* passes) {
     if(is_debug()) {
-        furi_string_cat_printf(out, "\nPasses (DEBUG & WIP):");
+        furi_string_cat_printf(out, "\nPasses (DEBUG / WIP):");
         for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
             if(passes[i].valid) {
                 furi_string_cat_printf(out, "\nPass %u", i + 1);
@@ -1091,43 +1099,38 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
 
         // TODO: Verify add'l?
 
-        const enum CharlieActiveSector active_sec_enum = get_active_sector(data);
-        const uint8_t active_sector = (active_sec_enum == CHARLIE_ACTIVE_SECTOR_2) ? 2 : 3;
+        // parse card data
+        const uint32_t card_number = mfg_sector_parse(data);
+        const CounterSector counter_sector = counter_sector_parse(data);
+        const BalanceSector balance_sector =
+            balance_sector_parse(data, counter_sector.active_balance_sector);
+        Pass* passes = passes_parse(data);
+        Trip* trips = trips_parse(data);
 
+        // print/append card data
         furi_string_cat_printf(parsed_data, "\e#CharlieCard");
-
-        size_t uid_len = 0;
-        const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
-        uint32_t card_number = bit_lib_bytes_to_num_be(uid, 4);
         furi_string_cat_printf(parsed_data, "\nSerial: 5-%lu", card_number);
 
-        Money bal = money_parse(data, active_sector, 1, 5);
         furi_string_cat_printf(parsed_data, "\nBal: ");
-        money_format_cat(parsed_data, bal);
+        money_format_cat(parsed_data, balance_sector.balance);
 
-        const uint16_t type = type_parse(data);
         furi_string_cat_printf(parsed_data, "\nType: ");
-        type_format_cat(parsed_data, type);
+        type_format_cat(parsed_data, balance_sector.type);
 
-        Pass* passes = passes_parse(data);
         passes_format_cat(parsed_data, passes);
         free(passes);
 
-        const uint16_t n_trips = n_uses(data, active_sec_enum);
-        furi_string_cat_printf(parsed_data, "\nTrip Count: %u", n_trips);
+        furi_string_cat_printf(parsed_data, "\nTrip Count: %u", counter_sector.n_uses);
 
-        const DateTime iss = date_parse(data, active_sector, 0, 6);
         furi_string_cat_printf(parsed_data, "\nIssued: ");
-        locale_format_dt_cat(parsed_data, &iss);
+        locale_format_dt_cat(parsed_data, &balance_sector.issued);
 
-        const DateTime e_v = main_end_validity_parse(data, active_sec_enum);
         furi_string_cat_printf(parsed_data, "\nExpiry: ");
-        locale_format_dt_cat(parsed_data, &e_v);
+        locale_format_dt_cat(parsed_data, &balance_sector.end_validity);
 
-        DateTime last = date_parse(data, active_sector, 0, 1);
-        furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
+        // const DateTime last = date_parse(data, active_sector, 0, 1);
+        // furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
 
-        Trip* trips = trips_parse(data);
         trips_format_cat(parsed_data, trips);
         free(trips);
 
