@@ -157,9 +157,10 @@ typedef struct {
 } Trip;
 
 typedef struct {
-    DateTime start_valid;
+    bool valid;
     uint16_t type;
-    DateTime end_valid;
+    DateTime start;
+    DateTime end;
 } Pass;
 
 // IdMapping approach borrowed from Jeremy Cooper's 'clipper.c'
@@ -650,6 +651,10 @@ uint32_t time_now() {
     return furi_hal_rtc_get_timestamp();
 }
 
+static bool is_debug() {
+    return furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
+}
+
 // **********************************************************
 // ********************* DATA PARSING ***********************
 // **********************************************************
@@ -731,9 +736,8 @@ static DateTime end_validity_parse(
     uint8_t sector_num,
     uint8_t block_num,
     uint8_t byte_num) {
-    // End validity field is a bit odd; shares first byte with another variable (the card type field),
-    // occupying only the last 3 bits (and subsequent two bytes), hence bitmask
-    // TODO: what are the add'l 3 bits between type & end validity fields?
+    // End validity field is weird; shares first byte with another variable (the card type field),
+    // occupying the last 5 bits (and subsequent two bytes), hence bitmask
     uint32_t ts_charlie_ev = pos_to_num(data, sector_num, block_num, byte_num, 3) & 0x1FFFFF;
 
     // additionally, instead of minute deltas, is in 8 minute increments
@@ -752,16 +756,33 @@ static Pass
     // WIP; testing only. Speculating it may be structured as follows
     // Sub-byte field divisions not drawn to scale, see code for exact bit offsets
     //
-    //       0    1    2    3    4    5    6
-    //       +----.----.----+----.-+--.----.----+
-    //       |     start    | type |    end     |
-    //       +----.----.----+----.-+--.----.----+
+    //       0    1    2    3    4    5
+    //       +----.----.----+----.----.----+
+    //       | type |  end  |     start    |
+    //       +----.----.----+----.----.----+
+    //
+    // "Blank" entries are as follows:
+    //       0    1    2    3    4    5
+    //       +----.----.----.----.----.--+-.
+    //       | 00   20   00   00   00   0|
+    //       +----.----.----.----.----.--+-.
 
-    DateTime start = date_parse(data, sector_num, block_num, byte_num);
-    uint16_t type = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 6;
-    DateTime end = end_validity_parse(data, sector_num, block_num, byte_num + 4);
+    // check for empty, if so, return struct filled w/ 0s
+    // (incl "valid" field: hence, "valid" is false-y)
+    if(pos_to_num(data, sector_num, block_num, byte_num, 6) == 0x002000000000) {
+        return (Pass){0};
+    }
 
-    return (Pass){start, type, end};
+    DateTime start = date_parse(data, sector_num, block_num, byte_num + 1);
+    uint16_t type = pos_to_num(data, sector_num, block_num, byte_num, 2) >> 6;
+
+    // these values make sense for end
+    DateTime end = end_validity_parse(data, sector_num, block_num, byte_num + 1);
+
+    // DateTime start = date_parse(data, sector_num, block_num, byte_num);
+    // uint16_t type = 0; // pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 6;
+
+    return (Pass){true, type, start, end};
 }
 
 static Trip
@@ -793,6 +814,39 @@ static Trip
     return (Trip){date, gate, g_flag, fare, f_flag};
 }
 
+// Manufacturer data (Sector 0)
+//
+//       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+//       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
+// 0x000 |        UID        |LRC | 88   04   00   C8 |unkn| 00   20   00   00   00 |unkn|
+//       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
+// 0x010 | 4E   0F   04   10   04   10   04   10   04   10   04   10   04   10   04   10 |
+//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
+// 0x020 |                               ...  00   00  ...                               |
+//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
+
+// Trip/transaction counters (Sector 1)
+//
+//       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+----+
+// 0x040 | 04   10   23   45   66   77                  ...  00   00  ...                |
+//       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----+----+
+// 0x050 |  uses1  |unkn|                     ...  00   00  ...                          |
+//       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+// 0x060 |  uses2  |unkn|                     ...  00   00  ...                          |
+//       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+
+// Balance / type / last transaction (Sector 2 & 3)
+//
+//       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+//       +----+----.----.----+----.----+----.----.----+----.----+----.----+----+----.----+
+// 0x080 | 11 |   date last  | loc last| date issued  | 65   00 | unknown | 00 |   crc   |
+//       +----+----.----.----+----+----+----+----+----+----.----+----.----+----+----.----+
+// 0x090 | type |end validity|unkn| balance | 00 |           unknown           |   crc   |
+//       +----.----.----.----+----+----.----+----+----.----.----.----.----.----+----.----+
+// 0x0A0 |      20             ...  00   00  ...             04                |   crc   |
+//       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
+
 static Pass* passes_parse(const MfClassicData* data) {
     // WIP. Read in all speculative passes into array
     // Sectors 4 & 5 speculated to contain pass data,
@@ -801,17 +855,17 @@ static Pass* passes_parse(const MfClassicData* data) {
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
-    // 0x100 |         pass1?           |0   00 |         pass2?           |0   00 |   crc1  |
+    // 0x100 |         pass0?           |0   00 |         pass1?           |0   00 |   crc   |
     //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
-    // 0x110 | 00   00   00   00   00   00   00   00   00   00   00   00   00   00 |   crc2  |
+    // 0x110 |                          ...  00   00  ...                          |   crc   |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
-    // 0x120 | 00   00   00   00   00   00   00   05   00   00   00   00   00   00 |   crc3  |
+    // 0x120 |                ...  00  ...                  05                     |   crc   |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
 
     Pass* passes = malloc(sizeof(Pass) * CHARLIE_N_PASSES);
 
     for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
-        passes[i] = pass_parse(data, 4 + (i / 2), 1, (i % 2) * 7);
+        passes[i] = pass_parse(data, 4 + (i / 2), 0, (i % 2) * 7);
     }
 
     return passes;
@@ -822,13 +876,13 @@ static Trip* trips_parse(const MfClassicData* data) {
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    // 0x180 |               trip0              |               trip1              |   crc1  |
+    // 0x180 |               trip0              |               trip1              |   crc   |
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
     //  ...                   ...                                ...                   ...
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    // 0x1D0 |               trip8              |               trip9              |   crc5  |
+    // 0x1D0 |               trip8              |               trip9              |   crc   |
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    // 0x1E0 | 00   00   00   00   00   00   00   00   00   00   00   00   00   00 |   crc6  |
+    // 0x1E0 |                          ...  00   00  ...                          |   crc   |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
     //
     //Trips are not sorted, rather, appear to get overwritten sequentially. (eg, sorted modulo array rotation)
@@ -947,19 +1001,24 @@ void type_format_cat(FuriString* out, uint16_t type) {
 }
 
 void pass_format_cat(FuriString* out, Pass pass) {
-    furi_string_cat_printf(out, "\nPass type: ");
+    furi_string_cat_printf(out, "\n-Type: ");
     type_format_cat(out, pass.type);
-    furi_string_cat_printf(out, "\nPass start: ");
-    locale_format_dt_cat(out, &pass.start_valid);
-    furi_string_cat_printf(out, "\nPass end: ");
-    locale_format_dt_cat(out, &pass.end_valid);
+    furi_string_cat_printf(out, "\n-Start: ");
+    locale_format_dt_cat(out, &pass.start);
+    furi_string_cat_printf(out, "\n-End: ");
+    locale_format_dt_cat(out, &pass.end);
 }
 
 void passes_format_cat(FuriString* out, Pass* passes) {
-    furi_string_cat_printf(out, "\nPasses:");
-    for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
-        pass_format_cat(out, passes[i]);
-        furi_string_cat_printf(out, "\n");
+    if(is_debug()) {
+        furi_string_cat_printf(out, "\nPasses (DEBUG & WIP):");
+        for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
+            if(passes[i].valid) {
+                furi_string_cat_printf(out, "\nPass %u", i + 1);
+                pass_format_cat(out, passes[i]);
+                furi_string_cat_printf(out, "\n");
+            }
+        }
     }
 }
 
@@ -988,7 +1047,7 @@ void trip_format_cat(FuriString* out, Trip trip) {
         furi_string_cat_printf(out, "%s%u", sep, trip.gate);
     }
     // print flags for debugging purposes
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    if(is_debug()) {
         furi_string_cat_printf(out, "%s%u%s%u", sep, trip.g_flag, sep, trip.f_flag);
     }
 }
