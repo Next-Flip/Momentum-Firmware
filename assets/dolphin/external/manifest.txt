@@ -199,7 +199,7 @@ Weight: 8
 
 Name: wardriving
 Min butthurt: 0
-Max butthurt: 30
+Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 8
