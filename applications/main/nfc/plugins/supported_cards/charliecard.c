@@ -146,14 +146,14 @@ typedef struct {
     uint16_t gate;
     uint8_t g_flag;
     Money fare;
-    uint8_t f_flag;
+    uint16_t f_flag;
 } Trip;
 
 typedef struct {
     bool valid;
-    uint16_t type;
-    DateTime start;
-    DateTime end;
+    uint16_t pre;
+    uint16_t post;
+    DateTime date;
 } Pass;
 
 typedef struct {
@@ -682,20 +682,6 @@ static DateTime
     return dt_delta(CHARLIE_EPOCH, ts_charlie * CHARLIE_TIME_DELTA_SECS);
 }
 
-static uint16_t type_parse(const MfClassicData* data) {
-    /* Card type data stored in the first 10bits of block 1 of sectors 2 & 3 (Block 9 & Block 13, from card start)
-    To my knowledge, card type should never change, so we can check either
-    without caring which is active. For my sanity, I check both, and assert equal.
-    */
-
-    // bitshift (2bytes = 16 bits) by 6bits for just first 10bits
-    const uint16_t type1 = pos_to_num(data, 2, 1, 0, 2) >> 6;
-    const uint16_t type2 = pos_to_num(data, 3, 1, 0, 2) >> 6;
-    furi_assert(type1 == type2);
-
-    return type1;
-}
-
 static DateTime end_validity_parse(
     const MfClassicData* data,
     uint8_t sector_num,
@@ -716,36 +702,45 @@ static Pass
     // Sub-byte field divisions not drawn to scale, see code for exact bit offsets
     //
     //       0    1    2    3    4    5
-    //       +----.----.----+----.----.----+
-    //       | type |  end  |     start    |
-    //       +----.----.----+----.----.----+
+    //       +----.----.----.----+----.----+
+    //       |  uk1  |   date    |   uk2   |
+    //       +----.----.----.----+----.----+
     //
     // "Blank" entries are as follows:
     //       0    1    2    3    4    5
-    //       +----.----.----.----.----.--+-.
-    //       | 00   20   00   00   00   0|
-    //       +----.----.----.----.----.--+-.
-
+    //       +----.----.----.----.----.----+
+    //       | 00   20   00   00   00   00 |
+    //       +----.----.----.----.----.----+
+    //
+    // if not blank, uk1 MSB seems to always be set to 1...
+    // the sole bit set to 1 on the blank entry seems to divide
+    // the uk1 and date fields, and is always set to 1 regardless
+    // same is true of type & end-validity split found in balance sector
+    //
+    //
     // check for empty, if so, return struct filled w/ 0s
     // (incl "valid" field: hence, "valid" is false-y)
     if(pos_to_num(data, sector_num, block_num, byte_num, 6) == 0x002000000000) {
         return (Pass){0};
     }
 
-    DateTime start = date_parse(data, sector_num, block_num, byte_num + 1);
-    uint16_t type = pos_to_num(data, sector_num, block_num, byte_num, 2) >> 6;
+    // const DateTime start = date_parse(data, sector_num, block_num, byte_num + 1);
 
-    // these values make sense for end
-    DateTime end = end_validity_parse(data, sector_num, block_num, byte_num + 1);
+    const uint16_t pre = pos_to_num(data, sector_num, block_num, byte_num, 2) >> 6;
+    const uint16_t post = pos_to_num(data, sector_num, block_num, byte_num + 4, 2);
+
+    // these values make sense for a date, but implied position of type
+    // before end validity, as seen in balance sector, doesn't seem
+    // to produce sensible values
+    const DateTime date = end_validity_parse(data, sector_num, block_num, byte_num + 1);
 
     // DateTime start = date_parse(data, sector_num, block_num, byte_num);
     // uint16_t type = 0; // pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 6;
 
-    return (Pass){true, type, start, end};
+    return (Pass){true, pre, post, date};
 }
 
-static Trip
-    trip_parse(const MfClassicData* data, uint8_t sector_num, uint8_t block_num, uint8_t byte_num) {
+static Trip trip_parse(const MfClassicData* data, uint8_t sector, uint8_t block, uint8_t byte) {
     /* This function parses individual trips. Each trip packs 7 bytes, stored as follows:
 
            0    1    2    3    4    5    6    
@@ -757,19 +752,23 @@ static Trip
     Amount appears to contain some flag bits, however, it is unclear what precisely their function is.
 
     Gate ID ("loc") is only the first 13 bits of 0x3:0x5, the final three bits appear to be flags ("f").
-    Least significant flag bit (ie "loc & 0x1") seems to indicate:
-    — When 0, fare (the amount by which balance is decremented)
-    — When 1, refill (the amount by which balance is incremented)
+    Least significant flag bit seems to indicate:
+    — When f & 1 == 0, fare (the amount by which balance is decremented)
+    — When f & 1 == 1, refill (the amount by which balance is incremented)
+    MSB (sign bit) of amt seems to serve the same role, just inverted, ie
+    — When amt & 0x8000 == 0x8000, fare
+    — When amt & 0x8000 == 0, refill
 
-    On monthly pass cards, MSB of amt will be set: 0x8000 (negative zero)
-    Seemingly randomly (irrespective of card type, last trip, etc) 0x0001 will be set on amt in addition to 
-    whatever the regular fare is (a half cent more). I am uncertain what this flag indicates.
+    Remaining unknown bits:
+    — f & 0b100
+    — f & 0b010
+    — amt & 1; does not seem to correspond with card type, last trip, first trip, refill v. fare, etc
     */
-    const DateTime date = date_parse(data, sector_num, block_num, byte_num);
-    const uint16_t gate = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) >> 3;
-    const uint8_t g_flag = pos_to_num(data, sector_num, block_num, byte_num + 3, 2) & 0b111;
-    const Money fare = money_parse(data, sector_num, block_num, byte_num + 5);
-    const uint8_t f_flag = pos_to_num(data, sector_num, block_num, byte_num + 5, 2) & 0x8001;
+    const DateTime date = date_parse(data, sector, block, byte);
+    const uint16_t gate = pos_to_num(data, sector, block, byte + 3, 2) >> 3;
+    const uint8_t g_flag = pos_to_num(data, sector, block, byte + 3, 2) & 0b111;
+    const Money fare = money_parse(data, sector, block, byte + 5);
+    const uint16_t f_flag = pos_to_num(data, sector, block, byte + 5, 2) & 0x8001;
     return (Trip){date, gate, g_flag, fare, f_flag};
 }
 
@@ -782,12 +781,15 @@ static uint32_t mfg_sector_parse(const MfClassicData* data) {
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
-    // 0x000 |        UID        |LRC | 88   04   00   C8 |unkn| 00   20   00   00   00 |unkn|
+    // 0x000 |        UID        | rc | 88   04   00   C8 | uk | 00   20   00   00   00 | uk |
     //       +----.----.----.----+----+----.----.----.----+----+----.----.----.----.----+----+
     // 0x010 | 4E   0F   04   10   04   10   04   10   04   10   04   10   04   10   04   10 |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
     // 0x020 |                               ...  00   00  ...                               |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
+    //
+    // rc := "redundancy check" (lrc / bcc)
+    // uk := "unknown"
 
     size_t uid_len = 0;
     const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
@@ -800,13 +802,16 @@ static CounterSector counter_sector_parse(const MfClassicData* data) {
     // Trip/transaction counters (Sector 1)
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+----+
+    //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----.----.----+
     // 0x040 | 04   10   23   45   66   77                  ...  00   00  ...                |
-    //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----+----+
-    // 0x050 |  uses1  |unkn|                     ...  00   00  ...                          |
     //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
-    // 0x060 |  uses2  |unkn|                     ...  00   00  ...                          |
+    // 0x050 |  uses1  | uk |                     ...  00   00  ...                          |
     //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+    // 0x060 |  uses2  | uk |                     ...  00   00  ...                          |
+    //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
+    //
+    // uk := "unknown"; if nonzero, seems to only occupy the first 4 bits (ie, mask w/ 0xF0),
+    //        with the remaining 4 zero
 
     // Card has two transaction sectors (2 & 3) containing balance data, with two
     // corresponding trip counters in 0x50:0x51 & 0x60:0x61 (sector 1, byte 0:1 of blocks 1 & 2).
@@ -827,27 +832,30 @@ static CounterSector counter_sector_parse(const MfClassicData* data) {
 }
 
 static BalanceSector balance_sector_parse(const MfClassicData* data, uint8_t active_sector) {
-    // Balance / type / last transaction (Sector 2 or 3)
+    // Balance & misc card info (Sector 2 or 3)
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----+----.----.----+----.----+----.----.----+----.----+----.----+----+----.----+
     // 0x080 | 11 |   date last  | loc last| date issued  | 65   00 | unknown | 00 |   crc   | 0x0C0
     //       +----+----.----.----+----+----+----+----+----+----.----+----.----+----+----.----+
-    // 0x090 | type |end validity|unkn| balance | 00 |           unknown           |   crc   | 0x0D0
+    // 0x090 | type |end validity| uk | balance | 00 |           unknown           |   crc   | 0x0D0
     //       +----.----.----.----+----+----.----+----+----.----.----.----.----.----+----.----+
     // 0x0A0 |      20             ...  00   00  ...             04                |   crc   | 0x0E0
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
     //
     // "Active" balance sector alternates between 2 and 3
-    // Last trip/transaction info in balance sector (date last & loc last)
-    // also included in transaction log, hence don't bother to read here
+    // Last trip/transaction info in balance sector ("date last" & "loc last")
+    // is also included in transaction log, hence don't bother to read here
     //
-    // Inactive balance sector represent the transaction N-1 balance data
+    // Inactive balance sector represent the transaction N-1 version
     // (where active sector represents data from transaction N).
 
     const DateTime issued = date_parse(data, active_sector, 0, 6);
     const DateTime end_validity = end_validity_parse(data, active_sector, 1, 1);
-    const uint16_t type = type_parse(data);
+    // Card type data stored in the first 10bits of block 1
+    // (0x90 or 0xD0 depending on active sector)
+    // bitshift (2bytes = 16 bits) by 6bits for just first 10bits
+    const uint16_t type = pos_to_num(data, active_sector, 1, 0, 2) >> 6;
     const Money bal = money_parse(data, active_sector, 1, 5);
 
     return (BalanceSector){bal, type, issued, end_validity};
@@ -857,9 +865,9 @@ static Pass* passes_parse(const MfClassicData* data) {
     // Passes, speculative (Sectors 4 &/or 5)
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
-    //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
-    // 0x100 |         pass0?           |0   00 |         pass1?           |0   00 |   crc   | 0x140
-    //       +----.----.----.----.----.-+--.----+----.----.----.----.----.-+--.----+----.----+
+    //       +----.----.----.----.----.----+----+----.----.----.----.----.----+----+----.----+
+    // 0x100 |            pass0?           | 00 |            pass1?           | 00 |   crc   | 0x140
+    //       +----.----.----.----.----.----+----+----.----.----.----.----.----+----+----.----+
     // 0x110 |                          ...  00   00  ...                          |   crc   | 0x150
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
     // 0x120 |                ...  00  ...                  05                     |   crc   | 0x160
@@ -867,6 +875,7 @@ static Pass* passes_parse(const MfClassicData* data) {
     //
     // WIP. Read in all speculative passes into array
     // 4 separate fields? active vs inactive sector for 2 passes?
+    // something else entirely?
 
     Pass* passes = malloc(sizeof(Pass) * CHARLIE_N_PASSES);
 
@@ -1009,23 +1018,35 @@ void type_format_cat(FuriString* out, uint16_t type) {
 }
 
 void pass_format_cat(FuriString* out, Pass pass) {
-    furi_string_cat_printf(out, "\n-Type: ");
-    type_format_cat(out, pass.type);
-    furi_string_cat_printf(out, "\n-Start: ");
-    locale_format_dt_cat(out, &pass.start);
-    furi_string_cat_printf(out, "\n-End: ");
-    locale_format_dt_cat(out, &pass.end);
+    furi_string_cat_printf(out, "\n-Pre: %b", pass.pre);
+    // type_format_cat(out, pass.type);
+    furi_string_cat_printf(out, "\n-Post: %b", pass.post);
+    // locale_format_dt_cat(out, &pass.start);
+    furi_string_cat_printf(out, "\n-Date: ");
+    locale_format_dt_cat(out, &pass.date);
 }
 
 void passes_format_cat(FuriString* out, Pass* passes) {
-    if(is_debug()) {
-        furi_string_cat_printf(out, "\nPasses (DEBUG / WIP):");
-        for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
-            if(passes[i].valid) {
-                furi_string_cat_printf(out, "\nPass %u", i + 1);
-                pass_format_cat(out, passes[i]);
-                furi_string_cat_printf(out, "\n");
-            }
+    // only print passes if DEBUG on
+    if(!is_debug()) {
+        return;
+    }
+
+    // only print if there is at least 1 valid pass to print
+    bool any_valid = false;
+    for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
+        any_valid |= passes[i].valid;
+    }
+    if(!any_valid) {
+        return;
+    }
+
+    furi_string_cat_printf(out, "\nPasses (DEBUG / WIP):");
+    for(size_t i = 0; i < CHARLIE_N_PASSES; i++) {
+        if(passes[i].valid) {
+            furi_string_cat_printf(out, "\nPass %u", i + 1);
+            pass_format_cat(out, passes[i]);
+            furi_string_cat_printf(out, "\n");
         }
     }
 }
@@ -1044,19 +1065,19 @@ void trip_format_cat(FuriString* out, Trip trip) {
     if(!!(trip.g_flag & 0x1) && (trip.fare.dollars == FARE_BUS.dollars) &&
        (trip.fare.cents == FARE_BUS.cents)) {
         // if not a refill, and the fare amount is equal to bus fare (any better approach? flag bits for modality?)
-        // format for bus (gate ID on busses = posted bus #)
-        furi_string_cat_printf(out, "%sBus#%u", sep, trip.gate);
+        // format for bus — supposedly some correlation between gate ID & bus #, haven't investigated
+        furi_string_cat_printf(out, "%s#%u", sep, trip.gate);
     } else if(get_map_item(trip.gate, charliecard_fare_gate_ids, kNumFareGateIds, &sta)) {
         // station found in fare gate ID map, append station name
         furi_string_cat_str(out, sep);
         furi_string_cat_str(out, sta);
     } else {
         // no found station in fare gate ID map & not a bus, just print ID w/o add'l info
-        furi_string_cat_printf(out, "%s%u", sep, trip.gate);
+        furi_string_cat_printf(out, "%s#%u", sep, trip.gate);
     }
     // print flags for debugging purposes
     if(is_debug()) {
-        furi_string_cat_printf(out, "%s%u%s%u", sep, trip.g_flag, sep, trip.f_flag);
+        furi_string_cat_printf(out, "%s%x%s%x", sep, trip.g_flag, sep, trip.f_flag);
     }
 }
 
@@ -1117,9 +1138,6 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         furi_string_cat_printf(parsed_data, "\nType: ");
         type_format_cat(parsed_data, balance_sector.type);
 
-        passes_format_cat(parsed_data, passes);
-        free(passes);
-
         furi_string_cat_printf(parsed_data, "\nTrip Count: %u", counter_sector.n_uses);
 
         furi_string_cat_printf(parsed_data, "\nIssued: ");
@@ -1130,6 +1148,9 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
 
         // const DateTime last = date_parse(data, active_sector, 0, 1);
         // furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
+
+        passes_format_cat(parsed_data, passes);
+        free(passes);
 
         trips_format_cat(parsed_data, trips);
         free(trips);
