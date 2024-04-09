@@ -36,7 +36,13 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
                         txt_path = archive_get_default_path(ArchiveTabBadKb);
                         break;
                     }
-                    if(txt_path != NULL && furi_string_start_with_str(file->path, txt_path)) {
+                    if(txt_path != NULL) {
+                        size_t len = strlen(txt_path);
+                        if(furi_string_size(file->path) < len) continue;
+                        // Compare but ignore /ext or /any, continue if different (memcmp() != 0)
+                        if(memcmp(furi_string_get_cstr(file->path) + 4, txt_path + 4, len - 4)) {
+                            continue;
+                        }
                         file->type = i;
                         return;
                     }
