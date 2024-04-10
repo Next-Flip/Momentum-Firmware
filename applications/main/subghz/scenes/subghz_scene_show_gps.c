@@ -3,17 +3,7 @@
 
 void subghz_scene_show_gps_draw_satellites(void* context) {
     SubGhz* subghz = context;
-
-    DateTime datetime;
-    furi_hal_rtc_get_datetime(&datetime);
-    if((datetime.second - subghz->gps->fix_second) > 15) {
-        subghz->gps->latitude = NAN;
-        subghz->gps->longitude = NAN;
-        subghz->gps->satellites = 0;
-        subghz->gps->fix_hour = 0;
-        subghz->gps->fix_minute = 0;
-        subghz->gps->fix_second = 0;
-    }
+    widget_reset(subghz->widget);
 
     float latitude, longitude;
     // Get from saved file or from history
@@ -24,17 +14,30 @@ void subghz_scene_show_gps_draw_satellites(void* context) {
         latitude = subghz_history_get_latitude(subghz->history, subghz->idx_menu_chosen);
         longitude = subghz_history_get_longitude(subghz->history, subghz->idx_menu_chosen);
     }
+    FuriString* text_str = furi_string_alloc_printf(
+        "Captured at: %f,\r\n"
+        "%f\r\n"
+        "\r\n",
+        (double)latitude,
+        (double)longitude);
 
-    FuriString* text_str = furi_string_alloc();
-    subghz->gps->get_descr(subghz->gps, text_str, latitude, longitude);
+    if(subghz->gps) {
+        DateTime datetime;
+        furi_hal_rtc_get_datetime(&datetime);
+        if((datetime.second - subghz->gps->fix_second) > 15) {
+            subghz->gps->latitude = NAN;
+            subghz->gps->longitude = NAN;
+            subghz->gps->satellites = 0;
+            subghz->gps->fix_hour = 0;
+            subghz->gps->fix_minute = 0;
+            subghz->gps->fix_second = 0;
+        }
+
+        subghz->gps->cat_realtime(subghz->gps, text_str, latitude, longitude);
+    }
+
     widget_add_text_scroll_element(subghz->widget, 0, 0, 128, 64, furi_string_get_cstr(text_str));
     furi_string_free(text_str);
-}
-
-void subghz_scene_show_gps_refresh_screen(void* context) {
-    SubGhz* subghz = context;
-    widget_reset(subghz->widget);
-    subghz_scene_show_gps_draw_satellites(subghz);
 }
 
 void subghz_scene_show_gps_on_enter(void* context) {
@@ -44,7 +47,7 @@ void subghz_scene_show_gps_on_enter(void* context) {
 
     if(subghz->gps) {
         subghz->gps->timer =
-            furi_timer_alloc(subghz_scene_show_gps_refresh_screen, FuriTimerTypePeriodic, subghz);
+            furi_timer_alloc(subghz_scene_show_gps_draw_satellites, FuriTimerTypePeriodic, subghz);
         furi_timer_start(subghz->gps->timer, 1000);
     }
 

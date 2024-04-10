@@ -1,7 +1,6 @@
 #include "subghz_gps.h"
 #include "minmea.h"
 
-#include <expansion/expansion.h>
 #include <momentum/momentum.h>
 
 #define UART_CH (momentum_settings.uart_nmea_channel)
@@ -128,15 +127,13 @@ static int32_t subghz_gps_uart_worker(void* context) {
 static void subghz_gps_deinit(SubGhzGPS* subghz_gps) {
     furi_assert(subghz_gps);
 
+    furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
+    furi_thread_join(subghz_gps->thread);
+
     furi_hal_serial_async_rx_stop(subghz_gps->serial_handle);
     furi_hal_serial_deinit(subghz_gps->serial_handle);
     furi_hal_serial_control_release(subghz_gps->serial_handle);
 
-    expansion_enable(furi_record_open(RECORD_EXPANSION));
-    furi_record_close(RECORD_EXPANSION);
-
-    furi_thread_flags_set(furi_thread_get_id(subghz_gps->thread), WorkerEvtStop);
-    furi_thread_join(subghz_gps->thread);
     furi_thread_free(subghz_gps->thread);
 
     furi_stream_buffer_free(subghz_gps->rx_stream);
@@ -162,7 +159,7 @@ static float subghz_gps_calc_angle(float lat1, float lon1, float lat2, float lon
     return atan2(lat1 - lat2, lon1 - lon2) * 180 / (double)M_PI;
 }
 
-static void subghz_gps_get_descr(
+static void subghz_gps_cat_realtime(
     SubGhzGPS* subghz_gps,
     FuriString* descr,
     float latitude,
@@ -192,16 +189,11 @@ static void subghz_gps_get_descr(
         angle_str = "W";
     }
 
-    furi_string_printf(
+    furi_string_cat_printf(
         descr,
-        "Captured at: %f,\r\n"
-        "%f\r\n"
-        "\r\n"
         "Realtime:  Sats: %d\r\n"
         "Distance: %.2f%s Dir: %s\r\n"
         "GPS time: %02d:%02d:%02d UTC",
-        (double)latitude,
-        (double)longitude,
         subghz_gps->satellites,
         (double)(subghz_gps->satellites > 0 ? distance > 1 ? distance : distance * 1000 : 0),
         distance > 1 ? "km" : "m",
@@ -225,9 +217,6 @@ static void subghz_gps_init(SubGhzGPS* subghz_gps, uint32_t baudrate) {
         furi_thread_alloc_ex("SubGhzGPSWorker", 1024, subghz_gps_uart_worker, subghz_gps);
     furi_thread_start(subghz_gps->thread);
 
-    expansion_disable(furi_record_open(RECORD_EXPANSION));
-    furi_record_close(RECORD_EXPANSION);
-
     subghz_gps->serial_handle = furi_hal_serial_control_acquire(UART_CH);
     furi_check(subghz_gps->serial_handle);
     furi_hal_serial_init(subghz_gps->serial_handle, baudrate);
@@ -236,7 +225,7 @@ static void subghz_gps_init(SubGhzGPS* subghz_gps, uint32_t baudrate) {
         subghz_gps->serial_handle, subghz_gps_uart_on_irq_cb, subghz_gps, false);
 
     subghz_gps->deinit = &subghz_gps_deinit;
-    subghz_gps->get_descr = &subghz_gps_get_descr;
+    subghz_gps->cat_realtime = &subghz_gps_cat_realtime;
 }
 
 #include <flipper_application/flipper_application.h>

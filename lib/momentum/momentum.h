@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <furi_hal_version.h>
 #include <toolbox/colors.h>
 #include <gui/canvas.h>
 
@@ -89,6 +90,7 @@ typedef struct {
     VgmColorMode vgm_color_mode;
     Rgb565Color vgm_color_fg;
     Rgb565Color vgm_color_bg;
+    FuriHalVersionColor spoof_color;
 } MomentumSettings;
 
 typedef struct {
@@ -96,12 +98,12 @@ typedef struct {
     CanvasFontParameters* font_params[FontTotalNumber];
 } AssetPacks;
 
-void momentum_settings_load();
-void momentum_settings_save();
+void momentum_settings_load(void);
+void momentum_settings_save(void);
 extern MomentumSettings momentum_settings;
 
-void asset_packs_init();
-void asset_packs_free();
+void asset_packs_init(void);
+void asset_packs_free(void);
 extern AssetPacks asset_packs;
 
 #ifdef __cplusplus

@@ -277,7 +277,7 @@ void subrem_view_remote_exit(void* context) {
     furi_assert(context);
 }
 
-SubRemViewRemote* subrem_view_remote_alloc() {
+SubRemViewRemote* subrem_view_remote_alloc(void) {
     SubRemViewRemote* subrem_view_remote = malloc(sizeof(SubRemViewRemote));
 
     // View allocation and configuration

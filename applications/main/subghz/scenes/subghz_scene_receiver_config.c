@@ -178,8 +178,8 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
             subghz->txrx,
             furi_string_get_cstr(preset.name),
             frequency,
-            0,
-            0,
+            NAN,
+            NAN,
             preset.data,
             preset.data_size);
 
@@ -206,8 +206,8 @@ static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
         subghz->txrx,
         preset_name,
         preset.frequency,
-        0,
-        0,
+        NAN,
+        NAN,
         subghz_setting_get_preset_data(setting, index),
         subghz_setting_get_preset_data_size(setting, index));
     subghz->last_settings->preset_index = index;
@@ -240,8 +240,8 @@ static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item)
             subghz->txrx,
             furi_string_get_cstr(preset.name),
             frequency,
-            0,
-            0,
+            NAN,
+            NAN,
             preset.data,
             preset.data_size);
         variable_item_set_current_value_index(
@@ -410,14 +410,11 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
             subghz->view_dispatcher, SubGhzCustomEventSceneSettingLock);
     } else if(index == SubGhzSettingIndexResetToDefault) {
         // Reset all values to default state!
-#if SUBGHZ_LAST_SETTING_SAVE_PRESET
         subghz_txrx_set_preset_internal(
             subghz->txrx,
             SUBGHZ_LAST_SETTING_DEFAULT_FREQUENCY,
             SUBGHZ_LAST_SETTING_DEFAULT_PRESET);
-#else
-        subghz_txrx_set_default_preset(subghz->txrx, SUBGHZ_LAST_SETTING_DEFAULT_FREQUENCY);
-#endif
+
         SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
         SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
         const char* preset_name = furi_string_get_cstr(preset.name);
@@ -449,9 +446,7 @@ static void subghz_scene_receiver_config_var_list_enter_callback(void* context, 
 
         variable_item_list_set_selected_item(subghz->variable_item_list, default_index);
         variable_item_list_reset(subghz->variable_item_list);
-#ifdef FURI_DEBUG
-        subghz_last_settings_log(subghz->last_settings);
-#endif
+
         subghz_last_settings_save(subghz->last_settings);
 
         view_dispatcher_send_custom_event(
@@ -745,9 +740,7 @@ void subghz_scene_receiver_config_on_exit(void* context) {
 
     variable_item_list_set_selected_item(subghz->variable_item_list, 0);
     variable_item_list_reset(subghz->variable_item_list);
-#ifdef FURI_DEBUG
-    subghz_last_settings_log(subghz->last_settings);
-#endif
+
     subghz_last_settings_save(subghz->last_settings);
     scene_manager_set_scene_state(
         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);

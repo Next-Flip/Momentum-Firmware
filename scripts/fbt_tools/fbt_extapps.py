@@ -308,6 +308,8 @@ def _validate_app_imports(target, source, env):
                 "totp_",
                 "token_info_",
                 "memset_s",
+                # troika
+                "mosgortrans_parse_transport_block",
             )
         )
         and any(
@@ -317,6 +319,7 @@ def _validate_app_imports(target, source, env):
                 "gallagher",
                 "js_",
                 "totp_",
+                "troika",
             ]
         )
     ]

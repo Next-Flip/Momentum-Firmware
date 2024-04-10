@@ -32,7 +32,7 @@ struct SubGhzGPS {
     void (*deinit)(SubGhzGPS* subghz_gps);
 
     /**
-     * Get description for signal info
+     * Concatenate realtime GPS info to string
      * 
      * @param subghz_gps SubGhzGPS object
      * @param descr Output string
@@ -40,7 +40,7 @@ struct SubGhzGPS {
      * @param longitude Longitude
      * @return void
     */
-    void (*get_descr)(SubGhzGPS* subghz_gps, FuriString* descr, float latitude, float longitude);
+    void (*cat_realtime)(SubGhzGPS* subghz_gps, FuriString* descr, float latitude, float longitude);
 };
 
 /**
@@ -49,7 +49,7 @@ struct SubGhzGPS {
  *
  * @return SubGhzGPS* SubGhzGPS object
 */
-SubGhzGPS* subghz_gps_plugin_init();
+SubGhzGPS* subghz_gps_plugin_init(uint32_t baudrate);
 
 /**
  * Deinitialize SubGhzGPS plugin
