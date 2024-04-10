@@ -638,6 +638,11 @@ static bool dt_ge(DateTime dt1, DateTime dt2) {
     return datetime_datetime_to_timestamp(&dt1) >= datetime_datetime_to_timestamp(&dt2);
 }
 
+static bool dt_eq(DateTime dt1, DateTime dt2) {
+    // compares two DateTimes
+    return datetime_datetime_to_timestamp(&dt1) == datetime_datetime_to_timestamp(&dt2);
+}
+
 static bool get_map_item(uint16_t id, const IdMapping* map, size_t sz, const char** out) {
     // code borrowed from Jeremy Cooper's 'clipper.c'. Used as follows:
     // const char* s; if(!get_map_item(_,_,_,&s)) {s="Default str";}
@@ -712,7 +717,7 @@ static Pass
     //       | 00   20   00   00   00   00 |
     //       +----.----.----.----.----.----+
     //
-    // if not blank, uk1 MSB seems to always be set to 1...
+    // even when not blank, uk1 LSB seems to always be set to 1...
     // the sole bit set to 1 on the blank entry seems to divide
     // the uk1 and date fields, and is always set to 1 regardless
     // same is true of type & end-validity split found in balance sector
@@ -746,29 +751,32 @@ static Pass
 
 static Transaction
     transaction_parse(const MfClassicData* data, uint8_t sector, uint8_t block, uint8_t byte) {
-    /* This function parses individual transactions. Each transaction packs 7 bytes, stored as follows:
+    // This function parses individual transactions. Each transaction packs 7 bytes, stored as follows:
+    //
+    //       0    1    2    3    4    5    6
+    //       +----.----.----+----.--+-+----.----+
+    //       |     date     |   loc |f|   amt   |
+    //       +----.----.----+----.--+-+----.----+
+    //
+    // Where date is in the typical format, loc represents the fare gate tapped, and amt is the fare amount.
+    // Amount appears to contain some flag bits, however, it is unclear what precisely their function is.
+    //
+    // Gate ID ("loc") is only the first 13 bits of 0x3:0x5, the final three bits appear to be flags ("f").
+    // Least significant flag bit seems to indicate:
+    // — When f & 1 == 1, fare (the amount by which balance is decremented)
+    // — When f & 1 == 0, refill (the amount by which balance is incremented)
+    // MSB (sign bit) of amt seems to serve the same role, just inverted, ie
+    // — When amt & 0x8000 == 0, fare
+    // — When amt & 0x8000 == 0x8000, refill
+    // Only contradiction between the two observed is on cards w/ passes;
+    // MSB of amt seems to be set for every transaction when (remaining bits of) amt is 0 on a card w/ a pass
+    // Hence, using f's LSB as method for inferring fare v. refill
+    //
+    // Remaining unknown bits:
+    // — f & 0b100; seems to be set on fares where the card has a pass, and amt is 0
+    // — f & 0b010
+    // — amt & 1; does not seem to correspond with card type, last transaction, first transaction, refill v. fare, etc
 
-           0    1    2    3    4    5    6    
-           +----.----.----+----.--+-+----.----+
-           |     date     |   loc |f|   amt   |
-           +----.----.----+----.--+-+----.----+
-
-    Where date is in the typical format, loc represents the fare gate tapped, and amt is the fare amount.
-    Amount appears to contain some flag bits, however, it is unclear what precisely their function is.
-
-    Gate ID ("loc") is only the first 13 bits of 0x3:0x5, the final three bits appear to be flags ("f").
-    Least significant flag bit seems to indicate:
-    — When f & 1 == 1, fare (the amount by which balance is decremented)
-    — When f & 1 == 0, refill (the amount by which balance is incremented)
-    MSB (sign bit) of amt seems to serve the same role, just inverted, ie
-    — When amt & 0x8000 == 0, fare
-    — When amt & 0x8000 == 0x8000, refill
-
-    Remaining unknown bits:
-    — f & 0b100
-    — f & 0b010
-    — amt & 1; does not seem to correspond with card type, last transaction, first transaction, refill v. fare, etc
-    */
     const DateTime date = date_parse(data, sector, block, byte);
     const uint16_t gate = pos_to_num(data, sector, block, byte + 3, 2) >> 3;
     const uint8_t g_flag = pos_to_num(data, sector, block, byte + 3, 2) & 0b111;
@@ -1124,8 +1132,6 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         if(key_a != charliecard_1k_keys[verify_sector].a) break;
         if(key_b != charliecard_1k_keys[verify_sector].b) break;
 
-        // TODO: Verify add'l?
-
         // parse card data
         const uint32_t card_number = mfg_sector_parse(data);
         const CounterSector counter_sector = counter_sector_parse(data);
@@ -1138,6 +1144,10 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         furi_string_cat_printf(parsed_data, "\e#CharlieCard");
         furi_string_cat_printf(parsed_data, "\nSerial: 5-%lu", card_number);
 
+        // Type and balance 0 on some (Perq) cards
+        // (ie no "main" type / balance / end validity,
+        //  essentially only pass & trip info)
+        // skip/change formatting for that case?
         furi_string_cat_printf(parsed_data, "\nBal: ");
         money_format_cat(parsed_data, balance_sector.balance);
 
@@ -1149,17 +1159,23 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         furi_string_cat_printf(parsed_data, "\nIssued: ");
         locale_format_dt_cat(parsed_data, &balance_sector.issued);
 
-        furi_string_cat_printf(parsed_data, "\nExpiry: ");
-        locale_format_dt_cat(parsed_data, &balance_sector.end_validity);
+        if(!dt_eq(balance_sector.end_validity, CHARLIE_EPOCH) &
+           dt_ge(balance_sector.end_validity, balance_sector.issued)) {
+            // sometimes (seen on Perq cards) end validity field is all 0
+            // When this is the case, calc'd end validity is equal to CHARLIE_EPOCH).
+            // Only print if not 0, & end validity after issuance date
+            furi_string_cat_printf(parsed_data, "\nExpiry: ");
+            locale_format_dt_cat(parsed_data, &balance_sector.end_validity);
+        }
 
         // const DateTime last = date_parse(data, active_sector, 0, 1);
         // furi_string_cat_printf(parsed_data, "\nExpired: %s", expired(e_v, last) ? "Yes" : "No");
 
-        passes_format_cat(parsed_data, passes);
-        free(passes);
-
         transactions_format_cat(parsed_data, transactions);
         free(transactions);
+
+        passes_format_cat(parsed_data, passes);
+        free(passes);
 
         parsed = true;
     } while(false);
