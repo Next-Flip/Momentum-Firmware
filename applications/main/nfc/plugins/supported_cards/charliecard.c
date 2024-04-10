@@ -206,7 +206,7 @@ static const IdMapping charliecard_types[] = {
     {.id = 166, .name = "30 Day Commuter Rail Zone 1A Pass"},
     {.id = 167, .name = "30 Day Commuter Rail Zone 1 Pass"},
     {.id = 168, .name = "30 Day Commuter Rail Zone 2 Pass"},
-    {.id = 169, .name = "30 Day ComZmuter Rail Zone 3 Pass"},
+    {.id = 169, .name = "30 Day Commuter Rail Zone 3 Pass"},
     {.id = 170, .name = "30 Day Commuter Rail Zone 4 Pass"},
     {.id = 171, .name = "30 Day Commuter Rail Zone 5 Pass"},
     {.id = 172, .name = "30 Day Commuter Rail Zone 6 Pass"},
