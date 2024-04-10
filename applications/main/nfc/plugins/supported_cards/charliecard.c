@@ -94,7 +94,7 @@
 // timestep is one minute
 #define CHARLIE_TIME_DELTA_SECS 60
 #define CHARLIE_END_VALID_DELTA_SECS 60 * 8
-#define CHARLIE_N_TRIP_HISTORY 10
+#define CHARLIE_N_TRANSACTION_HISTORY 10
 #define CHARLIE_N_PASSES 4
 
 typedef struct {
@@ -147,7 +147,7 @@ typedef struct {
     uint8_t g_flag;
     Money fare;
     uint16_t f_flag;
-} Trip;
+} Transaction;
 
 typedef struct {
     bool valid;
@@ -206,7 +206,7 @@ static const IdMapping charliecard_types[] = {
     {.id = 166, .name = "30 Day Commuter Rail Zone 1A Pass"},
     {.id = 167, .name = "30 Day Commuter Rail Zone 1 Pass"},
     {.id = 168, .name = "30 Day Commuter Rail Zone 2 Pass"},
-    {.id = 169, .name = "30 Day Commuter Rail Zone 3 Pass"},
+    {.id = 169, .name = "30 Day ComZmuter Rail Zone 3 Pass"},
     {.id = 170, .name = "30 Day Commuter Rail Zone 4 Pass"},
     {.id = 171, .name = "30 Day Commuter Rail Zone 5 Pass"},
     {.id = 172, .name = "30 Day Commuter Rail Zone 6 Pass"},
@@ -717,7 +717,11 @@ static Pass
     // the uk1 and date fields, and is always set to 1 regardless
     // same is true of type & end-validity split found in balance sector
     //
-    //
+    // likely fields incl
+    // — type #,
+    // — a secondary date field (eg start/end, end validity or normal format)
+    // — ID of FVM from which the pass was loaded
+
     // check for empty, if so, return struct filled w/ 0s
     // (incl "valid" field: hence, "valid" is false-y)
     if(pos_to_num(data, sector_num, block_num, byte_num, 6) == 0x002000000000) {
@@ -727,7 +731,7 @@ static Pass
     // const DateTime start = date_parse(data, sector_num, block_num, byte_num + 1);
 
     const uint16_t pre = pos_to_num(data, sector_num, block_num, byte_num, 2) >> 6;
-    const uint16_t post = pos_to_num(data, sector_num, block_num, byte_num + 4, 2);
+    const uint16_t post = (pos_to_num(data, sector_num, block_num, byte_num + 4, 2) >> 2) & 0x3ff;
 
     // these values make sense for a date, but implied position of type
     // before end validity, as seen in balance sector, doesn't seem
@@ -740,8 +744,9 @@ static Pass
     return (Pass){true, pre, post, date};
 }
 
-static Trip trip_parse(const MfClassicData* data, uint8_t sector, uint8_t block, uint8_t byte) {
-    /* This function parses individual trips. Each trip packs 7 bytes, stored as follows:
+static Transaction
+    transaction_parse(const MfClassicData* data, uint8_t sector, uint8_t block, uint8_t byte) {
+    /* This function parses individual transactions. Each transaction packs 7 bytes, stored as follows:
 
            0    1    2    3    4    5    6    
            +----.----.----+----.--+-+----.----+
@@ -753,23 +758,23 @@ static Trip trip_parse(const MfClassicData* data, uint8_t sector, uint8_t block,
 
     Gate ID ("loc") is only the first 13 bits of 0x3:0x5, the final three bits appear to be flags ("f").
     Least significant flag bit seems to indicate:
-    — When f & 1 == 0, fare (the amount by which balance is decremented)
-    — When f & 1 == 1, refill (the amount by which balance is incremented)
+    — When f & 1 == 1, fare (the amount by which balance is decremented)
+    — When f & 1 == 0, refill (the amount by which balance is incremented)
     MSB (sign bit) of amt seems to serve the same role, just inverted, ie
-    — When amt & 0x8000 == 0x8000, fare
-    — When amt & 0x8000 == 0, refill
+    — When amt & 0x8000 == 0, fare
+    — When amt & 0x8000 == 0x8000, refill
 
     Remaining unknown bits:
     — f & 0b100
     — f & 0b010
-    — amt & 1; does not seem to correspond with card type, last trip, first trip, refill v. fare, etc
+    — amt & 1; does not seem to correspond with card type, last transaction, first transaction, refill v. fare, etc
     */
     const DateTime date = date_parse(data, sector, block, byte);
     const uint16_t gate = pos_to_num(data, sector, block, byte + 3, 2) >> 3;
     const uint8_t g_flag = pos_to_num(data, sector, block, byte + 3, 2) & 0b111;
     const Money fare = money_parse(data, sector, block, byte + 5);
     const uint16_t f_flag = pos_to_num(data, sector, block, byte + 5, 2) & 0x8001;
-    return (Trip){date, gate, g_flag, fare, f_flag};
+    return (Transaction){date, gate, g_flag, fare, f_flag};
 }
 
 // **********************************************************
@@ -810,10 +815,10 @@ static CounterSector counter_sector_parse(const MfClassicData* data) {
     // 0x060 |  uses2  | uk |                     ...  00   00  ...                          |
     //       +----.----+----+----.----.----.----.----.----.----.----.----.----.----.----.----+
     //
-    // uk := "unknown"; if nonzero, seems to only occupy the first 4 bits (ie, mask w/ 0xF0),
+    // uk := "unknown"; if nonzero, seems to only occupy the first 4 bits (ie, uk & 0xF0 == uk),
     //        with the remaining 4 zero
 
-    // Card has two transaction sectors (2 & 3) containing balance data, with two
+    // Card has two sectors (2 & 3) containing balance data, with two
     // corresponding trip counters in 0x50:0x51 & 0x60:0x61 (sector 1, byte 0:1 of blocks 1 & 2).
 
     // The *lower* of the two values *minus one* is the true use count,
@@ -866,7 +871,7 @@ static Pass* passes_parse(const MfClassicData* data) {
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----.----.----+----+----.----.----.----.----.----+----+----.----+
-    // 0x100 |            pass0?           | 00 |            pass1?           | 00 |   crc   | 0x140
+    // 0x100 |           pass0/2?          | 00 |           pass1/3?          | 00 |   crc   | 0x140
     //       +----.----.----.----.----.----+----+----.----.----.----.----.----+----+----.----+
     // 0x110 |                          ...  00   00  ...                          |   crc   | 0x150
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
@@ -886,16 +891,16 @@ static Pass* passes_parse(const MfClassicData* data) {
     return passes;
 }
 
-static Trip* trips_parse(const MfClassicData* data) {
+static Transaction* transactions_parse(const MfClassicData* data) {
     // Transaction history (Sectors 6–7)
     //
     //       0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    // 0x180 |               trip0              |               trip1              |   crc   |
+    // 0x180 |           transaction0           |           transaction1           |   crc   |
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
     //  ...                   ...                                ...                   ...
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
-    // 0x1D0 |               trip8              |               trip9              |   crc   |
+    // 0x1D0 |           transaction8           |           transaction9           |   crc   |
     //       +----.----.----.----.----.----.----+----.----.----.----.----.----.----+----.----+
     // 0x1E0 |                          ...  00   00  ...                          |   crc   |
     //       +----.----.----.----.----.----.----.----.----.----.----.----.----.----+----.----+
@@ -903,20 +908,20 @@ static Trip* trips_parse(const MfClassicData* data) {
     // Transactions are not sorted, rather, appear to get overwritten
     // sequentially. (eg, sorted modulo array rotation)
 
-    Trip* trips = malloc(sizeof(Trip) * CHARLIE_N_TRIP_HISTORY);
+    Transaction* transactions = malloc(sizeof(Transaction) * CHARLIE_N_TRANSACTION_HISTORY);
 
-    // Parse each trip field using some modular math magic to get the offsets:
-    // move from sector 6 -> 7 after the first 6 trips
-    // move a block within a given sector every 2 trips, reset every 3 blocks (as sector has changed)
+    // Parse each transaction field using some modular math magic to get the offsets:
+    // move from sector 6 -> 7 after the first 6 transactions
+    // move a block within a given sector every 2 transactions, reset every 3 blocks (as sector has changed)
     // alternate between a start byte of 0 and 7 with every iteration
-    for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
-        trips[i] = trip_parse(data, 6 + (i / 6), (i / 2) % 3, (i % 2) * 7);
+    for(size_t i = 0; i < CHARLIE_N_TRANSACTION_HISTORY; i++) {
+        transactions[i] = transaction_parse(data, 6 + (i / 6), (i / 2) % 3, (i % 2) * 7);
     }
 
     // Iterate through the array to find the maximum (newest) date value
     int max_idx = 0;
-    for(int i = 1; i < CHARLIE_N_TRIP_HISTORY; i++) {
-        if(dt_ge(trips[i].date, trips[max_idx].date)) {
+    for(int i = 1; i < CHARLIE_N_TRANSACTION_HISTORY; i++) {
+        if(dt_ge(transactions[i].date, transactions[max_idx].date)) {
             max_idx = i;
         }
     }
@@ -924,24 +929,24 @@ static Trip* trips_parse(const MfClassicData* data) {
     // Sort by rotating
     for(int r = 0; r < (max_idx + 1); r++) {
         // Store the first element
-        Trip temp = trips[0];
+        Transaction temp = transactions[0];
         // Shift elements to the left
-        for(int i = 0; i < CHARLIE_N_TRIP_HISTORY - 1; i++) {
-            trips[i] = trips[i + 1];
+        for(int i = 0; i < CHARLIE_N_TRANSACTION_HISTORY - 1; i++) {
+            transactions[i] = transactions[i + 1];
         }
         // Move the first element to the last
-        trips[CHARLIE_N_TRIP_HISTORY - 1] = temp;
+        transactions[CHARLIE_N_TRANSACTION_HISTORY - 1] = temp;
     }
 
     // Reverse order, such that newest is first, oldest last
-    for(int i = 0; i < CHARLIE_N_TRIP_HISTORY / 2; i++) {
+    for(int i = 0; i < CHARLIE_N_TRANSACTION_HISTORY / 2; i++) {
         // Swap elements at index i and size - i - 1
-        Trip temp = trips[i];
-        trips[i] = trips[CHARLIE_N_TRIP_HISTORY - i - 1];
-        trips[CHARLIE_N_TRIP_HISTORY - i - 1] = temp;
+        Transaction temp = transactions[i];
+        transactions[i] = transactions[CHARLIE_N_TRANSACTION_HISTORY - i - 1];
+        transactions[CHARLIE_N_TRANSACTION_HISTORY - i - 1] = temp;
     }
 
-    return trips;
+    return transactions;
 }
 
 /*
@@ -976,12 +981,12 @@ static DateTime expiry(DateTime iss) {
     return exp;
 }
 
-static bool expired(DateTime expiry, DateTime last_trip) {
+static bool expired(DateTime expiry, DateTime last_transaction) {
     // if a card has sat unused for >2 years, expired (verify this claim?)
     // else expired if current date > expiry date
 
     uint32_t ts_exp = datetime_datetime_to_timestamp(&expiry);
-    uint32_t ts_last = datetime_datetime_to_timestamp(&last_trip);
+    uint32_t ts_last = datetime_datetime_to_timestamp(&last_transaction);
     uint32_t ts_now = time_now();
 
     return (ts_exp <= ts_now) | ((ts_now - ts_last) >= (2 * 365 * 24 * 60 * 60));
@@ -1020,7 +1025,8 @@ void type_format_cat(FuriString* out, uint16_t type) {
 void pass_format_cat(FuriString* out, Pass pass) {
     furi_string_cat_printf(out, "\n-Pre: %b", pass.pre);
     // type_format_cat(out, pass.type);
-    furi_string_cat_printf(out, "\n-Post: %b", pass.post);
+    furi_string_cat_printf(out, "\n-Post: ");
+    type_format_cat(out, pass.post);
     // locale_format_dt_cat(out, &pass.start);
     furi_string_cat_printf(out, "\n-Date: ");
     locale_format_dt_cat(out, &pass.date);
@@ -1055,37 +1061,37 @@ void money_format_cat(FuriString* out, Money money) {
     furi_string_cat_printf(out, "$%u.%02u", money.dollars, money.cents);
 }
 
-void trip_format_cat(FuriString* out, Trip trip) {
+void transaction_format_cat(FuriString* out, Transaction transaction) {
     const char* sep = "   ";
     const char* sta;
 
-    locale_format_dt_cat(out, &trip.date);
-    furi_string_cat_printf(out, "\n%s", !!(trip.g_flag & 0x1) ? "-" : "+");
-    money_format_cat(out, trip.fare);
-    if(!!(trip.g_flag & 0x1) && (trip.fare.dollars == FARE_BUS.dollars) &&
-       (trip.fare.cents == FARE_BUS.cents)) {
+    locale_format_dt_cat(out, &transaction.date);
+    furi_string_cat_printf(out, "\n%s", !!(transaction.g_flag & 0x1) ? "-" : "+");
+    money_format_cat(out, transaction.fare);
+    if(!!(transaction.g_flag & 0x1) && (transaction.fare.dollars == FARE_BUS.dollars) &&
+       (transaction.fare.cents == FARE_BUS.cents)) {
         // if not a refill, and the fare amount is equal to bus fare (any better approach? flag bits for modality?)
         // format for bus — supposedly some correlation between gate ID & bus #, haven't investigated
-        furi_string_cat_printf(out, "%s#%u", sep, trip.gate);
-    } else if(get_map_item(trip.gate, charliecard_fare_gate_ids, kNumFareGateIds, &sta)) {
+        furi_string_cat_printf(out, "%s#%u", sep, transaction.gate);
+    } else if(get_map_item(transaction.gate, charliecard_fare_gate_ids, kNumFareGateIds, &sta)) {
         // station found in fare gate ID map, append station name
         furi_string_cat_str(out, sep);
         furi_string_cat_str(out, sta);
     } else {
         // no found station in fare gate ID map & not a bus, just print ID w/o add'l info
-        furi_string_cat_printf(out, "%s#%u", sep, trip.gate);
+        furi_string_cat_printf(out, "%s#%u", sep, transaction.gate);
     }
     // print flags for debugging purposes
     if(is_debug()) {
-        furi_string_cat_printf(out, "%s%x%s%x", sep, trip.g_flag, sep, trip.f_flag);
+        furi_string_cat_printf(out, "%s%x%s%x", sep, transaction.g_flag, sep, transaction.f_flag);
     }
 }
 
-void trips_format_cat(FuriString* out, Trip* trips) {
+void transactions_format_cat(FuriString* out, Transaction* transactions) {
     furi_string_cat_printf(out, "\nTransactions:");
-    for(size_t i = 0; i < CHARLIE_N_TRIP_HISTORY; i++) {
+    for(size_t i = 0; i < CHARLIE_N_TRANSACTION_HISTORY; i++) {
         furi_string_cat_printf(out, "\n");
-        trip_format_cat(out, trips[i]);
+        transaction_format_cat(out, transactions[i]);
         furi_string_cat_printf(out, "\n");
     }
 }
@@ -1126,7 +1132,7 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         const BalanceSector balance_sector =
             balance_sector_parse(data, counter_sector.active_balance_sector);
         Pass* passes = passes_parse(data);
-        Trip* trips = trips_parse(data);
+        Transaction* transactions = transactions_parse(data);
 
         // print/append card data
         furi_string_cat_printf(parsed_data, "\e#CharlieCard");
@@ -1152,8 +1158,8 @@ static bool charliecard_parse(const NfcDevice* device, FuriString* parsed_data) 
         passes_format_cat(parsed_data, passes);
         free(passes);
 
-        trips_format_cat(parsed_data, trips);
-        free(trips);
+        transactions_format_cat(parsed_data, transactions);
+        free(transactions);
 
         parsed = true;
     } while(false);
