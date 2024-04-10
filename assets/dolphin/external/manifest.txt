@@ -193,13 +193,13 @@ Weight: 5
 Name: L1_3dprinting_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 1
+Min level: 6
 Max level: 30
-Weight: 8
+Weight: 6
 
 Name: wardriving
 Min butthurt: 0
 Max butthurt: 14
-Min level: 1
+Min level: 11
 Max level: 30
-Weight: 8
+Weight: 6
