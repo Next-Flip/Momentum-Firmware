@@ -152,6 +152,7 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
         BadKbConfig* cfg = app->set_bt_id ? &app->id_config : &app->config;
         memcpy(&app->cur_ble_cfg, &cfg->ble, sizeof(cfg->ble));
         app->cur_ble_cfg.bonding = app->bt_remember;
+        // TODO: Allow GapPairingNone with BT Remember ON
         if(app->bt_remember) {
             app->cur_ble_cfg.pairing = GapPairingPinCodeVerifyYesNo;
         } else {
