@@ -155,9 +155,9 @@ int32_t bad_kb_conn_apply(BadKbApp* app) {
         // TODO: Allow GapPairingNone with BT Remember ON
         if(app->bt_remember) {
             app->cur_ble_cfg.pairing = GapPairingPinCodeVerifyYesNo;
+            memcpy(app->cur_ble_cfg.mac, BAD_KB_BOUND_MAC, sizeof(BAD_KB_BOUND_MAC));
         } else {
             app->cur_ble_cfg.pairing = GapPairingNone;
-            memcpy(app->cur_ble_cfg.mac, BAD_KB_BOUND_MAC, sizeof(BAD_KB_BOUND_MAC));
         }
 
         // Set profile
