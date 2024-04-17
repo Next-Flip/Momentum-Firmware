@@ -29,8 +29,14 @@ void bad_kb_scene_config_connection_callback(VariableItem* item) {
 
 void bad_kb_scene_config_bt_remember_callback(VariableItem* item) {
     BadKbApp* bad_kb = variable_item_get_context(item);
-    bad_kb->bt_remember = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
+    bool value = variable_item_get_current_value_index(item);
+    // Set user config and remember
+    bad_kb->config.ble.bonding = value;
+    // Apply to ID config so its temporarily overridden (currently can't set bonding with BT_ID anyway)
+    if(bad_kb->set_bt_id) {
+        bad_kb->id_config.ble.bonding = value;
+    }
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     view_dispatcher_send_custom_event(bad_kb->view_dispatcher, VarItemListIndexBtRemember);
 }
 
@@ -52,20 +58,22 @@ void bad_kb_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, bad_kb->is_bt ? "BT" : "USB");
 
     if(bad_kb->is_bt) {
+        BadKbConfig* cfg = bad_kb->set_bt_id ? &bad_kb->id_config : &bad_kb->config;
+
         item = variable_item_list_add(
             var_item_list, "BT Remember", 2, bad_kb_scene_config_bt_remember_callback, bad_kb);
-        variable_item_set_current_value_index(item, bad_kb->bt_remember);
-        variable_item_set_current_value_text(item, bad_kb->bt_remember ? "ON" : "OFF");
+        variable_item_set_current_value_index(item, cfg->ble.bonding);
+        variable_item_set_current_value_text(item, cfg->ble.bonding ? "ON" : "OFF");
 
         item = variable_item_list_add(var_item_list, "BT Device Name", 0, NULL, bad_kb);
 
         item = variable_item_list_add(var_item_list, "BT MAC Address", 0, NULL, bad_kb);
-        if(bad_kb->bt_remember) {
+        if(cfg->ble.bonding) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
         }
 
         item = variable_item_list_add(var_item_list, "Randomize BT MAC", 0, NULL, bad_kb);
-        if(bad_kb->bt_remember) {
+        if(cfg->ble.bonding) {
             variable_item_set_locked(item, true, "Remember\nmust be Off!");
         }
     } else {
