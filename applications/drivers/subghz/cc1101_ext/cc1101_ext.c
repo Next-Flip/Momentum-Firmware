@@ -238,10 +238,7 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
              &furi_hal_spi_bus_handle_external_extra);
 
     // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
-    if(momentum_settings.spi_cc1101_handle == SpiDefault && !furi_hal_subghz_get_ext_power_amp()) {
-        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
-        furi_hal_gpio_write(&gpio_ext_pc3, true);
-    } else if(momentum_settings.spi_cc1101_handle == SpiExtra) {
+    if(momentum_settings.spi_cc1101_handle == SpiExtra) {
         furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
         furi_hal_gpio_write(&gpio_ext_pa4, true);
     }
@@ -468,6 +465,7 @@ void subghz_device_cc1101_ext_rx(void) {
     // Go GDO2 (!TX/RX) to high (RX state)
     cc1101_write_reg(
         subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
     if(subghz_device_cc1101_ext->power_amp) {
         furi_hal_gpio_write(SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO, 0);

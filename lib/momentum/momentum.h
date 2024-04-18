@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi_hal_serial_types.h>
+#include <furi_hal_version.h>
 #include <toolbox/colors.h>
 #include <gui/canvas.h>
 
@@ -89,6 +90,7 @@ typedef struct {
     VgmColorMode vgm_color_mode;
     Rgb565Color vgm_color_fg;
     Rgb565Color vgm_color_bg;
+    FuriHalVersionColor spoof_color;
 } MomentumSettings;
 
 typedef struct {

@@ -20,7 +20,6 @@
 
 #include <loader/loader.h>
 #include <notification/notification_app.h>
-#include <toolbox/api_lock.h>
 
 #define STATUS_BAR_Y_SHIFT 13
 
@@ -81,7 +80,7 @@ struct Desktop {
 
     bool in_transition : 1;
 
-    FuriApiLock animation_lock;
+    FuriSemaphore* animation_semaphore;
 
     Keybinds keybinds;
 

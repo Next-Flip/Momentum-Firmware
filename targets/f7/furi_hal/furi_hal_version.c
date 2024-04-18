@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <ble/ble.h>
 
+#include <momentum/momentum.h>
+
 #define TAG "FuriHalVersion"
 
 #define FURI_HAL_VERSION_OTP_HEADER_MAGIC 0xBABE
@@ -241,7 +243,10 @@ uint8_t furi_hal_version_get_hw_body(void) {
 }
 
 FuriHalVersionColor furi_hal_version_get_hw_color(void) {
-    return furi_hal_version.board_color;
+    if(momentum_settings.spoof_color == FuriHalVersionColorUnknown) {
+        return furi_hal_version.board_color;
+    }
+    return momentum_settings.spoof_color;
 }
 
 uint8_t furi_hal_version_get_hw_connect(void) {

@@ -2,6 +2,7 @@
 # JavaScript scripting API (WIP)
 ## Note: This documentation is still work in progress!
 Todo:
+- Migrate to new format from OFW (see /documentation/js/ folder)
 - Add missing parameters & returns (Dialog and lower)
 
 ## Description

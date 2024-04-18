@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,60.4,,
+Version,+,61.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -136,6 +136,7 @@ Header,+,lib/music_worker/music_worker.h,,
 Header,+,lib/nanopb/pb.h,,
 Header,+,lib/nanopb/pb_decode.h,,
 Header,+,lib/nanopb/pb_encode.h,,
+Header,+,lib/nfc/helpers/crypto1.h,,
 Header,+,lib/nfc/helpers/iso13239_crc.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
@@ -147,6 +148,8 @@ Header,+,lib/nfc/nfc_poller.h,,
 Header,+,lib/nfc/nfc_scanner.h,,
 Header,+,lib/nfc/protocols/emv/emv.h,,
 Header,+,lib/nfc/protocols/emv/emv_poller.h,,
+Header,+,lib/nfc/protocols/felica/felica.h,,
+Header,+,lib/nfc/protocols/felica/felica_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h,,
@@ -282,6 +285,7 @@ Header,+,targets/f7/platform_specific/cxx_virtual_stub.h,,
 Header,+,targets/f7/platform_specific/intrinsic_export.h,,
 Header,+,targets/f7/platform_specific/math_wrapper.h,,
 Header,+,targets/furi_hal_include/furi_hal.h,,
+Header,+,targets/furi_hal_include/furi_hal_adc.h,,
 Header,+,targets/furi_hal_include/furi_hal_bt.h,,
 Header,+,targets/furi_hal_include/furi_hal_cortex.h,,
 Header,+,targets/furi_hal_include/furi_hal_crypto.h,,
@@ -609,9 +613,7 @@ Function,-,acosh,double,double
 Function,-,acoshf,float,float
 Function,-,acoshl,long double,long double
 Function,-,acosl,long double,long double
-Function,-,aligned_alloc,void*,"size_t, size_t"
-Function,+,aligned_free,void,void*
-Function,+,aligned_malloc,void*,"size_t, size_t"
+Function,+,aligned_alloc,void*,"size_t, size_t"
 Function,-,arc4random,__uint32_t,
 Function,-,arc4random_buf,void,"void*, size_t"
 Function,-,arc4random_uniform,__uint32_t,__uint32_t
@@ -888,6 +890,16 @@ Function,-,coshl,long double,long double
 Function,-,cosl,long double,long double
 Function,+,crc32_calc_buffer,uint32_t,"uint32_t, const void*, size_t"
 Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
+Function,+,crypto1_alloc,Crypto1*,
+Function,+,crypto1_bit,uint8_t,"Crypto1*, uint8_t, int"
+Function,+,crypto1_byte,uint8_t,"Crypto1*, uint8_t, int"
+Function,+,crypto1_decrypt,void,"Crypto1*, const BitBuffer*, BitBuffer*"
+Function,+,crypto1_encrypt,void,"Crypto1*, uint8_t*, const BitBuffer*, BitBuffer*"
+Function,+,crypto1_encrypt_reader_nonce,void,"Crypto1*, uint64_t, uint32_t, uint8_t*, uint8_t*, BitBuffer*, _Bool"
+Function,+,crypto1_free,void,Crypto1*
+Function,+,crypto1_init,void,"Crypto1*, uint64_t"
+Function,+,crypto1_reset,void,Crypto1*
+Function,+,crypto1_word,uint32_t,"Crypto1*, uint32_t, int"
 Function,-,ctermid,char*,char*
 Function,-,cuserid,char*,char*
 Function,+,datetime_datetime_to_timestamp,uint32_t,DateTime*
@@ -1055,6 +1067,22 @@ Function,-,fdim,double,"double, double"
 Function,-,fdimf,float,"float, float"
 Function,-,fdiml,long double,"long double, long double"
 Function,-,fdopen,FILE*,"int, const char*"
+Function,+,felica_alloc,FelicaData*,
+Function,+,felica_calculate_mac_write,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t*, uint8_t*"
+Function,+,felica_calculate_session_key,void,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, uint8_t*"
+Function,+,felica_check_mac,_Bool,"mbedtls_des3_context*, const uint8_t*, const uint8_t*, const uint8_t*, const uint8_t, uint8_t*"
+Function,+,felica_copy,void,"FelicaData*, const FelicaData*"
+Function,+,felica_free,void,FelicaData*
+Function,+,felica_get_base_data,FelicaData*,const FelicaData*
+Function,+,felica_get_device_name,const char*,"const FelicaData*, NfcDeviceNameType"
+Function,+,felica_get_uid,const uint8_t*,"const FelicaData*, size_t*"
+Function,+,felica_is_equal,_Bool,"const FelicaData*, const FelicaData*"
+Function,+,felica_load,_Bool,"FelicaData*, FlipperFormat*, uint32_t"
+Function,+,felica_poller_activate,FelicaError,"FelicaPoller*, FelicaData*"
+Function,+,felica_reset,void,FelicaData*
+Function,+,felica_save,_Bool,"const FelicaData*, FlipperFormat*"
+Function,+,felica_set_uid,_Bool,"FelicaData*, const uint8_t*, size_t"
+Function,+,felica_verify,_Bool,"FelicaData*, const FuriString*"
 Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*
@@ -1236,6 +1264,16 @@ Function,+,furi_event_flag_get,uint32_t,FuriEventFlag*
 Function,+,furi_event_flag_set,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, uint32_t"
 Function,+,furi_get_tick,uint32_t,
+Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
+Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
+Function,+,furi_hal_adc_configure_ex,void,"FuriHalAdcHandle*, FuriHalAdcScale, FuriHalAdcClock, FuriHalAdcOversample, FuriHalAdcSamplingTime"
+Function,+,furi_hal_adc_convert_temp,float,"FuriHalAdcHandle*, uint16_t"
+Function,+,furi_hal_adc_convert_to_voltage,float,"FuriHalAdcHandle*, uint16_t"
+Function,+,furi_hal_adc_convert_vbat,float,"FuriHalAdcHandle*, uint16_t"
+Function,+,furi_hal_adc_convert_vref,float,"FuriHalAdcHandle*, uint16_t"
+Function,+,furi_hal_adc_init,void,
+Function,+,furi_hal_adc_read,uint16_t,"FuriHalAdcHandle*, FuriHalAdcChannel"
+Function,+,furi_hal_adc_release,void,FuriHalAdcHandle*
 Function,+,furi_hal_bt_change_app,FuriHalBleProfileBase*,"const FuriHalBleProfileTemplate*, FuriHalBleProfileParams, GapEventCallback, void*"
 Function,+,furi_hal_bt_check_profile_type,_Bool,"FuriHalBleProfileBase*, const FuriHalBleProfileTemplate*"
 Function,+,furi_hal_bt_clear_white_list,_Bool,
@@ -1643,7 +1681,6 @@ Function,-,furi_hal_subghz_dump_state,void,
 Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
 Function,+,furi_hal_subghz_get_data_gpio,const GpioPin*,
-Function,+,furi_hal_subghz_get_ext_power_amp,_Bool,
 Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_rolling_counter_mult,int8_t,
 Function,+,furi_hal_subghz_get_rssi,float,
@@ -1661,7 +1698,6 @@ Function,+,furi_hal_subghz_reset,void,
 Function,+,furi_hal_subghz_rx,void,
 Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
-Function,+,furi_hal_subghz_set_ext_power_amp,void,_Bool
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
@@ -1956,6 +1992,7 @@ Function,+,ibutton_protocols_read,_Bool,"iButtonProtocols*, iButtonKey*"
 Function,+,ibutton_protocols_render_brief_data,void,"iButtonProtocols*, const iButtonKey*, FuriString*"
 Function,+,ibutton_protocols_render_data,void,"iButtonProtocols*, const iButtonKey*, FuriString*"
 Function,+,ibutton_protocols_render_error,void,"iButtonProtocols*, const iButtonKey*, FuriString*"
+Function,+,ibutton_protocols_render_uid,void,"iButtonProtocols*, const iButtonKey*, FuriString*"
 Function,+,ibutton_protocols_save,_Bool,"iButtonProtocols*, const iButtonKey*, const char*"
 Function,+,ibutton_protocols_write_blank,_Bool,"iButtonProtocols*, iButtonKey*"
 Function,+,ibutton_protocols_write_copy,_Bool,"iButtonProtocols*, iButtonKey*"
@@ -2458,7 +2495,8 @@ Function,+,memchr,void*,"const void*, int, size_t"
 Function,+,memcmp,int,"const void*, const void*, size_t"
 Function,+,memcpy,void*,"void*, const void*, size_t"
 Function,-,memmem,void*,"const void*, size_t, const void*, size_t"
-Function,-,memmgr_alloc_from_pool,void*,size_t
+Function,+,memmgr_aux_pool_alloc,void*,size_t
+Function,+,memmgr_aux_pool_get_free,size_t,
 Function,+,memmgr_get_free_heap,size_t,
 Function,+,memmgr_get_minimum_free_heap,size_t,
 Function,+,memmgr_get_total_heap,size_t,
@@ -2466,8 +2504,7 @@ Function,+,memmgr_heap_disable_thread_trace,void,FuriThreadId
 Function,+,memmgr_heap_enable_thread_trace,void,FuriThreadId
 Function,+,memmgr_heap_get_max_free_block,size_t,
 Function,+,memmgr_heap_get_thread_memory,size_t,FuriThreadId
-Function,+,memmgr_heap_printf_free_blocks,void,
-Function,-,memmgr_pool_get_free,size_t,
+Function,+,memmgr_heap_walk_blocks,void,"BlockWalker, void*"
 Function,-,memmgr_pool_get_max_block,size_t,
 Function,+,memmove,void*,"void*, const void*, size_t"
 Function,-,mempcpy,void*,"void*, const void*, size_t"
@@ -2511,6 +2548,10 @@ Function,+,mf_classic_poller_get_nt,MfClassicError,"MfClassicPoller*, uint8_t, M
 Function,+,mf_classic_poller_get_nt_nested,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKeyType, MfClassicNt*"
 Function,+,mf_classic_poller_halt,MfClassicError,MfClassicPoller*
 Function,+,mf_classic_poller_read_block,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicBlock*"
+Function,+,mf_classic_poller_send_custom_parity_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,mf_classic_poller_send_encrypted_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,mf_classic_poller_send_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,mf_classic_poller_send_standard_frame,MfClassicError,"MfClassicPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,mf_classic_poller_sync_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_sync_change_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t, int32_t*"
 Function,+,mf_classic_poller_sync_collect_nt,MfClassicError,"Nfc*, uint8_t, MfClassicKeyType, MfClassicNt*"
@@ -2900,6 +2941,7 @@ Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
+Function,+,prng_successor,uint32_t,"uint32_t, uint32_t"
 Function,+,process_favorite_launch,_Bool,char**
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
 Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase**, size_t"
@@ -3766,6 +3808,7 @@ Variable,+,I_DolphinMafia_119x62,Icon,
 Variable,+,I_DolphinReadingSuccess_59x63,Icon,
 Variable,+,I_DolphinSaved_92x58,Icon,
 Variable,+,I_DolphinSuccess_91x55,Icon,
+Variable,+,I_DolphinWait_59x54,Icon,
 Variable,+,I_DolphinWait_61x59,Icon,
 Variable,+,I_Drive_112x35,Icon,
 Variable,+,I_Dynamic_9x7,Icon,
@@ -4187,6 +4230,7 @@ Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
 Variable,+,momentum_settings,MomentumSettings,
 Variable,-,nfc_device_emv,const NfcDeviceBase,
+Variable,-,nfc_device_felica,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
 Variable,-,nfc_device_mf_ultralight,const NfcDeviceBase,

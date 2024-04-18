@@ -33,6 +33,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeSubghzRemote] = ".txt",
     [ArchiveFileTypeInfraredRemote] = ".txt",
     [ArchiveFileTypeBadKb] = ".txt",
+    [ArchiveFileTypeWAV] = ".wav",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
     [ArchiveFileTypeJS] = ".js",
