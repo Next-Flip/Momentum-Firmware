@@ -10,7 +10,6 @@ void findmy_scene_main_on_enter(void* context) {
     FindMy* app = context;
 
     findmy_main_set_callback(app->findmy_main, findmy_scene_main_callback, app);
-    findmy_update_battery(app, app->state.battery_level);
     view_dispatcher_switch_to_view(app->view_dispatcher, FindMyViewMain);
 }
 
@@ -26,7 +25,6 @@ bool findmy_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case FindMyMainEventBackground:
             app->state.beacon_active = true;
-            findmy_update_battery(app, app->state.battery_level);
             findmy_state_save(&app->state);
             if(!furi_hal_bt_extra_beacon_is_active()) {
                 furi_check(furi_hal_bt_extra_beacon_start());

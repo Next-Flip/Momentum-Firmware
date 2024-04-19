@@ -105,13 +105,13 @@ bool findmy_state_load(FindMyState* out_state) {
 }
 
 void findmy_state_apply(FindMyState* state) {
-    // Stop any running beacon
+    // This function applies initial state to the beacon (loaded values)
     if(furi_hal_bt_extra_beacon_is_active()) {
         furi_check(furi_hal_bt_extra_beacon_stop());
     }
     furi_check(furi_hal_bt_extra_beacon_set_config(&state->config));
     findmy_update_payload_battery(state->data, state->battery_level, state->tag_type);
-    
+
     furi_check(
         furi_hal_bt_extra_beacon_set_data(state->data, findmy_state_data_size(state->tag_type)));
     if(state->beacon_active) {
@@ -129,27 +129,25 @@ void findmy_state_sync_config(FindMyState* state) {
 
 void findmy_update_payload_battery(uint8_t* data, uint8_t battery_level, FindMyType type) {
     // Update the battery level in the payload
-    FURI_LOG_I("update_bat", "Before update: %d", battery_level);
     if(type == FindMyTypeApple) {
         switch(battery_level) {
-            case BATTERY_FULL:
-                data[6] = BATTERY_FULL;
-                break;
-            case BATTERY_MEDIUM:
-                data[6] = BATTERY_MEDIUM;
-                break;
-            case BATTERY_LOW:
-                data[6] = BATTERY_LOW;
-                break;
-            case BATTERY_CRITICAL:
-                data[6] = BATTERY_CRITICAL;
-                break;
-            default:
-                FURI_LOG_E("update_bat", "Invalid battery level: %d", battery_level);
-                return;
+        case BATTERY_FULL:
+            data[6] = BATTERY_FULL;
+            break;
+        case BATTERY_MEDIUM:
+            data[6] = BATTERY_MEDIUM;
+            break;
+        case BATTERY_LOW:
+            data[6] = BATTERY_LOW;
+            break;
+        case BATTERY_CRITICAL:
+            data[6] = BATTERY_CRITICAL;
+            break;
+        default:
+            FURI_LOG_E("update_bat", "Invalid battery level: %d", battery_level);
+            return;
         }
     }
-    FURI_LOG_I("update_bat", "After update: %02X", data[6]);
 }
 
 void findmy_state_save(FindMyState* state) {
@@ -184,7 +182,6 @@ void findmy_state_save(FindMyState* state) {
                file, "data", state->data, findmy_state_data_size(state->tag_type)))
             break;
     } while(0);
-
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
 }

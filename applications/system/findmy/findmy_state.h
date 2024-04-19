@@ -18,7 +18,6 @@ typedef enum {
     FindMyTypeTile,
 } FindMyType;
 
-
 typedef struct {
     bool beacon_active;
     uint8_t broadcast_interval;
