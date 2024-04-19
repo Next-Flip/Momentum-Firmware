@@ -498,9 +498,14 @@ static void menu_exit(void* context) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
+            // If menu_reset() is called before view exit, model->items is reset
+            // But for some reason, even with size 0, array get() returns a non-null pointer?
+            // MLIB docs have no mention of out of bounds condition, seems weird
+            if(model->position < MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item && item->icon) {
+                    icon_animation_stop(item->icon);
+                }
             }
         },
         false);
