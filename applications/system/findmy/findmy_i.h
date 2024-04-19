@@ -38,7 +38,6 @@ struct FindMy {
 
     uint8_t mac_buf[EXTRA_BEACON_MAC_ADDR_SIZE];
     uint8_t packet_buf[EXTRA_BEACON_MAX_DATA_SIZE];
-    uint8_t battery_level;
 
     FindMyState state;
 };
