@@ -73,13 +73,11 @@ static void menu_centered_icon(
     size_t y,
     size_t width,
     size_t height) {
-    if(item->icon) {
-        canvas_draw_icon_animation(
-            canvas,
-            x + (width - item->icon->icon->width) / 2,
-            y + (height - item->icon->icon->height) / 2,
-            item->icon);
-    }
+    canvas_draw_icon_animation(
+        canvas,
+        x + (width - item->icon->icon->width) / 2,
+        y + (height - item->icon->icon->height) / 2,
+        item->icon);
 }
 
 static size_t menu_scroll_counter(MenuModel* model, bool selected) {
@@ -482,8 +480,8 @@ static void menu_enter(void* context) {
         menu->view,
         MenuModel * model,
         {
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
+            if(MenuItemArray_size(model->items)) {
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
                 icon_animation_start(item->icon);
             }
             model->scroll_counter = 0;
@@ -498,14 +496,9 @@ static void menu_exit(void* context) {
         menu->view,
         MenuModel * model,
         {
-            // If menu_reset() is called before view exit, model->items is reset
-            // But for some reason, even with size 0, array get() returns a non-null pointer?
-            // MLIB docs have no mention of out of bounds condition, seems weird
-            if(model->position < MenuItemArray_size(model->items)) {
+            if(MenuItemArray_size(model->items)) {
                 MenuItem* item = MenuItemArray_get(model->items, model->position);
-                if(item && item->icon) {
-                    icon_animation_stop(item->icon);
-                }
+                icon_animation_stop(item->icon);
             }
         },
         false);
@@ -608,14 +601,10 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
                 model->scroll_counter = 0;
 
                 MenuItem* item = MenuItemArray_get(model->items, model->position);
-                if(item && item->icon) {
-                    icon_animation_stop(item->icon);
-                }
+                icon_animation_stop(item->icon);
 
                 item = MenuItemArray_get(model->items, index);
-                if(item && item->icon) {
-                    icon_animation_start(item->icon);
-                }
+                icon_animation_start(item->icon);
 
                 model->position = index;
             }
@@ -836,7 +825,7 @@ static void menu_process_ok(Menu* menu) {
         menu->view,
         MenuModel * model,
         {
-            if(model->position < MenuItemArray_size(model->items)) {
+            if(MenuItemArray_size(model->items)) {
                 item = MenuItemArray_get(model->items, model->position);
             }
         },
