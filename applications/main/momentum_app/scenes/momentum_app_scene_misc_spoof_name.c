@@ -4,7 +4,7 @@ enum TextInputIndex {
     TextInputResultOk,
 };
 
-static void momentum_app_scene_misc_rename_text_input_callback(void* context) {
+static void momentum_app_scene_misc_spoof_name_text_input_callback(void* context) {
     MomentumApp* app = context;
 
     app->save_name = true;
@@ -12,8 +12,10 @@ static void momentum_app_scene_misc_rename_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
 }
 
-static bool
-    momentum_app_scene_misc_rename_validator(const char* text, FuriString* error, void* context) {
+static bool momentum_app_scene_misc_spoof_name_validator(
+    const char* text,
+    FuriString* error,
+    void* context) {
     UNUSED(context);
 
     for(; *text; ++text) {
@@ -27,19 +29,19 @@ static bool
     return true;
 }
 
-void momentum_app_scene_misc_rename_on_enter(void* context) {
+void momentum_app_scene_misc_spoof_name_on_enter(void* context) {
     MomentumApp* app = context;
     TextInput* text_input = app->text_input;
 
-    text_input_set_header_text(text_input, "Leave empty for default");
+    text_input_set_header_text(text_input, "Leave empty for real name");
 
-    text_input_set_validator(text_input, momentum_app_scene_misc_rename_validator, NULL);
+    text_input_set_validator(text_input, momentum_app_scene_misc_spoof_name_validator, NULL);
 
     text_input_set_minimum_length(text_input, 0);
 
     text_input_set_result_callback(
         text_input,
-        momentum_app_scene_misc_rename_text_input_callback,
+        momentum_app_scene_misc_spoof_name_text_input_callback,
         app,
         app->device_name,
         FURI_HAL_VERSION_ARRAY_NAME_LENGTH,
@@ -48,7 +50,7 @@ void momentum_app_scene_misc_rename_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, MomentumAppViewTextInput);
 }
 
-bool momentum_app_scene_misc_rename_on_event(void* context, SceneManagerEvent event) {
+bool momentum_app_scene_misc_spoof_name_on_event(void* context, SceneManagerEvent event) {
     MomentumApp* app = context;
     bool consumed = false;
 
@@ -66,7 +68,7 @@ bool momentum_app_scene_misc_rename_on_event(void* context, SceneManagerEvent ev
     return consumed;
 }
 
-void momentum_app_scene_misc_rename_on_exit(void* context) {
+void momentum_app_scene_misc_spoof_name_on_exit(void* context) {
     MomentumApp* app = context;
     text_input_reset(app->text_input);
 }

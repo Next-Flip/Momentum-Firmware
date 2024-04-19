@@ -42,6 +42,7 @@ MomentumSettings momentum_settings = {
     .vgm_color_mode = VgmColorModeDefault, // Default
     .vgm_color_fg.value = 0x0000, // Default Black
     .vgm_color_bg.value = 0xFC00, // Default Orange
+    .spoof_color = FuriHalVersionColorUnknown, // Real
 };
 
 typedef enum {
@@ -112,6 +113,7 @@ static const struct {
     {setting_enum(vgm_color_mode, VgmColorModeCount)},
     {setting_uint(vgm_color_fg, 0x0000, 0xFFFF)},
     {setting_uint(vgm_color_bg, 0x0000, 0xFFFF)},
+    {setting_enum(spoof_color, FuriHalVersionColorCount)},
 };
 
 void momentum_settings_load(void) {

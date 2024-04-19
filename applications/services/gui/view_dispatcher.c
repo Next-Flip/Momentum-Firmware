@@ -53,7 +53,6 @@ void view_dispatcher_set_navigation_event_callback(
     ViewDispatcher* view_dispatcher,
     ViewDispatcherNavigationEventCallback callback) {
     furi_check(view_dispatcher);
-    furi_check(callback);
     view_dispatcher->navigation_event_callback = callback;
 }
 
@@ -61,7 +60,6 @@ void view_dispatcher_set_custom_event_callback(
     ViewDispatcher* view_dispatcher,
     ViewDispatcherCustomEventCallback callback) {
     furi_check(view_dispatcher);
-    furi_check(callback);
     view_dispatcher->custom_event_callback = callback;
 }
 
@@ -70,7 +68,6 @@ void view_dispatcher_set_tick_event_callback(
     ViewDispatcherTickEventCallback callback,
     uint32_t tick_period) {
     furi_check(view_dispatcher);
-    furi_check(callback);
     view_dispatcher->tick_event_callback = callback;
     view_dispatcher->tick_period = tick_period;
 }

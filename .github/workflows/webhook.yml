@@ -7,8 +7,6 @@ on:
       - "Build"
       - "Lint"
       - "Release"
-      - "SonarCloud"
-      - "Submodules"
     types:
       - "completed"
   issues:
