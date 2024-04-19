@@ -103,17 +103,8 @@ void findmy_change_broadcast_interval(FindMy* app, uint8_t value) {
         return;
     }
     app->state.broadcast_interval = value;
-    findmy_state_sync_config(&app->state);
-    findmy_state_save(&app->state);
     findmy_main_update_interval(app->findmy_main, app->state.broadcast_interval);
-    if(furi_hal_bt_extra_beacon_is_active()) {
-        // Always check if beacon is active before changing config
-        furi_check(furi_hal_bt_extra_beacon_stop());
-    }
-    furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
-    if(app->state.beacon_active) {
-        furi_check(furi_hal_bt_extra_beacon_start());
-    }
+    findmy_state_save_and_apply(app, &app->state);
 }
 
 void findmy_change_transmit_power(FindMy* app, uint8_t value) {
@@ -121,49 +112,32 @@ void findmy_change_transmit_power(FindMy* app, uint8_t value) {
         return;
     }
     app->state.transmit_power = value;
-    findmy_state_sync_config(&app->state);
-    findmy_state_save(&app->state);
-    if(furi_hal_bt_extra_beacon_is_active()) {
-        furi_check(furi_hal_bt_extra_beacon_stop());
-    }
-    furi_check(furi_hal_bt_extra_beacon_set_config(&app->state.config));
-    if(app->state.beacon_active) {
-        furi_check(furi_hal_bt_extra_beacon_start());
-    }
+    findmy_state_save_and_apply(app, &app->state);
 }
 
 void findmy_toggle_show_mac(FindMy* app, bool show_mac) {
     app->state.show_mac = show_mac;
-    findmy_state_sync_config(&app->state);
-    findmy_state_save(&app->state);
     findmy_main_toggle_mac(app->findmy_main, app->state.show_mac);
+    findmy_state_save_and_apply(app, &app->state);
 }
 
 void findmy_toggle_beacon(FindMy* app) {
     app->state.beacon_active = !app->state.beacon_active;
-    findmy_state_save(&app->state);
-    if(furi_hal_bt_extra_beacon_is_active()) {
-        furi_check(furi_hal_bt_extra_beacon_stop());
-    }
-    if(app->state.beacon_active) {
-        furi_check(furi_hal_bt_extra_beacon_start());
-    }
+    findmy_state_save_and_apply(app, &app->state);
     findmy_main_update_active(app->findmy_main, furi_hal_bt_extra_beacon_is_active());
-    findmy_update_battery(app, app->state.battery_level);
 }
 
 void findmy_set_tag_type(FindMy* app, FindMyType type) {
     app->state.tag_type = type;
-    findmy_state_sync_config(&app->state);
-    findmy_state_save(&app->state);
+    findmy_state_save_and_apply(app, &app->state);
     findmy_main_update_type(app->findmy_main, type);
-    FURI_LOG_I("TagType2", "Tag Type: %d", type);
 }
 
-void findmy_update_battery(FindMy* app, uint8_t battery_level) {
+void findmy_state_save_and_apply(FindMy* app, FindMyState* state) {
     uint32_t battery_capacity = furi_hal_power_get_battery_full_capacity();
     uint32_t battery_remaining = furi_hal_power_get_battery_remaining_capacity();
     uint16_t battery_percent = (battery_remaining * 100) / battery_capacity;
+    uint8_t battery_level;
 
     if(battery_percent > 80) {
         battery_level = BATTERY_FULL;
@@ -174,10 +148,19 @@ void findmy_update_battery(FindMy* app, uint8_t battery_level) {
     } else {
         battery_level = BATTERY_CRITICAL;
     }
-
     app->state.battery_level = battery_level;
-    findmy_state_sync_config(&app->state);
-    findmy_state_save(&app->state);
+
+    if(furi_hal_bt_extra_beacon_is_active()) {
+        furi_check(furi_hal_bt_extra_beacon_stop());
+    }
+    furi_check(
+        furi_hal_bt_extra_beacon_set_data(state->data, findmy_state_data_size(state->tag_type)));
+    findmy_state_sync_config(state);
+    findmy_state_save(state);
+    furi_check(furi_hal_bt_extra_beacon_set_config(&state->config));
+    if(state->beacon_active) {
+        furi_check(furi_hal_bt_extra_beacon_start());
+    }
 }
 
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
