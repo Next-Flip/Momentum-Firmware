@@ -42,13 +42,6 @@ bool findmy_state_load(FindMyState* out_state) {
             }
             state.tag_type = tmp;
 
-            if(!flipper_format_read_uint32(file, "battery_level", &tmp, 1)) {
-                tmp = 0x00; // Default battery level set to Full
-                flipper_format_rewind(file);
-            }
-            FURI_LOG_I("findmy_load", "Saved Battery: %ld", tmp);
-            state.battery_level = tmp;
-
             if(!flipper_format_read_hex(file, "mac", state.mac, sizeof(state.mac))) break;
 
             if(!flipper_format_read_hex(
@@ -170,9 +163,6 @@ void findmy_state_save(FindMyState* state) {
 
         tmp = state->tag_type;
         if(!flipper_format_write_uint32(file, "tag_type", &tmp, 1)) break;
-
-        tmp = state->battery_level;
-        if(!flipper_format_write_uint32(file, "battery_level", &tmp, 1)) break;
 
         if(!flipper_format_write_bool(file, "show_mac", &state->show_mac, 1)) break;
 
