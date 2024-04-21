@@ -368,14 +368,13 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         }
         case MenuStyleMNTM: {
             canvas_set_font(canvas, FontPrimary);
-            canvas_draw_str(canvas, 5, 13, "Momentum");
             canvas_draw_icon(canvas, 62, 4, &I_Release_arrow_18x15);
             canvas_draw_line(canvas, 5, 15, 59, 15);
             canvas_draw_line(canvas, 7, 17, 61, 17);
             canvas_draw_line(canvas, 10, 19, 63, 19);
             char title[20];
             snprintf(title, sizeof(title), "%s", furi_hal_version_get_name_ptr());
-            canvas_draw_str(canvas, 5, 34, title);
+            canvas_draw_str(canvas, 5, 12, title);
             DateTime curr_dt;
             furi_hal_rtc_get_datetime(&curr_dt);
             uint8_t hour = curr_dt.hour;
@@ -389,9 +388,36 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             canvas_set_font(canvas, FontSecondary);
             char clk[20];
             snprintf(clk, sizeof(clk), "%02u:%02u", hour, min);
-            canvas_draw_str(canvas, 5, 46, clk);
+            canvas_draw_str(canvas, 5, 34, clk);
 
-            // Draw the selected menu item
+            uint32_t battery_capacity = furi_hal_power_get_battery_full_capacity();
+            uint32_t battery_remaining = furi_hal_power_get_battery_remaining_capacity();
+            bool ext5v = furi_hal_power_is_otg_enabled();
+            uint16_t battery_percent = (battery_remaining * 100) / battery_capacity;
+            bool charge_state = false;
+
+            // Determine charge state
+            if(furi_hal_power_is_charging()) {
+                if(battery_percent < 100 && !furi_hal_power_is_charging_done()) {
+                    charge_state = true;
+                }
+            }
+
+            // Display battery percentage
+            char bat_display[20];
+            snprintf(bat_display, sizeof(bat_display), "%d%%", battery_percent);
+            canvas_draw_str(canvas, 5, 45, bat_display);
+
+            // Display charge state icon
+            if(charge_state) {
+                canvas_draw_icon(canvas, 28, 33, &I_Voltage_16x16);
+            }
+
+            // Display OTG state
+            char ext5v_display[20];
+            snprintf(ext5v_display, sizeof(ext5v_display), "5v: %s", ext5v ? "On" : "Off");
+            canvas_draw_str(canvas, 5, 56, ext5v_display);
+
             MenuItem* item = MenuItemArray_get(model->items, position);
             menu_get_name(item, name, true);
             elements_bold_rounded_frame(canvas, 42, 23, 35, 33);
