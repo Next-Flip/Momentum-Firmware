@@ -39,14 +39,12 @@ bool momentum_app_apply(MomentumApp* app) {
                    file, SUBGHZ_SETTING_FILE_TYPE, SUBGHZ_SETTING_FILE_VERSION))
                 break;
 
-            while(flipper_format_delete_key(file, "Add_standard_frequencies"))
-                ;
+            while(flipper_format_delete_key(file, "Add_standard_frequencies"));
             flipper_format_write_bool(
                 file, "Add_standard_frequencies", &app->subghz_use_defaults, 1);
 
             if(!flipper_format_rewind(file)) break;
-            while(flipper_format_delete_key(file, "Frequency"))
-                ;
+            while(flipper_format_delete_key(file, "Frequency"));
             FrequencyList_it(it, app->subghz_static_freqs);
             for(size_t i = 0; i < FrequencyList_size(app->subghz_static_freqs); i++) {
                 flipper_format_write_uint32(
@@ -54,8 +52,7 @@ bool momentum_app_apply(MomentumApp* app) {
             }
 
             if(!flipper_format_rewind(file)) break;
-            while(flipper_format_delete_key(file, "Hopper_frequency"))
-                ;
+            while(flipper_format_delete_key(file, "Hopper_frequency"));
             for(size_t i = 0; i < FrequencyList_size(app->subghz_hopper_freqs); i++) {
                 flipper_format_write_uint32(
                     file, "Hopper_frequency", FrequencyList_get(app->subghz_hopper_freqs, i), 1);
@@ -328,7 +325,8 @@ MomentumApp* momentum_app_alloc() {
     if(furi_string_start_with(app->version_tag, "mntm-dev")) {
         furi_string_set(app->version_tag, "MNTM-DEV  ");
         const char* sha = version_get_githash(NULL);
-        for(size_t i = 0; i < strlen(sha); ++i) {
+        const uint8_t sha_len = strlen(sha) <= 7 ? strlen(sha) : 7;
+        for(size_t i = 0; i < sha_len; ++i) {
             furi_string_push_back(app->version_tag, toupper(sha[i]));
         }
     } else {
