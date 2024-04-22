@@ -8,7 +8,7 @@ from flipper.app import App
 
 
 class GitVersion:
-    REVISION_SUFFIX_LENGTH = 8
+    REVISION_SUFFIX_LENGTH = 7
 
     def __init__(self, source_dir, suffix):
         self.source_dir = source_dir
