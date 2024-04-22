@@ -328,7 +328,8 @@ MomentumApp* momentum_app_alloc() {
     if(furi_string_start_with(app->version_tag, "mntm-dev")) {
         furi_string_set(app->version_tag, "MNTM-DEV  ");
         const char* sha = version_get_githash(NULL);
-        for(size_t i = 0; i < strlen(sha); ++i) {
+        const uint8_t sha_len = strlen(sha) <= 7 ? strlen(sha) : 7;
+        for(size_t i = 0; i < sha_len; ++i) {
             furi_string_push_back(app->version_tag, toupper(sha[i]));
         }
     } else {
