@@ -27,7 +27,8 @@ typedef enum {
     DesktopViewIdMain,
     DesktopViewIdLockMenu,
     DesktopViewIdLocked,
-    DesktopViewIdHwMismatch,
+    _DesktopViewIdDebug, // Unused, kept for compatibility
+    DesktopViewIdPopup,
     DesktopViewIdPinInput,
     DesktopViewIdPinTimeout,
     DesktopViewIdSlideshow,
@@ -42,7 +43,7 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    Popup* hw_mismatch_popup;
+    Popup* popup;
     DesktopLockMenuView* lock_menu;
     DesktopDebugView* _debug_view; // Unused, kept for compatibility
     DesktopViewLocked* locked_view;
