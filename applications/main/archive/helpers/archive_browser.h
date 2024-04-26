@@ -24,25 +24,16 @@ static const char* tab_default_paths[] = {
 };
 
 static const char* known_ext[] = {
-    [ArchiveFileTypeIButton] = ".ibtn",
-    [ArchiveFileTypeNFC] = ".nfc",
-    [ArchiveFileTypeSubGhz] = ".sub",
-    [ArchiveFileTypeLFRFID] = ".rfid",
-    [ArchiveFileTypeInfrared] = ".ir",
-    [ArchiveFileTypeSubghzPlaylist] = ".txt",
-    [ArchiveFileTypeSubghzRemote] = ".txt",
-    [ArchiveFileTypeInfraredRemote] = ".txt",
-    [ArchiveFileTypeBadKb] = ".txt",
-    [ArchiveFileTypeWAV] = ".wav",
-    [ArchiveFileTypeU2f] = "?",
-    [ArchiveFileTypeApplication] = ".fap",
-    [ArchiveFileTypeJS] = ".js",
-    [ArchiveFileTypeSearch] = "*",
-    [ArchiveFileTypeUpdateManifest] = ".fuf",
-    [ArchiveFileTypeDiskImage] = ".img",
-    [ArchiveFileTypeFolder] = "?",
-    [ArchiveFileTypeUnknown] = "*",
-    [ArchiveFileTypeAppOrJs] = ".fap|.js",
+    [ArchiveFileTypeIButton] = ".ibtn",     [ArchiveFileTypeNFC] = ".nfc",
+    [ArchiveFileTypeSubGhz] = ".sub",       [ArchiveFileTypeLFRFID] = ".rfid",
+    [ArchiveFileTypeInfrared] = ".ir",      [ArchiveFileTypeSubghzPlaylist] = ".txt",
+    [ArchiveFileTypeSubghzRemote] = ".txt", [ArchiveFileTypeInfraredRemote] = ".txt",
+    [ArchiveFileTypeBadKb] = ".txt",        [ArchiveFileTypeWAV] = ".wav",
+    [ArchiveFileTypeMag] = ".mag",          [ArchiveFileTypeU2f] = "?",
+    [ArchiveFileTypeApplication] = ".fap",  [ArchiveFileTypeJS] = ".js",
+    [ArchiveFileTypeSearch] = "*",          [ArchiveFileTypeUpdateManifest] = ".fuf",
+    [ArchiveFileTypeDiskImage] = ".img",    [ArchiveFileTypeFolder] = "?",
+    [ArchiveFileTypeUnknown] = "*",         [ArchiveFileTypeAppOrJs] = ".fap|.js",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
