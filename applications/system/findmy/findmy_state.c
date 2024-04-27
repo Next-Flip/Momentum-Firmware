@@ -29,9 +29,12 @@ bool findmy_state_load(FindMyState* out_state) {
             if(!flipper_format_read_uint32(file, "transmit_power", &tmp, 1)) break;
             state.transmit_power = tmp;
 
-            if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) break;
+            if(!flipper_format_read_uint32(file, "tag_type", &tmp, 1)) {
+                tmp = FindMyTypeApple;
+                flipper_format_rewind(file);
+            }
             state.tag_type = tmp;
-            FURI_LOG_E("tag_type tmp", "%ld", tmp);
+            
 
             if(!flipper_format_read_bool(file, "show_mac", &state.show_mac, 1)) {
                 // Support migrating from old config
