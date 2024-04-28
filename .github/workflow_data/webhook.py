@@ -37,7 +37,7 @@ if __name__ == "__main__":
             for i, commit in enumerate(event["commits"]):
                 msg = commit['message'].splitlines()[0].replace("`", "").replace("_", "\_")
                 msg = msg[:50] + ("..." if len(msg) > 50 else "")
-                desc += f"\n[`{commit['id'][:7]}`]({commit['url']}): {msg} - [__{commit['author'].get('username')}__](https://github.com/{commit['author'].get('username')})"
+                desc += f"\n[`{commit['id'][:8]}`]({commit['url']}): {msg} - [__{commit['author'].get('username')}__](https://github.com/{commit['author'].get('username')})"
                 if len(desc) > 2020:
                     desc = desc.rsplit("\n", 1)[0] + f"\n+ {count - i} more commits"
                     break
