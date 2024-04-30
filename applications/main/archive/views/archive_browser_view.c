@@ -35,6 +35,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeInfraredRemote] = &I_ir_scope_10px,
     [ArchiveFileTypeBadKb] = &I_badkb_10px,
     [ArchiveFileTypeWAV] = &I_music_10px,
+    [ArchiveFileTypeMag] = &I_mag_card_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
     [ArchiveFileTypeJS] = &I_js_script_10px,

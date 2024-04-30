@@ -24,6 +24,7 @@ static const char* tab_default_paths[] = {
 };
 
 static const char* known_ext[] = {
+    // clang-format off
     [ArchiveFileTypeIButton] = ".ibtn",
     [ArchiveFileTypeNFC] = ".nfc",
     [ArchiveFileTypeSubGhz] = ".sub",
@@ -34,6 +35,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeInfraredRemote] = ".txt",
     [ArchiveFileTypeBadKb] = ".txt",
     [ArchiveFileTypeWAV] = ".wav",
+    [ArchiveFileTypeMag] = ".mag",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
     [ArchiveFileTypeJS] = ".js",
@@ -43,6 +45,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
     [ArchiveFileTypeAppOrJs] = ".fap|.js",
+    // clang-format on
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
