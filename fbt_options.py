@@ -1,6 +1,7 @@
 from pathlib import Path
 import posixpath
 import re
+import os
 
 # For more details on these options, run 'fbt -h'
 
@@ -18,13 +19,25 @@ DEBUG = 0
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
 
-# Check scripts/get_env.py to mirror CI naming
-_git = lambda a: __import__("subprocess").check_output(["git", *a]).decode().strip()
-local_branch = _git(["symbolic-ref", "HEAD", "--short"])
-ref = _git(["config", "--get", f"branch.{local_branch}.merge"])
-branch_name = re.sub("refs/\w+/", "", ref)
-commit_sha = _git(["rev-parse", "HEAD"])[:8]
-DIST_SUFFIX = "mntm-" + branch_name.replace("/", "_") + "-" + commit_sha
+if not os.environ.get("DIST_SUFFIX"):
+    # Check scripts/get_env.py to mirror CI naming
+    def git(*args):
+        import subprocess
+
+        return (
+            subprocess.check_output(["git", *args], stderr=subprocess.DEVNULL)
+            .decode()
+            .strip()
+        )
+
+    try:
+        local_branch = git("symbolic-ref", "HEAD", "--short")
+        ref = git("config", "--get", f"branch.{local_branch}.merge")
+    except Exception:
+        ref = "refs/heads/detached"
+    branch_name = re.sub("refs/\w+/", "", ref)
+    commit_sha = git("rev-parse", "HEAD")[:8]
+    DIST_SUFFIX = "mntm-" + branch_name.replace("/", "_") + "-" + commit_sha
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
