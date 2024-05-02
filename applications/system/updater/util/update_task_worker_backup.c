@@ -46,24 +46,14 @@ typedef enum {
 
 #define UPDATE_TASK_RESOURCES_FILE_TO_TOTAL_PERCENT 90
 
-typedef struct {
-    UpdateTask* update_task;
-    int32_t total_files, processed_files;
-} TarUnpackProgress;
-
-static bool update_task_resource_unpack_cb(const char* name, bool is_directory, void* context) {
-    UNUSED(name);
-    UNUSED(is_directory);
-    TarUnpackProgress* unpack_progress = context;
-    unpack_progress->processed_files++;
+static void update_task_resource_progress_cb(size_t progress, size_t total, void* context) {
+    UpdateTask* update_task = context;
     update_task_set_progress(
-        unpack_progress->update_task,
+        update_task,
         UpdateTaskStageProgress,
         /* For this stage, last progress segment = extraction */
         (UpdateTaskResourcesWeightsFileCleanup + UpdateTaskResourcesWeightsDirCleanup) +
-            (unpack_progress->processed_files * UpdateTaskResourcesWeightsFileUnpack) /
-                (unpack_progress->total_files + 1));
-    return true;
+            (progress * UpdateTaskResourcesWeightsFileUnpack) / total);
 }
 
 static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_t n_tar_entries) {
@@ -177,11 +167,6 @@ static bool update_task_post_update(UpdateTask* update_task) {
 #endif
 
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
-            TarUnpackProgress progress = {
-                .update_task = update_task,
-                .total_files = 0,
-                .processed_files = 0,
-            };
             update_task_set_progress(update_task, UpdateTaskStageResourcesUpdate, 0);
 
             path_concat(
@@ -189,16 +174,13 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 furi_string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
-            tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
+            tar_archive_set_read_callback(archive, update_task_resource_progress_cb, update_task);
             CHECK_RESULT(
                 tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ));
 
-            progress.total_files = tar_archive_get_entries_count(archive);
-            if(progress.total_files > 0) {
-                update_task_cleanup_resources(update_task, progress.total_files);
+            update_task_cleanup_resources(update_task, 1800); // FIXME: file count estimate
 
-                CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
-            }
+            CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
         }
 
         if(update_task->state.groups & UpdateTaskStageGroupSplashscreen) {
