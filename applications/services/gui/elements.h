@@ -229,17 +229,7 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, size_t width)
  * @param      string    The string
  * @param[in]  scroll    The scroll counter: 0 - no scroll, any other number - scroll. Just count up, everything else will be calculated on the inside.
  * @param[in]  ellipsis  The ellipsis flag: true to add ellipse
- * @param[in]  centered  The centered flag: true to center text on x and y
  */
-void elements_scrollable_text_line_str(
-    Canvas* canvas,
-    int32_t x,
-    int32_t y,
-    size_t width,
-    const char* string,
-    size_t scroll,
-    bool ellipsis,
-    bool centered);
 void elements_scrollable_text_line(
     Canvas* canvas,
     int32_t x,
@@ -248,6 +238,18 @@ void elements_scrollable_text_line(
     FuriString* string,
     size_t scroll,
     bool ellipsis);
+
+/** Draw scrollable text line, optionally centered
+ *
+ * @param      canvas    The canvas
+ * @param[in]  x         X coordinate
+ * @param[in]  y         Y coordinate
+ * @param[in]  width     The width
+ * @param      string    The string
+ * @param[in]  scroll    The scroll counter: 0 - no scroll, any other number - scroll. Just count up, everything else will be calculated on the inside.
+ * @param[in]  ellipsis  The ellipsis flag: true to add ellipse
+ * @param[in]  centered  The centered flag: true to center text horizontally, x coordinate will indicate the middle
+ */
 void elements_scrollable_text_line_centered(
     Canvas* canvas,
     int32_t x,

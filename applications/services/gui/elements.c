@@ -101,14 +101,17 @@ void elements_scrollbar_horizontal(
     size_t pos,
     size_t total) {
     furi_check(canvas);
+
     // prevent overflows
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, x, y - 3, width, 3);
+
     // dot line
     canvas_set_color(canvas, ColorBlack);
     for(size_t i = x; i < width + x; i += 2) {
         canvas_draw_dot(canvas, i, y - 2);
     }
+
     // Position block
     if(total) {
         float block_w = ((float)width) / total;
@@ -606,12 +609,23 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, size_t width)
     }
 }
 
-void elements_scrollable_text_line_str(
+void elements_scrollable_text_line(
     Canvas* canvas,
     int32_t x,
     int32_t y,
     size_t width,
-    const char* string,
+    FuriString* string,
+    size_t scroll,
+    bool ellipsis) {
+    elements_scrollable_text_line_centered(canvas, x, y, width, string, scroll, ellipsis, false);
+}
+
+void elements_scrollable_text_line_centered(
+    Canvas* canvas,
+    int32_t x,
+    int32_t y,
+    size_t width,
+    FuriString* string,
     size_t scroll,
     bool ellipsis,
     bool centered) {
@@ -665,31 +679,6 @@ void elements_scrollable_text_line_str(
         canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
     }
     furi_string_free(line);
-}
-
-void elements_scrollable_text_line(
-    Canvas* canvas,
-    int32_t x,
-    int32_t y,
-    size_t width,
-    FuriString* string,
-    size_t scroll,
-    bool ellipsis) {
-    elements_scrollable_text_line_str(
-        canvas, x, y, width, furi_string_get_cstr(string), scroll, ellipsis, false);
-}
-
-void elements_scrollable_text_line_centered(
-    Canvas* canvas,
-    int32_t x,
-    int32_t y,
-    size_t width,
-    FuriString* string,
-    size_t scroll,
-    bool ellipsis,
-    bool centered) {
-    elements_scrollable_text_line_str(
-        canvas, x, y, width, furi_string_get_cstr(string), scroll, ellipsis, centered);
 }
 
 void elements_text_box(
