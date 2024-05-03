@@ -334,11 +334,23 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
     update_task->state.overall_progress = adapted_progress;
 
     if(update_task->status_change_cb) {
-        (update_task->status_change_cb)(
-            furi_string_get_cstr(update_task->state.status),
-            adapted_progress,
-            update_stage_is_error(update_task->state.stage),
-            update_task->status_change_cb_state);
+        if(update_stage_is_error(update_task->state.stage)) {
+            (update_task->status_change_cb)(
+                furi_string_get_cstr(update_task->state.status),
+                adapted_progress,
+                update_stage_is_error(update_task->state.stage),
+                update_task->status_change_cb_state);
+        } else {
+            size_t len = furi_string_size(update_task->state.status) + strlen(" 100%") + 1;
+            char* s = malloc(len);
+            snprintf(s, len, "%s %d%%", furi_string_get_cstr(update_task->state.status), progress);
+            (update_task->status_change_cb)(
+                s,
+                adapted_progress,
+                update_stage_is_error(update_task->state.stage),
+                update_task->status_change_cb_state);
+            free(s);
+        }
     }
 }
 
