@@ -10,6 +10,8 @@
 #include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 #include <update_util/resources/manifest.h>
+#include <update_util/resources/manifest_i.h>
+#include <toolbox/stream/stream.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
 
@@ -56,7 +58,7 @@ static void update_task_resource_progress_cb(size_t progress, size_t total, void
             (progress * UpdateTaskResourcesWeightsFileUnpack) / total);
 }
 
-static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_t n_tar_entries) {
+static void update_task_cleanup_resources(UpdateTask* update_task) {
     ResourceManifestReader* manifest_reader = resource_manifest_reader_alloc(update_task->storage);
     do {
         FURI_LOG_D(TAG, "Cleaning up old manifest");
@@ -65,8 +67,7 @@ static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_
             break;
         }
 
-        const uint32_t n_approx_file_entries =
-            n_tar_entries * UPDATE_TASK_RESOURCES_FILE_TO_TOTAL_PERCENT / 100 + 1;
+        size_t manifest_size = stream_size(manifest_reader->stream);
         uint32_t n_dir_entries = 1;
 
         ResourceManifestEntry* entry_ptr = NULL;
@@ -77,8 +78,9 @@ static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_
                     update_task,
                     UpdateTaskStageProgress,
                     /* For this stage, first pass = old manifest's file cleanup */
-                    (n_processed_entries++ * UpdateTaskResourcesWeightsFileCleanup) /
-                        n_approx_file_entries);
+                    (stream_tell(manifest_reader->stream) *
+                     UpdateTaskResourcesWeightsFileCleanup) /
+                        manifest_size);
 
                 FuriString* file_path = furi_string_alloc();
                 path_concat(
@@ -178,7 +180,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
             CHECK_RESULT(
                 tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ));
 
-            update_task_cleanup_resources(update_task, 1800); // FIXME: file count estimate
+            update_task_cleanup_resources(update_task);
 
             CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
         }
