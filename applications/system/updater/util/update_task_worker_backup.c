@@ -41,9 +41,9 @@ static bool update_task_pre_update(UpdateTask* update_task) {
 }
 
 typedef enum {
-    UpdateTaskResourcesWeightsFileCleanup = 20,
-    UpdateTaskResourcesWeightsDirCleanup = 20,
-    UpdateTaskResourcesWeightsFileUnpack = 60,
+    UpdateTaskResourcesWeightsFileCleanup = 10,
+    UpdateTaskResourcesWeightsDirCleanup = 10,
+    UpdateTaskResourcesWeightsFileUnpack = 80,
 } UpdateTaskResourcesWeights;
 
 #define UPDATE_TASK_RESOURCES_FILE_TO_TOTAL_PERCENT 90
