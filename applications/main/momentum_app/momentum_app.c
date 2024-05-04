@@ -244,6 +244,7 @@ MomentumApp* momentum_app_alloc() {
     CharList_init(app->mainmenu_app_exes);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
+    FuriString* label = furi_string_alloc();
     uint32_t version;
     uint8_t* unused_icon = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
     if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
@@ -251,6 +252,7 @@ MomentumApp* momentum_app_alloc() {
        sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
        version <= 1) {
         while(stream_read_line(stream, line)) {
+            // Loading logic mimics applications/services/loader/loader.c
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
             if(version == 0) {
@@ -260,24 +262,49 @@ MomentumApp* momentum_app_alloc() {
                     furi_string_set(line, "Sub-GHz");
                 }
             }
-            CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
-            flipper_application_load_name_and_icon(line, storage, &unused_icon, line);
-            if(!furi_string_cmp(line, "Momentum")) {
-                furi_string_set(line, "MNTM");
-            } else if(!furi_string_cmp(line, "125 kHz RFID")) {
-                furi_string_set(line, "RFID");
-            } else if(!furi_string_cmp(line, "Sub-GHz")) {
-                furi_string_set(line, "SubGHz");
-            } else if(furi_string_start_with_str(line, "[")) {
-                size_t trim = furi_string_search_str(line, "] ", 1);
-                if(trim != FURI_STRING_FAILURE) {
-                    furi_string_right(line, trim + 2);
+            if(storage_file_exists(storage, furi_string_get_cstr(line))) {
+                if(!flipper_application_load_name_and_icon(line, storage, &unused_icon, label)) {
+                    furi_string_reset(label);
+                }
+            } else {
+                furi_string_reset(label);
+                bool found = false;
+                for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
+                        furi_string_set(label, FLIPPER_APPS[i].name);
+                        found = true;
+                    }
+                }
+                for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
+                        furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
+                        found = true;
+                    }
                 }
             }
-            CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(line)));
+            if(furi_string_empty(label)) {
+                // Ignore unknown apps just like in main menu, prevents "ghost" apps when saving
+                continue;
+            }
+            CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(line)));
+            // Display logic mimics applications/services/gui/modules/menu.c
+            if(!furi_string_cmp(label, "Momentum")) {
+                furi_string_set(label, "MNTM");
+            } else if(!furi_string_cmp(label, "125 kHz RFID")) {
+                furi_string_set(label, "RFID");
+            } else if(!furi_string_cmp(label, "Sub-GHz")) {
+                furi_string_set(label, "SubGHz");
+            } else if(furi_string_start_with_str(label, "[")) {
+                size_t trim = furi_string_search_str(label, "] ", 1);
+                if(trim != FURI_STRING_FAILURE) {
+                    furi_string_right(label, trim + 2);
+                }
+            }
+            CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(label)));
         }
     }
     free(unused_icon);
+    furi_string_free(label);
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
