@@ -155,31 +155,37 @@ static LevelDuration
  * Calculates CRC from the raw demodulated bytes
  * @param instance Pointer to a SubGhzProtocolDecoderHormannBiSecur instance
  */
-static uint8_t subghz_protocol_decoder_hormann_bisecur_crc(SubGhzProtocolDecoderHormannBiSecur* instance);
+static uint8_t
+    subghz_protocol_decoder_hormann_bisecur_crc(SubGhzProtocolDecoderHormannBiSecur* instance);
 
 /**
  * Checks if the raw demodulated data has correct CRC
  * @param instance Pointer to a SubGhzProtocolDecoderHormannBiSecur instance
  * @return if CRC is valid or not
  */
-static bool subghz_protocol_decoder_hormann_bisecur_check_crc(SubGhzProtocolDecoderHormannBiSecur* instance);
+static bool subghz_protocol_decoder_hormann_bisecur_check_crc(
+    SubGhzProtocolDecoderHormannBiSecur* instance);
 
 /**
  * Add the next bit to the decoding result
  * @param instance Pointer to a SubGhzProtocolDecoderHormannBiSecur instance
  * @param level Level of the next bit
  */
-static void subghz_protocol_decoder_hormann_bisecur_add_bit(SubGhzProtocolDecoderHormannBiSecur* instance, bool level);
+static void subghz_protocol_decoder_hormann_bisecur_add_bit(
+    SubGhzProtocolDecoderHormannBiSecur* instance,
+    bool level);
 
 /**
  * Parses the raw data into separate fields
  * @param instance Pointer to a SubGhzProtocolDecoderHormannBiSecur instance
  */
-static void subghz_protocol_hormann_bisecur_parse_data(SubGhzProtocolDecoderHormannBiSecur* instance);
+static void
+    subghz_protocol_hormann_bisecur_parse_data(SubGhzProtocolDecoderHormannBiSecur* instance);
 
 void* subghz_protocol_encoder_hormann_bisecur_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
-    SubGhzProtocolEncoderHormannBiSecur* instance = malloc(sizeof(SubGhzProtocolEncoderHormannBiSecur));
+    SubGhzProtocolEncoderHormannBiSecur* instance =
+        malloc(sizeof(SubGhzProtocolEncoderHormannBiSecur));
 
     instance->base.protocol = &subghz_protocol_hormann_bisecur;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -190,8 +196,8 @@ void* subghz_protocol_encoder_hormann_bisecur_alloc(SubGhzEnvironment* environme
 
     // instance->encoder.repeat = 3; //original remote does 3 repeats
     instance->encoder.repeat = 1;
-    instance->encoder.size_upload = 21 * 2 + 2 * 2 +
-        subghz_protocol_hormann_bisecur_const.min_count_bit_for_found * 2 + 1;
+    instance->encoder.size_upload =
+        21 * 2 + 2 * 2 + subghz_protocol_hormann_bisecur_const.min_count_bit_for_found * 2 + 1;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
     return instance;
@@ -209,7 +215,8 @@ void subghz_protocol_encoder_hormann_bisecur_free(void* context) {
  * @param instance Pointer to a SubGhzProtocolEncoderHormannBiSecur instance
  * @return true On success
  */
-static bool subghz_protocol_encoder_hormann_bisecur_get_upload(SubGhzProtocolEncoderHormannBiSecur* instance) {
+static bool subghz_protocol_encoder_hormann_bisecur_get_upload(
+    SubGhzProtocolEncoderHormannBiSecur* instance) {
     furi_assert(instance);
     size_t index = 0;
     ManchesterEncoderState enc_state;
@@ -221,15 +228,15 @@ static bool subghz_protocol_encoder_hormann_bisecur_get_upload(SubGhzProtocolEnc
     uint32_t duration_half_short = duration_short / 2;
 
     // Send preamble
-    for (uint8_t i = 0; i < 21; i++) {
+    for(uint8_t i = 0; i < 21; i++) {
         uint32_t duration_low = duration_short;
         uint32_t duration_high = duration_short;
 
-        if (i == 0) {
+        if(i == 0) {
             duration_low += duration_half_short;
         }
 
-        if (i == 20) {
+        if(i == 20) {
             duration_high = duration_long * 4;
         }
 
@@ -237,7 +244,7 @@ static bool subghz_protocol_encoder_hormann_bisecur_get_upload(SubGhzProtocolEnc
         instance->encoder.upload[index++] = level_duration_make(true, duration_high);
     }
 
-    for (uint8_t i = 0; i < 2; i++) {
+    for(uint8_t i = 0; i < 2; i++) {
         instance->encoder.upload[index++] = level_duration_make(false, duration_long);
         instance->encoder.upload[index++] = level_duration_make(true, duration_long);
     }
@@ -245,12 +252,12 @@ static bool subghz_protocol_encoder_hormann_bisecur_get_upload(SubGhzProtocolEnc
     // Send key data
     uint8_t max_byte_index = instance->generic.data_count_bit / 8 - 1;
 
-    for (uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
+    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
         uint8_t bit_index = i - 1;
         uint8_t byte_index = max_byte_index - bit_index / 8;
         bool bit_is_set = !bit_read(instance->data[byte_index], bit_index & 0x07);
 
-        if (!manchester_encoder_advance(&enc_state, bit_is_set, &result)) {
+        if(!manchester_encoder_advance(&enc_state, bit_is_set, &result)) {
             instance->encoder.upload[index++] =
                 subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(result);
             manchester_encoder_advance(&enc_state, bit_is_set, &result);
@@ -260,8 +267,9 @@ static bool subghz_protocol_encoder_hormann_bisecur_get_upload(SubGhzProtocolEnc
             subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(result);
     }
 
-    LevelDuration last_level_duration = subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(
-        manchester_encoder_finish(&enc_state));
+    LevelDuration last_level_duration =
+        subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(
+            manchester_encoder_finish(&enc_state));
 
     last_level_duration.duration += duration_short + duration_half_short;
     instance->encoder.upload[index++] = last_level_duration;
@@ -271,42 +279,43 @@ static bool subghz_protocol_encoder_hormann_bisecur_get_upload(SubGhzProtocolEnc
     return true;
 }
 
-SubGhzProtocolStatus
-    subghz_protocol_encoder_hormann_bisecur_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus subghz_protocol_encoder_hormann_bisecur_deserialize(
+    void* context,
+    FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderHormannBiSecur* instance = context;
 
-    if (!flipper_format_rewind(flipper_format)) {
+    if(!flipper_format_rewind(flipper_format)) {
         FURI_LOG_E(TAG, "Rewind error");
         return SubGhzProtocolStatusErrorParserOthers;
     }
 
     uint32_t bits = 0;
 
-    if (!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&bits, 1)) {
+    if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&bits, 1)) {
         FURI_LOG_E(TAG, "Missing Bit");
         return SubGhzProtocolStatusErrorParserBitCount;
     }
 
     instance->generic.data_count_bit = (uint16_t)bits;
 
-    if (instance->generic.data_count_bit != subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
+    if(instance->generic.data_count_bit !=
+       subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
         FURI_LOG_E(TAG, "Wrong number of bits in key");
         return SubGhzProtocolStatusErrorValueBitCount;
     }
 
     size_t key_length = instance->generic.data_count_bit / 8;
 
-    if (!flipper_format_read_hex(flipper_format, "Key", instance->data, key_length)) {
+    if(!flipper_format_read_hex(flipper_format, "Key", instance->data, key_length)) {
         FURI_LOG_E(TAG, "Unable to read Key in encoder");
         return SubGhzProtocolStatusErrorParserKey;
     }
 
     // optional parameter
-    flipper_format_read_uint32(
-        flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
+    flipper_format_read_uint32(flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-    if (!subghz_protocol_encoder_hormann_bisecur_get_upload(instance)) {
+    if(!subghz_protocol_encoder_hormann_bisecur_get_upload(instance)) {
         return SubGhzProtocolStatusErrorEncoderGetUpload;
     }
 
@@ -323,14 +332,14 @@ void subghz_protocol_encoder_hormann_bisecur_stop(void* context) {
 LevelDuration subghz_protocol_encoder_hormann_bisecur_yield(void* context) {
     SubGhzProtocolEncoderHormannBiSecur* instance = context;
 
-    if (instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
         instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
     LevelDuration ret = instance->encoder.upload[instance->encoder.front];
 
-    if (++instance->encoder.front == instance->encoder.size_upload) {
+    if(++instance->encoder.front == instance->encoder.size_upload) {
         instance->encoder.repeat--;
         instance->encoder.front = 0;
     }
@@ -340,7 +349,8 @@ LevelDuration subghz_protocol_encoder_hormann_bisecur_yield(void* context) {
 
 void* subghz_protocol_decoder_hormann_bisecur_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
-    SubGhzProtocolDecoderHormannBiSecur* instance = malloc(sizeof(SubGhzProtocolDecoderHormannBiSecur));
+    SubGhzProtocolDecoderHormannBiSecur* instance =
+        malloc(sizeof(SubGhzProtocolDecoderHormannBiSecur));
     instance->base.protocol = &subghz_protocol_hormann_bisecur;
     instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
@@ -372,75 +382,81 @@ void subghz_protocol_decoder_hormann_bisecur_feed(void* context, bool level, uin
 
     ManchesterEvent event = ManchesterEventReset;
 
-    switch (instance->decoder.parser_step) {
-        case HormannBiSecurDecoderStepReset:
-            if (!level && DURATION_DIFF(duration, duration_short + duration_half_short) <
-                    duration_delta) {
-                instance->decoder.parser_step = HormannBiSecurDecoderStepFoundPreambleAlternatingShort;
-            }
+    switch(instance->decoder.parser_step) {
+    case HormannBiSecurDecoderStepReset:
+        if(!level &&
+           DURATION_DIFF(duration, duration_short + duration_half_short) < duration_delta) {
+            instance->decoder.parser_step = HormannBiSecurDecoderStepFoundPreambleAlternatingShort;
+        }
+        break;
+    case HormannBiSecurDecoderStepFoundPreambleAlternatingShort:
+        if(DURATION_DIFF(duration, duration_short) < duration_delta) {
+            // stay on the same step, the pattern repeats around 21 times
             break;
-        case HormannBiSecurDecoderStepFoundPreambleAlternatingShort:
-            if (DURATION_DIFF(duration, duration_short) < duration_delta) {
-                // stay on the same step, the pattern repeats around 21 times
-                break;
-            }
+        }
 
-            if (level && DURATION_DIFF(duration, duration_long * 4) < duration_delta) {
-                instance->decoder.parser_step = HormannBiSecurDecoderStepFoundPreambleHighVeryLong;
-                break;
-            }
-
-            instance->decoder.parser_step = HormannBiSecurDecoderStepReset;
+        if(level && DURATION_DIFF(duration, duration_long * 4) < duration_delta) {
+            instance->decoder.parser_step = HormannBiSecurDecoderStepFoundPreambleHighVeryLong;
             break;
-        case HormannBiSecurDecoderStepFoundPreambleHighVeryLong:
-            if (!level && DURATION_DIFF(duration, duration_long) < duration_delta) {
-                instance->sync_cnt = 3;
-                instance->decoder.parser_step = HormannBiSecurDecoderStepFoundPreambleAlternatingLong;
-                break;
-            }
+        }
 
-            instance->decoder.parser_step = HormannBiSecurDecoderStepReset;
+        instance->decoder.parser_step = HormannBiSecurDecoderStepReset;
+        break;
+    case HormannBiSecurDecoderStepFoundPreambleHighVeryLong:
+        if(!level && DURATION_DIFF(duration, duration_long) < duration_delta) {
+            instance->sync_cnt = 3;
+            instance->decoder.parser_step = HormannBiSecurDecoderStepFoundPreambleAlternatingLong;
             break;
-        case HormannBiSecurDecoderStepFoundPreambleAlternatingLong:
-            if (level == (instance->sync_cnt-- & 1) &&
-               DURATION_DIFF(duration, duration_long) < duration_delta) {
-                if (!instance->sync_cnt) {
-                    manchester_advance_alt(instance->manchester_saved_state, event,
-                                       &instance->manchester_saved_state, NULL);
-                    instance->decoder.parser_step = HormannBiSecurDecoderStepFoundData;
-                }
+        }
 
-                // stay on the same step, or advance to the next if enough transitions are found
-                break;
+        instance->decoder.parser_step = HormannBiSecurDecoderStepReset;
+        break;
+    case HormannBiSecurDecoderStepFoundPreambleAlternatingLong:
+        if(level == (instance->sync_cnt-- & 1) &&
+           DURATION_DIFF(duration, duration_long) < duration_delta) {
+            if(!instance->sync_cnt) {
+                manchester_advance_alt(
+                    instance->manchester_saved_state,
+                    event,
+                    &instance->manchester_saved_state,
+                    NULL);
+                instance->decoder.parser_step = HormannBiSecurDecoderStepFoundData;
             }
 
-            instance->decoder.parser_step = HormannBiSecurDecoderStepReset;
+            // stay on the same step, or advance to the next if enough transitions are found
             break;
-        case HormannBiSecurDecoderStepFoundData:
-            if (DURATION_DIFF(duration, duration_short) < duration_delta || (
-                // the last bit can be arbitrary long, but it is parsed as a short
-                instance->generic.data_count_bit == subghz_protocol_hormann_bisecur_const.min_count_bit_for_found - 1 &&
-                duration > duration_short
-            )) {
-                event = !level ? ManchesterEventShortHigh : ManchesterEventShortLow;
-            }
+        }
 
-            if (DURATION_DIFF(duration, duration_long) < duration_delta) {
-                event = !level ? ManchesterEventLongHigh : ManchesterEventLongLow;
-            }
+        instance->decoder.parser_step = HormannBiSecurDecoderStepReset;
+        break;
+    case HormannBiSecurDecoderStepFoundData:
+        if(DURATION_DIFF(duration, duration_short) < duration_delta ||
+           (
+               // the last bit can be arbitrary long, but it is parsed as a short
+               instance->generic.data_count_bit ==
+                   subghz_protocol_hormann_bisecur_const.min_count_bit_for_found - 1 &&
+               duration > duration_short)) {
+            event = !level ? ManchesterEventShortHigh : ManchesterEventShortLow;
+        }
 
-            if (event == ManchesterEventReset) {
-                subghz_protocol_decoder_hormann_bisecur_reset(instance);
-            }
-            else {
-                bool new_level;
+        if(DURATION_DIFF(duration, duration_long) < duration_delta) {
+            event = !level ? ManchesterEventLongHigh : ManchesterEventLongLow;
+        }
 
-                if (manchester_advance_alt(instance->manchester_saved_state, event,
-                        &instance->manchester_saved_state, &new_level)) {
-                    subghz_protocol_decoder_hormann_bisecur_add_bit(instance, new_level);
-                }
+        if(event == ManchesterEventReset) {
+            subghz_protocol_decoder_hormann_bisecur_reset(instance);
+        } else {
+            bool new_level;
+
+            if(manchester_advance_alt(
+                   instance->manchester_saved_state,
+                   event,
+                   &instance->manchester_saved_state,
+                   &new_level)) {
+                subghz_protocol_decoder_hormann_bisecur_add_bit(instance, new_level);
             }
-            break;
+        }
+        break;
     }
 }
 
@@ -451,7 +467,7 @@ uint8_t subghz_protocol_decoder_hormann_bisecur_get_hash_data(void* context) {
     uint8_t hash = 0;
     size_t key_length = instance->generic.data_count_bit / 8;
 
-    for (size_t i = 0; i < key_length; i++) {
+    for(size_t i = 0; i < key_length; i++) {
         hash ^= instance->data[i];
     }
 
@@ -471,14 +487,14 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
     do {
         stream_clean(flipper_format_get_raw_stream(flipper_format));
 
-        if (!flipper_format_write_header_cstr(
+        if(!flipper_format_write_header_cstr(
                flipper_format, SUBGHZ_KEY_FILE_TYPE, SUBGHZ_KEY_FILE_VERSION)) {
             FURI_LOG_E(TAG, "Unable to add header");
             res = SubGhzProtocolStatusErrorParserHeader;
             break;
         }
 
-        if (!flipper_format_write_uint32(flipper_format, "Frequency", &preset->frequency, 1)) {
+        if(!flipper_format_write_uint32(flipper_format, "Frequency", &preset->frequency, 1)) {
             FURI_LOG_E(TAG, "Unable to add Frequency");
             res = SubGhzProtocolStatusErrorParserFrequency;
             break;
@@ -486,22 +502,22 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
 
         subghz_block_generic_get_preset_name(furi_string_get_cstr(preset->name), preset_name);
 
-        if (!flipper_format_write_string_cstr(
+        if(!flipper_format_write_string_cstr(
                flipper_format, "Preset", furi_string_get_cstr(preset_name))) {
             FURI_LOG_E(TAG, "Unable to add Preset");
             res = SubGhzProtocolStatusErrorParserPreset;
             break;
         }
 
-        if (!strcmp(furi_string_get_cstr(preset_name), "FuriHalSubGhzPresetCustom")) {
-            if (!flipper_format_write_string_cstr(
+        if(!strcmp(furi_string_get_cstr(preset_name), "FuriHalSubGhzPresetCustom")) {
+            if(!flipper_format_write_string_cstr(
                    flipper_format, "Custom_preset_module", "CC1101")) {
                 FURI_LOG_E(TAG, "Unable to add Custom_preset_module");
                 res = SubGhzProtocolStatusErrorParserCustomPreset;
                 break;
             }
 
-            if (!flipper_format_write_hex(
+            if(!flipper_format_write_hex(
                    flipper_format, "Custom_preset_data", preset->data, preset->data_size)) {
                 FURI_LOG_E(TAG, "Unable to add Custom_preset_data");
                 res = SubGhzProtocolStatusErrorParserCustomPreset;
@@ -509,8 +525,8 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
             }
         }
 
-        if (!flipper_format_write_string_cstr(flipper_format, "Protocol",
-                instance->generic.protocol_name)) {
+        if(!flipper_format_write_string_cstr(
+               flipper_format, "Protocol", instance->generic.protocol_name)) {
             FURI_LOG_E(TAG, "Unable to add Protocol");
             res = SubGhzProtocolStatusErrorParserProtocolName;
             break;
@@ -518,7 +534,7 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
 
         uint32_t bit = instance->generic.data_count_bit;
 
-        if (!flipper_format_write_uint32(flipper_format, "Bit", &bit, 1)) {
+        if(!flipper_format_write_uint32(flipper_format, "Bit", &bit, 1)) {
             FURI_LOG_E(TAG, "Unable to add Bit");
             res = SubGhzProtocolStatusErrorParserBitCount;
             break;
@@ -526,45 +542,47 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
 
         uint16_t key_length = instance->generic.data_count_bit / 8;
 
-        if (!flipper_format_write_hex(flipper_format, "Key", instance->data, key_length)) {
+        if(!flipper_format_write_hex(flipper_format, "Key", instance->data, key_length)) {
             FURI_LOG_E(TAG, "Unable to add Key");
             res = SubGhzProtocolStatusErrorParserKey;
             break;
         }
-    } while (false);
+    } while(false);
 
     furi_string_free(preset_name);
 
     return res;
 }
 
-SubGhzProtocolStatus
-    subghz_protocol_decoder_hormann_bisecur_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_deserialize(
+    void* context,
+    FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderHormannBiSecur* instance = context;
 
-    if (!flipper_format_rewind(flipper_format)) {
+    if(!flipper_format_rewind(flipper_format)) {
         FURI_LOG_E(TAG, "Rewind error");
         return SubGhzProtocolStatusErrorParserOthers;
     }
 
     uint32_t bits = 0;
 
-    if (!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&bits, 1)) {
+    if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&bits, 1)) {
         FURI_LOG_E(TAG, "Missing Bit");
         return SubGhzProtocolStatusErrorParserBitCount;
     }
 
     instance->generic.data_count_bit = (uint16_t)bits;
 
-    if (instance->generic.data_count_bit != subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
+    if(instance->generic.data_count_bit !=
+       subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
         FURI_LOG_E(TAG, "Wrong number of bits in key");
         return SubGhzProtocolStatusErrorValueBitCount;
     }
 
     size_t key_length = instance->generic.data_count_bit / 8;
 
-    if (!flipper_format_read_hex(flipper_format, "Key", instance->data, key_length)) {
+    if(!flipper_format_read_hex(flipper_format, "Key", instance->data, key_length)) {
         FURI_LOG_E(TAG, "Unable to read Key in decoder");
         return SubGhzProtocolStatusErrorParserKey;
     }
@@ -587,54 +605,54 @@ void subghz_protocol_decoder_hormann_bisecur_get_string(void* context, FuriStrin
         "Key:%016llX\r\n"
         "Key:%016llX\r\n",
         instance->generic.protocol_name,
-        instance->generic.data_count_bit, instance->crc, valid_crc ? "OK" : "WRONG",
-        instance->type, instance->generic.serial,
+        instance->generic.data_count_bit,
+        instance->crc,
+        valid_crc ? "OK" : "WRONG",
+        instance->type,
+        instance->generic.serial,
         instance->generic.data,
-        instance->generic.data_2
-    );
+        instance->generic.data_2);
 }
 
-static LevelDuration
-    subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(ManchesterEncoderResult result) {
-    LevelDuration data = {
-        .duration = 0,
-        .level = 0
-    };
+static LevelDuration subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(
+    ManchesterEncoderResult result) {
+    LevelDuration data = {.duration = 0, .level = 0};
 
-    switch (result) {
-        case ManchesterEncoderResultShortLow:
-            data.duration = subghz_protocol_hormann_bisecur_const.te_short;
-            data.level = false;
-            break;
-        case ManchesterEncoderResultLongLow:
-            data.duration = subghz_protocol_hormann_bisecur_const.te_long;
-            data.level = false;
-            break;
-        case ManchesterEncoderResultLongHigh:
-            data.duration = subghz_protocol_hormann_bisecur_const.te_long;
-            data.level = true;
-            break;
-        case ManchesterEncoderResultShortHigh:
-            data.duration = subghz_protocol_hormann_bisecur_const.te_short;
-            data.level = true;
-            break;
+    switch(result) {
+    case ManchesterEncoderResultShortLow:
+        data.duration = subghz_protocol_hormann_bisecur_const.te_short;
+        data.level = false;
+        break;
+    case ManchesterEncoderResultLongLow:
+        data.duration = subghz_protocol_hormann_bisecur_const.te_long;
+        data.level = false;
+        break;
+    case ManchesterEncoderResultLongHigh:
+        data.duration = subghz_protocol_hormann_bisecur_const.te_long;
+        data.level = true;
+        break;
+    case ManchesterEncoderResultShortHigh:
+        data.duration = subghz_protocol_hormann_bisecur_const.te_short;
+        data.level = true;
+        break;
 
-        default:
-            furi_crash("SubGhz: ManchesterEncoderResult is incorrect.");
-            break;
+    default:
+        furi_crash("SubGhz: ManchesterEncoderResult is incorrect.");
+        break;
     }
 
     return level_duration_make(data.level, data.duration);
 }
 
-static uint8_t subghz_protocol_decoder_hormann_bisecur_crc(SubGhzProtocolDecoderHormannBiSecur* instance) {
+static uint8_t
+    subghz_protocol_decoder_hormann_bisecur_crc(SubGhzProtocolDecoderHormannBiSecur* instance) {
     furi_assert(instance);
 
-    switch (instance->type) {
-        case 0x50:
-            return ~(subghz_protocol_blocks_crc8(instance->data + 1, 20, 0x07, 0x00) ^ 0x55);
-        case 0x70:
-            return subghz_protocol_blocks_crc8le(instance->data, 21, 0x07, 0xFF);
+    switch(instance->type) {
+    case 0x50:
+        return ~(subghz_protocol_blocks_crc8(instance->data + 1, 20, 0x07, 0x00) ^ 0x55);
+    case 0x70:
+        return subghz_protocol_blocks_crc8le(instance->data, 21, 0x07, 0xFF);
     }
 
     FURI_LOG_E(TAG, "Unknown type 0x%02X", instance->type);
@@ -642,10 +660,11 @@ static uint8_t subghz_protocol_decoder_hormann_bisecur_crc(SubGhzProtocolDecoder
     return 0;
 }
 
-static bool subghz_protocol_decoder_hormann_bisecur_check_crc(SubGhzProtocolDecoderHormannBiSecur* instance) {
+static bool subghz_protocol_decoder_hormann_bisecur_check_crc(
+    SubGhzProtocolDecoderHormannBiSecur* instance) {
     furi_assert(instance);
 
-    if (instance->type != 0x50 && instance->type != 0x70) {
+    if(instance->type != 0x50 && instance->type != 0x70) {
         FURI_LOG_W(TAG, "Unknown type 0x%02X", instance->type);
         return false;
     }
@@ -653,40 +672,44 @@ static bool subghz_protocol_decoder_hormann_bisecur_check_crc(SubGhzProtocolDeco
     return subghz_protocol_decoder_hormann_bisecur_crc(instance) == instance->crc;
 }
 
-static void subghz_protocol_hormann_bisecur_parse_data(SubGhzProtocolDecoderHormannBiSecur* instance) {
+static void
+    subghz_protocol_hormann_bisecur_parse_data(SubGhzProtocolDecoderHormannBiSecur* instance) {
     furi_assert(instance);
 
     instance->type = instance->data[0];
 
     instance->generic.serial = 0;
 
-    for (uint8_t i = 1; i < 5; i++) {
+    for(uint8_t i = 1; i < 5; i++) {
         instance->generic.serial = instance->generic.serial << 8 | instance->data[i];
     }
 
     instance->generic.data = 0;
 
-    for (uint8_t i = 5; i < 13; i++) {
+    for(uint8_t i = 5; i < 13; i++) {
         instance->generic.data = instance->generic.data << 8 | instance->data[i];
     }
 
     instance->generic.data_2 = 0;
 
-    for (uint8_t i = 13; i < 21; i++) {
+    for(uint8_t i = 13; i < 21; i++) {
         instance->generic.data_2 = instance->generic.data_2 << 8 | instance->data[i];
     }
 
     instance->crc = instance->data[21];
 }
 
-static void subghz_protocol_decoder_hormann_bisecur_add_bit(SubGhzProtocolDecoderHormannBiSecur* instance, bool level) {
+static void subghz_protocol_decoder_hormann_bisecur_add_bit(
+    SubGhzProtocolDecoderHormannBiSecur* instance,
+    bool level) {
     furi_assert(instance);
 
-    if (instance->generic.data_count_bit >= subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
+    if(instance->generic.data_count_bit >=
+       subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
         return;
     }
 
-    if (level) {
+    if(level) {
         uint8_t byte_index = instance->generic.data_count_bit / 8;
         uint8_t bit_index = instance->generic.data_count_bit % 8;
 
@@ -695,11 +718,11 @@ static void subghz_protocol_decoder_hormann_bisecur_add_bit(SubGhzProtocolDecode
 
     instance->generic.data_count_bit++;
 
-    if (instance->generic.data_count_bit >= subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
-        if (instance->base.callback) {
+    if(instance->generic.data_count_bit >=
+       subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
+        if(instance->base.callback) {
             instance->base.callback(&instance->base, instance->base.context);
-        }
-        else {
+        } else {
             subghz_protocol_decoder_hormann_bisecur_reset(instance);
         }
     }

@@ -30,8 +30,9 @@ void subghz_protocol_encoder_hormann_bisecur_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return status
  */
-SubGhzProtocolStatus
-    subghz_protocol_encoder_hormann_bisecur_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus subghz_protocol_encoder_hormann_bisecur_deserialize(
+    void* context,
+    FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
@@ -98,8 +99,9 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return status
  */
-SubGhzProtocolStatus
-    subghz_protocol_decoder_hormann_bisecur_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_deserialize(
+    void* context,
+    FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
