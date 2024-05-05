@@ -58,7 +58,8 @@ const SubGhzProtocolDecoder subghz_protocol_hormann_bisecur_decoder = {
     .feed = subghz_protocol_decoder_hormann_bisecur_feed,
     .reset = subghz_protocol_decoder_hormann_bisecur_reset,
 
-    .get_hash_data = subghz_protocol_decoder_hormann_bisecur_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = subghz_protocol_decoder_hormann_bisecur_get_hash_data,
     .serialize = subghz_protocol_decoder_hormann_bisecur_serialize,
     .deserialize = subghz_protocol_decoder_hormann_bisecur_deserialize,
     .get_string = subghz_protocol_decoder_hormann_bisecur_get_string,
@@ -460,18 +461,21 @@ void subghz_protocol_decoder_hormann_bisecur_feed(void* context, bool level, uin
     }
 }
 
-uint8_t subghz_protocol_decoder_hormann_bisecur_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_hormann_bisecur_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderHormannBiSecur* instance = context;
 
-    uint8_t hash = 0;
+    union {
+        uint32_t full;
+        uint8_t split[4];
+    } hash = {0};
     size_t key_length = instance->generic.data_count_bit / 8;
 
     for(size_t i = 0; i < key_length; i++) {
-        hash ^= instance->data[i];
+        hash.split[i % sizeof(hash)] ^= instance->data[i];
     }
 
-    return hash;
+    return hash.full;
 }
 
 SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(

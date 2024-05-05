@@ -79,7 +79,7 @@ void subghz_protocol_decoder_hormann_bisecur_feed(void* context, bool level, uin
  * @param context Pointer to a SubGhzProtocolDecoderHormannBiSecur instance
  * @return hash Hash sum
  */
-uint8_t subghz_protocol_decoder_hormann_bisecur_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_hormann_bisecur_get_hash_data(void* context);
 
 /**
  * Serialize data SubGhzProtocolDecoderHormannBiSecur.
