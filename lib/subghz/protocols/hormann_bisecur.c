@@ -286,24 +286,24 @@ SubGhzProtocolStatus subghz_protocol_encoder_hormann_bisecur_deserialize(
     furi_assert(context);
     SubGhzProtocolEncoderHormannBiSecur* instance = context;
 
-    if(!flipper_format_rewind(flipper_format)) {
-        FURI_LOG_E(TAG, "Rewind error");
-        return SubGhzProtocolStatusErrorParserOthers;
+    SubGhzProtocolStatus ret =
+        subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    if(ret != SubGhzProtocolStatusOk) {
+        return ret;
     }
 
-    uint32_t bits = 0;
-
-    if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&bits, 1)) {
-        FURI_LOG_E(TAG, "Missing Bit");
-        return SubGhzProtocolStatusErrorParserBitCount;
-    }
-
-    instance->generic.data_count_bit = (uint16_t)bits;
+    // Generic key is too small, so we reset it and rewind to get real, longer, data
+    instance->generic.data = 0;
 
     if(instance->generic.data_count_bit !=
        subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
         FURI_LOG_E(TAG, "Wrong number of bits in key");
         return SubGhzProtocolStatusErrorValueBitCount;
+    }
+
+    if(!flipper_format_rewind(flipper_format)) {
+        FURI_LOG_E(TAG, "Rewind error");
+        return SubGhzProtocolStatusErrorParserOthers;
     }
 
     size_t key_length = instance->generic.data_count_bit / 8;
@@ -486,74 +486,28 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_serialize(
 
     SubGhzProtocolDecoderHormannBiSecur* instance = context;
     SubGhzProtocolStatus res = SubGhzProtocolStatusError;
-    FuriString* preset_name = furi_string_alloc();
 
     do {
-        stream_clean(flipper_format_get_raw_stream(flipper_format));
-
-        if(!flipper_format_write_header_cstr(
-               flipper_format, SUBGHZ_KEY_FILE_TYPE, SUBGHZ_KEY_FILE_VERSION)) {
-            FURI_LOG_E(TAG, "Unable to add header");
-            res = SubGhzProtocolStatusErrorParserHeader;
+        res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+        if(res != SubGhzProtocolStatusOk) {
             break;
         }
 
-        if(!flipper_format_write_uint32(flipper_format, "Frequency", &preset->frequency, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Frequency");
-            res = SubGhzProtocolStatusErrorParserFrequency;
-            break;
-        }
-
-        subghz_block_generic_get_preset_name(furi_string_get_cstr(preset->name), preset_name);
-
-        if(!flipper_format_write_string_cstr(
-               flipper_format, "Preset", furi_string_get_cstr(preset_name))) {
-            FURI_LOG_E(TAG, "Unable to add Preset");
-            res = SubGhzProtocolStatusErrorParserPreset;
-            break;
-        }
-
-        if(!strcmp(furi_string_get_cstr(preset_name), "FuriHalSubGhzPresetCustom")) {
-            if(!flipper_format_write_string_cstr(
-                   flipper_format, "Custom_preset_module", "CC1101")) {
-                FURI_LOG_E(TAG, "Unable to add Custom_preset_module");
-                res = SubGhzProtocolStatusErrorParserCustomPreset;
-                break;
-            }
-
-            if(!flipper_format_write_hex(
-                   flipper_format, "Custom_preset_data", preset->data, preset->data_size)) {
-                FURI_LOG_E(TAG, "Unable to add Custom_preset_data");
-                res = SubGhzProtocolStatusErrorParserCustomPreset;
-                break;
-            }
-        }
-
-        if(!flipper_format_write_string_cstr(
-               flipper_format, "Protocol", instance->generic.protocol_name)) {
-            FURI_LOG_E(TAG, "Unable to add Protocol");
-            res = SubGhzProtocolStatusErrorParserProtocolName;
-            break;
-        }
-
-        uint32_t bit = instance->generic.data_count_bit;
-
-        if(!flipper_format_write_uint32(flipper_format, "Bit", &bit, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Bit");
-            res = SubGhzProtocolStatusErrorParserBitCount;
+        // Generic key is too small, so it writes empty and we update here with real, longer, data
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
 
         uint16_t key_length = instance->generic.data_count_bit / 8;
 
-        if(!flipper_format_write_hex(flipper_format, "Key", instance->data, key_length)) {
-            FURI_LOG_E(TAG, "Unable to add Key");
+        if(!flipper_format_update_hex(flipper_format, "Key", instance->data, key_length)) {
+            FURI_LOG_E(TAG, "Unable to update Key");
             res = SubGhzProtocolStatusErrorParserKey;
             break;
         }
     } while(false);
-
-    furi_string_free(preset_name);
 
     return res;
 }
@@ -564,24 +518,24 @@ SubGhzProtocolStatus subghz_protocol_decoder_hormann_bisecur_deserialize(
     furi_assert(context);
     SubGhzProtocolDecoderHormannBiSecur* instance = context;
 
-    if(!flipper_format_rewind(flipper_format)) {
-        FURI_LOG_E(TAG, "Rewind error");
-        return SubGhzProtocolStatusErrorParserOthers;
+    SubGhzProtocolStatus ret =
+        subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    if(ret != SubGhzProtocolStatusOk) {
+        return ret;
     }
 
-    uint32_t bits = 0;
-
-    if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&bits, 1)) {
-        FURI_LOG_E(TAG, "Missing Bit");
-        return SubGhzProtocolStatusErrorParserBitCount;
-    }
-
-    instance->generic.data_count_bit = (uint16_t)bits;
+    // Generic key is too small, so we reset it and rewind to get real, longer, data
+    instance->generic.data = 0;
 
     if(instance->generic.data_count_bit !=
        subghz_protocol_hormann_bisecur_const.min_count_bit_for_found) {
         FURI_LOG_E(TAG, "Wrong number of bits in key");
         return SubGhzProtocolStatusErrorValueBitCount;
+    }
+
+    if(!flipper_format_rewind(flipper_format)) {
+        FURI_LOG_E(TAG, "Rewind error");
+        return SubGhzProtocolStatusErrorParserOthers;
     }
 
     size_t key_length = instance->generic.data_count_bit / 8;
