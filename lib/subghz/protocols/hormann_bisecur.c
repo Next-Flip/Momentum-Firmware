@@ -63,6 +63,7 @@ const SubGhzProtocolDecoder subghz_protocol_hormann_bisecur_decoder = {
     .serialize = subghz_protocol_decoder_hormann_bisecur_serialize,
     .deserialize = subghz_protocol_decoder_hormann_bisecur_deserialize,
     .get_string = subghz_protocol_decoder_hormann_bisecur_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_hormann_bisecur_encoder = {
