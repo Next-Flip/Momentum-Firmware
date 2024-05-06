@@ -68,6 +68,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_bin_raw,
     &subghz_protocol_mastercode,
     &subghz_protocol_x10,
+    &subghz_protocol_hormann_bisecur,
 };
 
 const SubGhzProtocolRegistry subghz_protocol_registry = {

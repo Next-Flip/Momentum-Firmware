@@ -69,3 +69,4 @@
 #include "bin_raw.h"
 #include "mastercode.h"
 #include "x10.h"
+#include "hormann_bisecur.h"
