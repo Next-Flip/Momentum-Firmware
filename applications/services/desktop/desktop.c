@@ -56,11 +56,11 @@ static void desktop_clock_update(Desktop* desktop) {
     furi_hal_rtc_get_datetime(&curr_dt);
     bool time_format_12 = locale_get_time_format() == LocaleTimeFormat12h;
 
-    if(desktop->time_hour != curr_dt.hour || desktop->time_minute != curr_dt.minute ||
-       desktop->time_format_12 != time_format_12) {
-        desktop->time_format_12 = time_format_12;
-        desktop->time_hour = curr_dt.hour;
-        desktop->time_minute = curr_dt.minute;
+    if(desktop->clock.hour != curr_dt.hour || desktop->clock.minute != curr_dt.minute ||
+       desktop->clock.format_12 != time_format_12) {
+        desktop->clock.format_12 = time_format_12;
+        desktop->clock.hour = curr_dt.hour;
+        desktop->clock.minute = curr_dt.minute;
         view_port_update(desktop->clock_viewport);
     }
 }
@@ -87,8 +87,8 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontPrimary);
 
-    uint8_t hour = desktop->time_hour;
-    if(desktop->time_format_12) {
+    uint8_t hour = desktop->clock.hour;
+    if(desktop->clock.format_12) {
         if(hour > 12) {
             hour -= 12;
         }
@@ -98,11 +98,11 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
     }
 
     char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->time_minute);
+    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->clock.minute);
 
     view_port_set_width(
         desktop->clock_viewport,
-        canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
+        canvas_string_width(canvas, buffer) - 1 + (desktop->clock.minute % 10 == 1));
 
     canvas_draw_str_aligned(canvas, 0, 8, AlignLeft, AlignBottom, buffer);
 }
@@ -131,7 +131,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         desktop_auto_lock_arm(desktop);
         return true;
     case DesktopGlobalAutoLock:
-        if(!loader_is_locked(desktop->loader)) {
+        if(!loader_is_locked(desktop->loader) && !desktop->locked) {
             desktop_lock(desktop, desktop->settings.auto_lock_with_pin);
         }
         return true;
@@ -215,6 +215,8 @@ static void desktop_clock_timer_callback(void* context) {
 }
 
 void desktop_lock(Desktop* desktop, bool pin_lock) {
+    furi_assert(!desktop->locked);
+
     pin_lock = pin_lock && desktop_pin_is_valid(&desktop->settings.pin_code);
     if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         furi_hal_rtc_set_pin_fails(0);
@@ -238,9 +240,13 @@ void desktop_lock(Desktop* desktop, bool pin_lock) {
 
     DesktopStatus status = {.locked = true};
     furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = true;
 }
 
 void desktop_unlock(Desktop* desktop) {
+    furi_assert(desktop->locked);
+
     view_port_enabled_set(desktop->lock_icon_viewport, false);
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_set_lockdown(gui, false);
@@ -263,6 +269,8 @@ void desktop_unlock(Desktop* desktop) {
 
     DesktopStatus status = {.locked = false};
     furi_pubsub_publish(desktop->status_pubsub, &status);
+
+    desktop->locked = false;
 }
 
 void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
