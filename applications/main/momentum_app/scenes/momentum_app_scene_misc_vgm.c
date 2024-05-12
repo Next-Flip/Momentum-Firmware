@@ -76,6 +76,7 @@ static void momentum_app_scene_misc_vgm_foreground_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, vgm_colors[index].name);
     momentum_settings.vgm_color_fg.rgb = vgm_colors[index].color;
+    momentum_settings.vgm_color_fg.mode = VgmColorModeCustom;
 
     if(strcmp("Rainbow", vgm_colors[index].name) == 0) {
         momentum_settings.vgm_color_fg.mode = VgmColorModeRainbow;
@@ -93,6 +94,7 @@ static void momentum_app_scene_misc_vgm_background_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, vgm_colors[index].name);
     momentum_settings.vgm_color_bg.rgb = vgm_colors[index].color;
+    momentum_settings.vgm_color_bg.mode = VgmColorModeCustom;
 
     if(strcmp("Rainbow", vgm_colors[index].name) == 0) {
         momentum_settings.vgm_color_bg.mode = VgmColorModeRainbow;
