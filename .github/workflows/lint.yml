@@ -3,7 +3,8 @@ name: "Lint"
 on:
   push:
     branches:
-      - dev
+      - "**"
+      - "!release"
     tags:
       - "*"
   pull_request:

@@ -89,6 +89,8 @@ jobs:
           ARTIFACT_TAG=flipper-z-"$(basename "$(realpath .)")"
           7z a ../../../artifacts/${ARTIFACT_TAG}.zip .
           echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
+          VERSION_TAG="$(basename "$(realpath .)" | cut -d- -f3-)"
+          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
 
       - name: "Upload artifacts to update server"
         env:

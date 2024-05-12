@@ -19,7 +19,7 @@ if __name__ == "__main__":
             "content": None,
             "embeds": [
                 {
-                    "title": "New Devbuild!",
+                    "title": f"New Devbuild: `{os.environ['VERSION_TAG']}`!",
                     "description": "",
                     "url": "",
                     "color": 16751147,
