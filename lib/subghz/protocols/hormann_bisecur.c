@@ -586,10 +586,11 @@ void subghz_protocol_decoder_hormann_bisecur_get_string_brief(void* context, Fur
 
     uint8_t data_hash = subghz_protocol_blocks_xor_bytes(
         (const uint8_t*)&instance->generic.data, sizeof(uint64_t));
-    data_hash ^= subghz_protocol_blocks_xor_bytes(
+    uint8_t data_2_hash = subghz_protocol_blocks_xor_bytes(
         (const uint8_t*)&instance->generic.data_2, sizeof(uint64_t));
 
-    furi_string_cat_printf(output, "HBS %08lX:%02X", instance->generic.serial, data_hash);
+    furi_string_cat_printf(
+        output, "HBS %08lX:%02X%02X", instance->generic.serial, data_hash, data_2_hash);
 }
 
 static LevelDuration subghz_protocol_encoder_hormann_bisecur_add_duration_to_upload(
