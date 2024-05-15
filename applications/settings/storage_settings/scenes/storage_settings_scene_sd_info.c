@@ -25,30 +25,33 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             dialog_ex, "Try to reinsert\nor format SD\ncard.", 3, 19, AlignLeft, AlignTop);
         dialog_ex_set_center_button_text(dialog_ex, "Ok");
     } else {
-        double total_v = (double)sd_info.kb_total;
-        double free_v = (double)sd_info.kb_free;
-        char* units[] = {"KiB", "MiB", "GiB", "TiB"};
-        uint8_t total_i, free_i;
-        for(total_i = 0; total_i < COUNT_OF(units); total_i++) {
-            if(total_v < 1024) break;
-            total_v /= 1024;
-        }
-        for(free_i = 0; free_i < COUNT_OF(units); free_i++) {
-            if(free_v < 1024) break;
-            free_v /= 1024;
-        }
-
         furi_string_printf(
             app->text_string,
-            "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free  %.2f%% free\n"
-            "%02X%s %s v%i.%i\nSN:%04lX %02i/%i",
+            "Label: %s\nType: %s\n",
             sd_info.label,
-            sd_api_get_fs_type_text(sd_info.fs_type),
-            total_v,
-            units[total_i],
-            free_v,
-            units[free_i],
-            (double)(((int)sd_info.kb_free * 100.0) / (int)sd_info.kb_total),
+            sd_api_get_fs_type_text(sd_info.fs_type));
+
+        if(sd_info.kb_total < 1024) {
+            furi_string_cat_printf(app->text_string, "Total: %lu KiB\n", sd_info.kb_total);
+        } else if(sd_info.kb_total < 1024 * 1024) {
+            furi_string_cat_printf(app->text_string, "Total: %lu MiB\n", sd_info.kb_total / 1024);
+        } else {
+            furi_string_cat_printf(
+                app->text_string, "Total: %lu GiB\n", sd_info.kb_total / (1024 * 1024));
+        }
+
+        if(sd_info.kb_free < 1024) {
+            furi_string_cat_printf(app->text_string, "Free: %lu KiB\n", sd_info.kb_free);
+        } else if(sd_info.kb_free < 1024 * 1024) {
+            furi_string_cat_printf(app->text_string, "Free: %lu MiB\n", sd_info.kb_free / 1024);
+        } else {
+            furi_string_cat_printf(
+                app->text_string, "Free: %lu GiB\n", sd_info.kb_free / (1024 * 1024));
+        }
+
+        furi_string_cat_printf(
+            app->text_string,
+            "%02X%s %s v%i.%i\nSN:%04lX %02i/%i",
             sd_info.manufacturer_id,
             sd_info.oem_id,
             sd_info.product_name,
@@ -57,6 +60,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             sd_info.product_serial_number,
             sd_info.manufacturing_month,
             sd_info.manufacturing_year);
+
         dialog_ex_set_text(
             dialog_ex, furi_string_get_cstr(app->text_string), 4, 1, AlignLeft, AlignTop);
     }
