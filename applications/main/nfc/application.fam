@@ -264,6 +264,15 @@ App(
 )
 
 App(
+    appid="skylanders_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="skylanders_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/skylanders.c"],
+)
+
+App(
     appid="sonicare_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="sonicare_plugin_ep",
