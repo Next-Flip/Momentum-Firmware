@@ -41,7 +41,7 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     HidMediaModel* model = context;
 
-    // Header
+// Header
 #ifdef HID_TRANSPORT_BLE
     if(model->connected) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
@@ -208,6 +208,7 @@ HidMedia* hid_media_alloc(Hid* hid) {
     view_allocate_model(hid_media->view, ViewModelTypeLocking, sizeof(HidMediaModel));
     view_set_draw_callback(hid_media->view, hid_media_draw_callback);
     view_set_input_callback(hid_media->view, hid_media_input_callback);
+
     return hid_media;
 }
 

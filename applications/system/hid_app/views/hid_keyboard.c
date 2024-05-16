@@ -228,7 +228,7 @@ static void hid_keyboard_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     HidKeyboardModel* model = context;
 
-    // Header
+// Header
 #ifdef HID_TRANSPORT_BLE
     if(!model->connected) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
@@ -400,8 +400,7 @@ HidKeyboard* hid_keyboard_alloc(Hid* bt_hid) {
     view_set_draw_callback(hid_keyboard->view, hid_keyboard_draw_callback);
     view_set_input_callback(hid_keyboard->view, hid_keyboard_input_callback);
 
-    with_view_model(
-        hid_keyboard->view, HidKeyboardModel * model, { model->y = 1; }, true);
+    with_view_model(hid_keyboard->view, HidKeyboardModel * model, { model->y = 1; }, true);
 
     return hid_keyboard;
 }
