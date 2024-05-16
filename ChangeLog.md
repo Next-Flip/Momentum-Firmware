@@ -12,7 +12,7 @@
 - MNTM Settings: Add warning screens for SubGHz bypass and extend (by @Willy-JL)
 - SubGHz: Show reason for TX blocked (by @Willy-JL)
 - SubGHz: New decoder API `get_string_brief` for short info of a received signal (#119 by @user890104)
-- SubGHz: New API `furi_hal_subghz_check_tx(frequency)` to know why TX is blocked (by @Willy-JL)
+- SubGHz: New APIs `furi_hal_subghz_check_tx(freq)` and `subghz_devices_check_tx(dev, freq)` to know if and why TX is blocked (by @Willy-JL)
 - OFW: NFC: Skylanders plugin (by @bettse)
 - OFW: Desktop: New Akira animation (by @Astrrra)
 - OFW: Loader: Add support for R_ARM_REL32 relocations (by @Sameesunkaria)
@@ -29,6 +29,9 @@
 
 ### Fixed:
 - SubGHz: Improved readability of Hormann BiSecur signals (#119 by @user890104)
+- SubGHz: External modules follow extended and bypass settings correctly (by @Willy-JL)
+- SubGHz: Fixed restoring RX only frequency (by @Willy-JL)
+- SubGHz: Fixed crash when setting frequencies near range limits (by @Willy-JL)
 
 ### Removed:
 - Nothing
