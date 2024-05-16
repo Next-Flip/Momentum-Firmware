@@ -9,9 +9,9 @@
 - Apps:
   - Infrared: Cross Remote (by @leedave)
   - Games: Color Guess (by @leedave)
-- SubGHz: New decoder API `get_string_brief` for short info of a received signal (#119 by @user890104)
-- SubGHz: Add warning screens for SubGHz bypass and extend (by @Willy-JL)
+- MNTM Settings: Add warning screens for SubGHz bypass and extend (by @Willy-JL)
 - SubGHz: Show reason for TX blocked (by @Willy-JL)
+- SubGHz: New decoder API `get_string_brief` for short info of a received signal (#119 by @user890104)
 - SubGHz: New API `furi_hal_subghz_check_tx(frequency)` to know why TX is blocked (by @Willy-JL)
 - OFW: NFC: Skylanders plugin (by @bettse)
 - OFW: Desktop: New Akira animation (by @Astrrra)
