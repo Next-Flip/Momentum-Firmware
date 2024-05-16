@@ -36,6 +36,11 @@ static void momentum_app_scene_misc_screen_hand_orient_changed(VariableItem* ite
     }
 }
 
+static void momentum_app_scene_misc_screen_rgb_backlight_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    view_dispatcher_send_custom_event(app->view_dispatcher, VarItemListIndexRgbBacklight);
+}
+
 static const struct {
     char* name;
     RgbColor color;
@@ -178,12 +183,19 @@ void momentum_app_scene_misc_screen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list, "Left Handed", 2, momentum_app_scene_misc_screen_hand_orient_changed, app);
-    bool value = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
-    variable_item_set_current_value_index(item, value);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    value_index = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, value_index ? "ON" : "OFF");
 
-    item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
-    variable_item_set_current_value_text(item, momentum_settings.rgb_backlight ? "ON" : "OFF");
+    item = variable_item_list_add(
+        var_item_list,
+        "RGB Backlight",
+        2,
+        momentum_app_scene_misc_screen_rgb_backlight_changed,
+        app);
+    value_index = momentum_settings.rgb_backlight;
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, value_index ? "ON" : "OFF");
 
     RgbColor color;
     for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
@@ -279,8 +291,12 @@ bool momentum_app_scene_misc_screen_on_event(void* context, SceneManagerEvent ev
         consumed = true;
         switch(event.event) {
         case VarItemListIndexRgbBacklight: {
-            bool change = momentum_settings.rgb_backlight;
-            if(!change) {
+            VariableItem* item =
+                variable_item_list_get(app->var_item_list, VarItemListIndexRgbBacklight);
+            bool value = variable_item_get_current_value_index(item);
+            if(value == momentum_settings.rgb_backlight) value = !value; // Invoked via click
+            bool change = !value; // Change without confirm if going from ON to OFF
+            if(value) {
                 DialogMessage* msg = dialog_message_alloc();
                 dialog_message_set_header(msg, "RGB Backlight", 64, 0, AlignCenter, AlignTop);
                 dialog_message_set_buttons(msg, "No", NULL, "Yes");
@@ -297,37 +313,39 @@ bool momentum_app_scene_misc_screen_on_event(void* context, SceneManagerEvent ev
                 dialog_message_free(msg);
             }
             if(change) {
-                momentum_settings.rgb_backlight = !momentum_settings.rgb_backlight;
+                momentum_settings.rgb_backlight = value;
                 app->save_settings = true;
                 app->save_backlight = true;
                 notification_message(app->notification, &sequence_display_backlight_on);
-                rgb_backlight_reconfigure(momentum_settings.rgb_backlight);
-                variable_item_set_current_value_text(
-                    variable_item_list_get(app->var_item_list, VarItemListIndexRgbBacklight),
-                    momentum_settings.rgb_backlight ? "ON" : "OFF");
+                rgb_backlight_reconfigure(value);
+
                 for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
                     variable_item_set_locked(
                         variable_item_list_get(app->var_item_list, VarItemListIndexLcdColor0 + i),
-                        !momentum_settings.rgb_backlight,
+                        !value,
                         "Needs RGB\nBacklight!");
                 }
                 variable_item_set_locked(
                     variable_item_list_get(app->var_item_list, VarItemListIndexRainbowLcd),
-                    !momentum_settings.rgb_backlight,
+                    !value,
                     "Needs RGB\nBacklight!");
                 variable_item_set_locked(
                     variable_item_list_get(app->var_item_list, VarItemListIndexRainbowSpeed),
-                    !momentum_settings.rgb_backlight,
+                    !value,
                     "Needs RGB\nBacklight!");
                 variable_item_set_locked(
                     variable_item_list_get(app->var_item_list, VarItemListIndexRainbowInterval),
-                    !momentum_settings.rgb_backlight,
+                    !value,
                     "Needs RGB\nBacklight!");
                 variable_item_set_locked(
                     variable_item_list_get(app->var_item_list, VarItemListIndexRainbowSaturation),
-                    !momentum_settings.rgb_backlight,
+                    !value,
                     "Needs RGB\nBacklight!");
+            } else {
+                value = !value;
             }
+            variable_item_set_current_value_index(item, value);
+            variable_item_set_current_value_text(item, value ? "ON" : "OFF");
             break;
         }
         case VarItemListIndexLcdColor0:
