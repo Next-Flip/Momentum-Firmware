@@ -7,6 +7,7 @@
 
 ### Added:
 - Apps:
+  - NFC: Mifare Nested (by @AloneLiberty, ported with nfclegacy by @xMasterX)
   - Infrared: Cross Remote (by @leedave)
   - Games: Color Guess (by @leedave)
 - MNTM Settings: Add warning screens for SubGHz bypass and extend (by @Willy-JL)
@@ -21,8 +22,12 @@
 
 ### Updated:
 - Apps:
+  - UL: ESubGHz Chat: NFC feature works again with nfclegacy (by @xMasterX)
   - UL: BT/USB Remote: Split into Mouse Jiggler and Mouse Jiggler Stealth (by @xMasterX)
   - Magspoof: GUI and Settings fixes (by @zacharyweiss)
+  - Slots: Allow balancing of the bet to the user (by @DefinetlyNotAI)
+  - UL: Metronome: Fix crash (by @xMasterX)
+  - OFW: NFC Magic: Fix user dict attack results being discarded (by @Astrrra)
 - SubGHz: Increased deduplication threshold (500ms to 600ms) to fit Hormann BiSecure remotes  (#119 by @user890104)
 - OFW: Infrared: Updated universals assets (by @hakuyoku2011)
 - OFW: Settings: Settings menu refactoring (by @Astrrra)
