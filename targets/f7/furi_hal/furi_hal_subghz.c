@@ -378,11 +378,11 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     // Set these values to the extended frequency range only. They dont define if you can transmit but do select the correct RF path
     value = furi_hal_subghz_set_frequency(value);
-    if(value >= 281000000 && value <= 361000000) {
+    if(value >= 280999633 && value <= 360999938) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-    } else if(value >= 378000000 && value <= 481000000) {
+    } else if(value >= 377999755 && value <= 481000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath433);
-    } else if(value >= 749000000 && value <= 962000000) {
+    } else if(value >= 748999633 && value <= 962000000) {
         furi_hal_subghz_set_path(FuriHalSubGhzPath868);
     } else {
         furi_crash("SubGhz: Incorrect frequency during set.");
