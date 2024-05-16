@@ -15,14 +15,7 @@ void momentum_app_scene_protocols_var_item_list_callback(void* context, uint32_t
 
 static void momentum_app_scene_protocols_subghz_bypass_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
-    app->subghz_bypass = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, app->subghz_bypass ? "ON" : "OFF");
-    app->save_subghz = true;
-    app->require_reboot = true;
-    variable_item_set_locked(
-        variable_item_list_get(app->var_item_list, VarItemListIndexSubghzExtend),
-        !app->subghz_bypass,
-        NULL);
+    view_dispatcher_send_custom_event(app->view_dispatcher, VarItemListIndexSubghzBypass);
 }
 
 static void momentum_app_scene_protocols_subghz_extend_changed(VariableItem* item) {
@@ -100,11 +93,13 @@ bool momentum_app_scene_protocols_on_event(void* context, SceneManagerEvent even
             scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneProtocolsFreqs, 0);
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneProtocolsFreqs);
             break;
+        case VarItemListIndexSubghzBypass:
         case VarItemListIndexSubghzExtend: {
-            VariableItem* item =
-                variable_item_list_get(app->var_item_list, VarItemListIndexSubghzExtend);
+            bool* setting = (event.event == VarItemListIndexSubghzBypass) ? &app->subghz_bypass :
+                                                                            &app->subghz_extend;
+            VariableItem* item = variable_item_list_get(app->var_item_list, event.event);
             bool value = variable_item_get_current_value_index(item);
-            if(value == app->subghz_extend) value = !value; // Invoked via click
+            if(value == *setting) value = !value; // Invoked via click
             bool change = !value; // Change without confirm if going from ON to OFF
             if(value) {
                 DialogMessage* msg = dialog_message_alloc();
@@ -112,10 +107,14 @@ bool momentum_app_scene_protocols_on_event(void* context, SceneManagerEvent even
                 dialog_message_set_buttons(msg, "No", NULL, "Yes");
                 dialog_message_set_text(
                     msg,
-                    "Extends to: 281-361,\n"
-                    "378-481, 749-962 MHz\n"
-                    "Use at own risk, may\n"
-                    "damage Flipper",
+                    (event.event == VarItemListIndexSubghzBypass) ? "Unlocks TX to 300-350,\n"
+                                                                    "387-467, 779-928 MHz\n"
+                                                                    "Use responsibly, check\n"
+                                                                    "local laws" :
+                                                                    "Extends TX to 281-361,\n"
+                                                                    "378-481, 749-962 MHz\n"
+                                                                    "Use at own risk, may\n"
+                                                                    "damage Flipper",
                     64,
                     32,
                     AlignCenter,
@@ -126,9 +125,15 @@ bool momentum_app_scene_protocols_on_event(void* context, SceneManagerEvent even
                 dialog_message_free(msg);
             }
             if(change) {
-                app->subghz_extend = value;
+                *setting = value;
                 app->save_subghz = true;
                 app->require_reboot = true;
+                if(event.event == VarItemListIndexSubghzBypass) {
+                    variable_item_set_locked(
+                        variable_item_list_get(app->var_item_list, VarItemListIndexSubghzExtend),
+                        !value,
+                        NULL);
+                }
             } else {
                 value = !value;
             }
