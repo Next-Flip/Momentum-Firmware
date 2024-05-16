@@ -17,6 +17,7 @@
 - OFW: Desktop: New Akira animation (by @Astrrra)
 - OFW: Loader: Add support for R_ARM_REL32 relocations (by @Sameesunkaria)
 - OFW: BLE: New connection parameters negotiation scheme (by @skotopes)
+- OFW: GUI: Add `ViewHolder` to API (by @nminaylov)
 
 ### Updated:
 - Apps:
@@ -26,8 +27,10 @@
 - OFW: Infrared: Updated universals assets (by @hakuyoku2011)
 - OFW: Settings: Settings menu refactoring (by @Astrrra)
 - OFW: FuriHal: Move version init to early stage (by @skotopes)
+- OFW: JS: Submenu module refactored (by @nminaylov)
 
 ### Fixed:
+- OFW: SubGHz: Fix memory corrupt in read raw view crash (by @DrZlo13)
 - SubGHz: Improved readability of Hormann BiSecur signals (#119 by @user890104)
 - SubGHz: External modules follow extended and bypass settings correctly (by @Willy-JL)
 - SubGHz: Fixed restoring RX only frequency (by @Willy-JL)
