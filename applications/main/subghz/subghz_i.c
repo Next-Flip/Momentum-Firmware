@@ -29,10 +29,8 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             subghz->dialogs, "Error in protocol\nparameters\ndescription");
         break;
     case SubGhzTxRxStartTxStateErrorOnlyRx:
-        flipper_format_rewind(flipper_format);
-        uint32_t temp_data32;
-        flipper_format_read_uint32(flipper_format, "Frequency", &temp_data32, 1);
-        subghz_dialog_message_freq_error(subghz, furi_hal_subghz_check_tx(temp_data32));
+        uint32_t frequency = subghz_txrx_get_preset(subghz->txrx).frequency;
+        subghz_dialog_message_freq_error(subghz, furi_hal_subghz_check_tx(frequency));
         break;
 
     default:
