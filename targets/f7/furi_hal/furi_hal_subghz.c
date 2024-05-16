@@ -53,7 +53,7 @@ typedef struct {
     const GpioPin* async_mirror_pin;
 
     int8_t rolling_counter_mult;
-    bool extended_frequency_i : 1;
+    bool extended_range : 1;
     bool bypass_region : 1;
 } FuriHalSubGhz;
 
@@ -62,7 +62,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .regulation = SubGhzRegulationTxRx,
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
-    .extended_frequency_i = false,
+    .extended_range = false,
     .bypass_region = false,
 };
 
@@ -74,12 +74,20 @@ void furi_hal_subghz_set_rolling_counter_mult(int8_t mult) {
     furi_hal_subghz.rolling_counter_mult = mult;
 }
 
-void furi_hal_subghz_set_extended_frequency(bool state_i) {
-    furi_hal_subghz.extended_frequency_i = state_i;
+void furi_hal_subghz_set_extended_range(bool enabled) {
+    furi_hal_subghz.extended_range = enabled;
+}
+
+bool furi_hal_subghz_get_extended_range(void) {
+    return furi_hal_subghz.extended_range;
 }
 
 void furi_hal_subghz_set_bypass_region(bool enabled) {
     furi_hal_subghz.bypass_region = enabled;
+}
+
+bool furi_hal_subghz_get_bypass_region(void) {
+    return furi_hal_subghz.bypass_region;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
@@ -390,40 +398,40 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-FuriHalSubGhzTx furi_hal_subghz_check_tx(uint32_t value) {
+SubGhzTx furi_hal_subghz_check_tx(uint32_t value) {
     // Check against extended range of YARD Stick One, no configuration would allow this frequency
     if(!furi_hal_subghz_is_frequency_valid(value)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside supported range");
-        return FuriHalSubGhzTxBlockedUnsupported;
+        return SubGhzTxUnsupported;
     }
 
     // Check against default range, regardless of region restrictions
-    if(!furi_hal_subghz.extended_frequency_i &&
+    if(!furi_hal_subghz.extended_range &&
        !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside default range");
-        return FuriHalSubGhzTxBlockedDefault;
+        return SubGhzTxBlockedDefault;
     }
 
     // Check against region restrictions, tighter than extended and default
     if(!furi_hal_subghz.bypass_region) {
         if(!furi_hal_region_is_provisioned()) {
             FURI_LOG_I(TAG, "Frequency blocked - region not provisioned");
-            return FuriHalSubGhzTxBlockedRegionNotProvisioned;
+            return SubGhzTxBlockedRegionNotProvisioned;
         }
         if(!_furi_hal_region_is_frequency_allowed(value)) {
             FURI_LOG_I(TAG, "Frequency blocked - outside region range");
-            return FuriHalSubGhzTxBlockedRegion;
+            return SubGhzTxBlockedRegion;
         }
     }
 
     // We already checked for extended range, default range, and region range
-    return FuriHalSubGhzTxAllowed;
+    return SubGhzTxAllowed;
 }
 
 bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
-    return furi_hal_subghz_check_tx(value) == FuriHalSubGhzTxAllowed;
+    return furi_hal_subghz_check_tx(value) == SubGhzTxAllowed;
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
