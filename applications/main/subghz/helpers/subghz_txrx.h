@@ -366,7 +366,7 @@ const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance);
 */
 bool subghz_txrx_radio_device_is_frequency_valid(SubGhzTxRx* instance, uint32_t frequency);
 
-bool subghz_txrx_radio_device_is_tx_allowed(SubGhzTxRx* instance, uint32_t frequency);
+SubGhzTx subghz_txrx_radio_device_check_tx(SubGhzTxRx* instance, uint32_t frequency);
 
 void subghz_txrx_set_debug_pin_state(SubGhzTxRx* instance, bool state);
 bool subghz_txrx_get_debug_pin_state(SubGhzTxRx* instance);

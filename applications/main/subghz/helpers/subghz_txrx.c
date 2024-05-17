@@ -652,22 +652,9 @@ bool subghz_txrx_radio_device_is_frequency_valid(SubGhzTxRx* instance, uint32_t 
     return subghz_devices_is_frequency_valid(instance->radio_device, frequency);
 }
 
-bool subghz_txrx_radio_device_is_tx_allowed(SubGhzTxRx* instance, uint32_t frequency) {
-    // TODO: Remake this function to check if the frequency is allowed on specific module - for modules not based on CC1101
+SubGhzTx subghz_txrx_radio_device_check_tx(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance);
-    UNUSED(frequency);
-    /*
-    furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
-
-    subghz_devices_idle(instance->radio_device);
-    subghz_devices_set_frequency(instance->radio_device, frequency);
-
-    bool ret = subghz_devices_set_tx(instance->radio_device);
-    subghz_devices_idle(instance->radio_device);
-
-    return ret;
-    */
-    return true;
+    return subghz_devices_check_tx(instance->radio_device, frequency);
 }
 
 void subghz_txrx_set_debug_pin_state(SubGhzTxRx* instance, bool state) {

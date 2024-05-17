@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,61.2,,
+Version,+,62.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -36,6 +36,7 @@ Header,+,applications/services/gui/modules/variable_item_list.h,,
 Header,+,applications/services/gui/modules/widget.h,,
 Header,+,applications/services/gui/modules/widget_elements/widget_element.h,,
 Header,+,applications/services/gui/view_dispatcher.h,,
+Header,+,applications/services/gui/view_holder.h,,
 Header,+,applications/services/gui/view_stack.h,,
 Header,+,applications/services/input/input.h,,
 Header,+,applications/services/loader/firmware_api/firmware_api.h,,
@@ -1676,6 +1677,7 @@ Function,-,furi_hal_spi_config_init,void,
 Function,-,furi_hal_spi_config_init_early,void,
 Function,-,furi_hal_spi_dma_init,void,
 Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
+Function,+,furi_hal_subghz_check_tx,SubGhzTx,uint32_t
 Function,-,furi_hal_subghz_dump_state,void,
 Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
@@ -3347,6 +3349,7 @@ Function,+,subghz_custom_btn_set,_Bool,uint8_t
 Function,+,subghz_custom_btns_reset,void,
 Function,-,subghz_device_cc1101_ext_ep,const FlipperAppPluginDescriptor*,
 Function,+,subghz_devices_begin,_Bool,const SubGhzDevice*
+Function,+,subghz_devices_check_tx,SubGhzTx,"const SubGhzDevice*, uint32_t"
 Function,+,subghz_devices_deinit,void,
 Function,+,subghz_devices_end,void,const SubGhzDevice*
 Function,+,subghz_devices_flush_rx,void,const SubGhzDevice*
@@ -3521,7 +3524,9 @@ Function,+,subghz_worker_stop,void,SubGhzWorker*
 Function,+,submenu_add_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*"
 Function,+,submenu_add_lockable_item,void,"Submenu*, const char*, uint32_t, SubmenuItemCallback, void*, _Bool, const char*"
 Function,+,submenu_alloc,Submenu*,
+Function,+,submenu_change_item_label,void,"Submenu*, uint32_t, const char*"
 Function,+,submenu_free,void,Submenu*
+Function,+,submenu_get_selected_item,uint32_t,Submenu*
 Function,+,submenu_get_view,View*,Submenu*
 Function,+,submenu_reset,void,Submenu*
 Function,+,submenu_set_header,void,"Submenu*, const char*"
@@ -3662,6 +3667,16 @@ Function,+,view_dispatcher_switch_to_view,void,"ViewDispatcher*, uint32_t"
 Function,+,view_free,void,View*
 Function,+,view_free_model,void,View*
 Function,+,view_get_model,void*,View*
+Function,+,view_holder_alloc,ViewHolder*,
+Function,+,view_holder_attach_to_gui,void,"ViewHolder*, Gui*"
+Function,+,view_holder_free,void,ViewHolder*
+Function,+,view_holder_get_free_context,void*,ViewHolder*
+Function,+,view_holder_set_back_callback,void,"ViewHolder*, BackCallback, void*"
+Function,+,view_holder_set_free_callback,void,"ViewHolder*, FreeCallback, void*"
+Function,+,view_holder_set_view,void,"ViewHolder*, View*"
+Function,+,view_holder_start,void,ViewHolder*
+Function,+,view_holder_stop,void,ViewHolder*
+Function,+,view_holder_update,void,"View*, void*"
 Function,+,view_port_alloc,ViewPort*,
 Function,+,view_port_ascii_callback_set,void,"ViewPort*, ViewPortAsciiCallback, void*"
 Function,+,view_port_draw_callback_set,void,"ViewPort*, ViewPortDrawCallback, void*"
@@ -3793,7 +3808,7 @@ Variable,+,I_CC_Settings_16x16,Icon,
 Variable,+,I_Certification1_103x56,Icon,
 Variable,+,I_Certification2_46x33,Icon,
 Variable,+,I_CertificationChina0_121x41,Icon,
-Variable,+,I_CertificationChina1_122x47,Icon,
+Variable,+,I_CertificationChina1_124x47,Icon,
 Variable,+,I_CertificationMexico_98x41,Icon,
 Variable,+,I_CertificationTaiwan_33x32,Icon,
 Variable,+,I_Charging_lightning_9x10,Icon,
@@ -3803,7 +3818,6 @@ Variable,+,I_Clock_18x18,Icon,
 Variable,+,I_Connect_me_62x31,Icon,
 Variable,+,I_Connected_62x31,Icon,
 Variable,+,I_Cos_9x7,Icon,
-Variable,+,I_Cry_dolph_55x52,Icon,
 Variable,+,I_DFU_128x50,Icon,
 Variable,+,I_DolphinDone_80x58,Icon,
 Variable,+,I_DolphinMafia_119x62,Icon,
@@ -3840,6 +3854,7 @@ Variable,+,I_KeySaveSelected_22x11,Icon,
 Variable,+,I_KeySave_22x11,Icon,
 Variable,+,I_Keychain_39x36,Icon,
 Variable,+,I_Left_mouse_icon_9x9,Icon,
+Variable,+,I_LoadingHourglass_24x24,Icon,
 Variable,+,I_Lock_7x8,Icon,
 Variable,+,I_Lockscreen,Icon,
 Variable,+,I_MFKey_qr_25x25,Icon,
@@ -3908,6 +3923,7 @@ Variable,+,I_ch_up_hover_24x21,Icon,
 Variable,+,I_check_big_20x17,Icon,
 Variable,+,I_cool_30x51,Icon,
 Variable,+,I_dir_10px,Icon,
+Variable,+,I_dolph_cry_49x54,Icon,
 Variable,+,I_dry_19x20,Icon,
 Variable,+,I_dry_hover_19x20,Icon,
 Variable,+,I_dry_text_15x5,Icon,
@@ -3973,6 +3989,7 @@ Variable,+,I_power_text_24x5,Icon,
 Variable,+,I_prev_19x20,Icon,
 Variable,+,I_prev_hover_19x20,Icon,
 Variable,+,I_prev_text_19x5,Icon,
+Variable,+,I_qr_benchmark_25x25,Icon,
 Variable,+,I_rotate_19x20,Icon,
 Variable,+,I_rotate_hover_19x20,Icon,
 Variable,+,I_rotate_text_24x5,Icon,

@@ -143,6 +143,7 @@ static void hid_numpad_draw_callback(Canvas* canvas, void* context) {
             canvas, 7, 60, AlignLeft, AlignBottom, "Waiting for\nConnection...");
     }
     elements_multiline_text_aligned(canvas, 20, 3, AlignLeft, AlignTop, "Numpad");
+
 #else
     elements_multiline_text_aligned(canvas, 12, 3, AlignLeft, AlignTop, "Numpad");
 #endif

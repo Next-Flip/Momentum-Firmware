@@ -147,6 +147,7 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
 
 extern int32_t desktop_settings_app(void* p) {
     DesktopSettingsApp* app = desktop_settings_app_alloc();
+
     if(p && (strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG) == 0)) {
         scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
     } else {
@@ -154,9 +155,11 @@ extern int32_t desktop_settings_app(void* p) {
     }
 
     view_dispatcher_run(app->view_dispatcher);
+
     if(app->save_settings) {
         DESKTOP_SETTINGS_SAVE(&app->desktop->settings);
     }
     desktop_settings_app_free(app);
+
     return 0;
 }

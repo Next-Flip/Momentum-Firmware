@@ -6,6 +6,7 @@
 #pragma once
 
 #include <lib/subghz/devices/preset.h>
+#include <lib/subghz/devices/tx.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -164,6 +165,14 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  * @return     real frequency in Hz
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
+
+/** Сheck if and why transmission is blocked on this frequency with current config
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     tx allowed or blocked enum
+ */
+SubGhzTx furi_hal_subghz_check_tx(uint32_t value);
 
 /** Сheck if transmission is allowed on this frequency with your current config
  *

@@ -164,7 +164,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
     flipper_format_free(fff_data_file);
     furi_record_close(RECORD_STORAGE);
 
-    if(instance->frequency == 0 || !furi_hal_subghz_is_tx_allowed(instance->frequency)) {
+    if(instance->frequency == 0 || !furi_hal_subghz_is_frequency_valid(instance->frequency)) {
         instance->frequency = SUBGHZ_LAST_SETTING_DEFAULT_FREQUENCY;
     }
 

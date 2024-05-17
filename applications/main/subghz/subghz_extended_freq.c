@@ -15,7 +15,7 @@ void subghz_extended_freq() {
         flipper_format_read_bool(file, "ignore_default_tx_region", &is_bypassed, 1);
     }
 
-    furi_hal_subghz_set_extended_frequency(is_extended_i);
+    furi_hal_subghz_set_extended_range(is_extended_i);
     furi_hal_subghz_set_bypass_region(is_bypassed);
 
     flipper_format_free(file);

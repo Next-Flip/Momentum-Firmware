@@ -48,6 +48,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
+    hid_mouse_jiggler_stealth_set_connected_status(hid->hid_mouse_jiggler_stealth, connected);
     hid_ptt_set_connected_status(hid->hid_ptt, connected);
     hid_tiktok_set_connected_status(hid->hid_tiktok, connected);
 }
@@ -57,7 +58,7 @@ static uint32_t hid_ptt_menu_view(void* context) {
     return HidViewPushToTalkMenu;
 }
 
-Hid* hid_alloc() {
+Hid* hid_alloc(void) {
     Hid* app = malloc(sizeof(Hid));
 
     // Gui
@@ -146,6 +147,12 @@ Hid* hid_alloc() {
         app->view_dispatcher,
         HidViewMouseJiggler,
         hid_mouse_jiggler_get_view(app->hid_mouse_jiggler));
+    // Mouse jiggler stealth view
+    app->hid_mouse_jiggler_stealth = hid_mouse_jiggler_stealth_alloc(app);
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        HidViewMouseJigglerStealth,
+        hid_mouse_jiggler_stealth_get_view(app->hid_mouse_jiggler_stealth));
 
     // PushToTalk view
     app->hid_ptt_menu = hid_ptt_menu_alloc(app);
@@ -191,6 +198,8 @@ void hid_free(Hid* app) {
     hid_mouse_clicker_free(app->hid_mouse_clicker);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJiggler);
     hid_mouse_jiggler_free(app->hid_mouse_jiggler);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJigglerStealth);
+    hid_mouse_jiggler_stealth_free(app->hid_mouse_jiggler_stealth);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewPushToTalkMenu);
     hid_ptt_menu_free(app->hid_ptt_menu);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewPushToTalk);

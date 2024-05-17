@@ -37,8 +37,9 @@ extern const char* EXTRA_KEYBINDS[];
 extern const size_t EXTRA_KEYBINDS_COUNT;
 
 typedef struct {
-    Gui* gui;
     Desktop* desktop;
+
+    Gui* gui;
     DialogsApp* dialogs;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -53,7 +54,7 @@ typedef struct {
     PinCode pincode_buffer;
     bool pincode_buffer_filled;
 
-    uint8_t menu_idx;
+    uint32_t pin_menu_idx;
 
     bool save_settings;
 } DesktopSettingsApp;

@@ -20,7 +20,6 @@
 
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO (&gpio_ext_pb2)
 #define SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO &gpio_ext_pc3
-#define SUBGHZ_DEVICE_CC1101_EXT_FORCE_EXTENDED_RANGE false
 
 #define SUBGHZ_DEVICE_CC1101_CONFIG_VER 1
 
@@ -93,8 +92,9 @@ typedef struct {
     const GpioPin* g0_pin;
     SubGhzDeviceCC1101ExtAsyncTx async_tx;
     SubGhzDeviceCC1101ExtAsyncRx async_rx;
-    bool power_amp;
     bool extended_range;
+    bool bypass_region;
+    bool power_amp;
 } SubGhzDeviceCC1101Ext;
 
 static SubGhzDeviceCC1101Ext* subghz_device_cc1101_ext = NULL;
@@ -219,12 +219,14 @@ bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf) {
     subghz_device_cc1101_ext->regulation = SubGhzDeviceCC1101ExtRegulationTxRx;
     subghz_device_cc1101_ext->async_mirror_pin = NULL;
     subghz_device_cc1101_ext->g0_pin = SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO;
-    subghz_device_cc1101_ext->power_amp = false;
     subghz_device_cc1101_ext->extended_range = false;
+    subghz_device_cc1101_ext->bypass_region = false;
+    subghz_device_cc1101_ext->power_amp = false;
     if(conf) {
         if(conf->ver == SUBGHZ_DEVICE_CC1101_CONFIG_VER) {
-            subghz_device_cc1101_ext->power_amp = conf->power_amp;
             subghz_device_cc1101_ext->extended_range = conf->extended_range;
+            subghz_device_cc1101_ext->bypass_region = conf->bypass_region;
+            subghz_device_cc1101_ext->power_amp = conf->power_amp;
         } else {
             FURI_LOG_E(TAG, "Config version mismatch");
         }
@@ -522,30 +524,47 @@ bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value) {
     return true;
 }
 
-bool subghz_device_cc1101_ext_is_tx_allowed(uint32_t value) {
-    if(!(SUBGHZ_DEVICE_CC1101_EXT_FORCE_EXTENDED_RANGE ||
-         subghz_device_cc1101_ext->extended_range) &&
+SubGhzTx subghz_device_cc1101_ext_check_tx(uint32_t value) {
+    // Check against extended range of YARD Stick One, no configuration would allow this frequency
+    if(!subghz_device_cc1101_ext_is_frequency_valid(value)) {
+        FURI_LOG_I(TAG, "Frequency blocked - outside supported range");
+        return SubGhzTxUnsupported;
+    }
+
+    // Check against default range, regardless of region restrictions
+    if(!subghz_device_cc1101_ext->extended_range &&
        !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside default range");
-        return false;
-    } else if(
-        (SUBGHZ_DEVICE_CC1101_EXT_FORCE_EXTENDED_RANGE ||
-         subghz_device_cc1101_ext->extended_range) &&
-        !subghz_device_cc1101_ext_is_frequency_valid(value)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
-        return false;
+        return SubGhzTxBlockedDefault;
     }
 
-    return true;
+    // Check against region restrictions, tighter than extended and default
+    if(!subghz_device_cc1101_ext->bypass_region) {
+        if(!furi_hal_region_is_provisioned()) {
+            FURI_LOG_I(TAG, "Frequency blocked - region not provisioned");
+            return SubGhzTxBlockedRegionNotProvisioned;
+        }
+        if(!furi_hal_region_is_frequency_allowed(value)) {
+            FURI_LOG_I(TAG, "Frequency blocked - outside region range");
+            return SubGhzTxBlockedRegion;
+        }
+    }
+
+    // We already checked for extended range, default range, and region range
+    return SubGhzTxAllowed;
+}
+
+bool subghz_device_cc1101_ext_is_tx_allowed(uint32_t value) {
+    return subghz_device_cc1101_ext_check_tx(value) == SubGhzTxAllowed;
 }
 
 uint32_t subghz_device_cc1101_ext_set_frequency(uint32_t value) {
     if(subghz_device_cc1101_ext_is_tx_allowed(value)) {
         subghz_device_cc1101_ext->regulation = SubGhzDeviceCC1101ExtRegulationTxRx;
     } else {
-        subghz_device_cc1101_ext->regulation = SubGhzDeviceCC1101ExtRegulationTxRx;
+        subghz_device_cc1101_ext->regulation = SubGhzDeviceCC1101ExtRegulationOnlyRx;
     }
 
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
