@@ -26,6 +26,7 @@
   - UL: BT/USB Remote: Split into Mouse Jiggler and Mouse Jiggler Stealth (by @xMasterX)
   - Magspoof: GUI and Settings fixes (by @zacharyweiss)
   - Slots: Allow balancing of the bet to the user (by @DefinetlyNotAI)
+  - Count Down Timer: Fix crash below 1 sec (by @0w0miao & @Willy-JL)
   - UL: Metronome: Fix crash (by @xMasterX)
   - OFW: NFC Magic: Fix user dict attack results being discarded (by @Astrrra)
 - SubGHz: Increased deduplication threshold (500ms to 600ms) to fit Hormann BiSecure remotes  (#119 by @user890104)
@@ -40,6 +41,7 @@
 - SubGHz: External modules follow extended and bypass settings correctly (by @Willy-JL)
 - SubGHz: Fixed restoring RX only frequency (by @Willy-JL)
 - SubGHz: Fixed crash when setting frequencies near range limits (by @Willy-JL)
+- SubGHz: Fix Radio Device Loader loading GPS plugin (by @Willy-JL)
 
 ### Removed:
 - Nothing
