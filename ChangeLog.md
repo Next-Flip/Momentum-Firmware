@@ -22,11 +22,11 @@
 
 ### Updated:
 - Apps:
-  - UL: ESubGHz Chat: NFC feature works again with nfclegacy (by @xMasterX)
   - UL: BT/USB Remote: Split into Mouse Jiggler and Mouse Jiggler Stealth (by @xMasterX)
   - Magspoof: GUI and Settings fixes (by @zacharyweiss)
   - Slots: Allow balancing of the bet to the user (by @DefinetlyNotAI)
   - Count Down Timer: Fix crash below 1 sec (by @0w0miao & @Willy-JL)
+  - NRF24 Mouse Jacker: Improve addresses.txt reading (by @Willy-JL)
   - UL: Metronome: Fix crash (by @xMasterX)
   - OFW: NFC Magic: Fix user dict attack results being discarded (by @Astrrra)
 - SubGHz: Increased deduplication threshold (500ms to 600ms) to fit Hormann BiSecure remotes  (#119 by @user890104)
