@@ -42,6 +42,7 @@
 - SubGHz: Fixed restoring RX only frequency (by @Willy-JL)
 - SubGHz: Fixed crash when setting frequencies near range limits (by @Willy-JL)
 - SubGHz: Fix Radio Device Loader loading GPS plugin (by @Willy-JL)
+- Archive: Fixed hidden files in non-browser tabs (by @Willy-JL)
 
 ### Removed:
 - Nothing
