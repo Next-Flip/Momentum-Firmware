@@ -55,7 +55,7 @@ if __name__ == "__main__":
                             "value": f"- [Download Firmware TGZ]({artifact_tgz})\n- [SDK (for development)]({artifact_sdk})"
                         }
                     ],
-                    "timestamp": dt.datetime.now(dt.UTC).isoformat()
+                    "timestamp": dt.datetime.utcnow().isoformat()
                 }
             ],
         },
