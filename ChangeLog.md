@@ -4,6 +4,10 @@
   - Same functionality, just different naming chosen upstream
 
 ### Added:
+- Apps:
+  - Tools: Quac! (by @rdefeo)
+  - GPIO: MALVEKE app suite (by @EstebanFuentealba)
+  - GPIO: Pokemon Trading (by @EstebanFuentealba)
 - OFW: NFC: Add Slix capabilities, some bugfixes (by @gornekich)
 - OFW: JS: Added `math.is_equal()` and `math.EPSILON` (by @skotopes)
 
@@ -13,6 +17,7 @@
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 
 ### Fixed:
+- Storage: Fix process aliases in rename (by @Willy-JL)
 - OFW: Settings: Refactor fixes (by @Astrrra)
 
 ### Removed:
