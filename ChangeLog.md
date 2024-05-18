@@ -8,6 +8,8 @@
 - OFW: JS: Added `math.is_equal()` and `math.EPSILON` (by @skotopes)
 
 ### Updated:
+- Apps:
+  - USB/BT Remote: Added back new UI for Mouse Clicker from OFW (by @gsurkov)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 
 ### Fixed:
