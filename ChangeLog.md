@@ -6,8 +6,12 @@
 ### Added:
 - Apps:
   - Tools: Quac! (by @rdefeo)
+  - NFC: NFC Playlist (by @acegoal07)
+  - SubGHz: Restaurant Pager (by @leedave)
+  - GPIO: W5500 Ethernet (by @karasevia)
   - GPIO: MALVEKE app suite (by @EstebanFuentealba)
   - GPIO: Pokemon Trading (by @EstebanFuentealba)
+  - GPIO: Badge (by @jamisonderek)
 - OFW: NFC: Add Slix capabilities, some bugfixes (by @gornekich)
 - OFW: JS: Added `math.is_equal()` and `math.EPSILON` (by @skotopes)
 
