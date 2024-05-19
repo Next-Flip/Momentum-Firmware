@@ -14,11 +14,13 @@
 ### Updated:
 - Apps:
   - USB/BT Remote: Added back new UI for Mouse Clicker from OFW (by @gsurkov)
+  - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 
 ### Fixed:
 - Storage: Fix process aliases in rename (by @Willy-JL)
 - OFW: Settings: Refactor fixes (by @Astrrra)
+- OFW: GUI: Fix calling both `view_free_model()` and `view_free()` (by @Willy-JL)
 
 ### Removed:
 - Nothing
