@@ -23,6 +23,7 @@
 
 ### Fixed:
 - Storage: Fix process aliases in rename (by @Willy-JL)
+- Desktop: Show "safe to unplug the USB cable" even when locked (by @Willy-JL)
 - OFW: Settings: Refactor fixes (by @Astrrra)
 - OFW: GUI: Fix calling both `view_free_model()` and `view_free()` (by @Willy-JL)
 
