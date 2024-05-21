@@ -20,6 +20,9 @@
   - USB/BT Remote: Added back new UI for Mouse Clicker from OFW (by @gsurkov)
   - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
+- OFW: GUI: Text Box rework (by @gornekich)
+- OFW: Icons: Compression fixes & larger dimension support (by @hedger)
+- OFW: FuriHal: Add flash ops stats, workaround bug in SHCI_C2_SetSystemClock (by @skotopes)
 
 ### Fixed:
 - Storage: Fix process aliases in rename (by @Willy-JL)

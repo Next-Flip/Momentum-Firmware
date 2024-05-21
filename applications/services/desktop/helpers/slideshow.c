@@ -1,6 +1,5 @@
 #include "slideshow.h"
 
-#include <stddef.h>
 #include <storage/storage.h>
 #include <gui/icon.h>
 #include <core/dangerous_defines.h>
