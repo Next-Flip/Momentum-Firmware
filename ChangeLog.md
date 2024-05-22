@@ -18,6 +18,7 @@
 ### Updated:
 - Apps:
   - USB/BT Remote: Added back new UI for Mouse Clicker from OFW (by @gsurkov)
+  - Seader: Fix for TLSF allocator crashes (by @Willy-JL)
   - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 - OFW: GUI: Text Box rework (by @gornekich)
