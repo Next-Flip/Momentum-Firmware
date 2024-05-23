@@ -18,7 +18,8 @@
 ### Updated:
 - Apps:
   - USB/BT Remote: Added back new UI for Mouse Clicker from OFW (by @gsurkov)
-  - Seader: Fix for TLSF allocator crashes (by @Willy-JL)
+  - Seader: Fix for TLSF allocator crashes (by @Willy-JL & @bettse)
+  - FlipBIP: Minor UI cleanup (by @xtruan)
   - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 - OFW: GUI: Text Box rework (by @gornekich)
@@ -30,6 +31,8 @@
 - Desktop: Show "safe to unplug the USB cable" even when locked (by @Willy-JL)
 - OFW: Settings: Refactor fixes (by @Astrrra)
 - OFW: GUI: Fix calling both `view_free_model()` and `view_free()` (by @Willy-JL)
+- OFW: Archive: Fix condition race on exit (by @skotopes)
+- OFW: FuriHalFlash: Fix obsolete-format delay (by @hedger)
 
 ### Removed:
 - Nothing
