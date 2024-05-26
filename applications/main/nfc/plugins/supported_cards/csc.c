@@ -158,7 +158,7 @@ bool csc_parse(const NfcDevice* device, FuriString* parsed_data) {
         if(refill_sign == new_card_sign) {
             furi_string_printf(
             parsed_data,
-            "\e#CSC Service Works\nUID: %lu\nNew Card\nCard Price: %lu.%02u USD\nCard Usage Left: %lu",
+            "\e#CSC Service Works\nUID: %lu\nNew Card\nCard Value: %lu.%02u USD\nCard Usages Left: %lu",
             card_uid,
             refilled_balance_dollar,
             refilled_balance_cent,
@@ -167,7 +167,7 @@ bool csc_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         furi_string_printf(
             parsed_data,
-            "\e#CSC Service Works\nUID: %lu\nBalance: %lu.%02u USD\nRefilled Balance: %lu.%02u USD\nRefill Times: %lu\nCard Usage Left: %lu",
+            "\e#CSC Service Works\nUID: %lu\nBalance: %lu.%02u USD\nLast Top-up: %lu.%02u USD\nTop-up Count: %lu\nCard Usages Left: %lu",
             card_uid,
             current_balance_dollar,
             current_balance_cent,
