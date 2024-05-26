@@ -351,17 +351,19 @@ MomentumApp* momentum_app_alloc() {
     app->dolphin_angry = stats.butthurt;
     furi_record_close(RECORD_DOLPHIN);
 
-    app->version_tag = furi_string_alloc_printf("%s ", version_get_version(NULL));
-    if(furi_string_start_with(app->version_tag, "mntm-dev")) {
-        furi_string_set(app->version_tag, "MNTM-DEV  ");
-        const char* sha = version_get_githash(NULL);
-        const uint8_t sha_len = strlen(sha) <= 7 ? strlen(sha) : 7;
-        for(size_t i = 0; i < sha_len; ++i) {
-            furi_string_push_back(app->version_tag, toupper(sha[i]));
+    app->version_tag = furi_string_alloc_set(version_get_version(NULL));
+    size_t sha_pos = furi_string_search_char(app->version_tag, '-', strlen("mntm-"));
+    if(sha_pos != FURI_STRING_FAILURE) {
+        // Change second "-" to "  " and make uppercase
+        furi_string_replace_at(app->version_tag, sha_pos, 1, "  ");
+        for(size_t i = 0; i < furi_string_size(app->version_tag); ++i) {
+            furi_string_set_char(
+                app->version_tag, i, toupper(furi_string_get_char(app->version_tag, i)));
         }
     } else {
+        // Make uppercase and add build date after space
         furi_string_replace(app->version_tag, "mntm", "MNTM");
-        furi_string_cat(app->version_tag, version_get_builddate(NULL));
+        furi_string_cat_printf(app->version_tag, " %s", version_get_builddate(NULL));
     }
 
     return app;
