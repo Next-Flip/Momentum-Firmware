@@ -1,3 +1,11 @@
+/*
+* Parser for CSC Service Works Reloadable Cash Card (US)
+* Date created 2024/5/26
+* Zinong Li  
+* Discord  @torron0483 
+* Github   @zinongli
+*/
+
 #include "nfc_supported_card_plugin.h"
 #include <flipper_application.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
@@ -71,7 +79,7 @@ static bool csc_read(Nfc* nfc, NfcDevice* device) {
     nfc_device_copy_data(device, NfcProtocolMfClassic, data);
 
     do {
-        MfClassicType type = MfClassicTypeMini;
+        MfClassicType type = MfClassicType1k;
         MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
         if(error != MfClassicErrorNone) break;
 
