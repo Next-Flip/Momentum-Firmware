@@ -352,19 +352,34 @@ MomentumApp* momentum_app_alloc() {
     furi_record_close(RECORD_DOLPHIN);
 
     app->version_tag = furi_string_alloc_set(version_get_version(NULL));
-    size_t sha_pos = furi_string_search_char(app->version_tag, '-', strlen("mntm-"));
-    if(sha_pos != FURI_STRING_FAILURE) {
-        // Change second "-" to "  " and make uppercase
-        furi_string_replace_at(app->version_tag, sha_pos, 1, "  ");
+    size_t separator = furi_string_search_char(app->version_tag, '-', strlen("mntm-"));
+    Canvas* canvas = gui_direct_draw_acquire(app->gui); // Need canvas to calculate text length
+    canvas_set_font(canvas, FontPrimary);
+    if(separator != FURI_STRING_FAILURE) {
+        // Change second - to space
+        furi_string_set_char(app->version_tag, separator, ' ');
+        // Make uppercase
         for(size_t i = 0; i < furi_string_size(app->version_tag); ++i) {
             furi_string_set_char(
                 app->version_tag, i, toupper(furi_string_get_char(app->version_tag, i)));
         }
+        // Remove sha digits if necessary
+        while(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) >=
+              canvas_width(canvas) - 8) {
+            furi_string_left(app->version_tag, furi_string_size(app->version_tag) - 1);
+        }
     } else {
-        // Make uppercase and add build date after space
+        separator = furi_string_size(app->version_tag);
+        // Make uppercase, add space, add build date
         furi_string_replace(app->version_tag, "mntm", "MNTM");
         furi_string_cat_printf(app->version_tag, " %s", version_get_builddate(NULL));
     }
+    // Add spaces to align right
+    while(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) <=
+          canvas_width(canvas) - 13) {
+        furi_string_replace_at(app->version_tag, separator, 0, " ");
+    }
+    gui_direct_draw_release(app->gui);
 
     return app;
 }
