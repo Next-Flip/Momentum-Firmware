@@ -12,6 +12,7 @@
   - GPIO: MALVEKE app suite (by @EstebanFuentealba)
   - GPIO: Pokemon Trading (by @EstebanFuentealba)
   - GPIO: Badge (by @jamisonderek)
+  - Tools: Tone Generator (by @GEMISIS)
 - OFW: NFC: Add Slix capabilities, some bugfixes (by @gornekich)
 - OFW: JS: Added `math.is_equal()` and `math.EPSILON` (by @skotopes)
 
@@ -21,6 +22,8 @@
   - Seader: Fix for TLSF allocator crashes (by @Willy-JL & @bettse)
   - FlipBIP: Minor UI cleanup (by @xtruan)
   - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
+  - Countdown Timer: Fixes and improvements (by @puppable & @0w0mewo)
+  - Reversi: Algorithm improvements (by @achistyakov)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 - OFW: GUI: Text Box rework (by @gornekich)
 - OFW: Icons: Compression fixes & larger dimension support (by @hedger)
