@@ -32,6 +32,8 @@
 ### Fixed:
 - Storage: Fix process aliases in rename (by @Willy-JL)
 - Desktop: Show "safe to unplug the USB cable" even when locked (by @Willy-JL)
+- UL: RFID: Electra fix non-initialized encoded epilogue on render (by @Leptopt1los)
+- OFW: NFC: Fix changing UID (by @gornekich)
 - OFW: Settings: Refactor fixes (by @Astrrra)
 - OFW: GUI: Fix calling both `view_free_model()` and `view_free()` (by @Willy-JL)
 - OFW: Archive: Fix condition race on exit (by @skotopes)
