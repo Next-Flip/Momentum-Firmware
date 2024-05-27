@@ -116,10 +116,20 @@ static bool csc_read(Nfc* nfc, NfcDevice* device) {
 }
 
 bool csc_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
     bool parsed = false;
 
     do {
+        // Verify key
+        const uint8_t ticket_sector_number = 1;
+
+        const MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(data, ticket_sector_number);
+
+        const uint64_t key =
+            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
+        if(key != csc_1k_keys[ticket_sector_number].a) break;
         // Parse data
         const uint8_t refill_block_num = 2;
         const uint8_t current_balance_block_num = 4;
