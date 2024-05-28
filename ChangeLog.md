@@ -30,6 +30,7 @@
 - OFW: FuriHal: Add flash ops stats, workaround bug in SHCI_C2_SetSystemClock (by @skotopes)
 
 ### Fixed:
+- NFC: Fix Mifare DESFire reading (by @Willy-JL)
 - Storage: Fix process aliases in rename (by @Willy-JL)
 - Desktop: Show "safe to unplug the USB cable" even when locked (by @Willy-JL)
 - GUI: Some text and UI fixes (by @Willy-JL)
@@ -41,4 +42,4 @@
 - OFW: FuriHalFlash: Fix obsolete-format delay (by @hedger)
 
 ### Removed:
-- Nothing
+- NFC: Removed `nfc_device_get_abbreviated_name()` API, only used by NFC app in Momentum and in NFC Maker
