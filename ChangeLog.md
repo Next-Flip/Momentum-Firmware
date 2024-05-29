@@ -13,6 +13,7 @@
   - GPIO: Pokemon Trading (by @EstebanFuentealba)
   - GPIO: Badge (by @jamisonderek)
   - Tools: Tone Generator (by @GEMISIS)
+- Archive: New info page with md5 hash (by @Willy-JL)
 - OFW: NFC: Add Slix capabilities, some bugfixes (by @gornekich)
 - OFW: JS: Added `math.is_equal()` and `math.EPSILON` (by @skotopes)
 
