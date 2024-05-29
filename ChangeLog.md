@@ -19,11 +19,14 @@
 ### Updated:
 - Apps:
   - USB/BT Remote: Added back new UI for Mouse Clicker from OFW (by @gsurkov)
+  - SubGHz Playlist: Fix region lock crash, show when send fails (by @Willy-JL)
+  - Quac!: Fix SubGHz protocols and crash (by @Willy-JL)
   - Seader: Fix for TLSF allocator crashes (by @Willy-JL & @bettse)
   - FlipBIP: Minor UI cleanup (by @xtruan)
-  - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
   - Countdown Timer: Fixes and improvements (by @puppable & @0w0mewo)
   - Reversi: Algorithm improvements (by @achistyakov)
+  - IFTTT Btn: Fix memleaks and wrong free's (by @Willy-JL)
+  - UL: USB/BT Remote: Fix Mouse Jiggler Stealth icon in BT (by @xMasterX)
 - OFW: JS: Refactored and fixed `math` and `textbox` modules (by @nminaylov & @skotopes)
 - OFW: GUI: Text Box rework (by @gornekich)
 - OFW: Icons: Compression fixes & larger dimension support (by @hedger)
