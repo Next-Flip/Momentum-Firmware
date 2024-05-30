@@ -171,10 +171,15 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
     } else {
         uint16_t api_major, api_minor;
         furi_hal_info_get_api_version(&api_major, &api_minor);
+        furi_string_set(buffer, version_get_version(ver));
+        size_t sha_pos = furi_string_search_char(buffer, '-', strlen("mntm-"));
+        if(sha_pos != FURI_STRING_FAILURE) {
+            // Strip commit sha if present (non-release)
+            furi_string_left(buffer, sha_pos);
+        }
         furi_string_cat_printf(
             buffer,
-            "%s   %s\n%s   F%d:%d.%d   %s\nhttps://momentum-fw.dev/",
-            version_get_version(ver),
+            "   %s\n%s   F%d:%d.%d   %s\nmomentum-fw.dev",
             version_get_builddate(ver),
             version_get_githash(ver),
             version_get_target(ver),

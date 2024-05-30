@@ -215,7 +215,12 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, debug_pin_text[value_index]);
     variable_item_set_locked(
-        item, !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug), "Enable\nDebug!");
+        item,
+        !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug),
+        "Enable\n"
+        "Settings >\n"
+        "System >\n"
+        "Debug");
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }

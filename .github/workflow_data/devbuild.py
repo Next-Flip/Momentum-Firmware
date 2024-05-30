@@ -13,8 +13,8 @@ if __name__ == "__main__":
         event = json.load(f)
 
     release = "release"
-    before = event["before"][:8]
-    after = event["after"][:8]
+    before = event["before"]
+    after = event["after"]
     compare = event["compare"].rsplit("/", 1)[0]
 
     # Saved before uploading new devbuild
@@ -40,11 +40,11 @@ if __name__ == "__main__":
                     "fields": [
                         {
                             "name": "Diff since last build:",
-                            "value": f"[Compare {before} to {after}]({compare}/{before}...{after})"
+                            "value": f"[Compare {before[:8]} to {after[:8]}]({compare}/{before}...{after})"
                         },
                         {
                             "name": "Diff since last release:",
-                            "value": f"[Compare {release} to {after}]({compare}/{release}...{after})"
+                            "value": f"[Compare {release} to {after[:8]}]({compare}/{release}...{after})"
                         },
                         {
                             "name": "Changelog since last release:",

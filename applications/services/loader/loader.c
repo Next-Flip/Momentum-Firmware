@@ -233,7 +233,7 @@ bool loader_menu_load_fap_meta(
     }
     *icon = malloc(sizeof(Icon));
     FURI_CONST_ASSIGN((*icon)->frame_count, 1);
-    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+    FURI_CONST_ASSIGN((*icon)->frame_rate, 1);
     FURI_CONST_ASSIGN((*icon)->width, 10);
     FURI_CONST_ASSIGN((*icon)->height, 10);
     FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
