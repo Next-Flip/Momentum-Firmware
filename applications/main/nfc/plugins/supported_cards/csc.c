@@ -51,8 +51,7 @@ static bool csc_verify(Nfc* nfc) {
         FURI_LOG_D(TAG, "Verifying sector %u", verify_sector);
 
         MfClassicKey key = {0};
-        bit_lib_num_to_bytes_be(
-            csc_1k_keys[verify_sector].a, COUNT_OF(key.data), key.data);
+        bit_lib_num_to_bytes_be(csc_1k_keys[verify_sector].a, COUNT_OF(key.data), key.data);
 
         MfClassicAuthContext auth_context;
         MfClassicError error =
@@ -66,8 +65,6 @@ static bool csc_verify(Nfc* nfc) {
 
     return verified;
 }
-
-
 
 static bool csc_read(Nfc* nfc, NfcDevice* device) {
     furi_assert(nfc);
@@ -91,11 +88,9 @@ static bool csc_read(Nfc* nfc, NfcDevice* device) {
             .key_b_mask = 0,
         };
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            bit_lib_num_to_bytes_be(
-                csc_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            bit_lib_num_to_bytes_be(csc_1k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
             FURI_BIT_SET(keys.key_a_mask, i);
-            bit_lib_num_to_bytes_be(
-                csc_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+            bit_lib_num_to_bytes_be(csc_1k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
             FURI_BIT_SET(keys.key_b_mask, i);
         }
 
@@ -134,19 +129,15 @@ bool csc_parse(const NfcDevice* device, FuriString* parsed_data) {
         const uint8_t refill_block_num = 2;
         const uint8_t current_balance_block_num = 4;
         const uint8_t card_lives_block_num = 9;
-        const uint8_t refill_sign_block_num = 13; 
+        const uint8_t refill_sign_block_num = 13;
         const uint64_t new_card_sign = 0x00000000000000;
 
-        const uint8_t* refilled_balance_block_start_ptr =
-            &data->block[refill_block_num].data[9];
-        const uint8_t* refill_times_block_start_ptr =
-            &data->block[refill_block_num].data[5];
+        const uint8_t* refilled_balance_block_start_ptr = &data->block[refill_block_num].data[9];
+        const uint8_t* refill_times_block_start_ptr = &data->block[refill_block_num].data[5];
         const uint8_t* current_balance_block_start_ptr =
             &data->block[current_balance_block_num].data[0];
-        const uint8_t* card_lives_block_start_ptr =
-            &data->block[card_lives_block_num].data[0];
-        const uint8_t* refill_sign_block_start_ptr =
-            &data->block[refill_sign_block_num].data[0];
+        const uint8_t* card_lives_block_start_ptr = &data->block[card_lives_block_num].data[0];
+        const uint8_t* refill_sign_block_start_ptr = &data->block[refill_sign_block_num].data[0];
 
         uint32_t refilled_balance = bit_lib_bytes_to_num_le(refilled_balance_block_start_ptr, 2);
         uint32_t refilled_balance_dollar = refilled_balance / 100;
@@ -167,31 +158,29 @@ bool csc_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         if(refill_sign == new_card_sign) {
             furi_string_printf(
-            parsed_data,
-            "\e#CSC Service Works\nUID: %lu\nNew Card\nCard Value: %lu.%02u USD\nCard Usages Left: %lu",
-            card_uid,
-            refilled_balance_dollar,
-            refilled_balance_cent,
-            card_lives);
+                parsed_data,
+                "\e#CSC Service Works\nUID: %lu\nNew Card\nCard Value: %lu.%02u USD\nCard Usages Left: %lu",
+                card_uid,
+                refilled_balance_dollar,
+                refilled_balance_cent,
+                card_lives);
         } else {
-
-        furi_string_printf(
-            parsed_data,
-            "\e#CSC Service Works\nUID: %lu\nBalance: %lu.%02u USD\nLast Top-up: %lu.%02u USD\nTop-up Count: %lu\nCard Usages Left: %lu",
-            card_uid,
-            current_balance_dollar,
-            current_balance_cent,
-            refilled_balance_dollar,
-            refilled_balance_cent,
-            refill_times,
-            card_lives);
+            furi_string_printf(
+                parsed_data,
+                "\e#CSC Service Works\nUID: %lu\nBalance: %lu.%02u USD\nLast Top-up: %lu.%02u USD\nTop-up Count: %lu\nCard Usages Left: %lu",
+                card_uid,
+                current_balance_dollar,
+                current_balance_cent,
+                refilled_balance_dollar,
+                refilled_balance_cent,
+                refill_times,
+                card_lives);
         }
         parsed = true;
     } while(false);
 
     return parsed;
 }
-
 
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin csc_plugin = {

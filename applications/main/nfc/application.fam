@@ -282,6 +282,15 @@ App(
 )
 
 App(
+    appid="csc_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="csc_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/csc.c"],
+)
+
+App(
     appid="nfc_cli",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
@@ -297,13 +306,4 @@ App(
     entry_point="nfc_on_system_start",
     sources=["nfc_start.c"],
     order=30,
-)
-
-App(
-    appid="csc_parser",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="csc_plugin_ep",
-    targets=["f7"],
-    requires=["nfc"],
-    sources=["plugins/supported_cards/csc.c"],
 )
