@@ -228,6 +228,11 @@ vars.AddVariables(
         default=False,
     ),
     (
+        "EXTRA_EXT_APPS",
+        "List of appids to include regardless of other configuration",
+        [],
+    ),
+    (
         "APPSRC",
         "Application source directory for app to build & upload",
         "",

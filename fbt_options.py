@@ -42,6 +42,9 @@ if not os.environ.get("DIST_SUFFIX"):
 # Skip external apps by default
 SKIP_EXTERNAL = False
 
+# Appid's to include even when skipping externals
+EXTRA_EXT_APPS = []
+
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
 
