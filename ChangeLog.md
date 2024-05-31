@@ -1,8 +1,8 @@
 <!-- ### Breaking Changes:
 -  -->
 
-<!-- ### Added:
--  -->
+### Added:
+- Sub-GHz: New Legrand doorbell protocol (by @user890104)
 
 ### Updated:
 - Apps:
