@@ -228,12 +228,14 @@ class AppManager:
         applist: List[str],
         ext_applist: List[str],
         hw_target: str,
+        skip_external: bool = False,
     ):
         return AppBuildset(
             self,
             hw_target=hw_target,
             appnames=applist,
             extra_ext_appnames=ext_applist,
+            skip_external=skip_external,
         )
 
 
@@ -278,12 +280,14 @@ class AppBuildset:
         appnames: List[str],
         *,
         extra_ext_appnames: List[str],
+        skip_external: bool = False,
         message_writer: Callable | None = None,
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
         self.incompatible_extapps, self.extapps = [], []
         self._extra_ext_appnames = extra_ext_appnames
+        self._skip_external = skip_external
         self._orig_appnames = appnames
         self.hw_target = hw_target
         self._writer = message_writer if message_writer else self.print_writer
@@ -340,7 +344,11 @@ class AppBuildset:
         extapps = [
             app
             for (apptype, global_lookup) in self.EXTERNAL_APP_TYPES_MAP.items()
-            for app in self.get_apps_of_type(apptype, global_lookup)
+            for app in self.get_apps_of_type(
+                apptype,
+                global_lookup
+                and not (self._skip_external and apptype is FlipperAppType.EXTERNAL),
+            )
         ]
         extapps.extend(map(self.appmgr.get, self._extra_ext_appnames))
 
@@ -409,7 +417,10 @@ class AppBuildset:
                     if (
                         parent_app.apptype in self.BUILTIN_APP_TYPES
                         and parent_app_id in self.appnames
-                    ) or parent_app.apptype not in self.BUILTIN_APP_TYPES:
+                    ) or (
+                        parent_app.apptype not in self.BUILTIN_APP_TYPES
+                        and parent_app in self.extapps
+                    ):
                         keep_app |= True
 
                 except FlipperManifestException:

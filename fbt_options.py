@@ -39,6 +39,9 @@ if not os.environ.get("DIST_SUFFIX"):
     commit_sha = git("rev-parse", "HEAD")[:8]
     DIST_SUFFIX = "mntm-" + branch_name.replace("/", "_") + "-" + commit_sha
 
+# Skip external apps by default
+SKIP_EXTERNAL = False
+
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"
 

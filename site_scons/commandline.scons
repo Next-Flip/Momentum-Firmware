@@ -222,6 +222,11 @@ vars.AddVariables(
         "Application set to use from FIRMWARE_APPS",
         "default",
     ),
+    BoolVariable(
+        "SKIP_EXTERNAL",
+        help="Skip external apps unless explicitly selected",
+        default=False,
+    ),
     (
         "APPSRC",
         "Application source directory for app to build & upload",
