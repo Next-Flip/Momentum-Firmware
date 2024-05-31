@@ -95,6 +95,9 @@ else:
     )
 env.AppendUnique(CPPDEFINES=["FW_CFG_${FIRMWARE_APP_SET}"])
 
+if env.subst("$FIRMWARE_APP_SET").startswith("unit_tests"):
+    env.Replace(SKIP_EXTERNAL=True)
+
 env.ConfigureForTarget(env.subst("${TARGET_HW}"))
 
 Export("env")
