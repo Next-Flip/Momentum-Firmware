@@ -142,7 +142,7 @@ def PrepareApplicationsBuild(env):
             applist=env["APPS"],
             ext_applist=env["EXTRA_EXT_APPS"],
             hw_target=env.subst("f${TARGET_HW}"),
-            skip_external=env.subst("$SKIP_EXTERNAL"),
+            skip_external=env["SKIP_EXTERNAL"],
         )
     except Exception as e:
         raise StopError(e)

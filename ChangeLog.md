@@ -3,6 +3,7 @@
 
 ### Added:
 - Sub-GHz: New Legrand doorbell protocol (by @user890104)
+- FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 
 ### Updated:
 - Apps:
