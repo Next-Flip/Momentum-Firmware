@@ -1,4 +1,5 @@
 #!/usb/bin/env python3
+
 import json
 import os
 import subprocess
@@ -10,9 +11,8 @@ from flipper.app import App
 class GitVersion:
     REVISION_SUFFIX_LENGTH = 8
 
-    def __init__(self, source_dir, suffix):
+    def __init__(self, source_dir):
         self.source_dir = source_dir
-        self.suffix = suffix
 
     def get_version_info(self):
         commit = (
@@ -22,20 +22,26 @@ class GitVersion:
 
         dirty = False
         try:
-            self._exec_git("diff --quiet")
+            self._exec_git("diff HEAD --quiet")  # Check both staged and not
         except subprocess.CalledProcessError as e:
             if e.returncode == 1:
                 dirty = True
+
+        try:
+            tag = self._exec_git("describe --tags --abbrev=0 --exact-match")
+        except subprocess.CalledProcessError:
+            tag = ""
 
         # If WORKFLOW_BRANCH_OR_TAG is set in environment, is has precedence
         # (set by CI)
         branch = (
             os.environ.get("WORKFLOW_BRANCH_OR_TAG", None)
-            or self._exec_git("rev-parse --abbrev-ref HEAD")
+            or tag
+            or self._exec_git("rev-parse --abbrev-ref HEAD").removeprefix("mntm-")
             or "unknown"
         )
 
-        version = self.suffix or os.environ.get("DIST_SUFFIX", None) or "unknown"
+        version = tag or "mntm-dev"
 
         if "SOURCE_DATE_EPOCH" in os.environ:
             commit_date = datetime.utcfromtimestamp(
@@ -52,18 +58,33 @@ class GitVersion:
             "GIT_BRANCH": branch,
             "VERSION": version,
             "BUILD_DIRTY": dirty and 1 or 0,
-            "GIT_ORIGIN": self._get_git_origin(),
+            "GIT_ORIGIN": ",".join(self._get_git_origins()),
             "GIT_COMMIT_DATE": commit_date,
         }
 
-    def _get_git_origin(self):
+    def _get_git_origins(self):
         try:
             branch = self._exec_git("branch --show-current")
             remote = self._exec_git(f"config branch.{branch}.remote")
             origin = self._exec_git(f"remote get-url {remote}")
-            return origin
+            return set([origin])
         except subprocess.CalledProcessError:
-            return ""
+            try:
+                remotes = self._exec_git("remote -v")
+            except subprocess.CalledProcessError:
+                remotes = ""
+        origins = set()
+        for line in remotes.split("\n"):
+            if not line:
+                continue
+            _, destination = line.split("\t")
+            url, _ = destination.split(" ")
+            origins.add(url)
+            break
+        if len(origins) == 1:
+            return origins
+        else:
+            return set(["https://github.com/Next-Flip/Momentum-Firmware"])
 
     def _exec_git(self, args):
         cmd = ["git"]
@@ -100,13 +121,10 @@ class Main(App):
             required=True,
         )
         self.parser_generate.add_argument("--dir", dest="sourcedir", required=True)
-        self.parser_generate.add_argument("--suffix", dest="suffix", required=True)
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
-        current_info = GitVersion(
-            self.args.sourcedir, self.args.suffix
-        ).get_version_info()
+        current_info = GitVersion(self.args.sourcedir).get_version_info()
 
         build_date = (
             date.today()

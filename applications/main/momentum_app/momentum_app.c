@@ -351,13 +351,15 @@ MomentumApp* momentum_app_alloc() {
     app->dolphin_angry = stats.butthurt;
     furi_record_close(RECORD_DOLPHIN);
 
+    // Will be "(version) (commit or date)"
     app->version_tag = furi_string_alloc_set(version_get_version(NULL));
-    size_t separator = furi_string_search_char(app->version_tag, '-', strlen("mntm-"));
-    Canvas* canvas = gui_direct_draw_acquire(app->gui); // Need canvas to calculate text length
+    size_t separator = furi_string_size(app->version_tag);
+    // Need canvas to calculate text length
+    Canvas* canvas = gui_direct_draw_acquire(app->gui);
     canvas_set_font(canvas, FontPrimary);
-    if(separator != FURI_STRING_FAILURE) {
-        // Change second - to space
-        furi_string_set_char(app->version_tag, separator, ' ');
+    if(furi_string_equal(app->version_tag, "mntm-dev")) {
+        // Add space, add commit sha
+        furi_string_cat_printf(app->version_tag, " %s", version_get_githash(NULL));
         // Make uppercase
         for(size_t i = 0; i < furi_string_size(app->version_tag); ++i) {
             furi_string_set_char(
@@ -369,7 +371,6 @@ MomentumApp* momentum_app_alloc() {
             furi_string_left(app->version_tag, furi_string_size(app->version_tag) - 1);
         }
     } else {
-        separator = furi_string_size(app->version_tag);
         // Make uppercase, add space, add build date
         furi_string_replace(app->version_tag, "mntm", "MNTM");
         furi_string_cat_printf(app->version_tag, " %s", version_get_builddate(NULL));

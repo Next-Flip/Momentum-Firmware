@@ -31,13 +31,17 @@ if not os.environ.get("DIST_SUFFIX"):
         )
 
     try:
-        local_branch = git("symbolic-ref", "HEAD", "--short")
-        ref = git("config", "--get", f"branch.{local_branch}.merge")
+        # For tags, dist name is just the tag name: mntm-(ver)
+        DIST_SUFFIX = git("describe", "--tags", "--abbrev=0", "--exact-match")
     except Exception:
-        ref = "refs/heads/detached"
-    branch_name = re.sub("refs/\w+/", "", ref)
-    commit_sha = git("rev-parse", "HEAD")[:8]
-    DIST_SUFFIX = "mntm-" + branch_name.replace("/", "_") + "-" + commit_sha
+        # If not a tag, dist name is: mntm-(branch)-(commmit)
+        branch_name = git("rev-parse", "--abbrev-ref", "HEAD").removeprefix("mntm-")
+        commit_sha = git("rev-parse", "HEAD")[:8]
+        DIST_SUFFIX = f"mntm-{branch_name}-{commit_sha}"
+    # Dist name is only for naming of output files
+    DIST_SUFFIX = DIST_SUFFIX.replace("/", "-")
+    # Instead, FW version uses tag name (mntm-xxx), or "mntm-dev" if not a tag (see scripts/version.py)
+    # You can get commit and branch info in firmware with appropriate version_get_*() calls
 
 # Skip external apps by default
 SKIP_EXTERNAL = False
