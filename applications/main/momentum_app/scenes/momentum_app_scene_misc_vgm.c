@@ -100,7 +100,7 @@ void momentum_app_scene_misc_vgm_on_enter(void* context) {
         value_index = 2;
     } else if(color.mode == ScreenColorModeCustom) {
         found = false;
-        for(size_t i = 0; i < vgm_colors_count; i++) {
+        for(size_t i = 3; i < vgm_colors_count; i++) {
             if(rgbcmp(&color.rgb, &vgm_colors[i].color) != 0) continue;
             value_index = i;
             found = true;
@@ -133,7 +133,7 @@ void momentum_app_scene_misc_vgm_on_enter(void* context) {
         value_index = 2;
     } else if(color.mode == ScreenColorModeCustom) {
         found = false;
-        for(size_t i = 0; i < vgm_colors_count; i++) {
+        for(size_t i = 3; i < vgm_colors_count; i++) {
             if(rgbcmp(&color.rgb, &vgm_colors[i].color) != 0) continue;
             value_index = i;
             found = true;
