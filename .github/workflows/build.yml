@@ -66,7 +66,7 @@ jobs:
         run: |
           set -e
           for symbols in targets/f*/api_symbols.csv; do
-            ofw_api="$(curl "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release/${symbols}" | head -n2)"
+            ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release/${symbols}" | head -n2)"
             our_api="$(head -n2 "${symbols}")"
             if [ "$our_api" != "$ofw_api" ] ; then
               echo API versions aren\'t matching OFW. Please update!
