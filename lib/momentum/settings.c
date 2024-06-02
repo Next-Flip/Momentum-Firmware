@@ -39,10 +39,9 @@ MomentumSettings momentum_settings = {
     .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
     .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
     .file_naming_prefix_after = false, // Before
-    .vgm_color_mode = VgmColorModeDefault, // Default
-    .vgm_color_fg.value = 0x0000, // Default Black
-    .vgm_color_bg.value = 0xFC00, // Default Orange
     .spoof_color = FuriHalVersionColorUnknown, // Real
+    .rpc_color_fg = {{ScreenColorModeDefault, {.value = 0x000000}}}, // Default Black
+    .rpc_color_bg = {{ScreenColorModeDefault, {.value = 0xFF8200}}}, // Default Orange
 };
 
 typedef enum {
