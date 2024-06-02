@@ -46,20 +46,20 @@ typedef enum {
 } SpiHandle;
 
 typedef enum {
-    VgmColorModeDefault,
-    VgmColorModeCustom,
-    VgmColorModeRainbow,
-    VgmColorModeRgbBacklight,
-    VgmColorModeCount,
-} VgmColorMode;
+    ScreenColorModeDefault,
+    ScreenColorModeCustom,
+    ScreenColorModeRainbow,
+    ScreenColorModeRgbBacklight,
+    ScreenColorModeCount,
+} ScreenColorMode;
 
 typedef union __attribute__((packed)) {
     struct {
-        VgmColorMode mode;
+        ScreenColorMode mode;
         RgbColor rgb;
     };
     uint32_t value;
-} RgbColorTransmit;
+} ScreenFrameColor;
 
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
@@ -95,10 +95,9 @@ typedef struct {
     FuriHalSerialId uart_esp_channel;
     FuriHalSerialId uart_nmea_channel;
     bool file_naming_prefix_after;
-    VgmColorMode vgm_color_mode;
     FuriHalVersionColor spoof_color;
-    RgbColorTransmit vgm_color_fg;
-    RgbColorTransmit vgm_color_bg;
+    ScreenFrameColor rpc_color_fg;
+    ScreenFrameColor rpc_color_bg;
 } MomentumSettings;
 
 typedef struct {
