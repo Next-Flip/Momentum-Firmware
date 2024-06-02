@@ -1,6 +1,8 @@
 #include "rpc_i.h"
 #include <gui/gui_i.h>
 #include <assets_icons.h>
+#include <momentum/momentum.h>
+#include <rgb_backlight.h>
 
 #include <flipper.pb.h>
 #include <gui.pb.h>
@@ -96,6 +98,34 @@ static void rpc_system_gui_screen_stream_frame_callback(
     memcpy(buffer, data, size);
     rpc_gui->transmit_frame->content.gui_screen_frame.orientation =
         rpc_system_gui_screen_orientation_map[orientation];
+
+    if(momentum_settings.rpc_color_fg.mode == ScreenColorModeRgbBacklight) {
+        ScreenFrameColor fg_color;
+        if(rgb_backlight_get_rainbow_mode() == RGBBacklightRainbowModeOff) {
+            fg_color.mode = ScreenColorModeCustom;
+            rgb_backlight_get_color(0, &fg_color.rgb);
+        } else {
+            fg_color.mode = ScreenColorModeRainbow;
+        }
+        rpc_gui->transmit_frame->content.gui_screen_frame.fg_color = fg_color.value;
+    } else {
+        rpc_gui->transmit_frame->content.gui_screen_frame.fg_color =
+            momentum_settings.rpc_color_fg.value;
+    }
+
+    if(momentum_settings.rpc_color_bg.mode == ScreenColorModeRgbBacklight) {
+        ScreenFrameColor bg_color;
+        if(rgb_backlight_get_rainbow_mode() == RGBBacklightRainbowModeOff) {
+            bg_color.mode = ScreenColorModeCustom;
+            rgb_backlight_get_color(0, &bg_color.rgb);
+        } else {
+            bg_color.mode = ScreenColorModeRainbow;
+        }
+        rpc_gui->transmit_frame->content.gui_screen_frame.bg_color = bg_color.value;
+    } else {
+        rpc_gui->transmit_frame->content.gui_screen_frame.bg_color =
+            momentum_settings.rpc_color_bg.value;
+    }
 
     furi_thread_flags_set(furi_thread_get_id(rpc_gui->transmit_thread), RpcGuiWorkerFlagTransmit);
 }

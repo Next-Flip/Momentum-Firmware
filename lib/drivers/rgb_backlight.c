@@ -35,9 +35,9 @@ static struct {
 } rgb_settings = {
     .colors =
         {
-            {255, 69, 0},
-            {255, 69, 0},
-            {255, 69, 0},
+            {{255, 69, 0}},
+            {{255, 69, 0}},
+            {{255, 69, 0}},
         },
     .rainbow_mode = RGBBacklightRainbowModeOff,
     .rainbow_speed = 5,
@@ -58,7 +58,7 @@ static struct {
     .enabled = false,
     .last_brightness = 0,
     .rainbow_timer = NULL,
-    .rainbow_hsv = {0, 255, 255},
+    .rainbow_hsv = {{0, 255, 255}},
 };
 
 void rgb_backlight_load_settings(bool enabled) {
