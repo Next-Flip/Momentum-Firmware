@@ -60,6 +60,8 @@ jobs:
           fi
 
       - name: "Check API versions for consistency with OFW release"
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
         run: |
           set -e
