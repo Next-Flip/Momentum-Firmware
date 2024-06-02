@@ -59,6 +59,22 @@ jobs:
             exit 1
           fi
 
+      - name: "Check API versions for consistency with OFW release"
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
+        run: |
+          set -e
+          for symbols in targets/f*/api_symbols.csv; do
+            ofw_api="$(curl "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release/${symbols}" | head -n2)"
+            our_api="$(head -n2 "${symbols}")"
+            if [ "$our_api" != "$ofw_api" ] ; then
+              echo API versions aren\'t matching OFW. Please update!
+              echo API versions are:
+              echo "OFW: $(tail -n1 <<< "$ofw_api")"
+              echo "Us:  $(tail -n1 <<< "$our_api")"
+              exit 1
+            fi
+          done
+
       - name: "Build the firmware and apps"
         id: build-fw
         run: |
