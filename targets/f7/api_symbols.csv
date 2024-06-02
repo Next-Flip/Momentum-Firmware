@@ -2080,7 +2080,6 @@ Function,+,infrared_worker_tx_stop,void,InfraredWorker*
 Function,-,initstate,char*,"unsigned, char*, size_t"
 Function,+,input_get_key_name,const char*,InputKey
 Function,+,input_get_type_name,const char*,InputType
-Function,+,interpolate_color,RgbColor,"const RgbColor*, const RgbColor*, uint8_t, uint8_t"
 Function,-,iprintf,int,"const char*, ..."
 Function,-,isalnum,int,int
 Function,-,isalnum_l,int,"int, locale_t"
@@ -2241,7 +2240,6 @@ Function,-,ldexp,double,"double, int"
 Function,-,ldexpf,float,"float, int"
 Function,-,ldexpl,long double,"long double, int"
 Function,-,ldiv,ldiv_t,"long, long"
-Function,+,lerp_color,RgbColor,"const RgbColor*, const RgbColor*, double"
 Function,+,lfrfid_dict_file_load,ProtocolId,"ProtocolDict*, const char*"
 Function,+,lfrfid_dict_file_save,_Bool,"ProtocolDict*, ProtocolId, const char*"
 Function,+,lfrfid_raw_file_alloc,LFRFIDRawFile*,Storage*
