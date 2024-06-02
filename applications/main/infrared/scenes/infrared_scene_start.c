@@ -51,7 +51,10 @@ void infrared_scene_start_on_enter(void* context) {
         infrared_scene_start_submenu_callback,
         infrared,
         !infrared->app_state.is_debug_enabled,
-        "Enable\nDebug!");
+        "Enable\n"
+        "Settings >\n"
+        "System >\n"
+        "Debug");
     submenu_add_lockable_item(
         submenu,
         "Debug RX",
@@ -59,7 +62,10 @@ void infrared_scene_start_on_enter(void* context) {
         infrared_scene_start_submenu_callback,
         infrared,
         !infrared->app_state.is_debug_enabled,
-        "Enable\nDebug!");
+        "Enable\n"
+        "Settings >\n"
+        "System >\n"
+        "Debug");
 
     const uint32_t submenu_index =
         scene_manager_get_scene_state(scene_manager, InfraredSceneStart);

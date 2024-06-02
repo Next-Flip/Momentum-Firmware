@@ -103,7 +103,7 @@ bool momentum_app_scene_protocols_on_event(void* context, SceneManagerEvent even
             bool change = !value; // Change without confirm if going from ON to OFF
             if(value) {
                 DialogMessage* msg = dialog_message_alloc();
-                dialog_message_set_header(msg, "Are you sure?", 64, 0, AlignCenter, AlignTop);
+                dialog_message_set_header(msg, "Are you sure?", 64, 4, AlignCenter, AlignTop);
                 dialog_message_set_buttons(msg, "No", NULL, "Yes");
                 dialog_message_set_text(
                     msg,
@@ -116,7 +116,7 @@ bool momentum_app_scene_protocols_on_event(void* context, SceneManagerEvent even
                                                                     "Use at own risk, may\n"
                                                                     "damage Flipper",
                     64,
-                    32,
+                    36,
                     AlignCenter,
                     AlignCenter);
                 if(dialog_message_show(app->dialogs, msg) == DialogMessageButtonRight) {

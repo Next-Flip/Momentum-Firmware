@@ -20,6 +20,7 @@ env = ENV.Clone(
         "fbt_resources",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
+    COMPILATIONDB_USE_BINARY_ABSPATH=True,
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     FW_FLAVOR=fw_build_meta["flavor"],
@@ -73,7 +74,9 @@ env = ENV.Clone(
     FW_API_TABLE=None,
     _APP_ICONS=None,
     APPS=_.split(",") if (_ := GetOption("extra_int_apps")) else [],
-    EXTRA_EXT_APPS=_.split(",") if (_ := GetOption("extra_ext_apps")) else [],
+    EXTRA_EXT_APPS=_.split(",")
+    if (_ := GetOption("extra_ext_apps"))
+    else ENV["EXTRA_EXT_APPS"],
 )
 
 env.PreConfigureFwEnvionment()
@@ -92,6 +95,9 @@ else:
         ],
     )
 env.AppendUnique(CPPDEFINES=["FW_CFG_${FIRMWARE_APP_SET}"])
+
+if env.subst("$FIRMWARE_APP_SET").startswith("unit_tests"):
+    env.Replace(SKIP_EXTERNAL=True)
 
 env.ConfigureForTarget(env.subst("${TARGET_HW}"))
 

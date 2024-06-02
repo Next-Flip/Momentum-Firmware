@@ -233,7 +233,7 @@ bool loader_menu_load_fap_meta(
     }
     *icon = malloc(sizeof(Icon));
     FURI_CONST_ASSIGN((*icon)->frame_count, 1);
-    FURI_CONST_ASSIGN((*icon)->frame_rate, 0);
+    FURI_CONST_ASSIGN((*icon)->frame_rate, 1);
     FURI_CONST_ASSIGN((*icon)->width, 10);
     FURI_CONST_ASSIGN((*icon)->height, 10);
     FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
@@ -546,6 +546,12 @@ static LoaderStatus loader_start_external_app(
         }
 
         FURI_LOG_I(TAG, "Starting app");
+
+        if(flipper_application_is_plugin(loader->app.fap)) {
+            status = loader_make_status_error(
+                LoaderStatusErrorInternal, error_message, "Plugin %s is not runnable", path);
+            break;
+        }
 
         loader->app.thread = flipper_application_alloc_thread(loader->app.fap, args);
         FuriString* app_name = furi_string_alloc();

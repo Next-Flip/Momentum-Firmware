@@ -32,8 +32,6 @@ def generate(env):
                             "${TARGET.dir.posix}",
                             "--dir",
                             "${ROOT_DIR}",
-                            "--suffix",
-                            "${DIST_SUFFIX}",
                         ]
                     ],
                     "${VERSIONCOMSTR}",

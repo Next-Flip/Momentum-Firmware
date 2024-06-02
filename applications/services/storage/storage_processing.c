@@ -728,8 +728,8 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
     case StorageCommandCommonRename: {
         FuriString* old_path = furi_string_alloc_set(message->data->rename.old);
         FuriString* new_path = furi_string_alloc_set(message->data->rename.new);
-        storage_process_alias(app, old_path, message->data->cequivpath.thread_id, false);
-        storage_process_alias(app, new_path, message->data->cequivpath.thread_id, false);
+        storage_process_alias(app, old_path, message->data->rename.thread_id, false);
+        storage_process_alias(app, new_path, message->data->rename.thread_id, false);
         message->return_data->error_value = storage_process_common_rename(app, old_path, new_path);
         furi_string_free(old_path);
         furi_string_free(new_path);

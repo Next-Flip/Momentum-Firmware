@@ -228,12 +228,14 @@ class AppManager:
         applist: List[str],
         ext_applist: List[str],
         hw_target: str,
+        skip_external: bool = False,
     ):
         return AppBuildset(
             self,
             hw_target=hw_target,
             appnames=applist,
             extra_ext_appnames=ext_applist,
+            skip_external=skip_external,
         )
 
 
@@ -278,12 +280,14 @@ class AppBuildset:
         appnames: List[str],
         *,
         extra_ext_appnames: List[str],
+        skip_external: bool = False,
         message_writer: Callable | None = None,
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
         self.incompatible_extapps, self.extapps = [], []
         self._extra_ext_appnames = extra_ext_appnames
+        self._skip_external = skip_external
         self._orig_appnames = appnames
         self.hw_target = hw_target
         self._writer = message_writer if message_writer else self.print_writer
@@ -340,7 +344,11 @@ class AppBuildset:
         extapps = [
             app
             for (apptype, global_lookup) in self.EXTERNAL_APP_TYPES_MAP.items()
-            for app in self.get_apps_of_type(apptype, global_lookup)
+            for app in self.get_apps_of_type(
+                apptype,
+                global_lookup
+                and not (self._skip_external and apptype is FlipperAppType.EXTERNAL),
+            )
         ]
         extapps.extend(map(self.appmgr.get, self._extra_ext_appnames))
 
@@ -352,10 +360,10 @@ class AppBuildset:
             ).append(app)
 
     def get_ext_apps(self):
-        return self.extapps
+        return list(self.extapps)
 
     def get_incompatible_ext_apps(self):
-        return self.incompatible_extapps
+        return list(self.incompatible_extapps)
 
     def _check_conflicts(self):
         conflicts = []
@@ -400,14 +408,33 @@ class AppBuildset:
     def _group_plugins(self):
         known_extensions = self.get_apps_of_type(FlipperAppType.PLUGIN, all_known=True)
         for extension_app in known_extensions:
+            keep_app = False
             for parent_app_id in extension_app.requires:
                 try:
                     parent_app = self.appmgr.get(parent_app_id)
                     parent_app._plugins.append(extension_app)
+
+                    if (
+                        parent_app.apptype in self.BUILTIN_APP_TYPES
+                        and parent_app_id in self.appnames
+                    ) or (
+                        parent_app.apptype not in self.BUILTIN_APP_TYPES
+                        and parent_app in self.extapps
+                    ):
+                        keep_app |= True
+
                 except FlipperManifestException:
                     self._writer(
                         f"Module {extension_app.appid} has unknown parent {parent_app_id}"
                     )
+                    keep_app = True
+            # Debug output for plugin parentage
+            # print(
+            #     f"Module {extension_app.appid} has parents {extension_app.requires} keep={keep_app}"
+            # )
+            if not keep_app and extension_app in self.extapps:
+                # print(f"Excluding plugin {extension_app.appid}")
+                self.extapps.remove(extension_app)
 
     def get_apps_cdefs(self):
         cdefs = set()
@@ -433,9 +460,11 @@ class AppBuildset:
         return sorted(
             filter(
                 lambda app: app.apptype == apptype,
-                self.appmgr.known_apps.values()
-                if all_known
-                else map(self.appmgr.get, self.appnames),
+                (
+                    self.appmgr.known_apps.values()
+                    if all_known
+                    else map(self.appmgr.get, self.appnames)
+                ),
             ),
             key=lambda app: app.order,
         )

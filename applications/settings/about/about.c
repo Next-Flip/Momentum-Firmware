@@ -173,14 +173,22 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
         furi_hal_info_get_api_version(&api_major, &api_minor);
         furi_string_cat_printf(
             buffer,
-            "%s   %s\n%s   F%d:%d.%d   %s\nhttps://momentum-fw.dev/",
+            "%s [%s]\n%s%s [%d.%d] %s\n[%d] ",
             version_get_version(ver),
             version_get_builddate(ver),
+            version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
-            version_get_target(ver),
             api_major,
             api_minor,
-            c2_ver ? c2_ver->StackTypeString : "<none>");
+            c2_ver ? c2_ver->StackTypeString : "<none>",
+            version_get_target(ver));
+        if(!strcmp(version_get_version(ver), "mntm-dev") &&
+           strcmp(version_get_gitbranch(ver), "dev")) {
+            // Not a tag but not dev branch, show custom branch
+            furi_string_cat(buffer, version_get_gitbranch(ver));
+        } else {
+            furi_string_cat(buffer, "momentum-fw.dev");
+        }
     }
 
     dialog_message_set_header(message, "Firmware Info:", 0, 0, AlignLeft, AlignTop);

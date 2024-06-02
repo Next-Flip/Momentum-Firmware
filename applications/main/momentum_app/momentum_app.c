@@ -351,18 +351,36 @@ MomentumApp* momentum_app_alloc() {
     app->dolphin_angry = stats.butthurt;
     furi_record_close(RECORD_DOLPHIN);
 
-    app->version_tag = furi_string_alloc_printf("%s ", version_get_version(NULL));
-    if(furi_string_start_with(app->version_tag, "mntm-dev")) {
-        furi_string_set(app->version_tag, "MNTM-DEV  ");
-        const char* sha = version_get_githash(NULL);
-        const uint8_t sha_len = strlen(sha) <= 7 ? strlen(sha) : 7;
-        for(size_t i = 0; i < sha_len; ++i) {
-            furi_string_push_back(app->version_tag, toupper(sha[i]));
+    // Will be "(version) (commit or date)"
+    app->version_tag = furi_string_alloc_set(version_get_version(NULL));
+    size_t separator = furi_string_size(app->version_tag);
+    // Need canvas to calculate text length
+    Canvas* canvas = gui_direct_draw_acquire(app->gui);
+    canvas_set_font(canvas, FontPrimary);
+    if(furi_string_equal(app->version_tag, "mntm-dev")) {
+        // Add space, add commit sha
+        furi_string_cat_printf(app->version_tag, " %s", version_get_githash(NULL));
+        // Make uppercase
+        for(size_t i = 0; i < furi_string_size(app->version_tag); ++i) {
+            furi_string_set_char(
+                app->version_tag, i, toupper(furi_string_get_char(app->version_tag, i)));
+        }
+        // Remove sha digits if necessary
+        while(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) >=
+              canvas_width(canvas) - 8) {
+            furi_string_left(app->version_tag, furi_string_size(app->version_tag) - 1);
         }
     } else {
+        // Make uppercase, add space, add build date
         furi_string_replace(app->version_tag, "mntm", "MNTM");
-        furi_string_cat(app->version_tag, version_get_builddate(NULL));
+        furi_string_cat_printf(app->version_tag, " %s", version_get_builddate(NULL));
     }
+    // Add spaces to align right
+    while(canvas_string_width(canvas, furi_string_get_cstr(app->version_tag)) <=
+          canvas_width(canvas) - 13) {
+        furi_string_replace_at(app->version_tag, separator, 0, " ");
+    }
+    gui_direct_draw_release(app->gui);
 
     return app;
 }

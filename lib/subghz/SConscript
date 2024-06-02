@@ -13,7 +13,6 @@ env.Append(
         File("registry.h"),
         File("subghz_worker.h"),
         File("subghz_tx_rx_worker.h"),
-        File("subghz_file_encoder_worker.h"),
         File("transmitter.h"),
         File("protocols/raw.h"),
         File("protocols/public_api.h"),
@@ -27,6 +26,7 @@ env.Append(
         File("subghz_protocol_registry.h"),
         File("devices/cc1101_configs.h"),
         File("devices/cc1101_int/cc1101_int_interconnect.h"),
+        File("subghz_file_encoder_worker.h"),
     ],
 )
 
