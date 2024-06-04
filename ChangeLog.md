@@ -8,6 +8,7 @@
   - New Legrand doorbell protocol (by @user890104)
   - OFW: Princeton protocol add custom guard time (by @Skorpionm)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
+- Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
 
@@ -23,6 +24,7 @@
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
+- OFW: cleanup of various warnings from clangd (by @hedger)
 
 ### Removed:
 - API: Removed `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
