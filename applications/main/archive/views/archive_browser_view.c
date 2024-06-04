@@ -1,6 +1,7 @@
 #include "assets_icons.h"
 #include "toolbox/path.h"
 #include <furi.h>
+#include "../archive_i.h"
 #include "archive_browser_view.h"
 #include "../helpers/archive_browser.h"
 

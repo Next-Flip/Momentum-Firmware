@@ -6,6 +6,8 @@
 #include <assets_icons.h>
 #include <m-array.h>
 
+#include "subghz_read_raw.h"
+
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 111
 #define MENU_ITEMS 4u
