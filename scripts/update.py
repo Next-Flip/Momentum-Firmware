@@ -20,10 +20,11 @@ class Main(App):
     UPDATE_MANIFEST_VERSION = 2
     UPDATE_MANIFEST_NAME = "update.fuf"
 
-    #  No compression, plain tar
+    RESOURCE_GZIP_MODE = "wb"
+    RESOURCE_GZIP_LEVEL = 9
     RESOURCE_TAR_MODE = "w:"
     RESOURCE_TAR_FORMAT = tarfile.USTAR_FORMAT
-    RESOURCE_FILE_NAME = "resources.tar"
+    RESOURCE_FILE_NAME = "resources.tar.gz"
     RESOURCE_ENTRY_NAME_MAX_LENGTH = 100
 
     WHITELISTED_STACK_TYPES = set(
@@ -159,14 +160,6 @@ class Main(App):
                 self.args.resources, join(self.args.directory, resources_basename)
             ):
                 return 3
-            resources_path = join(self.args.directory, resources_basename)
-            with open(resources_path, "rb") as f_raw:
-                resources_raw = f_raw.read()
-            os.unlink(resources_path)
-            resources_basename += ".gz"
-            resources_path += ".gz"
-            with gzip.open(resources_path, "wb", compresslevel=9) as f_zip:
-                f_zip.write(resources_raw)
 
         if not self.layout_check(dfu_size, radio_addr):
             self.logger.warn("Memory layout looks suspicious")
@@ -264,14 +257,21 @@ class Main(App):
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
-            with tarfile.open(
-                dst_name, self.RESOURCE_TAR_MODE, format=self.RESOURCE_TAR_FORMAT
-            ) as tarball:
-                tarball.add(
-                    srcdir,
-                    arcname="",
-                    filter=self._tar_filter,
-                )
+            with gzip.open(
+                dst_name,
+                self.RESOURCE_GZIP_MODE,
+                compresslevel=self.RESOURCE_GZIP_LEVEL,
+            ) as gzipped:
+                with tarfile.open(
+                    mode=self.RESOURCE_TAR_MODE,
+                    fileobj=gzipped,
+                    format=self.RESOURCE_TAR_FORMAT,
+                ) as tarball:
+                    tarball.add(
+                        srcdir,
+                        arcname="",
+                        filter=self._tar_filter,
+                    )
             return True
         except ValueError as e:
             self.logger.error(f"Cannot package resources: {e}")

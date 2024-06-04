@@ -1,13 +1,13 @@
-#include "assets_icons.h"
-#include "dolphin/helpers/dolphin_state.h"
-#include <core/check.h>
-#include <core/record.h>
 #include <furi.h>
-#include <gui/gui.h>
 #include <furi_hal_version.h>
-#include "dolphin/dolphin.h"
+
+#include <gui/gui.h>
+#include <dolphin/dolphin.h>
+#include <dolphin/helpers/dolphin_state.h>
+
+#include <assets_icons.h>
+
 #include <momentum/momentum.h>
-#include "math.h"
 
 typedef struct {
     FuriSemaphore* semaphore;

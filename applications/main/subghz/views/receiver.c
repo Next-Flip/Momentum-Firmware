@@ -1,11 +1,12 @@
 #include "receiver.h"
-#include "../subghz_i.h"
-#include <math.h>
 
+#include "types.h"
 #include <input/input.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <m-array.h>
+
+#include "subghz_read_raw.h"
 
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 111

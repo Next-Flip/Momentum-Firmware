@@ -3,7 +3,6 @@
 #include <gui/elements.h>
 
 #include "desktop_view_slideshow.h"
-#include "../desktop_i.h"
 #include "../helpers/slideshow.h"
 
 #define DESKTOP_SLIDESHOW_POWEROFF_SHORT 5000

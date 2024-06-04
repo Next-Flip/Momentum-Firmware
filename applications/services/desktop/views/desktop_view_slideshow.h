@@ -3,6 +3,7 @@
 #include <gui/view.h>
 
 #include "desktop_events.h"
+#include <storage/storage.h>
 
 #define SLIDESHOW_FS_PATH EXT_PATH(".slideshow")
 
