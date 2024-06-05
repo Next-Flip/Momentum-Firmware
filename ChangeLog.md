@@ -23,6 +23,7 @@
 ### Fixed:
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
+- AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: cleanup of various warnings from clangd (by @hedger)
 
