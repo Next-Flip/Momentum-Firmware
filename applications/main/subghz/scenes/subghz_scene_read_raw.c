@@ -3,7 +3,6 @@
 #include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/raw.h>
 #include <toolbox/path.h>
-#include <float_tools.h>
 
 #define RAW_FILE_NAME "RAW_"
 #define TAG "SubGhzSceneReadRAW"

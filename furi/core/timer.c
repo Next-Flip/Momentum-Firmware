@@ -8,65 +8,55 @@
 
 const char* current_timer_name = NULL;
 
-typedef struct {
-    FuriTimerCallback func;
-    void* context;
-} TimerCallback_t;
+struct FuriTimer {
+    StaticTimer_t container;
+    FuriTimerCallback cb_func;
+    void* cb_context;
+    volatile bool can_be_removed;
+};
+
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriTimer, container) == 0);
 
 const char* furi_timer_get_current_name(void) {
     return current_timer_name;
 }
 
 static void TimerCallback(TimerHandle_t hTimer) {
-    TimerCallback_t* callb;
-
-    /* Retrieve pointer to callback function and context */
-    callb = (TimerCallback_t*)pvTimerGetTimerID(hTimer);
-
-    /* Remove dynamic allocation flag */
-    callb = (TimerCallback_t*)((uint32_t)callb & ~1U);
-
-    if(callb != NULL) {
-        current_timer_name = pcTimerGetName(hTimer);
-        callb->func(callb->context);
-        current_timer_name = NULL;
-    }
+    FuriTimer* instance = pvTimerGetTimerID(hTimer);
+    furi_check(instance);
+    current_timer_name = pcTimerGetName(hTimer);
+    instance->cb_func(instance->cb_context);
+    current_timer_name = NULL;
 }
 
 FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* context) {
     furi_check((furi_kernel_is_irq_or_masked() == 0U) && (func != NULL));
 
-    TimerHandle_t hTimer;
-    TimerCallback_t* callb;
-    UBaseType_t reload;
+    FuriTimer* instance = malloc(sizeof(FuriTimer));
 
-    hTimer = NULL;
-
-    /* Dynamic memory allocation is available: if memory for callback and */
-    /* its context is not provided, allocate it from dynamic memory pool */
-    callb = (TimerCallback_t*)malloc(sizeof(TimerCallback_t));
-
-    callb->func = func;
-    callb->context = context;
-
-    if(type == FuriTimerTypeOnce) {
-        reload = pdFALSE;
-    } else {
-        reload = pdTRUE;
-    }
+    instance->cb_func = func;
+    instance->cb_context = context;
 
     // Timer name so thread appid works in timers, and so does APP_DATA_PATH()
     const char* name = furi_thread_get_appid(furi_thread_get_current_id());
 
-    /* Store callback memory dynamic allocation flag */
-    callb = (TimerCallback_t*)((uint32_t)callb | 1U);
-    // TimerCallback function is always provided as a callback and is used to call application
-    // specified function with its context both stored in structure callb.
-    hTimer = xTimerCreate(name, portMAX_DELAY, reload, callb, TimerCallback);
-    furi_check(hTimer);
+    const UBaseType_t reload = (type == FuriTimerTypeOnce ? pdFALSE : pdTRUE);
+    const TimerHandle_t hTimer = xTimerCreateStatic(
+        name, portMAX_DELAY, reload, instance, TimerCallback, &instance->container);
 
-    /* Return timer ID */
-    return ((FuriTimer*)hTimer);
+    furi_check(hTimer == (TimerHandle_t)instance);
+
+    return instance;
+}
+
+static void furi_timer_epilogue(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+
+    FuriTimer* instance = context;
+
+    instance->can_be_removed = true;
 }
 
 void furi_timer_free(FuriTimer* instance) {
@@ -74,26 +64,14 @@ void furi_timer_free(FuriTimer* instance) {
     furi_check(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
-    TimerCallback_t* callb;
+    furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
+    furi_check(xTimerPendFunctionCall(furi_timer_epilogue, instance, 0, portMAX_DELAY) == pdPASS);
 
-    callb = (TimerCallback_t*)pvTimerGetTimerID(hTimer);
-
-    if((uint32_t)callb & 1U) {
-        /* If callback memory was allocated, it is only safe to free it with
-         * the timer inactive. Send a stop command and wait for the timer to
-         * be in an inactive state.
-         */
-        furi_check(xTimerStop(hTimer, portMAX_DELAY) == pdPASS);
-        while(furi_timer_is_running(instance)) furi_delay_tick(2);
-
-        /* Callback memory was allocated from dynamic pool, clear flag */
-        callb = (TimerCallback_t*)((uint32_t)callb & ~1U);
-
-        /* Return allocated memory to dynamic pool */
-        free(callb);
+    while(!instance->can_be_removed) {
+        furi_delay_tick(2);
     }
 
-    furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
+    free(instance);
 }
 
 FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
@@ -110,8 +88,7 @@ FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
         stat = FuriStatusErrorResource;
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
@@ -129,8 +106,7 @@ FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
         stat = FuriStatusErrorResource;
     }
 
-    /* Return execution status */
-    return (stat);
+    return stat;
 }
 
 FuriStatus furi_timer_stop(FuriTimer* instance) {
