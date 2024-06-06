@@ -12,6 +12,7 @@
   - OFW: Write to ultralight cards is now possible (by @RebornedBrain)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
+- UL: BadKB: Add Finnish keyboard layout (by @nicou)
 - OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
 
