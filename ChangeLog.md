@@ -9,10 +9,12 @@
   - OFW: Princeton protocol add custom guard time (by @Skorpionm)
 - NFC:
   - OFW: Mifare Plus detection support (by @Astrrra)
+  - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to ultralight cards is now possible (by @RebornedBrain)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
+- OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
 - OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
 
@@ -31,6 +33,7 @@
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
 - OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+- OFW: Sub-GHz: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
 
