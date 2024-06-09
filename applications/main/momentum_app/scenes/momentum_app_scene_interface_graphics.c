@@ -181,6 +181,8 @@ bool momentum_app_scene_interface_graphics_on_event(void* context, SceneManagerE
             app->scene_manager, MomentumAppSceneInterfaceGraphics, event.event);
         consumed = true;
         switch(event.event) {
+        case VarItemListIndexAssetPack:
+            scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceGraphicsPack);
         default:
             break;
         }

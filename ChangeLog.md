@@ -11,6 +11,7 @@
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to ultralight cards is now possible (by @RebornedBrain)
+- MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)

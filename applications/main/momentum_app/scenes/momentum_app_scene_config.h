@@ -1,6 +1,7 @@
 ADD_SCENE(momentum_app, start, Start)
 ADD_SCENE(momentum_app, interface, Interface)
 ADD_SCENE(momentum_app, interface_graphics, InterfaceGraphics)
+ADD_SCENE(momentum_app, interface_graphics_pack, InterfaceGraphicsPack)
 ADD_SCENE(momentum_app, interface_mainmenu, InterfaceMainmenu)
 ADD_SCENE(momentum_app, interface_mainmenu_add, InterfaceMainmenuAdd)
 ADD_SCENE(momentum_app, interface_mainmenu_add_main, InterfaceMainmenuAddMain)
