@@ -1,5 +1,4 @@
 #include "../bad_kb_app_i.h"
-#include "furi_hal_power.h"
 
 enum VarItemListIndex {
     VarItemListIndexKeyboardLayout,
