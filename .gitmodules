@@ -1,6 +1,10 @@
 [submodule "applications/external"]
 	path = applications/external
 	url = https://github.com/Next-Flip/Momentum-Apps.git
+[submodule "assets/protobuf"]
+	path = assets/protobuf
+	url = https://github.com/Next-Flip/flipperzero-protobuf.git
+	shallow = false
 [submodule "lib/mlib"]
 	path = lib/mlib
 	url = https://github.com/P-p-H-d/mlib.git
@@ -10,10 +14,6 @@
 [submodule "lib/nanopb"]
 	path = lib/nanopb
 	url = https://github.com/nanopb/nanopb.git
-[submodule "assets/protobuf"]
-	path = assets/protobuf
-	url = https://github.com/flipperdevices/flipperzero-protobuf.git
-	shallow = false
 [submodule "lib/libusb_stm32"]
 	path = lib/libusb_stm32
 	url = https://github.com/flipperdevices/libusb_stm32.git

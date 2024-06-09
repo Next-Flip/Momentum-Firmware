@@ -1,6 +1,13 @@
 Filetype: Flipper Animation Manifest
 Version: 1
 
+Name: L1_Tv_128x47
+Min butthurt: 0
+Max butthurt: 14
+Min level: 9
+Max level: 30
+Weight: 3
+
 Name: L1_Waves_128x50
 Min butthurt: 0
 Max butthurt: 14
@@ -109,7 +116,7 @@ Weight: 3
 Name: L2_Wake_up_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 12
+Min level: 19
 Max level: 30
 Weight: 3
 
@@ -165,7 +172,7 @@ Weight: 3
 Name: L1_Sad_song_128x64
 Min butthurt: 11
 Max butthurt: 14
-Min level: 14
+Min level: 12
 Max level: 30
 Weight: 3
 
@@ -186,7 +193,7 @@ Weight: 3
 Name: L3_Freedom_2_dolphins_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 16
+Min level: 29
 Max level: 30
 Weight: 5
 

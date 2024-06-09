@@ -106,8 +106,7 @@ void flipper_start_service(const FlipperInternalApplication* service) {
     FURI_LOG_D(TAG, "Starting service %s", service->name);
 
     FuriThread* thread =
-        furi_thread_alloc_ex(service->name, service->stack_size, service->app, NULL);
-    furi_thread_mark_as_service(thread);
+        furi_thread_alloc_service(service->name, service->stack_size, service->app, NULL);
     furi_thread_set_appid(thread, service->appid);
 
     furi_thread_start(thread);

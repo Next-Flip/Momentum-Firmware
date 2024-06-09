@@ -12,6 +12,10 @@ typedef struct {
 } FuriThreadStdout;
 
 struct FuriThread {
+    StaticTask_t container;
+    TaskHandle_t task_handle;
+    StackType_t* stack_buffer;
+
     FuriThreadState state;
     int32_t ret;
 
@@ -26,7 +30,7 @@ struct FuriThread {
 
     FuriThreadPriority priority;
 
-    TaskHandle_t task_handle;
+    size_t stack_size;
     size_t heap_size;
 
     FuriThreadStdout output;
@@ -35,6 +39,7 @@ struct FuriThread {
     // this ensures that the size of this structure is minimal
     bool is_service;
     bool heap_trace_enabled;
-
-    configSTACK_DEPTH_TYPE stack_size;
 };
+
+// IMPORTANT: container MUST be the FIRST struct member
+static_assert(offsetof(FuriThread, container) == 0);

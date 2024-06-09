@@ -6,6 +6,7 @@
 #include <toolbox/path.h>
 #include <loader/loader.h>
 #include <storage/storage.h>
+#include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
 
 #include <loader/firmware_api/firmware_api.h>
@@ -36,6 +37,9 @@ struct TestRunner {
     int minunit_assert;
     int minunit_fail;
     int minunit_status;
+
+    // Summary
+    size_t total_failed;
 };
 
 TestRunner* test_runner_alloc(Cli* cli, FuriString* args) {
@@ -112,6 +116,8 @@ static bool test_runner_run_plugin(TestRunner* instance, const char* path) {
         instance->minunit_status += test->get_minunit_status();
 
         result = (instance->minunit_fail == 0);
+
+        instance->total_failed += instance->minunit_fail;
     } while(false);
 
     flipper_application_free(lib);
@@ -134,7 +140,7 @@ static void test_runner_run_internal(TestRunner* instance) {
         }
 
         while(true) {
-            if(cli_cmd_interrupt_received(instance->cli)) {
+            if(instance->cli && cli_cmd_interrupt_received(instance->cli)) {
                 break;
             }
 
@@ -165,7 +171,23 @@ static void test_runner_run_internal(TestRunner* instance) {
 
             if(!result) {
                 printf("Failed to execute test: %s\r\n", file_basename_cstr);
-                break;
+
+                if(!instance->cli) {
+                    notification_message(instance->notification, &sequence_error);
+
+                    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+                    DialogMessage* message = dialog_message_alloc();
+                    dialog_message_set_header(
+                        message, "Failed Test:", 64, 30, AlignCenter, AlignBottom);
+                    dialog_message_set_text(
+                        message, file_basename_cstr, 64, 34, AlignCenter, AlignTop);
+                    dialog_message_show(dialogs, message);
+                    dialog_message_free(message);
+                    furi_record_close(RECORD_DIALOGS);
+
+                    notification_message_block(
+                        instance->notification, &sequence_set_only_blue_255);
+                }
             }
         }
     } while(false);
@@ -192,7 +214,7 @@ void test_runner_run(TestRunner* instance) {
         test_runner_run_internal(instance);
 
         if(instance->minunit_run != 0) {
-            printf("\r\nFailed tests: %d\r\n", instance->minunit_fail);
+            printf("\r\nFailed tests: %d\r\n", instance->total_failed);
 
             // Time report
             cycle_counter = (furi_get_tick() - cycle_counter);
@@ -204,12 +226,38 @@ void test_runner_run(TestRunner* instance) {
             printf("Leaked: %ld\r\n", heap_before - heap_after);
 
             // Final Report
-            if(instance->minunit_fail == 0) {
+            if(instance->total_failed == 0) {
                 notification_message(instance->notification, &sequence_success);
                 printf("Status: PASSED\r\n");
             } else {
                 notification_message(instance->notification, &sequence_error);
                 printf("Status: FAILED\r\n");
+            }
+
+            if(!instance->cli) {
+                char text[70];
+                snprintf(
+                    text,
+                    sizeof(text),
+                    "Failed tests: %d\n"
+                    "Consumed: %lu ms\n"
+                    "Leaked: %ld",
+                    instance->total_failed,
+                    cycle_counter,
+                    heap_before - heap_after);
+                DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+                DialogMessage* message = dialog_message_alloc();
+                dialog_message_set_header(
+                    message,
+                    instance->total_failed == 0 ? "PASSED" : "FAILED",
+                    64,
+                    8,
+                    AlignCenter,
+                    AlignTop);
+                dialog_message_set_text(message, text, 64, 38, AlignCenter, AlignCenter);
+                dialog_message_show(dialogs, message);
+                dialog_message_free(message);
+                furi_record_close(RECORD_DIALOGS);
             }
         }
     }

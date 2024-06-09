@@ -1,4 +1,4 @@
-#include "protocol_items.h"
+#include "protocol_items.h" // IWYU pragma: keep
 
 const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_gate_tx,
@@ -69,6 +69,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_mastercode,
     &subghz_protocol_x10,
     &subghz_protocol_hormann_bisecur,
+    &subghz_protocol_legrand,
 };
 
 const SubGhzProtocolRegistry subghz_protocol_registry = {

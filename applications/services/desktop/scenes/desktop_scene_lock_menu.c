@@ -9,7 +9,6 @@
 #include "../desktop_i.h"
 #include <desktop/desktop_settings.h>
 #include "../views/desktop_view_lock_menu.h"
-#include "desktop_scene_i.h"
 #include "desktop_scene.h"
 #include "../helpers/pin.h"
 #include <power/power_service/power.h>

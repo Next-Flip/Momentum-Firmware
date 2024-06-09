@@ -1,18 +1,18 @@
 #include "receiver.h"
 #include "../subghz_i.h"
-#include <math.h>
 
+#include "types.h"
 #include <input/input.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <m-array.h>
 
+#include "subghz_read_raw.h"
+
 #define FRAME_HEIGHT 12
 #define MAX_LEN_PX 111
 #define MENU_ITEMS 4u
 #define UNLOCK_CNT 3
-
-// #define SUBGHZ_RAW_THRESHOLD_MIN (-90.0f)
 
 #define FLIP_TIMEOUT (500)
 

@@ -20,6 +20,7 @@ void archive_scene_rename_on_enter(void* context) {
 
     TextInput* text_input = archive->text_input;
     ArchiveFile_t* current = archive_get_current_file(archive->browser);
+    const bool is_file = current->type != ArchiveFileTypeFolder;
 
     FuriString* path_name = furi_string_alloc();
     FuriString* path_folder = furi_string_alloc();
@@ -27,16 +28,15 @@ void archive_scene_rename_on_enter(void* context) {
     ArchiveTabEnum tab = archive_get_tab(archive->browser);
     bool hide_ext = tab != ArchiveTabBrowser && tab != ArchiveTabInternal;
 
-    if(current->type == ArchiveFileTypeFolder || !hide_ext) {
-        furi_string_reset(archive->file_extension);
-        path_extract_basename(furi_string_get_cstr(current->path), path_name);
-    } else {
+    if(is_file && !hide_ext) {
         path_extract_ext_str(current->path, archive->file_extension);
         path_extract_filename(current->path, path_name, true);
+    } else {
+        furi_string_reset(archive->file_extension);
+        path_extract_basename(furi_string_get_cstr(current->path), path_name);
     }
     strlcpy(archive->text_store, furi_string_get_cstr(path_name), MAX_NAME_LEN);
-    text_input_set_header_text(
-        text_input, current->type == ArchiveFileTypeFolder ? "Rename directory:" : "Rename file:");
+    text_input_set_header_text(text_input, is_file ? "Rename file:" : "Rename directory:");
 
     // Get current folder (for file) or previous folder (for folder) for validator
     path_extract_dirname(furi_string_get_cstr(current->path), path_folder);
@@ -44,7 +44,7 @@ void archive_scene_rename_on_enter(void* context) {
     text_input_set_result_callback(
         text_input,
         archive_scene_rename_text_input_callback,
-        context,
+        archive,
         archive->text_store,
         MAX_NAME_LEN,
         false);
