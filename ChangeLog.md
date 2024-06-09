@@ -22,7 +22,7 @@
 ### Updated:
 - Apps:
   - VGM Tool: Add new RGB VGM firmware to support Flipper FW changes (by @HaxSam)
-  - Picopass: Add acknowledgements page (by @bettse)
+  - Picopass: Add acknowledgements page, plugin improvements (by @bettse)
   - Authenticator: Fix URL format (by @akopachov)
   - NFC Playlist: Various fixes (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
