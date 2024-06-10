@@ -251,6 +251,12 @@ static void js_gpio_read_analog(struct mjs* mjs) {
     JsGpioInst* gpio = mjs_get_ptr(mjs, obj_inst);
     furi_assert(gpio);
 
+    if(gpio->handle == NULL) {
+        mjs_prepend_errorf(mjs, MJS_SYNTAX_ERROR, "Analog mode not started");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
+    }
+
     mjs_val_t pin_arg = mjs_arg(mjs, 0);
 
     if(!mjs_is_string(pin_arg)) {
