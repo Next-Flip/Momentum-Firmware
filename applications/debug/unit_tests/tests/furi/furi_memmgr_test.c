@@ -1,5 +1,8 @@
 #include "../test.h" // IWYU pragma: keep
-#include <furi.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 void test_furi_memmgr(void) {
     void* ptr;
@@ -46,6 +49,11 @@ static void test_memmgr_malloc(const size_t allocation_size) {
     // test that we can allocate memory
     if(ptr == NULL) {
         error_message = "malloc failed";
+    }
+
+    // test that memory is aligned by 8 bytes
+    if(((uintptr_t)ptr % 8) != 0) {
+        error_message = "memory is not aligned by 8 bytes after malloc";
     }
 
     // test that memory is zero-initialized after allocation
@@ -99,6 +107,11 @@ static void test_memmgr_realloc(const size_t allocation_size) {
         error_message = "realloc(NULL) failed";
     }
 
+    // test that memory is aligned by 8 bytes
+    if(((uintptr_t)ptr % 8) != 0) {
+        error_message = "memory is not aligned by 8 bytes after realloc";
+    }
+
     // test that memory is zero-initialized after allocation
     for(size_t i = 0; i < allocation_size; i++) {
         if(ptr[i] != 0) {
@@ -122,6 +135,11 @@ static void test_memmgr_realloc(const size_t allocation_size) {
             error_message = "memory is not reallocated after realloc";
             break;
         }
+    }
+
+    // test that memory is aligned by 8 bytes
+    if(((uintptr_t)ptr % 8) != 0) {
+        error_message = "memory is not aligned by 8 bytes after realloc";
     }
 
     // test that remaining memory is zero-initialized
@@ -289,5 +307,19 @@ void test_furi_memmgr_advanced(void) {
         for(size_t i = 0; i < sizes_count - 1; i++) {
             free(guards[i]);
         }
+    }
+}
+
+void test_furi_memmgr_aligned8(void) {
+    const size_t repeat_count = 100;
+
+    for(size_t i = 0; i < repeat_count; i++) {
+        uintptr_t ptr = (uintptr_t)malloc(10);
+        mu_assert_int_eq(0, ptr % 8);
+        ptr = (uintptr_t)realloc((void*)ptr, 20);
+        mu_assert_int_eq(0, ptr % 8);
+        ptr = (uintptr_t)realloc((void*)ptr, 30);
+        mu_assert_int_eq(0, ptr % 8);
+        free((void*)ptr);
     }
 }

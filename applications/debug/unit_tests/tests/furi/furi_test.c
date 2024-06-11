@@ -8,6 +8,7 @@ void test_furi_concurrent_access(void);
 void test_furi_pubsub(void);
 void test_furi_memmgr(void);
 void test_furi_memmgr_advanced(void);
+void test_furi_memmgr_aligned8(void);
 void test_furi_event_loop(void);
 
 static int foo = 0;
@@ -38,6 +39,7 @@ MU_TEST(mu_test_furi_memmgr) {
     // that memory management is working fine
     test_furi_memmgr();
     test_furi_memmgr_advanced();
+    test_furi_memmgr_aligned8();
 }
 
 MU_TEST(mu_test_furi_event_loop) {
