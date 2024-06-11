@@ -15,6 +15,7 @@
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
+- OFW: Furi: Event loop (by @skotopes)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
 - OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
@@ -28,6 +29,7 @@
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
 - OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
+- OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
