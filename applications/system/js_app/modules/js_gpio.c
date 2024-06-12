@@ -252,7 +252,7 @@ static void js_gpio_read_analog(struct mjs* mjs) {
     furi_assert(gpio);
 
     if(gpio->handle == NULL) {
-        mjs_prepend_errorf(mjs, MJS_SYNTAX_ERROR, "Analog mode not started");
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Analog mode not started");
         mjs_return(mjs, MJS_UNDEFINED);
         return;
     }
@@ -313,8 +313,9 @@ static void js_gpio_start_analog(struct mjs* mjs) {
     }
 
     if(gpio->handle != NULL) {
-        furi_hal_adc_release(gpio->handle);
-        gpio->handle = NULL;
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Analog mode already started");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
     }
 
     gpio->handle = furi_hal_adc_acquire();
@@ -331,10 +332,14 @@ static void js_gpio_stop_analog(struct mjs* mjs) {
     JsGpioInst* gpio = mjs_get_ptr(mjs, obj_inst);
     furi_assert(gpio);
 
-    if(gpio->handle != NULL) {
-        furi_hal_adc_release(gpio->handle);
-        gpio->handle = NULL;
+    if(gpio->handle == NULL) {
+        mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Analog mode not started");
+        mjs_return(mjs, MJS_UNDEFINED);
+        return;
     }
+
+    furi_hal_adc_release(gpio->handle);
+    gpio->handle = NULL;
 }
 
 static void* js_gpio_create(struct mjs* mjs, mjs_val_t* object) {
