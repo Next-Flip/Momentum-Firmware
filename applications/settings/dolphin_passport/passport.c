@@ -99,8 +99,6 @@ static void render_callback(Canvas* canvas, void* _ctx) {
 int32_t passport_app(void* p) {
     UNUSED(p);
     FuriSemaphore* semaphore = furi_semaphore_alloc(1, 0);
-    furi_assert(semaphore);
-
     ViewPort* view_port = view_port_alloc();
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
