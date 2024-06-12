@@ -53,9 +53,8 @@ static void furi_thread_body(void* context) {
     furi_check(thread->state == FuriThreadStateStarting);
     furi_thread_set_state(thread, FuriThreadStateRunning);
 
-    TaskHandle_t task_handle = xTaskGetCurrentTaskHandle();
     if(thread->heap_trace_enabled == true) {
-        memmgr_heap_enable_thread_trace((FuriThreadId)task_handle);
+        memmgr_heap_enable_thread_trace(thread);
     }
 
     thread->ret = thread->callback(thread->context);
@@ -64,14 +63,14 @@ static void furi_thread_body(void* context) {
 
     if(thread->heap_trace_enabled == true) {
         furi_delay_ms(33);
-        thread->heap_size = memmgr_heap_get_thread_memory((FuriThreadId)task_handle);
+        thread->heap_size = memmgr_heap_get_thread_memory(thread);
         furi_log_print_format(
             thread->heap_size ? FuriLogLevelError : FuriLogLevelInfo,
             TAG,
             "%s allocation balance: %zu",
             thread->name ? thread->name : "Thread",
             thread->heap_size);
-        memmgr_heap_disable_thread_trace((FuriThreadId)task_handle);
+        memmgr_heap_disable_thread_trace(thread);
     }
 
     furi_check(thread->state == FuriThreadStateRunning);
@@ -160,7 +159,7 @@ void furi_thread_free(FuriThread* thread) {
     furi_check(thread->is_service == false);
     // Cannot free a non-joined thread
     furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->task_handle == NULL);
+    furi_check(!thread->is_active);
 
     furi_thread_set_name(thread, NULL);
     furi_thread_set_appid(thread, NULL);
@@ -276,16 +275,17 @@ void furi_thread_start(FuriThread* thread) {
     uint32_t stack_depth = thread->stack_size / sizeof(StackType_t);
     UBaseType_t priority = thread->priority ? thread->priority : FuriThreadPriorityNormal;
 
-    thread->task_handle = xTaskCreateStatic(
-        furi_thread_body,
-        thread->name,
-        stack_depth,
-        thread,
-        priority,
-        thread->stack_buffer,
-        &thread->container);
+    thread->is_active = true;
 
-    furi_check(thread->task_handle == (TaskHandle_t)&thread->container);
+    furi_check(
+        xTaskCreateStatic(
+            furi_thread_body,
+            thread->name,
+            stack_depth,
+            thread,
+            priority,
+            thread->stack_buffer,
+            &thread->container) == (TaskHandle_t)thread);
 }
 
 void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
@@ -293,8 +293,8 @@ void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
     if(thread) {
         // clear thread local storage
         vTaskSetThreadLocalStoragePointer(task, 0, NULL);
-        furi_check(thread->task_handle == task);
-        thread->task_handle = NULL;
+        furi_check(thread == (FuriThread*)task);
+        thread->is_active = false;
     }
 }
 
@@ -309,7 +309,7 @@ bool furi_thread_join(FuriThread* thread) {
     //
     // If your thread exited, but your app stuck here: some other thread uses
     // all cpu time, which delays kernel from releasing task handle
-    while(thread->task_handle) {
+    while(thread->is_active) {
         furi_delay_ms(10);
     }
 
@@ -318,7 +318,7 @@ bool furi_thread_join(FuriThread* thread) {
 
 FuriThreadId furi_thread_get_id(FuriThread* thread) {
     furi_check(thread);
-    return thread->task_handle;
+    return thread;
 }
 
 void furi_thread_enable_heap_trace(FuriThread* thread) {
