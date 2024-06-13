@@ -1,7 +1,10 @@
 ### Breaking Changes:
+- OFW: NFC: Reading Apple/Google Pay can crash due to new Mifare Plus poller
 - VGM: Reworked color customization functionality over RPC (by @HaxSam & @Willy-JL)
   - Better rainbow support, more responsive config, custom fore/back-ground
   - If you used this, need to reflash your VGM and reconfigure the colors
+- OFW: CLI: New `top` command, replaces `ps` (by @skotopes)
+  - Now includes CPU usage info too
 
 ### Added:
 - Sub-GHz:
@@ -11,6 +14,7 @@
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to ultralight cards is now possible (by @RebornedBrain)
+- OFW: RFID: Added Support for Securakey Protocol (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - JS: Added ADC (analog voltage) support to gpio library (by @jamisonderek)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
@@ -38,10 +42,13 @@
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
 - OFW: USB: IRQ Handling and EP configuration, Thread handler shenanigans (by @skotopes)
 - OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+- OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Sub-GHz: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - OFW: Loader: fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
 
 ### Removed:
+- Furi: Temp disabled `FURI_TRACE` due to DFU size, some crashes will say "furi_check failed" instead of source path
 - API: Removed `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
+- OFW: CLI: Removed `ps` command, replaced by `top`
