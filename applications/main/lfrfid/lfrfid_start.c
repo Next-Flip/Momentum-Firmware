@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void lfrfid_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("lfrfid_cli", 1, cli, args, context);
+    cli_plugin_wrapper("lfrfid", cli, args, context);
 }
 
 void lfrfid_on_system_start(void) {

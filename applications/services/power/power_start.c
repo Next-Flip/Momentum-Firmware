@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void power_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("power_cli", 1, cli, args, context);
+    cli_plugin_wrapper("power", cli, args, context);
 }
 
 void power_on_system_start(void) {

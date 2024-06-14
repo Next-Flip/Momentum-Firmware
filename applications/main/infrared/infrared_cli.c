@@ -546,10 +546,11 @@ static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
 }
 
 #include <flipper_application/flipper_application.h>
+#include <cli/cli_i.h>
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = "infrared_cli",
-    .ep_api_version = 1,
+    .appid = CLI_PLUGIN_APP_ID,
+    .ep_api_version = CLI_PLUGIN_API_VERSION,
     .entry_point = &infrared_cli_start_ir,
 };
 

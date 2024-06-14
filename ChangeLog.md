@@ -19,6 +19,7 @@
 - JS: Added ADC (analog voltage) support to gpio library (by @jamisonderek)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
+- CLI: Simpler plugin wrapper (by @Willy-JL)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
 - OFW: Furi: Event loop (by @skotopes)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)

@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void nfc_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("nfc_cli", 1, cli, args, context);
+    cli_plugin_wrapper("nfc", cli, args, context);
 }
 
 void nfc_on_system_start(void) {

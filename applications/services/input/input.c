@@ -57,7 +57,7 @@ const char* input_get_type_name(InputType type) {
 #include <cli/cli_i.h>
 
 static void input_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("input_cli", 1, cli, args, context);
+    cli_plugin_wrapper("input", cli, args, context);
 }
 
 int32_t input_srv(void* p) {

@@ -2,7 +2,7 @@
 #include "loader.h"
 
 static void loader_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("loader_cli", 1, cli, args, context);
+    cli_plugin_wrapper("loader", cli, args, context);
 }
 
 void loader_on_system_start(void) {

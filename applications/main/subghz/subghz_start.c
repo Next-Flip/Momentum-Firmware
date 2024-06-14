@@ -7,7 +7,7 @@
 #define SUBGHZ_REGION_FILENAME "/int/.region_data"
 
 static void subghz_cli_command_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("subghz_cli", 1, cli, args, context);
+    cli_plugin_wrapper("subghz", cli, args, context);
 }
 
 static void subghz_cli_command_chat_wrapper(Cli* cli, FuriString* args, void* context) {

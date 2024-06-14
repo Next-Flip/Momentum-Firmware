@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void ibutton_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("ibutton_cli", 1, cli, args, context);
+    cli_plugin_wrapper("ibutton", cli, args, context);
 }
 
 void ibutton_on_system_start(void) {
