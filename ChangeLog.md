@@ -46,6 +46,7 @@
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Sub-GHz: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - OFW: Loader: fix crash on locked via cli loader (by @DrZlo13)
+- OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
 
