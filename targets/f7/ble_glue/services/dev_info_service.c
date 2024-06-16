@@ -107,7 +107,7 @@ BleServiceDevInfo* ble_svc_dev_info_start(void) {
         sizeof(software_revision),
         "%s %s %s %s",
         version_get_githash(NULL),
-        version_get_version(NULL),
+        version_get_gitbranch(NULL),
         version_get_gitbranchnum(NULL),
         version_get_builddate(NULL));
     snprintf(hardware_revision, sizeof(hardware_revision), "%d", version_get_target(NULL));

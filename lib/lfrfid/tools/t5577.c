@@ -1,7 +1,6 @@
 #include "t5577.h"
 #include <furi.h>
 #include <furi_hal_rfid.h>
-#include <stddef.h>
 
 #define T5577_TIMING_WAIT_TIME 400
 #define T5577_TIMING_START_GAP 30

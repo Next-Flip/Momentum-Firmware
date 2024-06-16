@@ -67,7 +67,7 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         view_dispatcher_run_input_callback,
         view_dispatcher);
 
-    view_dispatcher->ascii_queue = furi_message_queue_alloc(8, sizeof(AsciiEvent));
+    view_dispatcher->ascii_queue = furi_message_queue_alloc(16, sizeof(AsciiEvent));
     furi_event_loop_message_queue_subscribe(
         view_dispatcher->event_loop,
         view_dispatcher->ascii_queue,

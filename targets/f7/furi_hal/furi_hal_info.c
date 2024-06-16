@@ -9,12 +9,6 @@
 #include <furi.h>
 #include <protobuf_version.h>
 
-#include <momentum/momentum.h>
-#include <rgb_backlight.h>
-#include <SK6805.h>
-#include <colors.h>
-#include <stdint.h>
-
 FURI_WEAK void furi_hal_info_get_api_version(uint16_t* major, uint16_t* minor) {
     *major = 0;
     *minor = 0;

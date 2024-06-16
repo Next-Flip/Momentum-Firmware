@@ -1,6 +1,5 @@
 from pathlib import Path
 import posixpath
-import re
 import os
 
 # For more details on these options, run 'fbt -h'
