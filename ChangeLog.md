@@ -1,5 +1,4 @@
 ### Breaking Changes:
-- OFW: NFC: Reading Apple/Google Pay can crash due to new Mifare Plus poller
 - VGM: Reworked color customization functionality over RPC (by @HaxSam & @Willy-JL)
   - Better rainbow support, more responsive config, custom fore/back-ground
   - If you used this, need to reflash your VGM and reconfigure the colors
@@ -9,11 +8,11 @@
 ### Added:
 - Sub-GHz:
   - New Legrand doorbell protocol (by @user890104)
-  - OFW: Princeton protocol add custom guard time (by @Skorpionm)
+  - OFW: Princeton protocol add custom guard time (by @Skorpionm & @xMasterX)
 - NFC:
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
-  - OFW: Write to ultralight cards is now possible (by @RebornedBrain)
+  - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
 - OFW: RFID: Added Support for Securakey Protocol (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - JS: Added ADC (analog voltage) support to gpio library (by @jamisonderek)
@@ -46,11 +45,12 @@
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
+- OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
 - OFW: JS: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Sub-GHz: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
-- OFW: Loader: fix crash on locked via cli loader (by @DrZlo13)
+- OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
