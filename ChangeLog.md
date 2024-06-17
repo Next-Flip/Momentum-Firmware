@@ -42,6 +42,11 @@
 
 ### Fixed:
 - OFW: USB: IRQ, CDC and EP fixes, no more "Operation timeout (generic)" updating from OFW (by @skotopes)
+- Sub-GHz:
+  - UL: Fix add manually princeton (by @xMasterX)
+  - UL: Fix decode raw signals showing up in read menu (by @xMasterX)
+  - UL: Sync signal delete scene with OFW (by @xMasterX)
+  - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
@@ -49,7 +54,6 @@
 - OFW: JS: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
-- OFW: Sub-GHz: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
