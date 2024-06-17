@@ -74,7 +74,7 @@ static const LoaderError err_invalid_flie = {"Invalid File", "Update the app", "
 static const LoaderError err_invalid_manifest =
     {"Invalid Manifest", "Update firmware or app", "err_03", &I_err_03};
 static const LoaderError err_missing_imports =
-    {"Missing Imports", "Update firmware", "err_04", &I_err_04};
+    {"Missing Imports", "Update app or firmware", "err_04", &I_err_04};
 static const LoaderError err_hw_target_mismatch =
     {"HW Target\nMismatch", "App not supported", "err_05", &I_err_05};
 static const LoaderError err_outdated_app = {"Outdated App", "Update the app", "err_06", &I_err_06};

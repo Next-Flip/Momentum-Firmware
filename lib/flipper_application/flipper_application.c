@@ -302,7 +302,7 @@ const char* flipper_application_load_status_to_string(FlipperApplicationLoadStat
     case FlipperApplicationLoadStatusUnspecifiedError:
         return "Unknown error";
     case FlipperApplicationLoadStatusMissingImports:
-        return "Update Firmware to use with this Application (MissingImports)";
+        return "Update Application or Firmware to compatible versions (MissingImports)";
     }
 
     return "Unknown error";
