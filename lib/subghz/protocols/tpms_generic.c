@@ -4,82 +4,15 @@
 
 #define TAG "TPMSBlockGeneric"
 
-void tpms_block_generic_get_preset_name(const char* preset_name, FuriString* preset_str) {
-    const char* preset_name_temp;
-    if(!strcmp(preset_name, "AM270")) {
-        preset_name_temp = "FuriHalSubGhzPresetOok270Async";
-    } else if(!strcmp(preset_name, "AM650")) {
-        preset_name_temp = "FuriHalSubGhzPresetOok650Async";
-    } else if(!strcmp(preset_name, "FM238")) {
-        preset_name_temp = "FuriHalSubGhzPreset2FSKDev238Async";
-    } else if(!strcmp(preset_name, "FM476")) {
-        preset_name_temp = "FuriHalSubGhzPreset2FSKDev476Async";
-    } else {
-        preset_name_temp = "FuriHalSubGhzPresetCustom";
-    }
-    furi_string_set(preset_str, preset_name_temp);
-}
-
 SubGhzProtocolStatus tpms_block_generic_serialize(
     TPMSBlockGeneric* instance,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(instance);
-    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    SubGhzProtocolStatus res = subghz_block_generic_serialize_common(instance->protocol_name, flipper_format, preset);
+    if(res != SubGhzProtocolStatusOk) return res;
+    res = SubGhzProtocolStatusError;
     do {
-        stream_clean(flipper_format_get_raw_stream(flipper_format));
-        if(!flipper_format_write_header_cstr(
-               flipper_format, TPMS_KEY_FILE_TYPE, TPMS_KEY_FILE_VERSION)) {
-            FURI_LOG_E(TAG, "Unable to add header");
-            res = SubGhzProtocolStatusErrorParserHeader;
-            break;
-        }
-
-        if(!flipper_format_write_uint32(flipper_format, "Frequency", &preset->frequency, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Frequency");
-            res = SubGhzProtocolStatusErrorParserFrequency;
-            break;
-        }
-
-        tpms_block_generic_get_preset_name(furi_string_get_cstr(preset->name), temp_str);
-        if(!flipper_format_write_string_cstr(
-               flipper_format, "Preset", furi_string_get_cstr(temp_str))) {
-            FURI_LOG_E(TAG, "Unable to add Preset");
-            res = SubGhzProtocolStatusErrorParserPreset;
-            break;
-        }
-        if(!strcmp(furi_string_get_cstr(temp_str), "FuriHalSubGhzPresetCustom")) {
-            if(!flipper_format_write_string_cstr(
-                   flipper_format, "Custom_preset_module", "CC1101")) {
-                FURI_LOG_E(TAG, "Unable to add Custom_preset_module");
-                res = SubGhzProtocolStatusErrorParserCustomPreset;
-                break;
-            }
-            if(!flipper_format_write_hex(
-                   flipper_format, "Custom_preset_data", preset->data, preset->data_size)) {
-                FURI_LOG_E(TAG, "Unable to add Custom_preset_data");
-                res = SubGhzProtocolStatusErrorParserCustomPreset;
-                break;
-            }
-        }
-        if(!flipper_format_write_float(flipper_format, "Latitute", &preset->latitude, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Latitute");
-            res = SubGhzProtocolStatusErrorParserLatitude;
-            break;
-        }
-        if(!flipper_format_write_float(flipper_format, "Longitude", &preset->longitude, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Longitude");
-            res = SubGhzProtocolStatusErrorParserLongitude;
-            break;
-        }
-        if(!flipper_format_write_string_cstr(flipper_format, "Protocol", instance->protocol_name)) {
-            FURI_LOG_E(TAG, "Unable to add Protocol");
-            res = SubGhzProtocolStatusErrorParserProtocolName;
-            break;
-        }
-
         uint32_t temp_data = instance->id;
         if(!flipper_format_write_uint32(flipper_format, "Id", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Unable to add Id");
@@ -138,7 +71,6 @@ SubGhzProtocolStatus tpms_block_generic_serialize(
 
         res = SubGhzProtocolStatusOk;
     } while(false);
-    furi_string_free(temp_str);
     return res;
 }
 
