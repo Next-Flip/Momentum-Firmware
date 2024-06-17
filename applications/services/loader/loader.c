@@ -611,7 +611,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
            preload_res == FlipperApplicationPreloadStatusApiTooNew) {
             api_mismatch = true;
         } else if(preload_res != FlipperApplicationPreloadStatusSuccess) {
-            api_mismatch_bypass_failed:
+        api_mismatch_bypass_failed:
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
             result.value = loader_make_status_error(
                 LoaderStatusErrorInternal, error_message, "Preload failed, %s: %s", path, err_msg);
