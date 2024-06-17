@@ -654,12 +654,13 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
             furi_record_close(RECORD_DIALOGS);
             if(res != DialogMessageButtonRight) {
                 const char* err_msg = flipper_application_preload_status_to_string(preload_res);
-                status = loader_make_status_error(
-                    LoaderStatusErrorAppStarted,
+                result.value = loader_make_status_error(
+                    LoaderStatusErrorAppStarted, // Not LoaderStatusErrorInternal since it would show another popup
                     error_message,
                     "Preload failed, %s: %s",
                     path,
                     err_msg);
+                result.error = loader_status_error_from_preload_status(preload_res);
                 break;
             }
         }
