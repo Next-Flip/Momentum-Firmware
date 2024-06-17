@@ -3,3 +3,4 @@
 *.ps1 eol=crlf
 *.cmd eol=crlf
 ReadMe.md merge=ours
+ChangeLog.md merge=ours
