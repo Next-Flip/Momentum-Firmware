@@ -985,7 +985,8 @@ SubGhzProtocolStatus subghz_protocol_decoder_bin_raw_serialize(
     furi_assert(context);
     SubGhzProtocolDecoderBinRAW* instance = context;
 
-    SubGhzProtocolStatus res = subghz_block_generic_serialize_common(instance->generic.protocol_name, flipper_format, preset);
+    SubGhzProtocolStatus res = subghz_block_generic_serialize_common(
+        instance->generic.protocol_name, flipper_format, preset);
     if(res != SubGhzProtocolStatusOk) return res;
     res = SubGhzProtocolStatusError;
     do {

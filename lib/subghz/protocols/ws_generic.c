@@ -10,7 +10,8 @@ SubGhzProtocolStatus ws_block_generic_serialize(
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(instance);
-    SubGhzProtocolStatus res = subghz_block_generic_serialize_common(instance->protocol_name, flipper_format, preset);
+    SubGhzProtocolStatus res =
+        subghz_block_generic_serialize_common(instance->protocol_name, flipper_format, preset);
     if(res != SubGhzProtocolStatusOk) return res;
     res = SubGhzProtocolStatusError;
     do {
