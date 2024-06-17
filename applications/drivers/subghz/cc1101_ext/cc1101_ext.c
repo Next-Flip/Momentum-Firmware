@@ -16,6 +16,8 @@
 #include <cc1101.h>
 #include <stdio.h>
 
+#include <momentum/momentum.h>
+
 #define TAG "SubGhzDeviceCc1101Ext"
 
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO (&gpio_ext_pb2)

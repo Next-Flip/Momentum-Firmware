@@ -57,5 +57,7 @@
 
 ### Removed:
 - Furi: Temp disabled `FURI_TRACE` due to DFU size, some crashes will say "furi_check failed" instead of source path
+- Furi: Reverted TLSF allocator due to diminishing results on RAM usage
 - API: Removed `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
+- API: Removed unused `furi_hal_usb_get_config_context()` function
 - OFW: CLI: Removed `ps` command, replaced by `top`
