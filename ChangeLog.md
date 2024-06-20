@@ -58,7 +58,9 @@
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
+- OFW: Debug: Backup openocd work area, fix crash after fresh debugger connect and continue (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
+- OFW: ReadMe: update outdated bits and pieces (by @skotopes)
 
 ### Removed:
 - Furi: Temp disabled `FURI_TRACE` due to DFU size, some crashes will say "furi_check failed" instead of source path
