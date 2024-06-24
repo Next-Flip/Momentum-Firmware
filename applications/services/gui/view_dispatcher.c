@@ -84,11 +84,6 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
         view_dispatcher);
 }
 
-void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
-    furi_check(view_dispatcher);
-    view_dispatcher->event_context = context;
-}
-
 void view_dispatcher_set_navigation_event_callback(
     ViewDispatcher* view_dispatcher,
     ViewDispatcherNavigationEventCallback callback) {
@@ -110,6 +105,11 @@ void view_dispatcher_set_tick_event_callback(
     furi_check(view_dispatcher);
     view_dispatcher->tick_event_callback = callback;
     view_dispatcher->tick_period = tick_period;
+}
+
+void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
+    furi_check(view_dispatcher);
+    view_dispatcher->event_context = context;
 }
 
 FuriEventLoop* view_dispatcher_get_event_loop(ViewDispatcher* view_dispatcher) {

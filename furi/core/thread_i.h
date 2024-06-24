@@ -24,6 +24,9 @@ struct FuriThread {
     FuriThreadStateCallback state_callback;
     void* state_context;
 
+    FuriThreadSignalCallback signal_callback;
+    void* signal_context;
+
     char* name;
     char* appid;
 

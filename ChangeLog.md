@@ -19,7 +19,9 @@
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
-- OFW: Furi: Event loop (by @skotopes)
+- Furi:
+  - OFW: Event loop (by @skotopes)
+  - OFW: Thread signals, loader close, loader get app name (by @gsurkov)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
 - OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
@@ -63,8 +65,10 @@
 - OFW: ReadMe: update outdated bits and pieces (by @skotopes)
 
 ### Removed:
-- Furi: Temp disabled `FURI_TRACE` due to DFU size, some crashes will say "furi_check failed" instead of source path
-- Furi: Reverted TLSF allocator due to diminishing results on RAM usage
-- API: Removed `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
-- API: Removed unused `furi_hal_usb_get_config_context()` function
+- Furi:
+  - Temp disabled `FURI_TRACE` due to DFU size, some crashes will say "furi_check failed" instead of source path
+  - Reverted TLSF allocator due to diminishing results on RAM usage
+- API:
+  - Removed unused `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
+  - Removed unused `furi_hal_usb_get_config_context()` function since BadKB doesn't use it anymore
 - OFW: CLI: Removed `ps` command, replaced by `top`

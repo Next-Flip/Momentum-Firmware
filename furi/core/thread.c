@@ -267,6 +267,29 @@ FuriThreadState furi_thread_get_state(FuriThread* thread) {
     return thread->state;
 }
 
+void furi_thread_set_signal_callback(
+    FuriThread* thread,
+    FuriThreadSignalCallback callback,
+    void* context) {
+    furi_check(thread);
+    furi_check(thread->state == FuriThreadStateStopped || thread == furi_thread_get_current());
+
+    thread->signal_callback = callback;
+    thread->signal_context = context;
+}
+
+bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg) {
+    furi_check(thread);
+
+    bool is_consumed = false;
+
+    if(thread->signal_callback) {
+        is_consumed = thread->signal_callback(signal, arg, thread->signal_context);
+    }
+
+    return is_consumed;
+}
+
 void furi_thread_start(FuriThread* thread) {
     furi_check(thread);
     furi_check(thread->callback);
