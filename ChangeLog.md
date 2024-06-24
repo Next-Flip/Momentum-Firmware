@@ -56,6 +56,7 @@
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
+- OFW: RPC: Fix input lockup on disconnect (by @Willy-JL)
 - OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
 - OFW: JS: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
