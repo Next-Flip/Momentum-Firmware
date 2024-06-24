@@ -38,7 +38,9 @@
   - UL: Barcode: Fix backlight settings (by @xMasterX)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
 - UL: NFC: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
-- Sub-GHz: Streamline generic serialize +1.5k free flash (by @Willy-JL)
+- Sub-GHz:
+  - Streamline generic serialize +1.5k free flash (by @Willy-JL)
+  - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
 - CLI: Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
 - OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)

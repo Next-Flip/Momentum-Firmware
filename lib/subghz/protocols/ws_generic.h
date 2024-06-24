@@ -63,6 +63,13 @@ SubGhzProtocolStatus ws_block_generic_deserialize_check_count_bit(
     FlipperFormat* flipper_format,
     uint16_t count_bit);
 
+/**
+ * Get string WSBlockGeneric.
+ * @param instance Pointer to a WSBlockGeneric instance
+ * @param output Pointer to a FuriString instance
+ */
+void ws_block_generic_get_string(WSBlockGeneric* instance, FuriString* output);
+
 #ifdef __cplusplus
 }
 #endif
