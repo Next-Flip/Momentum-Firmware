@@ -29,13 +29,16 @@
 ### Updated:
 - Apps:
   - VGM Tool: New RGB VGM firmware to support Flipper FW changes (by @HaxSam)
-  - Picopass: Add acknowledgements page, plugin improvements (by @bettse)
+  - MFKey: 30% speedup, fix half speed mode, fix UI bugs (by @noproto)
+  - Picopass: Acknowledgements page, Elite VB6 RNG keygen attack, plugin improvements (by @bettse)
+  - Seader: Handle SAM removal better (by @bettse)
   - Authenticator: Fix URL format (by @akopachov)
-  - NFC Playlist: Various fixes (by @acegoal07)
+  - NFC Playlist: Various fixes and improvements, new icon (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
   - UL: Mifare Nested: Free some space by simplifying nfclegacy lib (by @xMasterX)
   - UL: RFID Fuzzer: Fix worker being not in LFRFIDWorkerIdle before next key (by @xMasterX)
   - UL: Barcode: Fix backlight settings (by @xMasterX)
+  - OFW: NFC/RFID Detector: Fix some typos (by @Skorpionm)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
 - NFC:
   - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
