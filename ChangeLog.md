@@ -37,7 +37,9 @@
   - UL: RFID Fuzzer: Fix worker being not in LFRFIDWorkerIdle before next key (by @xMasterX)
   - UL: Barcode: Fix backlight settings (by @xMasterX)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
-- UL: NFC: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
+- NFC:
+  - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
+  - UL: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
 - Sub-GHz:
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
