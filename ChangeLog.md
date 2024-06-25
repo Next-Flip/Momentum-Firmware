@@ -42,6 +42,7 @@
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
 - NFC:
   - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
+  - Mention using MFKey app after Detect Reader (by @Willy-JL)
   - UL: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
 - Sub-GHz:
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
