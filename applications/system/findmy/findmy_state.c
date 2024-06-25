@@ -14,9 +14,9 @@ bool findmy_state_load(FindMyState* out_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_file_exists(storage, FINDMY_STATE_PATH)) {
         FlipperFormat* file = flipper_format_file_alloc(storage);
+        FuriString* str = furi_string_alloc();
+        uint32_t tmp;
         do {
-            uint32_t tmp;
-            FuriString* str = furi_string_alloc();
             if(!flipper_format_file_open_existing(file, FINDMY_STATE_PATH)) break;
             if(!flipper_format_read_header(file, str, &tmp)) break;
             if(furi_string_cmp_str(str, FINDMY_STATE_HEADER)) break;
@@ -50,6 +50,7 @@ bool findmy_state_load(FindMyState* out_state) {
 
             loaded_from_file = true;
         } while(0);
+        furi_string_free(str);
         flipper_format_free(file);
     }
     furi_record_close(RECORD_STORAGE);
