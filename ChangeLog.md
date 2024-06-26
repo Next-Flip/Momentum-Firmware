@@ -47,6 +47,7 @@
 - Sub-GHz:
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
+- JS: Refactored widget and keyboard modules with `ViewHolder`, fix crash (by @Willy-JL)
 - CLI: Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
 - OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
