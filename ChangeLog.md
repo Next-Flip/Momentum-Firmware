@@ -35,6 +35,7 @@
   - Authenticator: Fix URL format (by @akopachov)
   - NFC Playlist: Various fixes and improvements, new icon (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
+  - UL: ESubGHz Chat: Add back NFC key sharing with nfclegacy (by @xMasterX)
   - UL: Mifare Nested: Free some space by simplifying nfclegacy lib (by @xMasterX)
   - UL: RFID Fuzzer: Fix worker being not in LFRFIDWorkerIdle before next key (by @xMasterX)
   - UL: Barcode: Fix backlight settings (by @xMasterX)
@@ -43,11 +44,13 @@
 - NFC:
   - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
   - Mention using MFKey app after Detect Reader (by @Willy-JL)
+  - Cache plugin name not full path, saves some RAM (by @Willy-JL)
   - UL: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
 - Sub-GHz:
-  - Streamline generic serialize +1.5k free flash (by @Willy-JL)
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
+  - Streamline generic serialize +1.5k free flash (by @Willy-JL)
 - JS: Refactored widget and keyboard modules with `ViewHolder`, fix crash (by @Willy-JL)
+- Desktop: Slim down internal anims, +3.4kb free flash (by @Willy-JL)
 - CLI: Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
 - OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
