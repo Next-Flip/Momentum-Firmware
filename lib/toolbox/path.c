@@ -55,6 +55,7 @@ void path_extract_ext_str(FuriString* path, FuriString* ext) {
 void path_extract_extension(FuriString* path, char* ext, size_t ext_len_max) {
     furi_check(path);
     furi_check(ext);
+    furi_check(ext_len_max > 0);
 
     size_t dot = furi_string_search_rchar(path, '.');
     size_t filename_start = furi_string_search_rchar(path, '/');
