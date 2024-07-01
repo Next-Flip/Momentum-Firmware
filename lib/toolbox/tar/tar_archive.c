@@ -33,6 +33,9 @@ typedef struct TarArchive {
     mtar_t tar;
     tar_unpack_file_cb unpack_cb;
     void* unpack_cb_context;
+
+    tar_unpack_read_cb read_cb;
+    void* read_cb_context;
 } TarArchive;
 
 /* Plain file backend - uncompressed, supports read and write */
@@ -211,6 +214,12 @@ void tar_archive_set_file_callback(TarArchive* archive, tar_unpack_file_cb callb
     archive->unpack_cb_context = context;
 }
 
+void tar_archive_set_read_callback(TarArchive* archive, tar_unpack_read_cb callback, void* context) {
+    furi_check(archive);
+    archive->read_cb = callback;
+    archive->read_cb_context = context;
+}
+
 static int tar_archive_entry_counter(mtar_t* tar, const mtar_header_t* header, void* param) {
     UNUSED(tar);
     UNUSED(header);
@@ -320,6 +329,13 @@ static bool archive_extract_current_file(TarArchive* archive, const char* dst_pa
             if(!readcnt || !storage_file_write(out_file, readbuf, readcnt)) {
                 success = false;
                 break;
+            }
+
+            if(archive->read_cb) {
+                archive->read_cb(
+                    storage_file_tell(archive->stream),
+                    storage_file_size(archive->stream),
+                    archive->read_cb_context);
             }
         }
     } while(false);

@@ -37,20 +37,10 @@ static bool update_task_pre_update(UpdateTask* update_task) {
     furi_string_free(backup_file_path);
     return success;
 }
-typedef struct {
-    UpdateTask* update_task;
-    TarArchive* archive;
-} TarUnpackProgress;
 
-static bool update_task_resource_unpack_cb(const char* name, bool is_directory, void* context) {
-    UNUSED(name);
-    UNUSED(is_directory);
-    TarUnpackProgress* unpack_progress = context;
-    int32_t progress = 0, total = 0;
-    tar_archive_get_read_progress(unpack_progress->archive, &progress, &total);
-    update_task_set_progress(
-        unpack_progress->update_task, UpdateTaskStageProgress, (progress * 100) / (total + 1));
-    return true;
+static void update_task_resource_unpack_cb(size_t progress, size_t total, void* context) {
+    UpdateTask* update_task = context;
+    update_task_set_progress(update_task, UpdateTaskStageProgress, (progress * 100) / (total + 1));
 }
 
 static void update_task_cleanup_resources(UpdateTask* update_task) {
@@ -168,11 +158,6 @@ static bool update_task_post_update(UpdateTask* update_task) {
 #endif
 
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
-            TarUnpackProgress progress = {
-                .update_task = update_task,
-                .archive = archive,
-            };
-
             path_concat(
                 furi_string_get_cstr(update_task->update_path),
                 furi_string_get_cstr(update_task->manifest->resource_bundle),
@@ -184,7 +169,7 @@ static bool update_task_post_update(UpdateTask* update_task) {
             update_task_cleanup_resources(update_task);
 
             update_task_set_progress(update_task, UpdateTaskStageResourcesFileUnpack, 0);
-            tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
+            tar_archive_set_read_callback(archive, update_task_resource_unpack_cb, update_task);
             CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
         }
 
