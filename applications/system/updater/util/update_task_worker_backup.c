@@ -10,8 +10,6 @@
 #include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 #include <update_util/resources/manifest.h>
-#include <update_util/resources/manifest_i.h>
-#include <toolbox/stream/stream.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
 
@@ -41,24 +39,34 @@ static bool update_task_pre_update(UpdateTask* update_task) {
 }
 
 typedef enum {
-    UpdateTaskResourcesWeightsFileCleanup = 10,
-    UpdateTaskResourcesWeightsDirCleanup = 10,
-    UpdateTaskResourcesWeightsFileUnpack = 80,
+    UpdateTaskResourcesWeightsFileCleanup = 20,
+    UpdateTaskResourcesWeightsDirCleanup = 20,
+    UpdateTaskResourcesWeightsFileUnpack = 60,
 } UpdateTaskResourcesWeights;
 
 #define UPDATE_TASK_RESOURCES_FILE_TO_TOTAL_PERCENT 90
 
-static void update_task_resource_progress_cb(size_t progress, size_t total, void* context) {
-    UpdateTask* update_task = context;
+typedef struct {
+    UpdateTask* update_task;
+    int32_t total_files, processed_files;
+} TarUnpackProgress;
+
+static bool update_task_resource_unpack_cb(const char* name, bool is_directory, void* context) {
+    UNUSED(name);
+    UNUSED(is_directory);
+    TarUnpackProgress* unpack_progress = context;
+    unpack_progress->processed_files++;
     update_task_set_progress(
-        update_task,
+        unpack_progress->update_task,
         UpdateTaskStageProgress,
         /* For this stage, last progress segment = extraction */
         (UpdateTaskResourcesWeightsFileCleanup + UpdateTaskResourcesWeightsDirCleanup) +
-            (progress * UpdateTaskResourcesWeightsFileUnpack) / total);
+            (unpack_progress->processed_files * UpdateTaskResourcesWeightsFileUnpack) /
+                (unpack_progress->total_files + 1));
+    return true;
 }
 
-static void update_task_cleanup_resources(UpdateTask* update_task) {
+static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_t n_tar_entries) {
     ResourceManifestReader* manifest_reader = resource_manifest_reader_alloc(update_task->storage);
     do {
         FURI_LOG_D(TAG, "Cleaning up old manifest");
@@ -67,7 +75,8 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
             break;
         }
 
-        size_t manifest_size = stream_size(manifest_reader->stream);
+        const uint32_t n_approx_file_entries =
+            n_tar_entries * UPDATE_TASK_RESOURCES_FILE_TO_TOTAL_PERCENT / 100 + 1;
         uint32_t n_dir_entries = 1;
 
         ResourceManifestEntry* entry_ptr = NULL;
@@ -78,9 +87,8 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
                     update_task,
                     UpdateTaskStageProgress,
                     /* For this stage, first pass = old manifest's file cleanup */
-                    (stream_tell(manifest_reader->stream) *
-                     UpdateTaskResourcesWeightsFileCleanup) /
-                        manifest_size);
+                    (n_processed_entries++ * UpdateTaskResourcesWeightsFileCleanup) /
+                        n_approx_file_entries);
 
                 FuriString* file_path = furi_string_alloc();
                 path_concat(
@@ -169,6 +177,11 @@ static bool update_task_post_update(UpdateTask* update_task) {
 #endif
 
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
+            TarUnpackProgress progress = {
+                .update_task = update_task,
+                .total_files = 0,
+                .processed_files = 0,
+            };
             update_task_set_progress(update_task, UpdateTaskStageResourcesUpdate, 0);
 
             path_concat(
@@ -176,13 +189,16 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 furi_string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
-            tar_archive_set_read_callback(archive, update_task_resource_progress_cb, update_task);
+            tar_archive_set_file_callback(archive, update_task_resource_unpack_cb, &progress);
             CHECK_RESULT(
                 tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ));
 
-            update_task_cleanup_resources(update_task);
+            progress.total_files = tar_archive_get_entries_count(archive);
+            if(progress.total_files > 0) {
+                update_task_cleanup_resources(update_task, progress.total_files);
 
-            CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
+                CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
+            }
         }
 
         if(update_task->state.groups & UpdateTaskStageGroupSplashscreen) {

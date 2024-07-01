@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import math
-import gzip
 import os
 import shutil
 import tarfile
@@ -20,11 +19,10 @@ class Main(App):
     UPDATE_MANIFEST_VERSION = 2
     UPDATE_MANIFEST_NAME = "update.fuf"
 
-    RESOURCE_GZIP_MODE = "wb"
-    RESOURCE_GZIP_LEVEL = 9
+    #  No compression, plain tar
     RESOURCE_TAR_MODE = "w:"
     RESOURCE_TAR_FORMAT = tarfile.USTAR_FORMAT
-    RESOURCE_FILE_NAME = "resources.tar.gz"
+    RESOURCE_FILE_NAME = "resources.tar"
     RESOURCE_ENTRY_NAME_MAX_LENGTH = 100
 
     WHITELISTED_STACK_TYPES = set(
@@ -257,21 +255,14 @@ class Main(App):
 
     def package_resources(self, srcdir: str, dst_name: str):
         try:
-            with gzip.open(
-                dst_name,
-                self.RESOURCE_GZIP_MODE,
-                compresslevel=self.RESOURCE_GZIP_LEVEL,
-            ) as gzipped:
-                with tarfile.open(
-                    mode=self.RESOURCE_TAR_MODE,
-                    fileobj=gzipped,
-                    format=self.RESOURCE_TAR_FORMAT,
-                ) as tarball:
-                    tarball.add(
-                        srcdir,
-                        arcname="",
-                        filter=self._tar_filter,
-                    )
+            with tarfile.open(
+                dst_name, self.RESOURCE_TAR_MODE, format=self.RESOURCE_TAR_FORMAT
+            ) as tarball:
+                tarball.add(
+                    srcdir,
+                    arcname="",
+                    filter=self._tar_filter,
+                )
             return True
         except ValueError as e:
             self.logger.error(f"Cannot package resources: {e}")
