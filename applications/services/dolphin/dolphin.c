@@ -1,6 +1,7 @@
 #include "dolphin_i.h"
 
 #include <furi_hal.h>
+#include <momentum/momentum.h>
 
 #define TAG "Dolphin"
 
@@ -15,7 +16,7 @@
 #define FLUSH_TIMEOUT_TICKS (SECONDS_IN_TICKS(30UL))
 
 #ifndef DOLPHIN_DEBUG
-#define BUTTHURT_INCREASE_PERIOD_TICKS (HOURS_IN_TICKS(48UL))
+#define BUTTHURT_INCREASE_PERIOD_TICKS (SECONDS_IN_TICKS(momentum_settings.butthurt_timer))
 #define CLEAR_LIMITS_PERIOD_TICKS (HOURS_IN_TICKS(24UL))
 #define CLEAR_LIMITS_UPDATE_PERIOD_TICKS (HOURS_IN_TICKS(1UL))
 #else
@@ -205,7 +206,9 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
 
         DolphinPubsubEvent event = DolphinPubsubEventUpdate;
         furi_pubsub_publish(dolphin->pubsub, &event);
-        furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+        if(BUTTHURT_INCREASE_PERIOD_TICKS) {
+            furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+        }
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
     } else if(event.type == DolphinEventTypeStats) {
@@ -256,7 +259,9 @@ int32_t dolphin_srv(void* p) {
         dolphin_process_event,
         dolphin);
 
-    furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+    if(BUTTHURT_INCREASE_PERIOD_TICKS) {
+        furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+    }
     furi_event_loop_timer_start(dolphin->clear_limits_timer, CLEAR_LIMITS_PERIOD_TICKS);
 
     furi_event_loop_tick_set(
