@@ -25,7 +25,7 @@ class Main(App):
     UPDATE_MANIFEST_NAME = "update.fuf"
 
     RESOURCE_TAR_MODE = "w:"
-    RESOURCE_FILE_NAME = "resources" + tarball.TAR_HEATSHRINK_EXTENSION
+    RESOURCE_FILE_NAME = "resources" + tarball.TAR_GZIP_EXTENSION
     RESOURCE_ENTRY_NAME_MAX_LENGTH = 100
 
     WHITELISTED_STACK_TYPES = set(
