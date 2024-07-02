@@ -24,6 +24,7 @@
 - Furi:
   - OFW: Event loop (by @skotopes)
   - OFW: Thread signals, loader close, loader get app name (by @gsurkov)
+  - OFW: Event Loop Timers (by @gsurkov)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
 - OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
@@ -81,6 +82,7 @@
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
+- OFW: Updater: Slightly smaller image (by @hedger)
 - OFW: Debug: Backup openocd work area, fix crash after fresh debugger connect and continue (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
 - OFW: ReadMe: update outdated bits and pieces (by @skotopes)
