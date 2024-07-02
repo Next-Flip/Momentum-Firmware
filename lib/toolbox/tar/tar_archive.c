@@ -215,6 +215,12 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
 
     compressed_stream->decoder = compress_stream_decoder_alloc(
         compressed_stream->type, &compressed_stream->config, file_read_cb, stream);
+    if(compressed_stream->decoder == NULL) {
+        storage_file_close(stream);
+        free(compressed_stream);
+        return false;
+    }
+
     mtar_init(&archive->tar, mtar_access, &compressed_ops, compressed_stream);
 
     return true;

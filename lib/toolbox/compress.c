@@ -440,8 +440,14 @@ CompressStreamDecoder* compress_stream_decoder_alloc(
 
     if(type == CompressTypeHeatshrink) {
         const CompressConfigHeatshrink* hs_config = config;
-        instance->decoder.heatshrink = heatshrink_decoder_alloc(
-            hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+        heatshrink_decoder* hs_decoder = heatshrink_decoder_alloc(
+            base_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+        if(hs_decoder == NULL) {
+            free(instance->decode_buffer);
+            free(instance);
+            return NULL;
+        }
+        instance->decoder.heatshrink = hs_decoder;
     } else if(type == CompressTypeGzip) {
         const CompressConfigGzip* gz_config = config;
         instance->decoder.gzip = NULL;
