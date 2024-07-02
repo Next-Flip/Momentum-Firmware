@@ -70,13 +70,17 @@ const struct mtar_ops filesystem_ops = {
     .close = mtar_storage_file_close,
 };
 
-/* Heatshrink stream backend - compressed, read-only */
+/* Compressed stream backend, read-only */
 
 typedef struct {
-    CompressConfigHeatshrink heatshrink_config;
+    CompressType type;
+    union {
+        CompressConfigHeatshrink heatshrink;
+        CompressConfigGzip gzip;
+    } config;
     File* stream;
     CompressStreamDecoder* decoder;
-} HeatshrinkStream;
+} CompressedStream;
 
 /* HSDS 'heatshrink data stream' header magic */
 static const uint32_t HEATSHRINK_MAGIC = 0x53445348;
@@ -89,42 +93,44 @@ typedef struct {
 } FURI_PACKED HeatshrinkStreamHeader;
 _Static_assert(sizeof(HeatshrinkStreamHeader) == 7, "Invalid HeatshrinkStreamHeader size");
 
-static int mtar_heatshrink_file_close(void* stream) {
-    HeatshrinkStream* hs_stream = stream;
-    if(hs_stream) {
-        if(hs_stream->decoder) {
-            compress_stream_decoder_free(hs_stream->decoder);
+static int mtar_compressed_file_close(void* stream) {
+    CompressedStream* compressed_stream = stream;
+    if(compressed_stream) {
+        if(compressed_stream->decoder) {
+            compress_stream_decoder_free(compressed_stream->decoder);
         }
-        storage_file_close(hs_stream->stream);
-        storage_file_free(hs_stream->stream);
-        free(hs_stream);
+        storage_file_close(compressed_stream->stream);
+        storage_file_free(compressed_stream->stream);
+        free(compressed_stream);
     }
     return MTAR_ESUCCESS;
 }
 
-static int mtar_heatshrink_file_read(void* stream, void* data, unsigned size) {
-    HeatshrinkStream* hs_stream = stream;
-    bool read_success = compress_stream_decoder_read(hs_stream->decoder, data, size);
+static int mtar_compressed_file_read(void* stream, void* data, unsigned size) {
+    CompressedStream* compressed_stream = stream;
+    bool read_success = compress_stream_decoder_read(compressed_stream->decoder, data, size);
     return read_success ? (int)size : MTAR_EREADFAIL;
 }
 
-static int mtar_heatshrink_file_seek(void* stream, unsigned offset) {
-    HeatshrinkStream* hs_stream = stream;
+static int mtar_compressed_file_seek(void* stream, unsigned offset) {
+    CompressedStream* compressed_stream = stream;
     bool success = false;
     if(offset == 0) {
-        success = storage_file_seek(hs_stream->stream, sizeof(HeatshrinkStreamHeader), true) &&
-                  compress_stream_decoder_rewind(hs_stream->decoder);
+        uint32_t rewind_offset =
+            compressed_stream->type == CompressTypeHeatshrink ? sizeof(HeatshrinkStreamHeader) : 0;
+        success = storage_file_seek(compressed_stream->stream, rewind_offset, true) &&
+                  compress_stream_decoder_rewind(compressed_stream->decoder);
     } else {
-        success = compress_stream_decoder_seek(hs_stream->decoder, offset);
+        success = compress_stream_decoder_seek(compressed_stream->decoder, offset);
     }
     return success ? MTAR_ESUCCESS : MTAR_ESEEKFAIL;
 }
 
-const struct mtar_ops heatshrink_ops = {
-    .read = mtar_heatshrink_file_read,
+const struct mtar_ops compressed_ops = {
+    .read = mtar_compressed_file_read,
     .write = NULL, // not supported
-    .seek = mtar_heatshrink_file_seek,
-    .close = mtar_heatshrink_file_close,
+    .seek = mtar_compressed_file_seek,
+    .close = mtar_compressed_file_close,
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -177,27 +183,38 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
         return false;
     }
 
-    if(compressed) {
+    if(!compressed) {
+        mtar_init(&archive->tar, mtar_access, &filesystem_ops, stream);
+        return true;
+    }
+
+    CompressedStream* compressed_stream = malloc(sizeof(CompressedStream));
+    compressed_stream->stream = stream;
+
+    if(mode == TarOpenModeReadHeatshrink) {
         /* Read and validate stream header */
         HeatshrinkStreamHeader header;
         if(storage_file_read(stream, &header, sizeof(HeatshrinkStreamHeader)) !=
                sizeof(HeatshrinkStreamHeader) ||
            header.magic != HEATSHRINK_MAGIC) {
             storage_file_close(stream);
+            free(compressed_stream);
             return false;
         }
 
-        HeatshrinkStream* hs_stream = malloc(sizeof(HeatshrinkStream));
-        hs_stream->stream = stream;
-        hs_stream->heatshrink_config.window_sz2 = header.window_sz2;
-        hs_stream->heatshrink_config.lookahead_sz2 = header.lookahead_sz2;
-        hs_stream->heatshrink_config.input_buffer_sz = FILE_BLOCK_SIZE;
-        hs_stream->decoder = compress_stream_decoder_alloc(
-            CompressTypeHeatshrink, &hs_stream->heatshrink_config, file_read_cb, stream);
-        mtar_init(&archive->tar, mtar_access, &heatshrink_ops, hs_stream);
-    } else {
-        mtar_init(&archive->tar, mtar_access, &filesystem_ops, stream);
+        compressed_stream->type = CompressTypeHeatshrink;
+        compressed_stream->config.heatshrink.window_sz2 = header.window_sz2;
+        compressed_stream->config.heatshrink.lookahead_sz2 = header.lookahead_sz2;
+        compressed_stream->config.heatshrink.input_buffer_sz = FILE_BLOCK_SIZE;
+
+    } else if(mode == TarOpenModeReadGzip) {
+        compressed_stream->type = CompressTypeGzip;
+        // FIXME
     }
+
+    compressed_stream->decoder = compress_stream_decoder_alloc(
+        compressed_stream->type, &compressed_stream->config, file_read_cb, stream);
+    mtar_init(&archive->tar, mtar_access, &compressed_ops, compressed_stream);
 
     return true;
 }
