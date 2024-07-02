@@ -407,13 +407,17 @@ bool compress_decode_streamed(
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct CompressStreamDecoder {
-    heatshrink_decoder* decoder;
     size_t stream_position;
     size_t decode_buffer_size;
     size_t decode_buffer_position;
     uint8_t* decode_buffer;
     CompressIoCallback read_cb;
     void* read_context;
+    CompressType type;
+    union {
+        heatshrink_decoder* heatshrink;
+        void* gzip; // FIXME
+    } decoder;
 };
 
 CompressStreamDecoder* compress_stream_decoder_alloc(
@@ -421,26 +425,40 @@ CompressStreamDecoder* compress_stream_decoder_alloc(
     const void* config,
     CompressIoCallback read_cb,
     void* read_context) {
-    furi_check(type == CompressTypeHeatshrink);
+    furi_check(type < CompressTypeMAX);
     furi_check(config);
 
-    const CompressConfigHeatshrink* hs_config = (const CompressConfigHeatshrink*)config;
+    const CompressConfigBase* base_config = config;
     CompressStreamDecoder* instance = malloc(sizeof(CompressStreamDecoder));
-    instance->decoder = heatshrink_decoder_alloc(
-        hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+    instance->type = type;
     instance->stream_position = 0;
-    instance->decode_buffer_size = hs_config->base.input_buffer_sz;
+    instance->decode_buffer_size = base_config->input_buffer_sz;
     instance->decode_buffer_position = 0;
-    instance->decode_buffer = malloc(hs_config->base.input_buffer_sz);
+    instance->decode_buffer = malloc(base_config->input_buffer_sz);
     instance->read_cb = read_cb;
     instance->read_context = read_context;
+
+    if(type == CompressTypeHeatshrink) {
+        const CompressConfigHeatshrink* hs_config = config;
+        instance->decoder.heatshrink = heatshrink_decoder_alloc(
+            hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+    } else if(type == CompressTypeGzip) {
+        const CompressConfigGzip* gz_config = config;
+        instance->decoder.gzip = NULL;
+        UNUSED(gz_config);
+        // FIXME
+    }
 
     return instance;
 }
 
 void compress_stream_decoder_free(CompressStreamDecoder* instance) {
     furi_check(instance);
-    heatshrink_decoder_free(instance->decoder);
+    if(instance->type == CompressTypeHeatshrink) {
+        heatshrink_decoder_free(instance->decoder.heatshrink);
+    } else if(instance->type == CompressTypeGzip) {
+        // FIXME
+    }
     free(instance->decode_buffer);
     free(instance);
 }
@@ -451,6 +469,7 @@ static bool compress_decode_stream_chunk(
     void* read_context,
     uint8_t* decompressed_chunk,
     size_t decomp_chunk_size) {
+    // FIXME
     HSD_sink_res sink_res;
     HSD_poll_res poll_res;
 
@@ -471,7 +490,7 @@ static bool compress_decode_stream_chunk(
         do {
             size_t poll_size = 0;
             poll_res = heatshrink_decoder_poll(
-                sd->decoder, decompressed_chunk, decomp_chunk_size, &poll_size);
+                sd->decoder.heatshrink, decompressed_chunk, decomp_chunk_size, &poll_size);
             if(poll_res < 0) {
                 return false;
             }
@@ -496,7 +515,7 @@ static bool compress_decode_stream_chunk(
         while(sd->decode_buffer_position && can_sink_more) {
             size_t sink_size = 0;
             sink_res = heatshrink_decoder_sink(
-                sd->decoder, sd->decode_buffer, sd->decode_buffer_position, &sink_size);
+                sd->decoder.heatshrink, sd->decode_buffer, sd->decode_buffer_position, &sink_size);
             can_sink_more = sink_res == HSDR_SINK_OK;
             if(sink_res < 0) {
                 failed = true;
@@ -565,7 +584,11 @@ bool compress_stream_decoder_rewind(CompressStreamDecoder* instance) {
     furi_check(instance);
 
     /* Reset decoder and read buffer */
-    heatshrink_decoder_reset(instance->decoder);
+    if(instance->type == CompressTypeHeatshrink) {
+        heatshrink_decoder_reset(instance->decoder.heatshrink);
+    } else if(instance->type == CompressTypeGzip) {
+        // FIXME
+    }
     instance->stream_position = 0;
     instance->decode_buffer_position = 0;
 
