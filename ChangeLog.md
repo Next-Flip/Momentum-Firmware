@@ -13,12 +13,14 @@
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
+  - OFW: Add `mf_classic_set_sector_trailer_read()` function (by @Astrrra)
 - OFW: RFID: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - JS: Added ADC (analog voltage) support to gpio library (by @jamisonderek)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
+- OFW: JS: New modules documentation added (by @rnadyrshin)
 - Furi:
   - OFW: Event loop (by @skotopes)
   - OFW: Thread signals, loader close, loader get app name (by @gsurkov)
@@ -46,13 +48,18 @@
   - Mention using MFKey app after Detect Reader (by @Willy-JL)
   - Cache plugin name not full path, saves some RAM (by @Willy-JL)
   - UL: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
+  - OFW: Update link to mfkey32 (by @Astrrra)
 - Sub-GHz:
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
 - JS: Refactored widget and keyboard modules with `ViewHolder`, fix crash (by @Willy-JL)
 - Desktop: Slim down internal anims, +3.4kb free flash (by @Willy-JL)
-- CLI: Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
+- OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
+- CLI:
+  - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
+  - OFW: Minor storage subcommand lookup refactor (by @hedger)
 - OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
+- OFW: Updater: Resource compression refactored (by @hedger)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
