@@ -15,6 +15,7 @@ from flipper.assets.coprobin import CoproBinary, get_stack_type
 from flipper.assets.heatshrink_stream import HeatshrinkDataStreamHeader
 from flipper.assets.obdata import ObReferenceValues, OptionBytesData
 from flipper.assets.tarball import compress_tree_tarball, tar_sanitizer_filter
+from flipper.assets import tarball
 from flipper.utils.fff import FlipperFormatFile
 from slideshow import Main as SlideshowMain
 
@@ -23,9 +24,8 @@ class Main(App):
     UPDATE_MANIFEST_VERSION = 2
     UPDATE_MANIFEST_NAME = "update.fuf"
 
-    #  No compression, plain tar
     RESOURCE_TAR_MODE = "w:"
-    RESOURCE_FILE_NAME = "resources.ths"  # .Tar.HeatShrink
+    RESOURCE_FILE_NAME = "resources" + tarball.TAR_HEATSHRINK_EXTENSION
     RESOURCE_ENTRY_NAME_MAX_LENGTH = 100
 
     WHITELISTED_STACK_TYPES = set(
