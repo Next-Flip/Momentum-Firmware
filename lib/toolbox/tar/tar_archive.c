@@ -22,6 +22,8 @@ TarOpenMode tar_archive_get_mode_for_path(const char* path) {
 
     if(strcmp(ext, ".ths") == 0) {
         return TarOpenModeReadHeatshrink;
+    } else if(strcmp(ext, ".tgz") == 0) {
+        return TarOpenModeReadGzip;
     } else {
         return TarOpenModeRead;
     }
@@ -160,6 +162,7 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
         open_mode = FSOM_CREATE_ALWAYS;
         break;
     case TarOpenModeReadHeatshrink:
+    case TarOpenModeReadGzip:
         mtar_access = MTAR_READ;
         access_mode = FSAM_READ;
         open_mode = FSOM_OPEN_EXISTING;

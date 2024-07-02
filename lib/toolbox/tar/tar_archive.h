@@ -19,6 +19,7 @@ typedef enum {
     TarOpenModeWrite = 'w',
     /* read-only heatshrink compressed tar */
     TarOpenModeReadHeatshrink = 'h',
+    TarOpenModeReadGzip = 'g',
 } TarOpenMode;
 
 /** Get expected open mode for archive at the path.
