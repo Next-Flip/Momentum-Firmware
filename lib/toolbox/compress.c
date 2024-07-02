@@ -633,9 +633,14 @@ bool compress_stream_decoder_read(
 bool compress_stream_decoder_seek(CompressStreamDecoder* instance, size_t position) {
     furi_check(instance);
 
+    /* No action required */
+    if(position == instance->stream_position) {
+        return true;
+    }
+
     /* Check if requested position is ahead of current position 
        we can't rewind the input stream */
-    furi_check(position >= instance->stream_position);
+    furi_check(position > instance->stream_position);
 
     /* Read and discard data up to requested position */
     uint8_t* dummy_buffer = malloc(instance->decode_buffer_size);

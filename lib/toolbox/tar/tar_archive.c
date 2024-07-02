@@ -116,7 +116,7 @@ static int mtar_compressed_file_read(void* stream, void* data, unsigned size) {
 static int mtar_compressed_file_seek(void* stream, unsigned offset) {
     CompressedStream* compressed_stream = stream;
     bool success = false;
-    if(offset == 0) {
+    if(offset == 0 && compress_stream_decoder_tell(compressed_stream->decoder) != 0) {
         uint32_t rewind_offset =
             compressed_stream->type == CompressTypeHeatshrink ? sizeof(HeatshrinkStreamHeader) : 0;
         success = storage_file_seek(compressed_stream->stream, rewind_offset, true) &&
