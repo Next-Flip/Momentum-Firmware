@@ -16,9 +16,9 @@
 #define COMPRESS_ICON_ENCODED_BUFF_SIZE (256u)
 
 const CompressConfigHeatshrink compress_config_heatshrink_default = {
+    .base.input_buffer_sz = COMPRESS_ICON_ENCODED_BUFF_SIZE,
     .window_sz2 = COMPRESS_EXP_BUFF_SIZE_LOG,
     .lookahead_sz2 = COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG,
-    .input_buffer_sz = COMPRESS_ICON_ENCODED_BUFF_SIZE,
 };
 
 /** Buffer size for input data */
@@ -376,7 +376,7 @@ bool compress_decode(
     if(!compress->decoder) {
         CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
         compress->decoder = heatshrink_decoder_alloc(
-            hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+            hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     }
     return compress_decode_internal(
         compress->decoder, data_in, data_in_size, data_out, data_out_size, data_res_size);
@@ -391,13 +391,13 @@ bool compress_decode_streamed(
     CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
     if(!compress->decoder) {
         compress->decoder = heatshrink_decoder_alloc(
-            hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+            hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     }
 
     heatshrink_decoder_reset(compress->decoder);
     return compress_decode_stream_internal(
         compress->decoder,
-        hs_config->input_buffer_sz,
+        hs_config->base.input_buffer_sz,
         read_cb,
         read_context,
         write_cb,
@@ -427,11 +427,11 @@ CompressStreamDecoder* compress_stream_decoder_alloc(
     const CompressConfigHeatshrink* hs_config = (const CompressConfigHeatshrink*)config;
     CompressStreamDecoder* instance = malloc(sizeof(CompressStreamDecoder));
     instance->decoder = heatshrink_decoder_alloc(
-        hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+        hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     instance->stream_position = 0;
-    instance->decode_buffer_size = hs_config->input_buffer_sz;
+    instance->decode_buffer_size = hs_config->base.input_buffer_sz;
     instance->decode_buffer_position = 0;
-    instance->decode_buffer = malloc(hs_config->input_buffer_sz);
+    instance->decode_buffer = malloc(hs_config->base.input_buffer_sz);
     instance->read_cb = read_cb;
     instance->read_context = read_context;
 

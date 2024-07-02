@@ -75,6 +75,7 @@ const struct mtar_ops filesystem_ops = {
 typedef struct {
     CompressType type;
     union {
+        CompressConfigBase base; // All other configs start with base
         CompressConfigHeatshrink heatshrink;
         CompressConfigGzip gzip;
     } config;
@@ -190,6 +191,7 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
 
     CompressedStream* compressed_stream = malloc(sizeof(CompressedStream));
     compressed_stream->stream = stream;
+    compressed_stream->config.base.input_buffer_sz = FILE_BLOCK_SIZE;
 
     if(mode == TarOpenModeReadHeatshrink) {
         /* Read and validate stream header */
@@ -205,11 +207,10 @@ bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
         compressed_stream->type = CompressTypeHeatshrink;
         compressed_stream->config.heatshrink.window_sz2 = header.window_sz2;
         compressed_stream->config.heatshrink.lookahead_sz2 = header.lookahead_sz2;
-        compressed_stream->config.heatshrink.input_buffer_sz = FILE_BLOCK_SIZE;
 
     } else if(mode == TarOpenModeReadGzip) {
         compressed_stream->type = CompressTypeGzip;
-        // FIXME
+        compressed_stream->config.gzip.dict_sz = 32 * 1024;
     }
 
     compressed_stream->decoder = compress_stream_decoder_alloc(
