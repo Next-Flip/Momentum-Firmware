@@ -8,6 +8,7 @@
 #include <dolphin/dolphin_i.h>
 #include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
+#include <furi_hal.h>
 #include <m-array.h>
 #include <momentum/momentum.h>
 #include <m-string.h>
