@@ -206,7 +206,7 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
 
         DolphinPubsubEvent event = DolphinPubsubEventUpdate;
         furi_pubsub_publish(dolphin->pubsub, &event);
-        if(BUTTHURT_INCREASE_PERIOD_TICKS) {
+        if(BUTTHURT_INCREASE_PERIOD_TICKS > 0) {
             furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
         }
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
@@ -259,7 +259,7 @@ int32_t dolphin_srv(void* p) {
         dolphin_process_event,
         dolphin);
 
-    if(BUTTHURT_INCREASE_PERIOD_TICKS) {
+    if(BUTTHURT_INCREASE_PERIOD_TICKS > 0) {
         furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
     }
     furi_event_loop_timer_start(dolphin->clear_limits_timer, CLEAR_LIMITS_PERIOD_TICKS);
