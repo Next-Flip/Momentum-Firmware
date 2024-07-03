@@ -182,9 +182,9 @@ static void compress_test_heatshrink_stream() {
     File* dest_file = storage_file_alloc(api);
 
     CompressConfigHeatshrink config = {
+        .base.input_buffer_sz = 128,
         .window_sz2 = 9,
         .lookahead_sz2 = 4,
-        .input_buffer_sz = 128,
     };
     Compress* compress = compress_alloc(CompressTypeHeatshrink, &config);
 

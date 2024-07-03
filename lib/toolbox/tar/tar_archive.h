@@ -17,8 +17,9 @@ typedef struct Storage Storage;
 typedef enum {
     TarOpenModeRead = 'r',
     TarOpenModeWrite = 'w',
-    /* read-only heatshrink compressed tar */
+    /* read-only compressed tar */
     TarOpenModeReadHeatshrink = 'h',
+    TarOpenModeReadGzip = 'g',
 } TarOpenMode;
 
 /** Get expected open mode for archive at the path.

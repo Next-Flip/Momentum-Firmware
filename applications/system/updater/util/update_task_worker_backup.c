@@ -156,7 +156,9 @@ static bool update_task_post_update(UpdateTask* update_task) {
                 file_path);
 
             CHECK_RESULT(tar_archive_open(
-                archive, furi_string_get_cstr(file_path), TarOpenModeReadHeatshrink));
+                archive,
+                furi_string_get_cstr(file_path),
+                tar_archive_get_mode_for_path(furi_string_get_cstr(file_path))));
 
             update_task_cleanup_resources(update_task);
 

@@ -21,6 +21,9 @@
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
 - OFW: JS: New modules documentation added (by @rnadyrshin)
+- Updater:
+  - OFW: Resource compression refactor, uses heatshrink (by @hedger)
+  - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (by @Willy-JL)
 - Furi:
   - OFW: Event loop (by @skotopes)
   - OFW: Thread signals, loader close, loader get app name (by @gsurkov)
@@ -60,7 +63,6 @@
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
   - OFW: Minor storage subcommand lookup refactor (by @hedger)
 - OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
-- OFW: Updater: Resource compression refactored (by @hedger)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
