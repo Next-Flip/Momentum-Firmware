@@ -54,25 +54,20 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
 
         ResourceManifestEntry* entry_ptr = NULL;
         /* Iterate over manifest and calculate entries count */
-        uint32_t n_file_entries = 1, n_dir_entries = 1;
+        uint32_t n_total_entries = 1;
         while((entry_ptr = resource_manifest_reader_next(manifest_reader))) {
-            if(entry_ptr->type == ResourceManifestEntryTypeFile) {
-                n_file_entries++;
-            } else if(entry_ptr->type == ResourceManifestEntryTypeDirectory) {
-                n_dir_entries++;
-            }
+            n_total_entries++;
         }
         resource_manifest_rewind(manifest_reader);
 
         update_task_set_progress(update_task, UpdateTaskStageResourcesFileCleanup, 0);
         uint32_t n_processed_file_entries = 0;
         while((entry_ptr = resource_manifest_reader_next(manifest_reader))) {
+            update_task_set_progress(
+                update_task,
+                UpdateTaskStageProgress,
+                (n_processed_file_entries++ * 100) / n_total_entries);
             if(entry_ptr->type == ResourceManifestEntryTypeFile) {
-                update_task_set_progress(
-                    update_task,
-                    UpdateTaskStageProgress,
-                    (n_processed_file_entries++ * 100) / n_file_entries);
-
                 FuriString* file_path = furi_string_alloc();
                 path_concat(
                     STORAGE_EXT_PATH_PREFIX, furi_string_get_cstr(entry_ptr->name), file_path);
@@ -94,12 +89,11 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
         update_task_set_progress(update_task, UpdateTaskStageResourcesDirCleanup, 0);
         uint32_t n_processed_dir_entries = 0;
         while((entry_ptr = resource_manifest_reader_previous(manifest_reader))) {
+            update_task_set_progress(
+                update_task,
+                UpdateTaskStageProgress,
+                (n_processed_dir_entries++ * 100) / n_total_entries);
             if(entry_ptr->type == ResourceManifestEntryTypeDirectory) {
-                update_task_set_progress(
-                    update_task,
-                    UpdateTaskStageProgress,
-                    (n_processed_dir_entries++ * 100) / n_dir_entries);
-
                 FuriString* folder_path = furi_string_alloc();
 
                 do {
