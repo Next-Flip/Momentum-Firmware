@@ -13,6 +13,7 @@
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
+  - OFW: Ultralight C authentication with des key (by @RebornedBrain)
   - OFW: Add `mf_classic_set_sector_trailer_read()` function (by @Astrrra)
 - OFW: RFID: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
@@ -62,7 +63,11 @@
 - CLI:
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
   - OFW: Minor storage subcommand lookup refactor (by @hedger)
-- OFW: Furi: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
+- Furi:
+  - OFW: Use static synchronisation primitives, prepare for event loop (by @gsurkov & @skotopes)
+  - OFW: Coalesce some allocations, smaller memory footprint (by @CookiePLMonster)
+  - OFW: Put Input state data on the stack of the service (by @CookiePLMonster)
+- OFW: BLE: Update to copro light stack v1.20.0 (by @hedger)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
@@ -83,6 +88,7 @@
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
+- OFW: iButton/RFID: Fix Add Manually results being discarded (by @Astrrra)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: Updater: Slightly smaller image (by @hedger)
 - OFW: Debug: Backup openocd work area, fix crash after fresh debugger connect and continue (by @skotopes)
