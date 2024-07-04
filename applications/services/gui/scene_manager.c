@@ -9,7 +9,7 @@ SceneManager* scene_manager_alloc(const SceneManagerHandlers* app_scene_handlers
     // Set SceneManager context and scene handlers
     scene_manager->context = context;
     scene_manager->scene_handlers = app_scene_handlers;
-    // Initialize SceneManager array for navigation
+    // Initialize ScaneManager array for navigation
     SceneManagerIdStack_init(scene_manager->scene_id_stack);
 
     return scene_manager;

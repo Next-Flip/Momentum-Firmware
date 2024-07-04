@@ -61,6 +61,7 @@
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
 - JS: Refactored widget and keyboard modules with `ViewHolder`, fix crash (by @Willy-JL)
 - Desktop: Slim down internal anims, +3.4kb free flash (by @Willy-JL)
+- UL: RFID: Update T5577 password list (by @korden32)
 - OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
 - CLI:
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
