@@ -53,8 +53,8 @@
 - NFC:
   - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
   - Mention using MFKey app after Detect Reader (by @Willy-JL)
-  - Cache plugin name not full path, saves some RAM (by @Willy-JL)
   - UL: Better plugin loading, faster launch from favourites, no lag in Saved menu (by @xMasterX)
+  - OFW: Cache plugin name not full path, saves some RAM (by @Willy-JL & @gornekich)
   - OFW: Update link to mfkey32 (by @Astrrra)
 - Sub-GHz:
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
