@@ -56,30 +56,21 @@ typedef enum {
     CompressTypeMAX,
 } CompressType;
 
-/** Base configuration for all compression types */
-typedef struct {
-    uint16_t input_buffer_sz;
-} CompressConfigBase;
-
 /** Configuration for heatshrink compression */
 typedef struct {
-    CompressConfigBase base;
     uint16_t window_sz2;
     uint16_t lookahead_sz2;
+    uint16_t input_buffer_sz;
 } CompressConfigHeatshrink;
-
-_Static_assert(offsetof(CompressConfigHeatshrink, base) == 0, "Base must be first struct member");
 
 /** Default configuration for heatshrink compression. Used for image assets. */
 extern const CompressConfigHeatshrink compress_config_heatshrink_default;
 
 /** Configuration for gzip compression */
 typedef struct {
-    CompressConfigBase base;
     uint32_t dict_sz;
+    uint16_t input_buffer_sz;
 } CompressConfigGzip;
-
-_Static_assert(offsetof(CompressConfigGzip, base) == 0, "Base must be first struct member");
 
 /** Allocate encoder and decoder
  *

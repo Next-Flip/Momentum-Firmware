@@ -17,9 +17,9 @@
 #define COMPRESS_ICON_ENCODED_BUFF_SIZE (256u)
 
 const CompressConfigHeatshrink compress_config_heatshrink_default = {
-    .base.input_buffer_sz = COMPRESS_ICON_ENCODED_BUFF_SIZE,
     .window_sz2 = COMPRESS_EXP_BUFF_SIZE_LOG,
     .lookahead_sz2 = COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG,
+    .input_buffer_sz = COMPRESS_ICON_ENCODED_BUFF_SIZE,
 };
 
 /** Buffer size for input data */
@@ -377,7 +377,7 @@ bool compress_decode(
     if(!compress->decoder) {
         CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
         compress->decoder = heatshrink_decoder_alloc(
-            hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+            hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     }
     return compress_decode_internal(
         compress->decoder, data_in, data_in_size, data_out, data_out_size, data_res_size);
@@ -392,13 +392,13 @@ bool compress_decode_streamed(
     CompressConfigHeatshrink* hs_config = (CompressConfigHeatshrink*)compress->config;
     if(!compress->decoder) {
         compress->decoder = heatshrink_decoder_alloc(
-            hs_config->base.input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+            hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
     }
 
     heatshrink_decoder_reset(compress->decoder);
     return compress_decode_stream_internal(
         compress->decoder,
-        hs_config->base.input_buffer_sz,
+        hs_config->input_buffer_sz,
         read_cb,
         read_context,
         write_cb,
@@ -469,20 +469,20 @@ CompressStreamDecoder* compress_stream_decoder_alloc(
     furi_check(type < CompressTypeMAX);
     furi_check(config);
 
-    const CompressConfigBase* base_config = config;
     CompressStreamDecoder* instance = malloc(sizeof(CompressStreamDecoder));
     instance->type = type;
     instance->stream_position = 0;
-    instance->decode_buffer_size = base_config->input_buffer_sz;
     instance->decode_buffer_position = 0;
-    instance->decode_buffer = malloc(base_config->input_buffer_sz);
     instance->read_cb = read_cb;
     instance->read_context = read_context;
 
     if(type == CompressTypeHeatshrink) {
         const CompressConfigHeatshrink* hs_config = config;
+        instance->decode_buffer_size = hs_config->input_buffer_sz;
+        instance->decode_buffer = malloc(hs_config->input_buffer_sz);
+
         heatshrink_decoder* hs_decoder = heatshrink_decoder_alloc(
-            base_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
+            hs_config->input_buffer_sz, hs_config->window_sz2, hs_config->lookahead_sz2);
         if(hs_decoder == NULL) {
             free(instance->decode_buffer);
             free(instance);
@@ -492,6 +492,9 @@ CompressStreamDecoder* compress_stream_decoder_alloc(
 
     } else if(type == CompressTypeGzip) {
         const CompressConfigGzip* gz_config = config;
+        instance->decode_buffer_size = gz_config->input_buffer_sz;
+        instance->decode_buffer = malloc(gz_config->input_buffer_sz);
+
         gzip_decoder* gz_decoder = malloc(sizeof(gzip_decoder) + gz_config->dict_sz);
         gz_decoder->sd = instance;
         gz_decoder->dict_sz = gz_config->dict_sz;
