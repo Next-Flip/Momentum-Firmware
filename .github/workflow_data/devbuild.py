@@ -48,7 +48,7 @@ if __name__ == "__main__":
                         },
                         {
                             "name": "Changelog since last release:",
-                            "value": f"[Changes since {release}]({event['repository']['html_url']}/blob/{after}/ChangeLog.md)"
+                            "value": f"[Changes since {release}]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)"
                         },
                         {
                             "name": "Download artifacts:",
