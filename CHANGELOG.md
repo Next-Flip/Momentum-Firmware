@@ -61,7 +61,9 @@
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
 - JS: Refactored widget and keyboard modules with `ViewHolder`, fix crash (by @Willy-JL)
 - Desktop: Slim down internal anims, +3.4kb free flash (by @Willy-JL)
-- UL: RFID: Update T5577 password list (by @korden32)
+- RFID:
+  - UL: Update T5577 password list (by @korden32)
+  - UL: DEZ 8 display form for EM4100 (by @korden32 & @mishamyte)
 - OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
 - CLI:
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
