@@ -37,8 +37,9 @@
 - Apps:
   - VGM Tool: New RGB VGM firmware to support Flipper FW changes (by @HaxSam)
   - MFKey: 30% speedup, fix half speed mode, fix UI bugs (by @noproto)
-  - Picopass: Acknowledgements page, Elite VB6 RNG keygen attack, plugin improvements (by @bettse)
+  - Picopass: Acknowledgements page, Elite VB6 RNG keygen attack, plugin and app improvements (by @bettse)
   - Seader: Handle SAM removal better (by @bettse)
+  - NFC Magic: Gen1 backdoor read support (by @Astrrra)
   - Authenticator: Fix URL format (by @akopachov)
   - NFC Playlist: Various fixes and improvements, new icon (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
