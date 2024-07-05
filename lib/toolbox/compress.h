@@ -1,6 +1,6 @@
 /**
  * @file compress.h
- * LZSS based compression HAL API
+ * Heatshrink (LZSS) / Gzip based compression HAL API
  */
 #pragma once
 
