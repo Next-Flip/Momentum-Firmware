@@ -74,6 +74,7 @@
   - OFW: Coalesce some allocations, smaller memory footprint (by @CookiePLMonster)
   - OFW: Put Input state data on the stack of the service (by @CookiePLMonster)
 - OFW: BLE: Update to copro light stack v1.20.0 (by @hedger)
+- OFW: FBT: Toolchain v37 (by @hedger)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:

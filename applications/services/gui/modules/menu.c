@@ -497,8 +497,7 @@ static bool menu_input_callback(InputEvent* event, void* context) {
 
 static void menu_scroll_timer_callback(void* context) {
     Menu* menu = context;
-    with_view_model(
-        menu->view, MenuModel * model, { model->scroll_counter++; }, true);
+    with_view_model(menu->view, MenuModel * model, { model->scroll_counter++; }, true);
 }
 
 static void menu_enter(void* context) {
