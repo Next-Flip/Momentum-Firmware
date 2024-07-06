@@ -2,8 +2,6 @@
 - VGM: Reworked color customization functionality over RPC (by @HaxSam & @Willy-JL)
   - Better rainbow support, more responsive config, custom fore/back-ground
   - If you used this, need to reflash your VGM and reconfigure the colors
-- OFW: CLI: New `top` command, replaces `ps` (by @skotopes)
-  - Now includes CPU usage info too
 
 ### Added:
 - Sub-GHz:
@@ -27,12 +25,14 @@
 - Updater:
   - OFW: Resource compression refactor, uses heatshrink (by @hedger)
   - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (by @Willy-JL)
+- OFW: CLI: New `top` command, replaces `ps`, ow includes CPU usage info too (by @skotopes)
 - Furi:
   - OFW: Event loop (by @skotopes)
   - OFW: Thread signals, loader close, loader get app name (by @gsurkov)
   - OFW: Event Loop Timers (by @gsurkov)
+  - OFW: Count ISR time and show in top command (by @skotopes)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
-- OFW: USB/CCID: Add initial ISO7816 support (by @kidbomb)
+- OFW: USB/CCID: Add initial ISO7816 support, improve data handling (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
 
 ### Updated:
@@ -49,7 +49,7 @@
   - UL: ESubGHz Chat: Add back NFC key sharing with nfclegacy (by @xMasterX)
   - UL: Mifare Nested: Free some space by simplifying nfclegacy lib (by @xMasterX)
   - UL: WAV Player: Reconfigure to use 8-bit memory buffer, halving memory usage (by @CookiePLMonster)
-  - UL: RFID Fuzzer: Fix worker being not in LFRFIDWorkerIdle before next key (by @xMasterX)
+  - UL: RFID Fuzzer: Fix worker not being in LFRFIDWorkerIdle before next key (by @xMasterX)
   - UL: Barcode: Fix backlight settings (by @xMasterX)
   - OFW: NFC/RFID Detector: Fix some typos (by @Skorpionm)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
