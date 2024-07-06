@@ -17,7 +17,9 @@
   - OFW: Add `mf_classic_set_sector_trailer_read()` function (by @Astrrra)
 - OFW: RFID: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
-- JS: Added ADC (analog voltage) support to gpio library (by @jamisonderek)
+- JS:
+  - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
+  - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
 - Desktop: Added TV animation from OFW which was missing (internal on OFW)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
@@ -60,7 +62,7 @@
 - Sub-GHz:
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
-- JS: Refactored widget and keyboard modules with `ViewHolder`, fix crash (by @Willy-JL)
+- JS: Refactored `widget` and `keyboard` modules with `ViewHolder`, fix crash (by @Willy-JL)
 - Desktop: Slim down internal anims, +3.4kb free flash (by @Willy-JL)
 - RFID:
   - UL: Update T5577 password list (by @korden32)
@@ -88,9 +90,11 @@
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
+- JS:
+  - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
+  - OFW: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: RPC: Fix input lockup on disconnect (by @Willy-JL)
 - OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
-- OFW: JS: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
