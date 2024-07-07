@@ -77,7 +77,7 @@ name: CH+
 type: parsed
 protocol: Samsung32
 address: 07 00 00 00
-command: 10 00 00 00
+command: 12 00 00 00
 # 
 name: CH-
 type: parsed
