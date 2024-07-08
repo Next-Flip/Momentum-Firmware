@@ -6,6 +6,8 @@
 ### Added:
 - Sub-GHz:
   - New Legrand doorbell protocol (by @user890104)
+  - UL: Novoferm remotes full support (by @xMasterX)
+  - UL: Add manually Hormann EcoStar, also Sommer FM238 option when default won't work (by @xMasterX)
   - OFW: Princeton protocol add custom guard time (by @Skorpionm & @xMasterX)
 - NFC:
   - OFW: Mifare Plus detection support (by @Astrrra)
@@ -82,8 +84,10 @@
 ### Fixed:
 - OFW: USB: IRQ, CDC and EP fixes, no more "Operation timeout (generic)" updating from OFW (by @skotopes)
 - Sub-GHz:
-  - UL: Fix add manually princeton (by @xMasterX)
-  - UL: Fix decode raw signals showing up in read menu (by @xMasterX)
+  - UL: Fix Add Manually for Princeton, Normstahl, Sommer, MHouse, Aprimatic (by @xMasterX)
+  - UL: Improve custom buttons for MHouse, Novoferm, Nice Smilo (by @xMasterX)
+  - UL: Fix various Decode RAW bugs (by @xMasterX)
+  - UL: Fix Hormann HSM 44bit static button code decoding (by @xMasterX)
   - UL: Sync signal delete scene with OFW (by @xMasterX)
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
@@ -113,4 +117,5 @@
 - API:
   - Removed unused `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
   - Removed unused `furi_hal_usb_get_config_context()` function since BadKB doesn't use it anymore
+- UL: Sub-GHz: Removed broken HND_1 modulation
 - OFW: CLI: Removed `ps` command, replaced by `top`
