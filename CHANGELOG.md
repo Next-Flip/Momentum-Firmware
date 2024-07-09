@@ -15,7 +15,9 @@
   - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
   - OFW: Ultralight C authentication with des key (by @RebornedBrain)
   - OFW: Add `mf_classic_set_sector_trailer_read()` function (by @Astrrra)
-- OFW: RFID: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
+- RFID:
+  - Add blank InstaFob detection (by @jamisonderek)
+  - OFW: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - JS:
   - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
@@ -65,7 +67,9 @@
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
 - JS: Refactored `widget` and `keyboard` modules with `ViewHolder`, fix crash (by @Willy-JL)
-- Desktop: Slim down internal anims, +3.4kb free flash (by @Willy-JL)
+- Desktop:
+  - Slim down internal anims, +3.4kb free flash (by @Willy-JL)
+  - OFW: Allow to close blocking bad sd animation (by @skotopes)
 - RFID:
   - UL: Update T5577 password list (by @korden32)
   - UL: DEZ 8 display form for EM4100 (by @korden32 & @mishamyte)
@@ -92,6 +96,7 @@
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+- Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
 - JS:
