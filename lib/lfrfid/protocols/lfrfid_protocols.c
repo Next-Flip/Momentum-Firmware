@@ -19,6 +19,7 @@
 #include "protocol_gallagher.h"
 #include "protocol_nexwatch.h"
 #include "protocol_securakey.h"
+#include "protocol_insta_fob.h"
 
 const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolEM4100] = &protocol_em4100,
@@ -43,4 +44,5 @@ const ProtocolBase* lfrfid_protocols[] = {
     [LFRFIDProtocolGallagher] = &protocol_gallagher,
     [LFRFIDProtocolNexwatch] = &protocol_nexwatch,
     [LFRFIDProtocolSecurakey] = &protocol_securakey,
+    [LFRFIDProtocolInstaFob] = &protocol_insta_fob,
 };
