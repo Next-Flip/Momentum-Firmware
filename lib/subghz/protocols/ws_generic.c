@@ -1,86 +1,20 @@
 #include "ws_generic.h"
 #include <lib/toolbox/stream/stream.h>
 #include <lib/flipper_format/flipper_format_i.h>
-//#include "../helpers/weather_station_types.h"
+#include <float_tools.h>
 
 #define TAG "WSBlockGeneric"
-
-void ws_block_generic_get_preset_name(const char* preset_name, FuriString* preset_str) {
-    const char* preset_name_temp;
-    if(!strcmp(preset_name, "AM270")) {
-        preset_name_temp = "FuriHalSubGhzPresetOok270Async";
-    } else if(!strcmp(preset_name, "AM650")) {
-        preset_name_temp = "FuriHalSubGhzPresetOok650Async";
-    } else if(!strcmp(preset_name, "FM238")) {
-        preset_name_temp = "FuriHalSubGhzPreset2FSKDev238Async";
-    } else if(!strcmp(preset_name, "FM476")) {
-        preset_name_temp = "FuriHalSubGhzPreset2FSKDev476Async";
-    } else {
-        preset_name_temp = "FuriHalSubGhzPresetCustom";
-    }
-    furi_string_set(preset_str, preset_name_temp);
-}
 
 SubGhzProtocolStatus ws_block_generic_serialize(
     WSBlockGeneric* instance,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(instance);
-    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    SubGhzProtocolStatus res =
+        subghz_block_generic_serialize_common(instance->protocol_name, flipper_format, preset);
+    if(res != SubGhzProtocolStatusOk) return res;
+    res = SubGhzProtocolStatusError;
     do {
-        stream_clean(flipper_format_get_raw_stream(flipper_format));
-        if(!flipper_format_write_header_cstr(
-               flipper_format, WS_KEY_FILE_TYPE, WS_KEY_FILE_VERSION)) {
-            FURI_LOG_E(TAG, "Unable to add header");
-            res = SubGhzProtocolStatusErrorParserHeader;
-            break;
-        }
-
-        if(!flipper_format_write_uint32(flipper_format, "Frequency", &preset->frequency, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Frequency");
-            res = SubGhzProtocolStatusErrorParserFrequency;
-            break;
-        }
-
-        ws_block_generic_get_preset_name(furi_string_get_cstr(preset->name), temp_str);
-        if(!flipper_format_write_string_cstr(
-               flipper_format, "Preset", furi_string_get_cstr(temp_str))) {
-            FURI_LOG_E(TAG, "Unable to add Preset");
-            res = SubGhzProtocolStatusErrorParserPreset;
-            break;
-        }
-        if(!strcmp(furi_string_get_cstr(temp_str), "FuriHalSubGhzPresetCustom")) {
-            if(!flipper_format_write_string_cstr(
-                   flipper_format, "Custom_preset_module", "CC1101")) {
-                FURI_LOG_E(TAG, "Unable to add Custom_preset_module");
-                res = SubGhzProtocolStatusErrorParserCustomPreset;
-                break;
-            }
-            if(!flipper_format_write_hex(
-                   flipper_format, "Custom_preset_data", preset->data, preset->data_size)) {
-                FURI_LOG_E(TAG, "Unable to add Custom_preset_data");
-                res = SubGhzProtocolStatusErrorParserCustomPreset;
-                break;
-            }
-        }
-        if(!flipper_format_write_float(flipper_format, "Latitute", &preset->latitude, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Latitute");
-            res = SubGhzProtocolStatusErrorParserLatitude;
-            break;
-        }
-        if(!flipper_format_write_float(flipper_format, "Longitude", &preset->longitude, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Longitude");
-            res = SubGhzProtocolStatusErrorParserLongitude;
-            break;
-        }
-        if(!flipper_format_write_string_cstr(flipper_format, "Protocol", instance->protocol_name)) {
-            FURI_LOG_E(TAG, "Unable to add Protocol");
-            res = SubGhzProtocolStatusErrorParserProtocolName;
-            break;
-        }
-
         uint32_t temp_data = instance->id;
         if(!flipper_format_write_uint32(flipper_format, "Id", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Unable to add Id");
@@ -153,7 +87,6 @@ SubGhzProtocolStatus ws_block_generic_serialize(
 
         res = SubGhzProtocolStatusOk;
     } while(false);
-    furi_string_free(temp_str);
     return res;
 }
 
@@ -261,4 +194,44 @@ SubGhzProtocolStatus ws_block_generic_deserialize_check_count_bit(
         }
     } while(false);
     return ret;
+}
+
+void ws_block_generic_get_string(WSBlockGeneric* instance, FuriString* output) {
+    furi_string_cat_printf(
+        output, "%s\r\n%dbit", instance->protocol_name, instance->data_count_bit);
+    if(instance->channel != WS_NO_CHANNEL) {
+        furi_string_cat_printf(output, "   Ch: %01d", instance->channel);
+    }
+    if(instance->btn != WS_NO_BTN) {
+        furi_string_cat_printf(output, "   Btn: %01d\r\n", instance->btn);
+    } else {
+        furi_string_cat(output, "\r\n");
+    }
+
+    if(instance->id != WS_NO_ID) {
+        furi_string_cat_printf(output, "Sn: 0x%02lX   ", instance->id);
+    }
+    if(instance->battery_low != WS_NO_BATT) {
+        furi_string_cat_printf(output, "Batt: %s\r\n", (!instance->battery_low ? "ok" : "low"));
+    } else {
+        furi_string_cat(output, "\r\n");
+    }
+
+    furi_string_cat_printf(
+        output,
+        "Data:0x%lX%08lX\r\n",
+        (uint32_t)(instance->data >> 32),
+        (uint32_t)(instance->data));
+
+    if(!float_is_equal(instance->temp, WS_NO_TEMPERATURE)) {
+        bool is_metric = furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric;
+        furi_string_cat_printf(
+            output,
+            "Temp: %3.1f%c   ",
+            (double)(is_metric ? instance->temp : locale_celsius_to_fahrenheit(instance->temp)),
+            is_metric ? 'C' : 'F');
+    }
+    if(instance->humidity != WS_NO_HUMIDITY) {
+        furi_string_cat_printf(output, "Hum: %d%%", instance->humidity);
+    }
 }

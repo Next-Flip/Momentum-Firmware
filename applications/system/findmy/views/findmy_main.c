@@ -162,8 +162,7 @@ void findmy_main_set_callback(FindMyMain* findmy_main, FindMyMainCallback callba
 
 void findmy_main_update_active(FindMyMain* findmy_main, bool active) {
     furi_assert(findmy_main);
-    with_view_model(
-        findmy_main->view, FindMyMainModel * model, { model->active = active; }, true);
+    with_view_model(findmy_main->view, FindMyMainModel * model, { model->active = active; }, true);
 }
 
 void findmy_main_toggle_mac(FindMyMain* findmy_main, bool show_mac) {
@@ -190,6 +189,5 @@ void findmy_main_update_interval(FindMyMain* findmy_main, uint8_t interval) {
 
 void findmy_main_update_type(FindMyMain* findmy_main, FindMyType type) {
     furi_assert(findmy_main);
-    with_view_model(
-        findmy_main->view, FindMyMainModel * model, { model->type = type; }, true);
+    with_view_model(findmy_main->view, FindMyMainModel * model, { model->type = type; }, true);
 }

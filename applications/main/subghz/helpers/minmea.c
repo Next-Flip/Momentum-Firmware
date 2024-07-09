@@ -28,7 +28,8 @@ uint8_t minmea_checksum(const char* sentence) {
     uint8_t checksum = 0x00;
 
     // The optional checksum is an XOR of all bytes between "$" and "*".
-    while(*sentence && *sentence != '*') checksum ^= *sentence++;
+    while(*sentence && *sentence != '*')
+        checksum ^= *sentence++;
 
     return checksum;
 }
@@ -82,17 +83,18 @@ bool minmea_scan(const char* sentence, const char* format, ...) {
     va_start(ap, format);
 
     const char* field = sentence;
-#define next_field()                                 \
-    do {                                             \
-        /* Progress to the next field. */            \
-        while(minmea_isfield(*sentence)) sentence++; \
-        /* Make sure there is a field there. */      \
-        if(*sentence == ',') {                       \
-            sentence++;                              \
-            field = sentence;                        \
-        } else {                                     \
-            field = NULL;                            \
-        }                                            \
+#define next_field()                            \
+    do {                                        \
+        /* Progress to the next field. */       \
+        while(minmea_isfield(*sentence))        \
+            sentence++;                         \
+        /* Make sure there is a field there. */ \
+        if(*sentence == ',') {                  \
+            sentence++;                         \
+            field = sentence;                   \
+        } else {                                \
+            field = NULL;                       \
+        }                                       \
     } while(0)
 
     while(*format) {
@@ -209,7 +211,8 @@ bool minmea_scan(const char* sentence, const char* format, ...) {
             char* buf = va_arg(ap, char*);
 
             if(field) {
-                while(minmea_isfield(*field)) *buf++ = *field++;
+                while(minmea_isfield(*field))
+                    *buf++ = *field++;
             }
 
             *buf = '\0';

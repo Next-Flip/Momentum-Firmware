@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void crypto_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("crypto_cli", 1, cli, args, context);
+    cli_plugin_wrapper("crypto", cli, args, context);
 }
 
 void crypto_on_system_start(void) {

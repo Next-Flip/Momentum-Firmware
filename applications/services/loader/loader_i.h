@@ -34,6 +34,8 @@ typedef enum {
     LoaderMessageTypeUnlock,
     LoaderMessageTypeIsLocked,
     LoaderMessageTypeStartByNameDetachedWithGuiError,
+    LoaderMessageTypeSignal,
+    LoaderMessageTypeGetApplicationName,
 
     LoaderMessageTypeShowSettings,
 } LoaderMessageType;
@@ -45,7 +47,24 @@ typedef struct {
 } LoaderMessageStartByName;
 
 typedef struct {
+    uint32_t signal;
+    void* arg;
+} LoaderMessageSignal;
+
+typedef enum {
+    LoaderStatusErrorUnknown,
+    LoaderStatusErrorInvalidFile,
+    LoaderStatusErrorInvalidManifest,
+    LoaderStatusErrorMissingImports,
+    LoaderStatusErrorHWMismatch,
+    LoaderStatusErrorOutdatedApp,
+    LoaderStatusErrorOutOfMemory,
+    LoaderStatusErrorOutdatedFirmware,
+} LoaderStatusError;
+
+typedef struct {
     LoaderStatus value;
+    LoaderStatusError error;
 } LoaderMessageLoaderStatusResult;
 
 typedef struct {
@@ -58,6 +77,8 @@ typedef struct {
 
     union {
         LoaderMessageStartByName start;
+        LoaderMessageSignal signal;
+        FuriString* application_name;
     };
 
     union {

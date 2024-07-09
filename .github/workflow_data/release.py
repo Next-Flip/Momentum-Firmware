@@ -15,7 +15,7 @@ if __name__ == "__main__":
     ).json()
     version_tag = release["tag_name"]
 
-    with open("ChangeLog.md", "r") as f:
+    with open("CHANGELOG.md", "r") as f:
         changelog = f.read()
 
     notes_path = '.github/workflow_data/release.md'

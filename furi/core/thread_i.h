@@ -13,7 +13,6 @@ typedef struct {
 
 struct FuriThread {
     StaticTask_t container;
-    TaskHandle_t task_handle;
     StackType_t* stack_buffer;
 
     FuriThreadState state;
@@ -24,6 +23,9 @@ struct FuriThread {
 
     FuriThreadStateCallback state_callback;
     void* state_context;
+
+    FuriThreadSignalCallback signal_callback;
+    void* signal_context;
 
     char* name;
     char* appid;
@@ -39,6 +41,7 @@ struct FuriThread {
     // this ensures that the size of this structure is minimal
     bool is_service;
     bool heap_trace_enabled;
+    volatile bool is_active;
 };
 
 // IMPORTANT: container MUST be the FIRST struct member

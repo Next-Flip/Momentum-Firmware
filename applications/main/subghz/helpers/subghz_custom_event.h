@@ -8,6 +8,7 @@ typedef enum {
     //SubGhzCustomEvent
     SubGhzCustomEventSceneDeleteSuccess = 100,
     SubGhzCustomEventSceneDelete,
+    SubGhzCustomEventSceneDeleteBack,
     SubGhzCustomEventSceneDeleteRAW,
     SubGhzCustomEventSceneDeleteRAWBack,
 
@@ -90,6 +91,8 @@ typedef enum {
     SetTypeCenturion433,
     SetTypeSommer_FM_434,
     SetTypeSommer_FM_868,
+    SetTypeSommer_FM238_434,
+    SetTypeSommer_FM238_868,
     SetTypeStilmatic,
     SetTypeIronLogic,
     SetTypeDeaMio433,
@@ -100,6 +103,8 @@ typedef enum {
     SetTypeElmesElectronic,
     SetTypeNormstahl_433_92,
     SetTypeJCM_433_92,
+    SetTypeNovoferm_433_92,
+    SetTypeHormannEcoStar_433_92,
     SetTypeFAACRCXT_433_92,
     SetTypeFAACRCXT_868,
     SetTypeGeniusBravo433,

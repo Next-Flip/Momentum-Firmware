@@ -1,6 +1,5 @@
 from pathlib import Path
 import posixpath
-import re
 import os
 
 # For more details on these options, run 'fbt -h'
@@ -53,7 +52,7 @@ EXTRA_EXT_APPS = []
 COPRO_OB_DATA = "scripts/ob.data"
 
 # Must match lib/stm32wb_copro version
-COPRO_CUBE_VERSION = "1.19.0"
+COPRO_CUBE_VERSION = "1.20.0"
 
 COPRO_CUBE_DIR = "lib/stm32wb_copro"
 

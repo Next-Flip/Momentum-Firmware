@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void onewire_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("onewire_cli", 1, cli, args, context);
+    cli_plugin_wrapper("onewire", cli, args, context);
 }
 
 void onewire_on_system_start(void) {

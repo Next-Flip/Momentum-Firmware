@@ -1,20 +1,10 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
-
-#include <lib/flipper_format/flipper_format.h>
-#include "furi.h"
-#include "furi_hal.h"
-#include <lib/subghz/types.h>
+#include "../blocks/generic_i.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define PCSG_KEY_FILE_VERSION 1
-#define PCSG_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
 typedef struct PCSGBlockGeneric PCSGBlockGeneric;
 
@@ -23,13 +13,6 @@ struct PCSGBlockGeneric {
     FuriString* result_ric;
     FuriString* result_msg;
 };
-
-/**
- * Get name preset.
- * @param preset_name name preset
- * @param preset_str Output name preset
- */
-void pcsg_block_generic_get_preset_name(const char* preset_name, FuriString* preset_str);
 
 /**
  * Serialize data PCSGBlockGeneric.
@@ -51,8 +34,6 @@ SubGhzProtocolStatus pcsg_block_generic_serialize(
  */
 SubGhzProtocolStatus
     pcsg_block_generic_deserialize(PCSGBlockGeneric* instance, FlipperFormat* flipper_format);
-
-float pcsg_block_generic_fahrenheit_to_celsius(float fahrenheit);
 
 #ifdef __cplusplus
 }

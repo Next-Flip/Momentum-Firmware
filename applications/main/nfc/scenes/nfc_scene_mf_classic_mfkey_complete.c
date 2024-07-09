@@ -14,16 +14,18 @@ void nfc_scene_mf_classic_mfkey_complete_on_enter(void* context) {
     NfcApp* instance = context;
 
     widget_add_string_element(
-        instance->widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Completed!");
+        instance->widget, 64, 2, AlignCenter, AlignTop, FontPrimary, "Completed!");
     widget_add_string_multiline_element(
         instance->widget,
         64,
-        13,
+        16,
         AlignCenter,
         AlignTop,
         FontSecondary,
-        "Now use Mfkey32 to extract \nkeys: lab.flipper.net/nfc-tools");
-    widget_add_icon_element(instance->widget, 50, 39, &I_MFKey_qr_25x25);
+        "Now use Mfkey32 to extract \nkeys: r.flipper.net/nfc-tools");
+    widget_add_string_element(
+        instance->widget, 29, 38, AlignLeft, AlignTop, FontSecondary, "or Apps > NFC > MFKey");
+    widget_add_icon_element(instance->widget, 0, 39, &I_MFKey_qr_25x25);
     widget_add_button_element(
         instance->widget,
         GuiButtonTypeRight,

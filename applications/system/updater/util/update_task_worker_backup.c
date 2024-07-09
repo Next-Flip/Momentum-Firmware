@@ -10,8 +10,6 @@
 #include <update_util/lfs_backup.h>
 #include <update_util/update_operation.h>
 #include <update_util/resources/manifest.h>
-#include <update_util/resources/manifest_i.h>
-#include <toolbox/stream/stream.h>
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
 
@@ -40,22 +38,9 @@ static bool update_task_pre_update(UpdateTask* update_task) {
     return success;
 }
 
-typedef enum {
-    UpdateTaskResourcesWeightsFileCleanup = 10,
-    UpdateTaskResourcesWeightsDirCleanup = 10,
-    UpdateTaskResourcesWeightsFileUnpack = 80,
-} UpdateTaskResourcesWeights;
-
-#define UPDATE_TASK_RESOURCES_FILE_TO_TOTAL_PERCENT 90
-
-static void update_task_resource_progress_cb(size_t progress, size_t total, void* context) {
+static void update_task_resource_unpack_cb(size_t progress, size_t total, void* context) {
     UpdateTask* update_task = context;
-    update_task_set_progress(
-        update_task,
-        UpdateTaskStageProgress,
-        /* For this stage, last progress segment = extraction */
-        (UpdateTaskResourcesWeightsFileCleanup + UpdateTaskResourcesWeightsDirCleanup) +
-            (progress * UpdateTaskResourcesWeightsFileUnpack) / total);
+    update_task_set_progress(update_task, UpdateTaskStageProgress, (progress * 100) / (total + 1));
 }
 
 static void update_task_cleanup_resources(UpdateTask* update_task) {
@@ -67,21 +52,22 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
             break;
         }
 
-        size_t manifest_size = stream_size(manifest_reader->stream);
-        uint32_t n_dir_entries = 1;
-
         ResourceManifestEntry* entry_ptr = NULL;
-        uint32_t n_processed_entries = 0;
+        /* Iterate over manifest and calculate entries count */
+        uint32_t n_total_entries = 1;
         while((entry_ptr = resource_manifest_reader_next(manifest_reader))) {
-            if(entry_ptr->type == ResourceManifestEntryTypeFile) {
-                update_task_set_progress(
-                    update_task,
-                    UpdateTaskStageProgress,
-                    /* For this stage, first pass = old manifest's file cleanup */
-                    (stream_tell(manifest_reader->stream) *
-                     UpdateTaskResourcesWeightsFileCleanup) /
-                        manifest_size);
+            n_total_entries++;
+        }
+        resource_manifest_rewind(manifest_reader);
 
+        update_task_set_progress(update_task, UpdateTaskStageResourcesFileCleanup, 0);
+        uint32_t n_processed_file_entries = 0;
+        while((entry_ptr = resource_manifest_reader_next(manifest_reader))) {
+            update_task_set_progress(
+                update_task,
+                UpdateTaskStageProgress,
+                (n_processed_file_entries++ * 100) / n_total_entries);
+            if(entry_ptr->type == ResourceManifestEntryTypeFile) {
                 FuriString* file_path = furi_string_alloc();
                 path_concat(
                     STORAGE_EXT_PATH_PREFIX, furi_string_get_cstr(entry_ptr->name), file_path);
@@ -97,22 +83,17 @@ static void update_task_cleanup_resources(UpdateTask* update_task) {
                         storage_error_get_desc(result));
                 }
                 furi_string_free(file_path);
-            } else if(entry_ptr->type == ResourceManifestEntryTypeDirectory) {
-                n_dir_entries++;
             }
         }
 
-        n_processed_entries = 0;
+        update_task_set_progress(update_task, UpdateTaskStageResourcesDirCleanup, 0);
+        uint32_t n_processed_dir_entries = 0;
         while((entry_ptr = resource_manifest_reader_previous(manifest_reader))) {
+            update_task_set_progress(
+                update_task,
+                UpdateTaskStageProgress,
+                (n_processed_dir_entries++ * 100) / n_total_entries);
             if(entry_ptr->type == ResourceManifestEntryTypeDirectory) {
-                update_task_set_progress(
-                    update_task,
-                    UpdateTaskStageProgress,
-                    /* For this stage, second 10% of progress = cleanup directories */
-                    UpdateTaskResourcesWeightsFileCleanup +
-                        (n_processed_entries++ * UpdateTaskResourcesWeightsDirCleanup) /
-                            n_dir_entries);
-
                 FuriString* folder_path = furi_string_alloc();
 
                 do {
@@ -169,19 +150,20 @@ static bool update_task_post_update(UpdateTask* update_task) {
 #endif
 
         if(update_task->state.groups & UpdateTaskStageGroupResources) {
-            update_task_set_progress(update_task, UpdateTaskStageResourcesUpdate, 0);
-
             path_concat(
                 furi_string_get_cstr(update_task->update_path),
                 furi_string_get_cstr(update_task->manifest->resource_bundle),
                 file_path);
 
-            tar_archive_set_read_callback(archive, update_task_resource_progress_cb, update_task);
-            CHECK_RESULT(
-                tar_archive_open(archive, furi_string_get_cstr(file_path), TAR_OPEN_MODE_READ));
+            CHECK_RESULT(tar_archive_open(
+                archive,
+                furi_string_get_cstr(file_path),
+                tar_archive_get_mode_for_path(furi_string_get_cstr(file_path))));
 
             update_task_cleanup_resources(update_task);
 
+            update_task_set_progress(update_task, UpdateTaskStageResourcesFileUnpack, 0);
+            tar_archive_set_read_callback(archive, update_task_resource_unpack_cb, update_task);
             CHECK_RESULT(tar_archive_unpack_to(archive, STORAGE_EXT_PATH_PREFIX, NULL));
         }
 

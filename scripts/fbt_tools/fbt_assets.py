@@ -87,8 +87,16 @@ def _packs_emitter(target, source, env):
         for node in env.GlobRecursive("*/Anims/**/*.png", source_dir.srcnode())
     )
     target.update(
+        source_dir.rel_path(node)
+        for node in env.GlobRecursive("*/Icons/**/*.bmx", source_dir.srcnode())
+    )
+    target.update(
         source_dir.rel_path(node).removesuffix(".png") + ".bmx"
         for node in env.GlobRecursive("*/Icons/**/*.png", source_dir.srcnode())
+    )
+    target.update(
+        source_dir.rel_path(node)
+        for node in env.GlobRecursive("*/Fonts/*.u8f", source_dir.srcnode())
     )
     target.update(
         source_dir.rel_path(node).removesuffix(".c") + ".u8f"

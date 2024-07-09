@@ -57,12 +57,6 @@ bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx);
  */
 FuriHalUsbInterface* furi_hal_usb_get_config(void);
 
-/** Get USB device configuration context
- *
- * @return    current USB device context
- */
-void* furi_hal_usb_get_config_context(void);
-
 /** Lock USB device mode switch
  */
 void furi_hal_usb_lock(void);

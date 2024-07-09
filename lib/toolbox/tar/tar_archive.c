@@ -4,131 +4,43 @@
 #include <storage/storage.h>
 #include <furi.h>
 #include <toolbox/path.h>
-
-#include <lib/uzlib/src/uzlib.h>
-
-typedef struct {
-    File* file;
-    uint8_t* buffer;
-    size_t buffer_size;
-    uint8_t* dict;
-    size_t dict_size;
-    struct uzlib_uncomp uzlib;
-
-    uint32_t source_pos;
-    uint32_t dest_pos;
-    bool eof;
-} Gunzip;
-
-int gunzip_read_cb(struct uzlib_uncomp* uncomp) {
-    void* data_p = uncomp;
-    data_p -= offsetof(Gunzip, uzlib);
-    Gunzip* gunzip = data_p;
-
-    uint16_t read_size = storage_file_read(gunzip->file, gunzip->buffer, gunzip->buffer_size);
-    gunzip->uzlib.source = &gunzip->buffer[1]; // we will return buffer[0] at exit
-    gunzip->uzlib.source_limit = gunzip->buffer + read_size;
-
-    if(read_size == 0) {
-        return -1;
-    }
-    gunzip->source_pos += read_size;
-
-    return gunzip->buffer[0];
-}
-
-Gunzip* gunzip_alloc(File* file, size_t dict_size, size_t buffer_size) {
-    Gunzip* gunzip = malloc(sizeof(Gunzip));
-    gunzip->file = file;
-    gunzip->buffer_size = buffer_size;
-    gunzip->buffer = malloc(buffer_size);
-    gunzip->dict_size = dict_size;
-    gunzip->dict = malloc(dict_size);
-
-    uzlib_uncompress_init(&gunzip->uzlib, gunzip->dict, gunzip->dict_size);
-
-    gunzip->uzlib.source = 0;
-    gunzip->uzlib.source_limit = 0;
-    gunzip->uzlib.source_read_cb = gunzip_read_cb;
-    gunzip->source_pos = 0;
-    gunzip->dest_pos = 0;
-    gunzip->eof = false;
-
-    return gunzip;
-}
-
-void gunzip_free(Gunzip* gunzip) {
-    free(gunzip->buffer);
-    free(gunzip->dict);
-    free(gunzip);
-}
-
-int32_t gunzip_uncompress(Gunzip* gunzip, void* out, size_t out_len) {
-    if(gunzip->eof) {
-        return 0;
-    }
-
-    gunzip->uzlib.dest = out;
-    gunzip->uzlib.dest_limit = (uint8_t*)out + out_len;
-
-    int res = uzlib_uncompress_chksum(&gunzip->uzlib);
-
-    if(res == TINF_DONE) {
-        gunzip->eof = true;
-    }
-    if(res < 0) {
-        return res;
-    }
-    int32_t read = gunzip->uzlib.dest - (uint8_t*)out;
-    gunzip->dest_pos += read;
-    return read;
-}
-
-int32_t gunzip_seek(Gunzip* gunzip, size_t pos) {
-    if(pos == gunzip->dest_pos) {
-        return 0;
-    }
-
-    if(pos < gunzip->dest_pos) {
-        // TODO: rewind to start if this causes issues
-        furi_crash("Gunzip rewind");
-        return -1;
-    }
-
-    size_t void_size = MIN(4096U, pos - gunzip->dest_pos);
-    void* void_buf = malloc(void_size);
-    while(!gunzip->eof && gunzip->dest_pos < pos) {
-        size_t uncompress_size = MIN(void_size, pos - gunzip->dest_pos);
-        int res = gunzip_uncompress(gunzip, void_buf, uncompress_size);
-        if(res < 0) {
-            free(void_buf);
-            return res;
-        }
-    }
-    free(void_buf);
-    return (pos == gunzip->dest_pos) ? 0 : -1;
-}
+#include <toolbox/compress.h>
 
 #define TAG "TarArch"
 #define MAX_NAME_LEN 254
-#define FILE_BLOCK_SIZE 512
+#define FILE_BLOCK_SIZE (10 * 1024)
 
 #define FILE_OPEN_NTRIES 10
 #define FILE_OPEN_RETRY_DELAY 25
 
+TarOpenMode tar_archive_get_mode_for_path(const char* path) {
+    char ext[8];
+
+    FuriString* path_str = furi_string_alloc_set_str(path);
+    path_extract_extension(path_str, ext, sizeof(ext));
+    furi_string_free(path_str);
+
+    if(strcmp(ext, ".ths") == 0) {
+        return TarOpenModeReadHeatshrink;
+    } else if(strcmp(ext, ".tgz") == 0) {
+        return TarOpenModeReadGzip;
+    } else {
+        return TarOpenModeRead;
+    }
+}
+
 typedef struct TarArchive {
     Storage* storage;
+    File* stream;
     mtar_t tar;
     tar_unpack_file_cb unpack_cb;
     void* unpack_cb_context;
 
     tar_unpack_read_cb read_cb;
     void* read_cb_context;
-    size_t total_size;
-    Gunzip* gunzip;
 } TarArchive;
 
-/* API WRAPPER */
+/* Plain file backend - uncompressed, supports read and write */
 static int mtar_storage_file_write(void* stream, const void* data, unsigned size) {
     uint16_t bytes_written = storage_file_write(stream, data, size);
     return (bytes_written == size) ? bytes_written : MTAR_EWRITEFAIL;
@@ -147,7 +59,6 @@ static int mtar_storage_file_seek(void* stream, unsigned offset) {
 static int mtar_storage_file_close(void* stream) {
     if(stream) {
         storage_file_close(stream);
-        storage_file_free(stream);
     }
     return MTAR_ESUCCESS;
 }
@@ -159,103 +70,158 @@ const struct mtar_ops filesystem_ops = {
     .close = mtar_storage_file_close,
 };
 
-static int mtar_storage_gunzip_write(void* gunzip, const void* data, unsigned size) {
-    UNUSED(gunzip);
-    UNUSED(data);
-    UNUSED(size);
-    furi_crash("Write to gzipped tar");
-    return MTAR_EWRITEFAIL;
-}
+/* Compressed stream backend, read-only */
 
-static int mtar_storage_gunzip_read(void* gunzip, void* data, unsigned size) {
-    int32_t res = gunzip_uncompress(gunzip, data, size);
-    if(res < 0) {
-        FURI_LOG_E(TAG, "Error uncompressing gzip: %ld\n", res);
-    }
-    return (res == (int32_t)size) ? res : MTAR_EREADFAIL;
-}
+typedef struct {
+    CompressType type;
+    union {
+        CompressConfigHeatshrink heatshrink;
+        CompressConfigGzip gzip;
+    } config;
+    File* stream;
+    CompressStreamDecoder* decoder;
+} CompressedStream;
 
-static int mtar_storage_gunzip_seek(void* gunzip, unsigned offset) {
-    int32_t res = gunzip_seek(gunzip, offset);
-    if(res < 0) {
-        FURI_LOG_E(TAG, "Error seeking gzip: %ld\n", res);
-    }
-    return (res == 0) ? MTAR_ESUCCESS : MTAR_ESEEKFAIL;
-}
+/* HSDS 'heatshrink data stream' header magic */
+static const uint32_t HEATSHRINK_MAGIC = 0x53445348;
 
-static int mtar_storage_gunzip_close(void* _gunzip) {
-    Gunzip* gunzip = _gunzip;
-    if(gunzip) {
-        if(gunzip->file) {
-            storage_file_close(gunzip->file);
-            storage_file_free(gunzip->file);
+typedef struct {
+    uint32_t magic;
+    uint8_t version;
+    uint8_t window_sz2;
+    uint8_t lookahead_sz2;
+} FURI_PACKED HeatshrinkStreamHeader;
+_Static_assert(sizeof(HeatshrinkStreamHeader) == 7, "Invalid HeatshrinkStreamHeader size");
+
+static int mtar_compressed_file_close(void* stream) {
+    CompressedStream* compressed_stream = stream;
+    if(compressed_stream) {
+        if(compressed_stream->decoder) {
+            compress_stream_decoder_free(compressed_stream->decoder);
         }
-        gunzip_free(gunzip);
+        storage_file_close(compressed_stream->stream);
+        storage_file_free(compressed_stream->stream);
+        free(compressed_stream);
     }
     return MTAR_ESUCCESS;
 }
 
-const struct mtar_ops gunzip_ops = {
-    .read = mtar_storage_gunzip_read,
-    .write = mtar_storage_gunzip_write,
-    .seek = mtar_storage_gunzip_seek,
-    .close = mtar_storage_gunzip_close,
+static int mtar_compressed_file_read(void* stream, void* data, unsigned size) {
+    CompressedStream* compressed_stream = stream;
+    bool read_success = compress_stream_decoder_read(compressed_stream->decoder, data, size);
+    return read_success ? (int)size : MTAR_EREADFAIL;
+}
+
+static int mtar_compressed_file_seek(void* stream, unsigned offset) {
+    CompressedStream* compressed_stream = stream;
+    bool success = false;
+    if(offset == 0 && compress_stream_decoder_tell(compressed_stream->decoder) != 0) {
+        uint32_t rewind_offset =
+            compressed_stream->type == CompressTypeHeatshrink ? sizeof(HeatshrinkStreamHeader) : 0;
+        success = storage_file_seek(compressed_stream->stream, rewind_offset, true) &&
+                  compress_stream_decoder_rewind(compressed_stream->decoder);
+    } else {
+        success = compress_stream_decoder_seek(compressed_stream->decoder, offset);
+    }
+    return success ? MTAR_ESUCCESS : MTAR_ESEEKFAIL;
+}
+
+const struct mtar_ops compressed_ops = {
+    .read = mtar_compressed_file_read,
+    .write = NULL, // not supported
+    .seek = mtar_compressed_file_seek,
+    .close = mtar_compressed_file_close,
 };
+
+//////////////////////////////////////////////////////////////////////////
 
 TarArchive* tar_archive_alloc(Storage* storage) {
     furi_check(storage);
     TarArchive* archive = malloc(sizeof(TarArchive));
     archive->storage = storage;
+    archive->stream = storage_file_alloc(archive->storage);
     archive->unpack_cb = NULL;
     return archive;
+}
+
+static int32_t file_read_cb(void* context, uint8_t* buffer, size_t buffer_size) {
+    File* file = context;
+    return storage_file_read(file, buffer, buffer_size);
 }
 
 bool tar_archive_open(TarArchive* archive, const char* path, TarOpenMode mode) {
     furi_check(archive);
     FS_AccessMode access_mode;
     FS_OpenMode open_mode;
+    bool compressed = false;
     int mtar_access = 0;
 
     switch(mode) {
-    case TAR_OPEN_MODE_READ:
+    case TarOpenModeRead:
         mtar_access = MTAR_READ;
         access_mode = FSAM_READ;
         open_mode = FSOM_OPEN_EXISTING;
         break;
-    case TAR_OPEN_MODE_WRITE:
+    case TarOpenModeWrite:
         mtar_access = MTAR_WRITE;
         access_mode = FSAM_WRITE;
         open_mode = FSOM_CREATE_ALWAYS;
+        break;
+    case TarOpenModeReadHeatshrink:
+    case TarOpenModeReadGzip:
+        mtar_access = MTAR_READ;
+        access_mode = FSAM_READ;
+        open_mode = FSOM_OPEN_EXISTING;
+        compressed = true;
         break;
     default:
         return false;
     }
 
-    File* stream = storage_file_alloc(archive->storage);
+    File* stream = archive->stream;
     if(!storage_file_open(stream, path, access_mode, open_mode)) {
-        storage_file_free(stream);
         return false;
     }
-    archive->total_size = storage_file_size(stream);
 
-    char* dot = strrchr(path, '.');
-    if(dot == NULL || strcmp(dot, ".gz") != 0 || mode != TAR_OPEN_MODE_READ) {
+    if(!compressed) {
         mtar_init(&archive->tar, mtar_access, &filesystem_ops, stream);
-    } else {
-        archive->gunzip = gunzip_alloc(stream, 32 * 1024, 10 * 1024);
+        return true;
+    }
 
-        int res = uzlib_gzip_parse_header(&archive->gunzip->uzlib);
-        if(res != TINF_OK) {
-            FURI_LOG_E(TAG, "Error parsing gzip header: %d\n", res);
+    CompressedStream* compressed_stream = malloc(sizeof(CompressedStream));
+    compressed_stream->stream = stream;
+
+    if(mode == TarOpenModeReadHeatshrink) {
+        /* Read and validate stream header */
+        HeatshrinkStreamHeader header;
+        if(storage_file_read(stream, &header, sizeof(HeatshrinkStreamHeader)) !=
+               sizeof(HeatshrinkStreamHeader) ||
+           header.magic != HEATSHRINK_MAGIC) {
             storage_file_close(stream);
-            storage_file_free(stream);
-            gunzip_free(archive->gunzip);
-            archive->gunzip = NULL;
+            free(compressed_stream);
             return false;
         }
 
-        mtar_init(&archive->tar, mtar_access, &gunzip_ops, archive->gunzip);
+        compressed_stream->type = CompressTypeHeatshrink;
+        compressed_stream->config.heatshrink.window_sz2 = header.window_sz2;
+        compressed_stream->config.heatshrink.lookahead_sz2 = header.lookahead_sz2;
+        compressed_stream->config.heatshrink.input_buffer_sz = FILE_BLOCK_SIZE;
+
+    } else if(mode == TarOpenModeReadGzip) {
+        compressed_stream->type = CompressTypeGzip;
+        compressed_stream->config.gzip.dict_sz = 32 * 1024;
+        compressed_stream->config.gzip.input_buffer_sz = FILE_BLOCK_SIZE;
     }
+
+    compressed_stream->decoder = compress_stream_decoder_alloc(
+        compressed_stream->type, &compressed_stream->config, file_read_cb, stream);
+    if(compressed_stream->decoder == NULL) {
+        storage_file_close(stream);
+        free(compressed_stream);
+        return false;
+    }
+
+    mtar_init(&archive->tar, mtar_access, &compressed_ops, compressed_stream);
 
     return true;
 }
@@ -265,6 +231,7 @@ void tar_archive_free(TarArchive* archive) {
     if(mtar_is_open(&archive->tar)) {
         mtar_close(&archive->tar);
     }
+    storage_file_free(archive->stream);
     free(archive);
 }
 
@@ -296,6 +263,21 @@ int32_t tar_archive_get_entries_count(TarArchive* archive) {
         counter = -1;
     }
     return counter;
+}
+
+bool tar_archive_get_read_progress(TarArchive* archive, int32_t* processed, int32_t* total) {
+    furi_check(archive);
+    if(mtar_access_mode(&archive->tar) != MTAR_READ) {
+        return false;
+    }
+
+    if(processed) {
+        *processed = storage_file_tell(archive->stream);
+    }
+    if(total) {
+        *total = storage_file_size(archive->stream);
+    }
+    return true;
 }
 
 bool tar_archive_dir_add_element(TarArchive* archive, const char* dirpath) {
@@ -378,8 +360,8 @@ static bool archive_extract_current_file(TarArchive* archive, const char* dst_pa
 
             if(archive->read_cb) {
                 archive->read_cb(
-                    archive->gunzip ? archive->gunzip->source_pos : archive->tar.pos,
-                    archive->total_size,
+                    storage_file_tell(archive->stream),
+                    storage_file_size(archive->stream),
                     archive->read_cb_context);
             }
         }
@@ -442,7 +424,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
 
     furi_string_free(converted_fname);
     furi_string_free(full_extracted_fname);
-    return success ? 0 : -1;
+    return success ? 0 : MTAR_EFAILURE;
 }
 
 bool tar_archive_unpack_to(

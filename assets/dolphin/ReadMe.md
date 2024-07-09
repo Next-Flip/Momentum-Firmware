@@ -43,6 +43,7 @@ Version: 1
 
 - `Width` - animation width in px (<= 128)
 - `Height` - animation height in px (<= 64)
+  > Note: Animations are aligned to bottom left, you can save a few bytes by trimming white borders on top and right of your animations (internal and blocking ones do this to save some precious DFU space)
 - `Passive frames` - number of bitmap frames for passive animation state
 - `Active frames` - number of bitmap frames for active animation state (can be 0)
 - `Frames order` - order of bitmap frames where first N frames are passive and following M are active. Each X number in order refers to bitmap frame, with name frame\_X.bm. This file must exist. Any X number can be repeated to refer same frame in animation.

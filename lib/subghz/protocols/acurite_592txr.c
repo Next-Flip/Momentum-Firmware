@@ -287,24 +287,7 @@ SubGhzProtocolStatus
 void ws_protocol_decoder_acurite_592txr_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderAcurite_592TXR* instance = context;
-    bool locale_is_metric = furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric;
-    furi_string_cat_printf(
-        output,
-        "%s\r\n%dbit\r\n"
-        "Key:0x%lX%08lX\r\n"
-        "Sn:0x%lX Ch:%d  Bat:%d\r\n"
-        "Temp:%3.1f %c Hum:%d%%",
-        instance->generic.protocol_name,
-        instance->generic.data_count_bit,
-        (uint32_t)(instance->generic.data >> 32),
-        (uint32_t)(instance->generic.data),
-        instance->generic.id,
-        instance->generic.channel,
-        instance->generic.battery_low,
-        (double)(locale_is_metric ? instance->generic.temp :
-                                    locale_celsius_to_fahrenheit(instance->generic.temp)),
-        locale_is_metric ? 'C' : 'F',
-        instance->generic.humidity);
+    ws_block_generic_get_string(&instance->generic, output);
 }
 
 void* ws_protocol_encoder_acurite_592txr_alloc(SubGhzEnvironment* environment) {

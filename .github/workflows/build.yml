@@ -59,14 +59,14 @@ jobs:
             exit 1
           fi
 
-      - name: "Check API versions for consistency with OFW release"
+      - name: "Check API versions for consistency with OFW release-candidate"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
         run: |
           set -e
           for symbols in targets/f*/api_symbols.csv; do
-            ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release/${symbols}" | head -n2)"
+            ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release-candidate/${symbols}" | head -n2)"
             our_api="$(head -n2 "${symbols}")"
             if [ "$our_api" != "$ofw_api" ] ; then
               echo API versions aren\'t matching OFW. Please update!

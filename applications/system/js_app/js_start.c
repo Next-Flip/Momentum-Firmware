@@ -1,7 +1,7 @@
 #include <cli/cli_i.h>
 
 static void js_cli_execute_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("js_cli", 1, cli, args, context);
+    cli_plugin_wrapper("js", cli, args, context);
 }
 
 void js_app_on_system_start(void) {

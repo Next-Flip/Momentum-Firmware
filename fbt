@@ -33,7 +33,7 @@ if [ -z "$FBT_NO_SYNC" ]; then
         _FBT_CLONE_FLAGS="$_FBT_CLONE_FLAGS --depth 1";
     fi
 
-    git submodule update --init --recursive --recursive $_FBT_CLONE_FLAGS;
+    git submodule update --init --recursive $_FBT_CLONE_FLAGS;
 fi
 
 $SCONS_EP $SCONS_DEFAULT_FLAGS "$@"

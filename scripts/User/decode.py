@@ -14,11 +14,11 @@ def padded_hex(i, l):
     return (
         "0x" + hex_result
         if num_hex_chars == given_len
-        else "?" * given_len
-        if num_hex_chars > given_len
-        else "0x" + extra_zeros + hex_result
-        if num_hex_chars < given_len
-        else None
+        else (
+            "?" * given_len
+            if num_hex_chars > given_len
+            else "0x" + extra_zeros + hex_result if num_hex_chars < given_len else None
+        )
     )
 
 

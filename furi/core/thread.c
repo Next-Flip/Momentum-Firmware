@@ -1,6 +1,7 @@
 #include "thread.h"
 #include "thread_i.h"
 #include "timer.h"
+#include "thread_list.h"
 #include "kernel.h"
 #include "memmgr.h"
 #include "memmgr_heap.h"
@@ -15,6 +16,8 @@
 #include <FreeRTOS.h>
 #include <stdint.h>
 #include <task.h>
+
+#include <task_control_block.h>
 
 #define TAG "FuriThread"
 
@@ -53,9 +56,8 @@ static void furi_thread_body(void* context) {
     furi_check(thread->state == FuriThreadStateStarting);
     furi_thread_set_state(thread, FuriThreadStateRunning);
 
-    TaskHandle_t task_handle = xTaskGetCurrentTaskHandle();
     if(thread->heap_trace_enabled == true) {
-        memmgr_heap_enable_thread_trace((FuriThreadId)task_handle);
+        memmgr_heap_enable_thread_trace(thread);
     }
 
     thread->ret = thread->callback(thread->context);
@@ -64,14 +66,14 @@ static void furi_thread_body(void* context) {
 
     if(thread->heap_trace_enabled == true) {
         furi_delay_ms(33);
-        thread->heap_size = memmgr_heap_get_thread_memory((FuriThreadId)task_handle);
+        thread->heap_size = memmgr_heap_get_thread_memory(thread);
         furi_log_print_format(
             thread->heap_size ? FuriLogLevelError : FuriLogLevelInfo,
             TAG,
             "%s allocation balance: %zu",
             thread->name ? thread->name : "Thread",
             thread->heap_size);
-        memmgr_heap_disable_thread_trace((FuriThreadId)task_handle);
+        memmgr_heap_disable_thread_trace(thread);
     }
 
     furi_check(thread->state == FuriThreadStateRunning);
@@ -126,11 +128,11 @@ FuriThread* furi_thread_alloc_service(
     uint32_t stack_size,
     FuriThreadCallback callback,
     void* context) {
-    FuriThread* thread = memmgr_aux_pool_alloc(sizeof(FuriThread));
+    FuriThread* thread = memmgr_alloc_from_pool(sizeof(FuriThread));
 
     furi_thread_init_common(thread);
 
-    thread->stack_buffer = memmgr_aux_pool_alloc(stack_size);
+    thread->stack_buffer = memmgr_alloc_from_pool(stack_size);
     thread->stack_size = stack_size;
     thread->is_service = true;
 
@@ -160,7 +162,7 @@ void furi_thread_free(FuriThread* thread) {
     furi_check(thread->is_service == false);
     // Cannot free a non-joined thread
     furi_check(thread->state == FuriThreadStateStopped);
-    furi_check(thread->task_handle == NULL);
+    furi_check(!thread->is_active);
 
     furi_thread_set_name(thread, NULL);
     furi_thread_set_appid(thread, NULL);
@@ -265,6 +267,29 @@ FuriThreadState furi_thread_get_state(FuriThread* thread) {
     return thread->state;
 }
 
+void furi_thread_set_signal_callback(
+    FuriThread* thread,
+    FuriThreadSignalCallback callback,
+    void* context) {
+    furi_check(thread);
+    furi_check(thread->state == FuriThreadStateStopped || thread == furi_thread_get_current());
+
+    thread->signal_callback = callback;
+    thread->signal_context = context;
+}
+
+bool furi_thread_signal(const FuriThread* thread, uint32_t signal, void* arg) {
+    furi_check(thread);
+
+    bool is_consumed = false;
+
+    if(thread->signal_callback) {
+        is_consumed = thread->signal_callback(signal, arg, thread->signal_context);
+    }
+
+    return is_consumed;
+}
+
 void furi_thread_start(FuriThread* thread) {
     furi_check(thread);
     furi_check(thread->callback);
@@ -276,16 +301,17 @@ void furi_thread_start(FuriThread* thread) {
     uint32_t stack_depth = thread->stack_size / sizeof(StackType_t);
     UBaseType_t priority = thread->priority ? thread->priority : FuriThreadPriorityNormal;
 
-    thread->task_handle = xTaskCreateStatic(
-        furi_thread_body,
-        thread->name,
-        stack_depth,
-        thread,
-        priority,
-        thread->stack_buffer,
-        &thread->container);
+    thread->is_active = true;
 
-    furi_check(thread->task_handle == (TaskHandle_t)&thread->container);
+    furi_check(
+        xTaskCreateStatic(
+            furi_thread_body,
+            thread->name,
+            stack_depth,
+            thread,
+            priority,
+            thread->stack_buffer,
+            &thread->container) == (TaskHandle_t)thread);
 }
 
 void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
@@ -293,8 +319,8 @@ void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
     if(thread) {
         // clear thread local storage
         vTaskSetThreadLocalStoragePointer(task, 0, NULL);
-        furi_check(thread->task_handle == task);
-        thread->task_handle = NULL;
+        furi_check(thread == (FuriThread*)task);
+        thread->is_active = false;
     }
 }
 
@@ -309,7 +335,7 @@ bool furi_thread_join(FuriThread* thread) {
     //
     // If your thread exited, but your app stuck here: some other thread uses
     // all cpu time, which delays kernel from releasing task handle
-    while(thread->task_handle) {
+    while(thread->is_active) {
         furi_delay_ms(10);
     }
 
@@ -318,7 +344,7 @@ bool furi_thread_join(FuriThread* thread) {
 
 FuriThreadId furi_thread_get_id(FuriThread* thread) {
     furi_check(thread);
-    return thread->task_handle;
+    return thread;
 }
 
 void furi_thread_enable_heap_trace(FuriThread* thread) {
@@ -510,33 +536,71 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     return rflags;
 }
 
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_item_count) {
-    uint32_t i, count;
-    TaskStatus_t* task;
+static const char* furi_thread_state_name(eTaskState state) {
+    switch(state) {
+    case eRunning:
+        return "Running";
+    case eReady:
+        return "Ready";
+    case eBlocked:
+        return "Blocked";
+    case eSuspended:
+        return "Suspended";
+    case eDeleted:
+        return "Deleted";
+    case eInvalid:
+        return "Invalid";
+    default:
+        return "?";
+    }
+}
 
-    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_item_count == 0U)) {
-        count = 0U;
-    } else {
-        vTaskSuspendAll();
+bool furi_thread_enumerate(FuriThreadList* thread_list) {
+    furi_check(thread_list);
+    furi_check(!FURI_IS_IRQ_MODE());
 
-        count = uxTaskGetNumberOfTasks();
-        task = pvPortMalloc(count * sizeof(TaskStatus_t));
+    bool result = false;
+
+    vTaskSuspendAll();
+    do {
+        uint32_t tick = furi_get_tick();
+        uint32_t count = uxTaskGetNumberOfTasks();
+
+        TaskStatus_t* task = pvPortMalloc(count * sizeof(TaskStatus_t));
+
+        if(!task) break;
+
         configRUN_TIME_COUNTER_TYPE total_run_time;
+        count = uxTaskGetSystemState(task, count, &total_run_time);
+        for(uint32_t i = 0U; i < count; i++) {
+            TaskControlBlock* tcb = (TaskControlBlock*)task[i].xHandle;
 
-        if(task != NULL) {
-            count = uxTaskGetSystemState(task, count, &total_run_time);
+            FuriThreadListItem* item =
+                furi_thread_list_get_or_insert(thread_list, (FuriThread*)task[i].xHandle);
 
-            for(i = 0U; (i < count) && (i < array_item_count); i++) {
-                thread_array[i] = (FuriThreadId)task[i].xHandle;
-            }
-            count = i;
+            item->thread = (FuriThreadId)task[i].xHandle;
+            item->app_id = furi_thread_get_appid(item->thread);
+            item->name = task[i].pcTaskName;
+            item->priority = task[i].uxCurrentPriority;
+            item->stack_address = (uint32_t)tcb->pxStack;
+            size_t thread_heap = memmgr_heap_get_thread_memory(item->thread);
+            item->heap = thread_heap == MEMMGR_HEAP_UNKNOWN ? 0u : thread_heap;
+            item->stack_size = (tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(StackType_t);
+            item->stack_min_free = furi_thread_get_stack_space(item->thread);
+            item->state = furi_thread_state_name(task[i].eCurrentState);
+            item->counter_previous = item->counter_current;
+            item->counter_current = task[i].ulRunTimeCounter;
+            item->tick = tick;
         }
-        (void)xTaskResumeAll();
 
         vPortFree(task);
-    }
+        furi_thread_list_process(thread_list, total_run_time, tick);
 
-    return count;
+        result = true;
+    } while(false);
+    (void)xTaskResumeAll();
+
+    return result;
 }
 
 const char* furi_thread_get_name(FuriThreadId thread_id) {

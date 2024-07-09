@@ -8,6 +8,7 @@
 #include <dolphin/dolphin_i.h>
 #include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
+#include <furi_hal.h>
 #include <m-array.h>
 #include <momentum/momentum.h>
 #include <m-string.h>
@@ -496,8 +497,7 @@ static bool menu_input_callback(InputEvent* event, void* context) {
 
 static void menu_scroll_timer_callback(void* context) {
     Menu* menu = context;
-    with_view_model(
-        menu->view, MenuModel * model, { model->scroll_counter++; }, true);
+    with_view_model(menu->view, MenuModel * model, { model->scroll_counter++; }, true);
 }
 
 static void menu_enter(void* context) {
@@ -559,8 +559,7 @@ void menu_free(Menu* menu) {
     furi_check(menu);
 
     menu_reset(menu);
-    with_view_model(
-        menu->view, MenuModel * model, { MenuItemArray_clear(model->items); }, false);
+    with_view_model(menu->view, MenuModel * model, { MenuItemArray_clear(model->items); }, false);
     view_free(menu->view);
     furi_timer_free(menu->scroll_timer);
 
