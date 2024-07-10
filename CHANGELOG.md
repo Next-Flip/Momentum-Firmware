@@ -10,6 +10,7 @@
   - UL: Add manually Hormann EcoStar, also Sommer FM238 option when default won't work (by @xMasterX)
   - OFW: Princeton protocol add custom guard time (by @Skorpionm & @xMasterX)
 - NFC:
+  - Add parser for CSC Service Works Reloadable Cash Card (by @zinongli)
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
