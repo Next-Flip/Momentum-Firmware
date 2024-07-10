@@ -73,6 +73,7 @@
 - JS: Refactored `widget` and `keyboard` modules with `ViewHolder`, fix crash (by @Willy-JL)
 - Desktop:
   - Slim down internal anims, +3.4kb free flash (by @Willy-JL)
+  - Desktop: Fix butthurt and levels, respects Flipper mood better (by @Willy-JL)
   - OFW: Allow to close blocking bad sd animation (by @skotopes)
 - RFID:
   - UL: Update T5577 password list (by @korden32)
