@@ -25,7 +25,9 @@
   - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
   - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
-- Desktop: Added TV animation from OFW which was missing (internal on OFW)
+- Desktop:
+  - Added TV animation from OFW which was missing (internal on OFW)
+  - OFW: New Intruder animation (by @Astrrra)
 - UL: BadKB: Add Finnish keyboard layout (by @nicou)
 - OFW: JS: New modules documentation added (by @rnadyrshin)
 - Updater:

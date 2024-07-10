@@ -186,7 +186,7 @@ Weight: 3
 Name: L2_Secret_door_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 26
+Min level: 23
 Max level: 30
 Weight: 3
 
@@ -195,7 +195,21 @@ Min butthurt: 0
 Max butthurt: 14
 Min level: 29
 Max level: 30
-Weight: 5
+Weight: 4
+
+Name: L1_Akira_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 4
+Max level: 30
+Weight: 4
+
+Name: L3_Intruder_alert_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 26
+Max level: 30
+Weight: 6
 
 Name: L1_3d_printing_128x64
 Min butthurt: 0
@@ -210,10 +224,3 @@ Max butthurt: 14
 Min level: 11
 Max level: 30
 Weight: 6
-
-Name: L1_Akira_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 4
-Max level: 30
-Weight: 5
