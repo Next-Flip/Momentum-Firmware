@@ -30,6 +30,7 @@ typedef struct {
     uint32_t repeater_state;
     bool enable_sound;
     bool autosave;
+    float hopping_threshold;
 } SubGhzLastSettings;
 
 SubGhzLastSettings* subghz_last_settings_alloc(void);

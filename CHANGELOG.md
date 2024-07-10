@@ -6,6 +6,7 @@
 ### Added:
 - Sub-GHz:
   - New Legrand doorbell protocol (by @user890104)
+  - Choose RSSI threshold for Hopping mode (by @Willy-JL)
   - UL: Novoferm remotes full support (by @xMasterX)
   - UL: Add manually Hormann EcoStar, also Sommer FM238 option when default won't work (by @xMasterX)
   - OFW: Princeton protocol add custom guard time (by @Skorpionm & @xMasterX)
