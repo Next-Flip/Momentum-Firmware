@@ -100,7 +100,6 @@ static int mtar_compressed_file_close(void* stream) {
             compress_stream_decoder_free(compressed_stream->decoder);
         }
         storage_file_close(compressed_stream->stream);
-        storage_file_free(compressed_stream->stream);
         free(compressed_stream);
     }
     return MTAR_ESUCCESS;
