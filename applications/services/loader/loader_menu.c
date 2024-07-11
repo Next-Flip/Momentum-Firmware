@@ -52,7 +52,7 @@ typedef struct {
 
 static void loader_menu_start(const char* name) {
     Loader* loader = furi_record_open(RECORD_LOADER);
-    loader_start_with_gui_error(loader, name, NULL);
+    loader_start_detached_with_gui_error(loader, name, NULL);
     furi_record_close(RECORD_LOADER);
 }
 
@@ -74,7 +74,15 @@ static uint32_t loader_menu_switch_to_primary(void* context) {
 
 static uint32_t loader_menu_exit(void* context) {
     UNUSED(context);
-    return VIEW_NONE;
+    return VIEW_IGNORE;
+}
+
+static bool loader_menu_back(void* context) {
+    LoaderMenu* loader_menu = context;
+    if(loader_menu->closed_cb) {
+        loader_menu->closed_cb(loader_menu->context);
+    }
+    return false;
 }
 
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
@@ -145,6 +153,8 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     view_dispatcher_add_view(app->view_dispatcher, LoaderMenuViewSettings, settings_view);
 
     view_dispatcher_enable_queue(app->view_dispatcher);
+    view_dispatcher_set_event_callback_context(app->view_dispatcher, loader_menu);
+    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, loader_menu_back);
     view_dispatcher_switch_to_view(
         app->view_dispatcher, app->settings ? LoaderMenuViewSettings : LoaderMenuViewPrimary);
 
@@ -173,10 +183,6 @@ static int32_t loader_menu_thread(void* p) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_run(app->view_dispatcher);
-
-    if(loader_menu->closed_cb) {
-        loader_menu->closed_cb(loader_menu->context);
-    }
 
     loader_menu_app_free(app);
 
