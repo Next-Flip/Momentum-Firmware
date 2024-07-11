@@ -4234,18 +4234,6 @@ address: 87 7C 00 00
 command: 25 DA 00 00
 #
 # Model: Dutch Originals Sound Bar
-name: Power
-type: parsed
-protocol: NEC
-address: 00 00 00 00
-command: 07 00 00 00
-#
-name: Next
-type: parsed
-protocol: NEC
-address: 00 00 00 00
-command: 15 00 00 00
-#
 name: Prev
 type: parsed
 protocol: NEC
