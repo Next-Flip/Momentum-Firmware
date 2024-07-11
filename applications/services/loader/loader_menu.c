@@ -111,7 +111,12 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     const FlipperExternalApplication* last =
         &FLIPPER_EXTERNAL_APPS[FLIPPER_EXTERNAL_APPS_COUNT - 1];
     menu_add_item(
-        app->primary_menu, last->name, last->icon, (uint32_t)last->path, loader_menu_callback, app);
+        app->primary_menu,
+        last->name,
+        last->icon,
+        (uint32_t)last->path,
+        loader_menu_callback,
+        menu);
     menu_add_item(
         app->primary_menu, "Settings", &A_Settings_14, 0, loader_menu_switch_to_settings, app);
 };
