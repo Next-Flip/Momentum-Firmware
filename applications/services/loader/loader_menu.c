@@ -16,9 +16,31 @@ struct LoaderMenu {
     bool settings;
     void (*closed_cb)(void*);
     void* context;
+    FuriPubSubSubscription* subscription;
 };
 
 static int32_t loader_menu_thread(void* p);
+
+static void loader_pubsub_callback(const void* message, void* context) {
+    const LoaderEvent* event = message;
+    LoaderMenu* loader_menu = context;
+
+    if(event->type == LoaderEventTypeApplicationBeforeLoad) {
+        if(loader_menu->thread) {
+            furi_thread_signal(loader_menu->thread, FuriSignalExit, NULL);
+            furi_thread_join(loader_menu->thread);
+            furi_thread_free(loader_menu->thread);
+            loader_menu->thread = NULL;
+        }
+    } else if(
+        event->type == LoaderEventTypeApplicationLoadFailed ||
+        event->type == LoaderEventTypeApplicationStopped) {
+        if(!loader_menu->thread) {
+            loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
+            furi_thread_start(loader_menu->thread);
+        }
+    }
+}
 
 LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings) {
     LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
@@ -27,13 +49,24 @@ LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool sett
     loader_menu->settings = settings;
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
     furi_thread_start(loader_menu->thread);
+
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    loader_menu->subscription =
+        furi_pubsub_subscribe(loader_get_pubsub(loader), loader_pubsub_callback, loader_menu);
+    furi_record_close(RECORD_LOADER);
     return loader_menu;
 }
 
 void loader_menu_free(LoaderMenu* loader_menu) {
     furi_assert(loader_menu);
-    furi_thread_join(loader_menu->thread);
-    furi_thread_free(loader_menu->thread);
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    furi_pubsub_unsubscribe(loader_get_pubsub(loader), loader_menu->subscription);
+    furi_record_close(RECORD_LOADER);
+
+    if(loader_menu->thread) {
+        furi_thread_join(loader_menu->thread);
+        furi_thread_free(loader_menu->thread);
+    }
     free(loader_menu);
 }
 
