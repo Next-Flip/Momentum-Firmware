@@ -15,6 +15,7 @@ struct LoaderMenu {
     FuriThread* thread;
     void (*closed_cb)(void*);
     void* context;
+    View* dummy;
     ViewHolder* view_holder;
     Loader* loader;
     FuriPubSubSubscription* subscription;
@@ -45,21 +46,43 @@ static void loader_pubsub_callback(const void* message, void* context) {
     }
 }
 
+static void loader_menu_set_view(LoaderMenu* loader_menu, View* view) {
+    view_holder_set_view(loader_menu->view_holder, view);
+    if(view) {
+        view_holder_update(view, loader_menu->view_holder);
+    }
+}
+
+static void loader_menu_dummy_draw(Canvas* canvas, void* context) {
+    UNUSED(context);
+
+    uint8_t x = canvas_width(canvas) / 2 - 24 / 2;
+    uint8_t y = canvas_height(canvas) / 2 - 24 / 2;
+
+    canvas_draw_icon(canvas, x, y, &I_LoadingHourglass_24x24);
+}
+
 LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings_only) {
     LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
     loader_menu->closed_cb = closed_cb;
     loader_menu->context = context;
+    loader_menu->settings_only = settings_only;
+    loader_menu->in_settings = settings_only;
+
+    loader_menu->dummy = view_alloc();
+    view_set_draw_callback(loader_menu->dummy, loader_menu_dummy_draw);
+
     Gui* gui = furi_record_open(RECORD_GUI);
     loader_menu->view_holder = view_holder_alloc();
     view_holder_attach_to_gui(loader_menu->view_holder, gui);
     view_holder_set_back_callback(loader_menu->view_holder, NULL, NULL);
-    view_holder_set_view(loader_menu->view_holder, NULL); // FIXME: loading
+    loader_menu_set_view(loader_menu, loader_menu->dummy);
     view_holder_start(loader_menu->view_holder);
+
     loader_menu->loader = furi_record_open(RECORD_LOADER);
     loader_menu->subscription = furi_pubsub_subscribe(
         loader_get_pubsub(loader_menu->loader), loader_pubsub_callback, loader_menu);
-    loader_menu->settings_only = settings_only;
-    loader_menu->in_settings = loader_menu->settings_only;
+
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
     furi_thread_start(loader_menu->thread);
     return loader_menu;
@@ -67,14 +90,20 @@ LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool sett
 
 void loader_menu_free(LoaderMenu* loader_menu) {
     furi_assert(loader_menu);
+
     furi_pubsub_unsubscribe(loader_get_pubsub(loader_menu->loader), loader_menu->subscription);
     furi_record_close(RECORD_LOADER);
+
     if(loader_menu->thread) {
         furi_thread_join(loader_menu->thread);
         furi_thread_free(loader_menu->thread);
     }
+
     view_holder_free(loader_menu->view_holder);
     furi_record_close(RECORD_GUI);
+
+    view_free(loader_menu->dummy);
+
     free(loader_menu);
 }
 
@@ -92,14 +121,14 @@ static void loader_menu_callback(void* context, uint32_t index) {
 static void loader_menu_switch_to_settings(void* context, uint32_t index) {
     UNUSED(index);
     LoaderMenuApp* app = context;
-    view_holder_set_view(app->loader_menu->view_holder, submenu_get_view(app->settings_menu));
+    loader_menu_set_view(app->loader_menu, submenu_get_view(app->settings_menu));
     app->loader_menu->in_settings = true;
 }
 
 static void loader_menu_back(void* context) {
     LoaderMenuApp* app = context;
     if(app->loader_menu->in_settings && !app->loader_menu->settings_only) {
-        view_holder_set_view(app->loader_menu->view_holder, menu_get_view(app->primary_menu));
+        loader_menu_set_view(app->loader_menu, menu_get_view(app->primary_menu));
         app->loader_menu->in_settings = false;
     } else {
         furi_thread_flags_set(furi_thread_get_id(app->loader_menu->thread), 0);
@@ -170,8 +199,7 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
 
     View* view = app->loader_menu->in_settings ? submenu_get_view(app->settings_menu) :
                                                  menu_get_view(app->primary_menu);
-    view_holder_set_view(app->loader_menu->view_holder, view);
-    view_holder_update(view, app->loader_menu->view_holder);
+    loader_menu_set_view(app->loader_menu, view);
     view_holder_set_back_callback(app->loader_menu->view_holder, loader_menu_back, app);
 
     return app;
@@ -179,7 +207,7 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
 
 static void loader_menu_app_free(LoaderMenuApp* app) {
     view_holder_set_back_callback(app->loader_menu->view_holder, NULL, NULL);
-    view_holder_set_view(app->loader_menu->view_holder, NULL); // FIXME: loading?
+    loader_menu_set_view(app->loader_menu, app->loader_menu->dummy);
 
     if(!app->loader_menu->settings_only) {
         menu_free(app->primary_menu);
