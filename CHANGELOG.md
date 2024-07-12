@@ -25,6 +25,7 @@
   - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
   - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
 - FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
+- GUI: Additional `menu_get_selected_item()` API (by @Willy-JL)
 - Desktop:
   - Added TV animation from OFW which was missing (internal on OFW)
   - OFW: New Intruder animation (by @Astrrra)
@@ -106,6 +107,7 @@
 - Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
+- GUI: Return user-provided index from `menu_set_selected_item()`  like `submenu` equivalent (by @Willy-JL)
 - JS:
   - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
   - OFW: Disable logging in mjs +2k free flash (by @hedger)

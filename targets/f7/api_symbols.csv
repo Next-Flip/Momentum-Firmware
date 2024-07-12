@@ -2573,6 +2573,7 @@ Function,+,memset,void*,"void*, int, size_t"
 Function,+,menu_add_item,void,"Menu*, const char*, const Icon*, uint32_t, MenuItemCallback, void*"
 Function,+,menu_alloc,Menu*,
 Function,+,menu_free,void,Menu*
+Function,+,menu_get_selected_item,uint32_t,Menu*
 Function,+,menu_get_view,View*,Menu*
 Function,+,menu_reset,void,Menu*
 Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
