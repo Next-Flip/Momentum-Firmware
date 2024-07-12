@@ -1,5 +1,5 @@
 #include <gui/gui.h>
-#include <gui/view_dispatcher.h>
+#include <gui/view_holder.h>
 #include <gui/modules/menu.h>
 #include <gui/modules/submenu.h>
 #include <assets_icons.h>
@@ -13,10 +13,13 @@
 
 struct LoaderMenu {
     FuriThread* thread;
-    bool settings;
     void (*closed_cb)(void*);
     void* context;
+    ViewHolder* view_holder;
+    Loader* loader;
     FuriPubSubSubscription* subscription;
+    bool settings_only;
+    bool in_settings;
 };
 
 static int32_t loader_menu_thread(void* p);
@@ -27,7 +30,7 @@ static void loader_pubsub_callback(const void* message, void* context) {
 
     if(event->type == LoaderEventTypeApplicationBeforeLoad) {
         if(loader_menu->thread) {
-            furi_thread_signal(loader_menu->thread, FuriSignalExit, NULL);
+            furi_thread_flags_set(furi_thread_get_id(loader_menu->thread), 0);
             furi_thread_join(loader_menu->thread);
             furi_thread_free(loader_menu->thread);
             loader_menu->thread = NULL;
@@ -42,80 +45,68 @@ static void loader_pubsub_callback(const void* message, void* context) {
     }
 }
 
-LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings) {
+LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings_only) {
     LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
     loader_menu->closed_cb = closed_cb;
     loader_menu->context = context;
-    loader_menu->settings = settings;
+    Gui* gui = furi_record_open(RECORD_GUI);
+    loader_menu->view_holder = view_holder_alloc();
+    view_holder_attach_to_gui(loader_menu->view_holder, gui);
+    view_holder_set_back_callback(loader_menu->view_holder, NULL, NULL);
+    view_holder_set_view(loader_menu->view_holder, NULL); // FIXME: loading
+    view_holder_start(loader_menu->view_holder);
+    loader_menu->loader = furi_record_open(RECORD_LOADER);
+    loader_menu->subscription = furi_pubsub_subscribe(
+        loader_get_pubsub(loader_menu->loader), loader_pubsub_callback, loader_menu);
+    loader_menu->settings_only = settings_only;
+    loader_menu->in_settings = loader_menu->settings_only;
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
     furi_thread_start(loader_menu->thread);
-
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    loader_menu->subscription =
-        furi_pubsub_subscribe(loader_get_pubsub(loader), loader_pubsub_callback, loader_menu);
-    furi_record_close(RECORD_LOADER);
     return loader_menu;
 }
 
 void loader_menu_free(LoaderMenu* loader_menu) {
     furi_assert(loader_menu);
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    furi_pubsub_unsubscribe(loader_get_pubsub(loader), loader_menu->subscription);
+    furi_pubsub_unsubscribe(loader_get_pubsub(loader_menu->loader), loader_menu->subscription);
     furi_record_close(RECORD_LOADER);
-
     if(loader_menu->thread) {
         furi_thread_join(loader_menu->thread);
         furi_thread_free(loader_menu->thread);
     }
+    view_holder_free(loader_menu->view_holder);
+    furi_record_close(RECORD_GUI);
     free(loader_menu);
 }
 
-typedef enum {
-    LoaderMenuViewPrimary,
-    LoaderMenuViewSettings,
-} LoaderMenuView;
-
 typedef struct {
-    Gui* gui;
-    ViewDispatcher* view_dispatcher;
+    LoaderMenu* loader_menu;
     Menu* primary_menu;
     Submenu* settings_menu;
-    bool settings;
 } LoaderMenuApp;
 
-static void loader_menu_start(const char* name) {
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    loader_start_detached_with_gui_error(loader, name, NULL);
-    furi_record_close(RECORD_LOADER);
-}
-
 static void loader_menu_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    loader_menu_start((const char*)index);
+    LoaderMenu* loader_menu = context;
+    loader_start_detached_with_gui_error(loader_menu->loader, (const char*)index, NULL);
 }
 
 static void loader_menu_switch_to_settings(void* context, uint32_t index) {
     UNUSED(index);
     LoaderMenuApp* app = context;
-    view_dispatcher_switch_to_view(app->view_dispatcher, LoaderMenuViewSettings);
+    view_holder_set_view(app->loader_menu->view_holder, submenu_get_view(app->settings_menu));
+    app->loader_menu->in_settings = true;
 }
 
-static uint32_t loader_menu_switch_to_primary(void* context) {
-    UNUSED(context);
-    return LoaderMenuViewPrimary;
-}
-
-static uint32_t loader_menu_exit(void* context) {
-    UNUSED(context);
-    return VIEW_IGNORE;
-}
-
-static bool loader_menu_back(void* context) {
-    LoaderMenu* loader_menu = context;
-    if(loader_menu->closed_cb) {
-        loader_menu->closed_cb(loader_menu->context);
+static void loader_menu_back(void* context) {
+    LoaderMenuApp* app = context;
+    if(app->loader_menu->in_settings && !app->loader_menu->settings_only) {
+        view_holder_set_view(app->loader_menu->view_holder, menu_get_view(app->primary_menu));
+        app->loader_menu->in_settings = false;
+    } else {
+        furi_thread_flags_set(furi_thread_get_id(app->loader_menu->thread), 0);
+        if(app->loader_menu->closed_cb) {
+            app->loader_menu->closed_cb(app->loader_menu->context);
+        }
     }
-    return false;
 }
 
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
@@ -127,8 +118,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         loader_menu_callback,
         (void*)menu);
 
-    Loader* loader = furi_record_open(RECORD_LOADER);
-    MenuAppList_t* menu_apps = loader_get_menu_apps(loader);
+    MenuAppList_t* menu_apps = loader_get_menu_apps(menu->loader);
     for(size_t i = 0; i < MenuAppList_size(*menu_apps); i++) {
         const MenuApp* menu_app = MenuAppList_get(*menu_apps, i);
         menu_add_item(
@@ -139,7 +129,6 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             loader_menu_callback,
             (void*)menu);
     }
-    furi_record_close(RECORD_LOADER);
 
     const FlipperExternalApplication* last =
         &FLIPPER_EXTERNAL_APPS[FLIPPER_EXTERNAL_APPS_COUNT - 1];
@@ -167,49 +156,36 @@ static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_men
 
 static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     LoaderMenuApp* app = malloc(sizeof(LoaderMenuApp));
-    app->gui = furi_record_open(RECORD_GUI);
-    app->view_dispatcher = view_dispatcher_alloc();
-    app->settings = loader_menu->settings;
+    app->loader_menu = loader_menu;
 
     // Primary menu
-    if(!app->settings) {
+    if(!app->loader_menu->settings_only) {
         app->primary_menu = menu_alloc();
         loader_menu_build_menu(app, loader_menu);
-        View* primary_view = menu_get_view(app->primary_menu);
-        view_set_context(primary_view, app->primary_menu);
-        view_set_previous_callback(primary_view, loader_menu_exit);
-        view_dispatcher_add_view(app->view_dispatcher, LoaderMenuViewPrimary, primary_view);
     }
 
     // Settings menu
     app->settings_menu = submenu_alloc();
     loader_menu_build_submenu(app, loader_menu);
-    View* settings_view = submenu_get_view(app->settings_menu);
-    view_set_context(settings_view, app->settings_menu);
-    view_set_previous_callback(
-        settings_view, app->settings ? loader_menu_exit : loader_menu_switch_to_primary);
-    view_dispatcher_add_view(app->view_dispatcher, LoaderMenuViewSettings, settings_view);
 
-    view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, loader_menu);
-    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, loader_menu_back);
-    view_dispatcher_switch_to_view(
-        app->view_dispatcher, app->settings ? LoaderMenuViewSettings : LoaderMenuViewPrimary);
+    View* view = app->loader_menu->in_settings ? submenu_get_view(app->settings_menu) :
+                                                 menu_get_view(app->primary_menu);
+    view_holder_set_view(app->loader_menu->view_holder, view);
+    view_holder_update(view, app->loader_menu->view_holder);
+    view_holder_set_back_callback(app->loader_menu->view_holder, loader_menu_back, app);
 
     return app;
 }
 
 static void loader_menu_app_free(LoaderMenuApp* app) {
-    if(!app->settings) {
-        view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewPrimary);
+    view_holder_set_back_callback(app->loader_menu->view_holder, NULL, NULL);
+    view_holder_set_view(app->loader_menu->view_holder, NULL); // FIXME: loading?
+
+    if(!app->loader_menu->settings_only) {
         menu_free(app->primary_menu);
     }
-    view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewSettings);
     submenu_free(app->settings_menu);
 
-    view_dispatcher_free(app->view_dispatcher);
-
-    furi_record_close(RECORD_GUI);
     free(app);
 }
 
@@ -219,8 +195,7 @@ static int32_t loader_menu_thread(void* p) {
 
     LoaderMenuApp* app = loader_menu_app_alloc(loader_menu);
 
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-    view_dispatcher_run(app->view_dispatcher);
+    furi_thread_flags_wait(0, FuriFlagWaitAll, FuriWaitForever);
 
     loader_menu_app_free(app);
 
