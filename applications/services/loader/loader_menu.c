@@ -19,6 +19,8 @@ struct LoaderMenu {
     ViewHolder* view_holder;
     Loader* loader;
     FuriPubSubSubscription* subscription;
+    uint32_t selected_primary;
+    uint32_t selected_setting;
     bool settings_only;
     bool in_settings;
 };
@@ -62,10 +64,18 @@ static void loader_menu_dummy_draw(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, x, y, &I_LoadingHourglass_24x24);
 }
 
+enum {
+    LoaderMenuIndexApps = (uint32_t)-1,
+    LoaderMenuIndexLast = (uint32_t)-2,
+    LoaderMenuIndexSettings = (uint32_t)-3,
+};
+
 LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings_only) {
     LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
     loader_menu->closed_cb = closed_cb;
     loader_menu->context = context;
+    loader_menu->selected_primary = LoaderMenuIndexApps;
+    loader_menu->selected_setting = 0;
     loader_menu->settings_only = settings_only;
     loader_menu->in_settings = settings_only;
 
@@ -113,16 +123,38 @@ typedef struct {
     Submenu* settings_menu;
 } LoaderMenuApp;
 
-static void loader_menu_callback(void* context, uint32_t index) {
-    LoaderMenu* loader_menu = context;
-    loader_start_detached_with_gui_error(loader_menu->loader, (const char*)index, NULL);
+static void loader_menu_primary_callback(void* context, uint32_t index) {
+    LoaderMenuApp* app = context;
+    const char* launch = NULL;
+    switch(index) {
+    case LoaderMenuIndexApps:
+        launch = LOADER_APPLICATIONS_NAME;
+        break;
+    case LoaderMenuIndexLast:
+        launch = FLIPPER_EXTERNAL_APPS[FLIPPER_EXTERNAL_APPS_COUNT - 1].name;
+        break;
+    case LoaderMenuIndexSettings:
+        loader_menu_set_view(app->loader_menu, submenu_get_view(app->settings_menu));
+        app->loader_menu->in_settings = true;
+        break;
+    default:
+        MenuAppList_t* menu_apps = loader_get_menu_apps(app->loader_menu->loader);
+        if(index < MenuAppList_size(*menu_apps)) {
+            launch = MenuAppList_get(*menu_apps, index)->exe;
+        }
+        break;
+    }
+    if(launch) {
+        loader_start_detached_with_gui_error(app->loader_menu->loader, launch, NULL);
+    }
 }
 
-static void loader_menu_switch_to_settings(void* context, uint32_t index) {
-    UNUSED(index);
+static void loader_menu_settings_callback(void* context, uint32_t index) {
     LoaderMenuApp* app = context;
-    loader_menu_set_view(app->loader_menu, submenu_get_view(app->settings_menu));
-    app->loader_menu->in_settings = true;
+    if(index < FLIPPER_SETTINGS_APPS_COUNT) {
+        const char* launch = FLIPPER_SETTINGS_APPS[index].name;
+        loader_start_detached_with_gui_error(app->loader_menu->loader, launch, NULL);
+    }
 }
 
 static void loader_menu_back(void* context) {
@@ -143,9 +175,9 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         app->primary_menu,
         LOADER_APPLICATIONS_NAME,
         &A_Plugins_14,
-        (uint32_t)LOADER_APPLICATIONS_NAME,
-        loader_menu_callback,
-        (void*)menu);
+        LoaderMenuIndexApps,
+        loader_menu_primary_callback,
+        app);
 
     MenuAppList_t* menu_apps = loader_get_menu_apps(menu->loader);
     for(size_t i = 0; i < MenuAppList_size(*menu_apps); i++) {
@@ -154,9 +186,9 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             app->primary_menu,
             menu_app->label,
             menu_app->icon,
-            (uint32_t)menu_app->exe,
-            loader_menu_callback,
-            (void*)menu);
+            i,
+            loader_menu_primary_callback,
+            app);
     }
 
     const FlipperExternalApplication* last =
@@ -165,11 +197,18 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         app->primary_menu,
         last->name,
         last->icon,
-        (uint32_t)last->path,
-        loader_menu_callback,
-        menu);
+        LoaderMenuIndexLast,
+        loader_menu_primary_callback,
+        app);
     menu_add_item(
-        app->primary_menu, "Settings", &A_Settings_14, 0, loader_menu_switch_to_settings, app);
+        app->primary_menu,
+        "Settings",
+        &A_Settings_14,
+        LoaderMenuIndexSettings,
+        loader_menu_primary_callback,
+        app);
+
+    menu_set_selected_item(app->primary_menu, menu->selected_primary);
 };
 
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
@@ -177,10 +216,11 @@ static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_men
         submenu_add_item(
             app->settings_menu,
             FLIPPER_SETTINGS_APPS[i].name,
-            (uint32_t)FLIPPER_SETTINGS_APPS[i].name,
-            loader_menu_callback,
-            loader_menu);
+            i,
+            loader_menu_settings_callback,
+            app);
     }
+    submenu_set_selected_item(app->settings_menu, loader_menu->selected_setting);
 }
 
 static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
@@ -210,8 +250,11 @@ static void loader_menu_app_free(LoaderMenuApp* app) {
     loader_menu_set_view(app->loader_menu, app->loader_menu->dummy);
 
     if(!app->loader_menu->settings_only) {
+        app->loader_menu->selected_primary = menu_get_selected_item(app->primary_menu);
         menu_free(app->primary_menu);
     }
+    app->loader_menu->selected_setting =
+        app->loader_menu->in_settings ? submenu_get_selected_item(app->settings_menu) : 0;
     submenu_free(app->settings_menu);
 
     free(app);
