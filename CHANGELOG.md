@@ -75,9 +75,11 @@
   - Slim down internal anims, +3.4kb free flash (by @Willy-JL)
   - Desktop: Fix butthurt and levels, respects Flipper mood better (by @Willy-JL)
   - OFW: Allow to close blocking bad sd animation (by @skotopes)
+- NFC: Updated MFC dict, 135 new keys (from RRG pm3 repo & UberGuidoZ dump)
 - RFID:
   - UL: Update T5577 password list (by @korden32)
   - UL: DEZ 8 display form for EM4100 (by @korden32 & @mishamyte)
+- Infrared: Added missing Koro Box entry to TV universal remote (by @skyhawkillusions)
 - OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
 - CLI:
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
