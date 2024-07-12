@@ -13,6 +13,7 @@ except UnicodeDecodeError:
     )
     exit()
 
+total = 0
 for i, line in enumerate(lines):
     lines[i] = line = line.strip()
     if line.startswith("#"):
@@ -21,9 +22,12 @@ for i, line in enumerate(lines):
     if not line:
         continue
     if len(line) != 12 or any(char not in string.hexdigits for char in line):
-        print(f"line {i + 1} is not correct: {line}")
+        print(f"Line {i + 1} is not correct: {line}")
+    else:
+        total = total + 1
     for j in reversed(range(i + 1, len(lines))):
         if lines[j].upper().strip() == line:
             del lines[j]
 
 file.write_text("\n".join(line for line in lines if line.removeprefix("#")))
+print(f"Total keys: {total}")
