@@ -103,7 +103,9 @@
   - UL: Sync signal delete scene with OFW (by @xMasterX)
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
-- Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+- Archive:
+  - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+  - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
