@@ -24,7 +24,9 @@
 - JS:
   - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
   - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
-- FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
+- FBT:
+  - New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
+  - Close current app when flashing firmware (by @Willy-JL)
 - GUI: Additional `menu_get_selected_item()` API (by @Willy-JL)
 - Desktop:
   - Added TV animation from OFW which was missing (internal on OFW)
@@ -103,7 +105,9 @@
   - UL: Sync signal delete scene with OFW (by @xMasterX)
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
-- Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+- Archive:
+  - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+  - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
 - FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
@@ -113,7 +117,9 @@
   - OFW: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: RPC: Fix input lockup on disconnect (by @Willy-JL)
 - OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
-- OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+- NFC:
+  - OFW: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+  - OFW: ISO15693 Render Typo Fix (by @zinongli)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)

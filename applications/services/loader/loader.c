@@ -150,7 +150,6 @@ static void loader_show_gui_error(
             // Generic error
             dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
 
-            furi_string_replace(error_message, ":", "\n");
             furi_string_replace(error_message, "/ext/apps/", "");
             furi_string_replace(error_message, ", ", "\n");
             furi_string_replace(error_message, ": ", "\n");

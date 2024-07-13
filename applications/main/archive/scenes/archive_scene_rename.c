@@ -28,7 +28,7 @@ void archive_scene_rename_on_enter(void* context) {
     ArchiveTabEnum tab = archive_get_tab(archive->browser);
     bool hide_ext = tab != ArchiveTabBrowser && tab != ArchiveTabInternal;
 
-    if(is_file && !hide_ext) {
+    if(is_file && hide_ext) {
         path_extract_ext_str(current->path, archive->file_extension);
         path_extract_filename(current->path, path_name, true);
     } else {
