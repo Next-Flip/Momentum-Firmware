@@ -53,7 +53,6 @@ static void
             CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(temp_path)));
             app->mainmenu_app_index = CharList_size(app->mainmenu_app_labels) - 1;
             app->save_mainmenu_apps = true;
-            app->require_reboot = true;
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, MomentumAppSceneInterfaceMainmenu);
         }
