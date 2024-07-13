@@ -117,7 +117,9 @@
   - OFW: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: RPC: Fix input lockup on disconnect (by @Willy-JL)
 - OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
-- OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+- NFC:
+  - OFW: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+  - OFW: ISO15693 Render Typo Fix (by @zinongli)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
