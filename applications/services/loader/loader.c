@@ -9,11 +9,6 @@
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
-#include <toolbox/stream/file_stream.h>
-#include <core/dangerous_defines.h>
-#include <gui/icon_i.h>
-
-#include <momentum/momentum.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -268,11 +263,6 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
     return loader->pubsub;
 }
 
-MenuAppList_t* loader_get_menu_apps(Loader* loader) {
-    furi_assert(loader);
-    return &loader->menu_apps;
-}
-
 bool loader_signal(Loader* loader, uint32_t signal, void* arg) {
     furi_check(loader);
 
@@ -340,54 +330,6 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
 
 // implementation
 
-bool loader_menu_load_fap_meta(
-    Storage* storage,
-    FuriString* path,
-    FuriString* name,
-    const Icon** icon) {
-    *icon = NULL;
-    uint8_t* icon_buf = malloc(CUSTOM_ICON_MAX_SIZE);
-    if(!flipper_application_load_name_and_icon(path, storage, &icon_buf, name)) {
-        free(icon_buf);
-        icon_buf = NULL;
-        return false;
-    }
-    *icon = malloc(sizeof(Icon));
-    FURI_CONST_ASSIGN((*icon)->frame_count, 1);
-    FURI_CONST_ASSIGN((*icon)->frame_rate, 1);
-    FURI_CONST_ASSIGN((*icon)->width, 10);
-    FURI_CONST_ASSIGN((*icon)->height, 10);
-    FURI_CONST_ASSIGN_PTR((*icon)->frames, malloc(sizeof(const uint8_t*)));
-    FURI_CONST_ASSIGN_PTR((*icon)->frames[0], icon_buf);
-    return true;
-}
-
-static void loader_make_menu_file(Storage* storage) {
-    Stream* new = file_stream_alloc(storage);
-    if(!storage_file_exists(storage, MAINMENU_APPS_PATH)) {
-        if(file_stream_open(new, MAINMENU_APPS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-            stream_write_format(new, "MenuAppList Version %u\n", 1);
-            for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-                stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
-            }
-            for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
-                stream_write_format(new, "%s\n", FLIPPER_EXTERNAL_APPS[i].name);
-            }
-            // Old additional external apps
-            Stream* old = file_stream_alloc(storage);
-            if(file_stream_open(old, CFG_PATH("xtreme_apps.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
-                stream_copy(old, new, stream_size(old));
-            }
-            file_stream_close(old);
-            stream_free(old);
-            storage_common_remove(storage, CFG_PATH("xtreme_apps.txt"));
-        }
-        file_stream_close(new);
-    }
-    file_stream_close(new);
-    stream_free(new);
-}
-
 static Loader* loader_alloc(void) {
     Loader* loader = malloc(sizeof(Loader));
     loader->pubsub = furi_pubsub_alloc();
@@ -398,82 +340,6 @@ static Loader* loader_alloc(void) {
     loader->app.thread = NULL;
     loader->app.insomniac = false;
     loader->app.fap = NULL;
-    MenuAppList_init(loader->menu_apps);
-
-    if(!furi_hal_is_normal_boot()) return loader;
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
-    FuriString* name = furi_string_alloc();
-    do {
-        if(!file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
-            file_stream_close(stream);
-            loader_make_menu_file(storage);
-            if(!file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
-                break;
-        }
-
-        uint32_t version;
-        if(!stream_read_line(stream, line) ||
-           sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
-           version > 1) {
-            file_stream_close(stream);
-            storage_common_remove(storage, MAINMENU_APPS_PATH);
-            loader_make_menu_file(storage);
-            if(!file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
-                break;
-            if(!stream_read_line(stream, line) ||
-               sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
-               version > 1)
-                break;
-        }
-
-        while(stream_read_line(stream, line)) {
-            furi_string_replace_all(line, "\r", "");
-            furi_string_replace_all(line, "\n", "");
-            if(version == 0) {
-                if(!furi_string_cmp(line, "RFID")) {
-                    furi_string_set(line, "125 kHz RFID");
-                } else if(!furi_string_cmp(line, "SubGHz")) {
-                    furi_string_set(line, "Sub-GHz");
-                }
-            }
-            const char* label = NULL;
-            const Icon* icon = NULL;
-            const char* exe = NULL;
-            if(storage_file_exists(storage, furi_string_get_cstr(line))) {
-                if(loader_menu_load_fap_meta(storage, line, name, &icon)) {
-                    label = strdup(furi_string_get_cstr(name));
-                    exe = strdup(furi_string_get_cstr(line));
-                }
-            } else {
-                for(size_t i = 0; !exe && i < FLIPPER_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
-                        label = FLIPPER_APPS[i].name;
-                        icon = FLIPPER_APPS[i].icon;
-                        exe = FLIPPER_APPS[i].name;
-                    }
-                }
-                for(size_t i = 0; !exe && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
-                        label = FLIPPER_EXTERNAL_APPS[i].name;
-                        icon = FLIPPER_EXTERNAL_APPS[i].icon;
-                        exe = FLIPPER_EXTERNAL_APPS[i].name;
-                    }
-                }
-            }
-            if(label && exe && icon) {
-                MenuAppList_push_back(
-                    loader->menu_apps, (MenuApp){.label = label, .icon = icon, .exe = exe});
-            }
-        }
-
-    } while(false);
-    furi_string_free(name);
-    furi_string_free(line);
-    file_stream_close(stream);
-    stream_free(stream);
-    furi_record_close(RECORD_STORAGE);
     return loader;
 }
 
