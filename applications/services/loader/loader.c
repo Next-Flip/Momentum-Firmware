@@ -741,9 +741,10 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
 
 // process messages
 
-static void loader_do_menu_show(Loader* loader, bool settings) {
+static void loader_do_menu_show(Loader* loader, bool settings_only) {
     if(!loader->loader_menu) {
-        loader->loader_menu = loader_menu_alloc(loader_menu_closed_callback, loader, settings);
+        loader->loader_menu =
+            loader_menu_alloc(loader_menu_closed_callback, loader, settings_only);
     }
 }
 
