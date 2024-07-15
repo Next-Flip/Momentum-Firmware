@@ -6,6 +6,7 @@ import os
 
 artifact_tgz = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG']}.tgz"
 artifact_sdk = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG'].replace('update', 'sdk')}.zip"
+artifact_lab = f"https://lab.flipper.net/?url={artifact_tgz}&channel=dev-cfw&version={os.environ['VERSION_TAG']}"
 
 
 if __name__ == "__main__":
@@ -51,8 +52,13 @@ if __name__ == "__main__":
                             "value": f"[Changes since {release}]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)"
                         },
                         {
-                            "name": "Download artifacts:",
-                            "value": f"- [Download Firmware TGZ]({artifact_tgz})\n- [SDK (for development)]({artifact_sdk})"
+                            "name": "Firmware artifacts:",
+                            "value": "\n".join([
+                                f"- [🖥️ Install with Web Updater](https://momentum-fw.dev/update)",
+                                f"- [☁️ Open in Flipper Lab/App]({artifact_lab})",
+                                f"- [🐬 Download Firmware TGZ]({artifact_tgz})",
+                                f"- [🛠️ SDK (for development)]({artifact_sdk})",
+                            ])
                         }
                     ],
                     "timestamp": dt.datetime.utcnow().isoformat()
