@@ -53,7 +53,7 @@
   - Picopass: Acknowledgements page, Elite VB6 RNG keygen attack, plugin and app improvements (by @bettse)
   - Seader: Handle SAM removal better (by @bettse)
   - NFC Magic: Gen1 backdoor read support (by @Astrrra)
-  - Authenticator: Fix URL format (by @akopachov)
+  - Authenticator: Support multiple BT profiles, fix URL format (by @akopachov)
   - NFC Playlist: Various fixes and improvements, new icon (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
   - ESP32CAM Camera Suite: Fix pinout diagram GND, fix horizontal flip (by @CodyTolene)
