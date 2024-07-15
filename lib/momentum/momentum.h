@@ -12,9 +12,9 @@ extern "C" {
 #endif
 
 #define MOMENTUM_SETTINGS_PATH CFG_PATH("momentum_settings.txt")
-#define ASSET_PACKS_PATH EXT_PATH("asset_packs")
-#define MAINMENU_APPS_PATH CFG_PATH("mainmenu_apps.txt")
-#define ASSET_PACKS_NAME_LEN 32
+#define ASSET_PACKS_PATH       EXT_PATH("asset_packs")
+#define MAINMENU_APPS_PATH     CFG_PATH("mainmenu_apps.txt")
+#define ASSET_PACKS_NAME_LEN   32
 
 typedef enum {
     BatteryIconOff,

@@ -6,18 +6,20 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define DESKTOP_SETTINGS_PATH INT_PATH(".desktop.settings")
-#define DESKTOP_SETTINGS_MAGIC (0x17)
 #define DESKTOP_SETTINGS_VER (11)
 
-#define DESKTOP_KEYBINDS_PATH CFG_PATH("desktop.keybinds")
-#define DESKTOP_KEYBINDS_MAGIC (0x14)
+#define DESKTOP_SETTINGS_PATH  INT_PATH(".desktop.settings")
+#define DESKTOP_SETTINGS_MAGIC (0x17)
+
 #define DESKTOP_KEYBINDS_VER (1)
+
+#define DESKTOP_KEYBINDS_PATH  CFG_PATH("desktop.keybinds")
+#define DESKTOP_KEYBINDS_MAGIC (0x14)
 
 #define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
 
-#define MAX_PIN_SIZE 10
-#define MIN_PIN_SIZE 4
+#define MAX_PIN_SIZE       10
+#define MIN_PIN_SIZE       4
 #define MAX_KEYBIND_LENGTH 64
 
 typedef struct {

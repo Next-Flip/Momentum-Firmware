@@ -3,26 +3,26 @@
 
 #define TAG "SubGhzLastSettings"
 
-#define SUBGHZ_LAST_SETTING_FILE_TYPE "Flipper SubGhz Last Setting File"
+#define SUBGHZ_LAST_SETTING_FILE_TYPE    "Flipper SubGhz Last Setting File"
 #define SUBGHZ_LAST_SETTING_FILE_VERSION 3
-#define SUBGHZ_LAST_SETTINGS_PATH EXT_PATH("subghz/assets/last_subghz.settings")
+#define SUBGHZ_LAST_SETTINGS_PATH        EXT_PATH("subghz/assets/last_subghz.settings")
 
-#define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY "Frequency"
-#define SUBGHZ_LAST_SETTING_FIELD_PRESET "Preset" // AKA Modulation
+#define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY                         "Frequency"
+#define SUBGHZ_LAST_SETTING_FIELD_PRESET                            "Preset" // AKA Modulation
 #define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_FEEDBACK_LEVEL "FeedbackLevel"
-#define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER "FATrigger"
-#define SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES "ProtocolNames"
-#define SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE "Hopping"
-#define SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER "IgnoreFilter"
-#define SUBGHZ_LAST_SETTING_FIELD_FILTER "Filter"
-#define SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD "RSSI"
-#define SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD "DelOldSignals"
+#define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER        "FATrigger"
+#define SUBGHZ_LAST_SETTING_FIELD_PROTOCOL_FILE_NAMES               "ProtocolNames"
+#define SUBGHZ_LAST_SETTING_FIELD_HOPPING_ENABLE                    "Hopping"
+#define SUBGHZ_LAST_SETTING_FIELD_IGNORE_FILTER                     "IgnoreFilter"
+#define SUBGHZ_LAST_SETTING_FIELD_FILTER                            "Filter"
+#define SUBGHZ_LAST_SETTING_FIELD_RSSI_THRESHOLD                    "RSSI"
+#define SUBGHZ_LAST_SETTING_FIELD_DELETE_OLD                        "DelOldSignals"
 
-#define SUBGHZ_LAST_SETTING_FIELD_GPS_BAUDRATE "GpsBaudrate"
+#define SUBGHZ_LAST_SETTING_FIELD_GPS_BAUDRATE      "GpsBaudrate"
 #define SUBGHZ_LAST_SETTING_FIELD_REMOVE_DUPLICATES "RemoveDuplicates"
-#define SUBGHZ_LAST_SETTING_FIELD_REPEATER "Repeater"
-#define SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND "Sound"
-#define SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE "Autosave"
+#define SUBGHZ_LAST_SETTING_FIELD_REPEATER          "Repeater"
+#define SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND      "Sound"
+#define SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE          "Autosave"
 #define SUBGHZ_LAST_SETTING_FIELD_HOPPING_THRESHOLD "HoppingThreshold"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {

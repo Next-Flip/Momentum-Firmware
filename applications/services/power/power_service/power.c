@@ -4,8 +4,9 @@
 #include <furi_hal.h>
 #include <momentum/momentum.h>
 
-#define POWER_OFF_TIMEOUT 90
 #define TAG "Power"
+
+#define POWER_OFF_TIMEOUT 90
 
 void power_set_battery_icon_enabled(Power* power, bool is_enabled) {
     furi_assert(power);

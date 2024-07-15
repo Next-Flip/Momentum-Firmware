@@ -15,14 +15,14 @@
 #define INSTAFOB_DECODED_DATA_SIZE_BYTES (8)
 
 #define INSTAFOB_ENCODED_DATA_SIZE_BYTES ((4 * 7) + 1)
-#define INSTAFOB_ENCODED_DATA_SIZE_BITS ((8 * 4 * 7) + 1)
-#define INSTAFOB_ENCODED_DATA_OFFSET (7)
+#define INSTAFOB_ENCODED_DATA_SIZE_BITS  ((8 * 4 * 7) + 1)
+#define INSTAFOB_ENCODED_DATA_OFFSET     (7)
 
 #define INSTAFOB_BLOCK1 (0x00107060)
 
-#define LFRFID_FREQUENCY (125000)
-#define INSTAFOB_CLOCK_PER_BIT (32)
-#define INSTAFOB_READ_LONG_TIME_BASE (1000000 / (LFRFID_FREQUENCY / INSTAFOB_CLOCK_PER_BIT))
+#define LFRFID_FREQUENCY              (125000)
+#define INSTAFOB_CLOCK_PER_BIT        (32)
+#define INSTAFOB_READ_LONG_TIME_BASE  (1000000 / (LFRFID_FREQUENCY / INSTAFOB_CLOCK_PER_BIT))
 #define INSTAFOB_READ_SHORT_TIME_BASE (INSTAFOB_READ_LONG_TIME_BASE / 2)
 #define INSTAFOB_READ_SEQTERM_TIME_BASE \
     (1000000 / (LFRFID_FREQUENCY * 32 / 50 / INSTAFOB_CLOCK_PER_BIT))
@@ -57,16 +57,16 @@ ProtocolInstaFob* protocol_insta_fob_alloc(void) {
     bit_lib_num_to_bytes_be(INSTAFOB_BLOCK1, 4, protocol->data);
     protocol->debug_string = furi_string_alloc();
     return (void*)protocol;
-};
+}
 
 void protocol_insta_fob_free(ProtocolInstaFob* protocol) {
     free(protocol->debug_string);
     free(protocol);
-};
+}
 
 uint8_t* protocol_insta_fob_get_data(ProtocolInstaFob* protocol) {
     return protocol->data;
-};
+}
 
 void protocol_insta_fob_decoder_start(ProtocolInstaFob* protocol) {
     memset(protocol->data, 0, INSTAFOB_DECODED_DATA_SIZE_BYTES);
@@ -78,7 +78,7 @@ void protocol_insta_fob_decoder_start(ProtocolInstaFob* protocol) {
         NULL);
     protocol->encoded_polarity = false;
     protocol->encoded_term_state = ProtocolInstaFobSeqTermNone;
-};
+}
 
 static const char* protocol_insta_fob_get_encoded_data(ProtocolInstaFob* protocol) {
     furi_string_reset(protocol->debug_string);
@@ -87,7 +87,7 @@ static const char* protocol_insta_fob_get_encoded_data(ProtocolInstaFob* protoco
             protocol->debug_string, bit_lib_get_bit(protocol->encoded_data, i) ? "1" : "0");
     }
     return furi_string_get_cstr(protocol->debug_string);
-};
+}
 
 static bool protocol_insta_fob_can_be_decoded(ProtocolInstaFob* protocol) {
     return bit_lib_get_bits_32(protocol->encoded_data, INSTAFOB_ENCODED_DATA_OFFSET, 32) ==
@@ -96,11 +96,11 @@ static bool protocol_insta_fob_can_be_decoded(ProtocolInstaFob* protocol) {
 
 static void protocol_insta_fob_decode(ProtocolInstaFob* protocol) {
     bit_lib_copy_bits(protocol->data, 0, 64, protocol->encoded_data, INSTAFOB_ENCODED_DATA_OFFSET);
-};
+}
 
 static bool protocol_insta_fob_in_range(uint32_t value, uint32_t base, uint32_t jitter) {
     return (value > (base - jitter)) && (value < (base + jitter));
-};
+}
 
 static ManchesterEvent protocol_insta_fob_manchester_event(bool level, uint32_t duration_us) {
     ManchesterEvent event = ManchesterEventReset;
@@ -122,12 +122,12 @@ static ManchesterEvent protocol_insta_fob_manchester_event(bool level, uint32_t 
     }
 
     return event;
-};
+}
 
 static bool protocol_insta_fob_is_sequence_terminator(uint32_t duration_us) {
     return protocol_insta_fob_in_range(
         duration_us, INSTAFOB_READ_SEQTERM_TIME_BASE, INSTAFOB_READ_JITTER_TIME_BASE);
-};
+}
 
 static bool protocol_insta_fob_decoder_seq_terminator(
     ProtocolInstaFob* protocol,
@@ -221,7 +221,7 @@ bool protocol_insta_fob_decoder_feed(ProtocolInstaFob* protocol, bool level, uin
     }
 
     return decoded_signal;
-};
+}
 
 bool protocol_insta_fob_encoder_start(ProtocolInstaFob* protocol) {
     uint32_t block1 = bit_lib_get_bits_32(protocol->data, 0, 32);
@@ -301,7 +301,7 @@ LevelDuration protocol_insta_fob_encoder_yield(ProtocolInstaFob* protocol) {
     }
 
     return level_duration_make(level, duration_cycles);
-};
+}
 
 void protocol_insta_fob_render_data(ProtocolInstaFob* protocol, FuriString* result) {
     furi_string_printf(
@@ -309,7 +309,7 @@ void protocol_insta_fob_render_data(ProtocolInstaFob* protocol, FuriString* resu
         "InstaFob\nBlk[1]: %08lX\nBlk[2]: %08lX",
         bit_lib_get_bits_32(protocol->data, 0, 32),
         bit_lib_get_bits_32(protocol->data, 32, 32));
-};
+}
 
 void protocol_insta_fob_render_brief_data(ProtocolInstaFob* protocol, FuriString* result) {
     furi_string_printf(
@@ -317,7 +317,7 @@ void protocol_insta_fob_render_brief_data(ProtocolInstaFob* protocol, FuriString
         "Fob %08lX %08lX",
         bit_lib_get_bits_32(protocol->data, 0, 32),
         bit_lib_get_bits_32(protocol->data, 32, 32));
-};
+}
 
 bool protocol_insta_fob_write_data(ProtocolInstaFob* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
@@ -347,7 +347,7 @@ bool protocol_insta_fob_write_data(ProtocolInstaFob* protocol, void* data) {
             request->t5577.block[2]);
     }
     return result;
-};
+}
 
 const ProtocolBase protocol_insta_fob = {
     .name = "InstaFob",

@@ -4,8 +4,9 @@
 
 #include <furi.h>
 
-#define SUBGHZ_HISTORY_MAX 65535 // uint16_t index max, ram limit below
+#define SUBGHZ_HISTORY_MAX       65535 // uint16_t index max, ram limit below
 #define SUBGHZ_HISTORY_FREE_HEAP (10240 * (3 - MIN(rpc_get_sessions_count(instance->rpc), 2U)))
+
 #define TAG "SubGhzHistory"
 
 typedef struct {

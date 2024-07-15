@@ -22,15 +22,15 @@ static const SubGhzBlockConst pocsag2400_const = {
 };
 
 // Minimal amount of sync bits (interleaving zeros and ones)
-#define POCSAG_MIN_SYNC_BITS 24
-#define POCSAG_CW_BITS 32
-#define POCSAG_CW_MASK 0xFFFFFFFF
+#define POCSAG_MIN_SYNC_BITS   24
+#define POCSAG_CW_BITS         32
+#define POCSAG_CW_MASK         0xFFFFFFFF
 #define POCSAG_FRAME_SYNC_CODE 0x7CD215D8
-#define POCSAG_IDLE_CODE_WORD 0x7A89C197
+#define POCSAG_IDLE_CODE_WORD  0x7A89C197
 
-#define POCSAG_FUNC_NUM 0
-#define POCSAG_FUNC_ALERT1 1
-#define POCSAG_FUNC_ALERT2 2
+#define POCSAG_FUNC_NUM      0
+#define POCSAG_FUNC_ALERT1   1
+#define POCSAG_FUNC_ALERT2   2
 #define POCSAG_FUNC_ALPHANUM 3
 
 static const char* func_msg[] = {"\e#Num:\e# ", "\e#Alert\e#", "\e#Alert:\e# ", "\e#Msg:\e# "};

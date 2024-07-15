@@ -24,7 +24,10 @@
 - JS:
   - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
   - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
-- FBT: New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
+- FBT:
+  - New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
+  - Close current app when flashing firmware (by @Willy-JL)
+- GUI: Additional `menu_get_selected_item()` API (by @Willy-JL)
 - Desktop:
   - Added TV animation from OFW which was missing (internal on OFW)
   - OFW: New Intruder animation (by @Astrrra)
@@ -50,7 +53,7 @@
   - Picopass: Acknowledgements page, Elite VB6 RNG keygen attack, plugin and app improvements (by @bettse)
   - Seader: Handle SAM removal better (by @bettse)
   - NFC Magic: Gen1 backdoor read support (by @Astrrra)
-  - Authenticator: Fix URL format (by @akopachov)
+  - Authenticator: Support multiple BT profiles, fix URL format (by @akopachov)
   - NFC Playlist: Various fixes and improvements, new icon (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
   - ESP32CAM Camera Suite: Fix pinout diagram GND, fix horizontal flip (by @CodyTolene)
@@ -89,7 +92,9 @@
   - OFW: Coalesce some allocations, smaller memory footprint (by @CookiePLMonster)
   - OFW: Put Input state data on the stack of the service (by @CookiePLMonster)
 - OFW: BLE: Update to copro light stack v1.20.0 (by @hedger)
-- OFW: FBT: Toolchain v37 (by @hedger)
+-FBT:
+  - OFW: Toolchain v38, clangd as default language server (by @hedger)
+  - OFW: Code formatting update (by @hedger)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
@@ -102,16 +107,25 @@
   - UL: Sync signal delete scene with OFW (by @xMasterX)
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
-- Archive: Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
-- Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
-- FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
+- Archive:
+  - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+  - Fix rename extension show/hide behavior (by @Willy-JL)
+- Infrared:
+  - Correct Samsung.ir CH+ command (by @skyhawkillusions)
+  - OFW: Check for negative timings (by @gsurkov)
+- FBT:
+  - Consistent version/branch info, fix gitorigin (by @Willy-JL)
+  - OFW: Fixed starting apps with spaces in path (by @hedger)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
+- GUI: Return user-provided index from `menu_set_selected_item()`  like `submenu` equivalent (by @Willy-JL)
 - JS:
   - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
   - OFW: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: RPC: Fix input lockup on disconnect (by @Willy-JL)
 - OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
-- OFW: NFC: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+- NFC:
+  - OFW: Fixed infinite loop in dictionary attack scene (by @RebornedBrain)
+  - OFW: ISO15693 Render Typo Fix (by @zinongli)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)

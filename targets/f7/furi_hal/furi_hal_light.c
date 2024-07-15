@@ -6,9 +6,9 @@
 #include <momentum/momentum.h>
 #include <rgb_backlight.h>
 
-#define LED_CURRENT_RED (50u)
+#define LED_CURRENT_RED   (50u)
 #define LED_CURRENT_GREEN (50u)
-#define LED_CURRENT_BLUE (50u)
+#define LED_CURRENT_BLUE  (50u)
 #define LED_CURRENT_WHITE (150u)
 
 void furi_hal_light_init(void) {

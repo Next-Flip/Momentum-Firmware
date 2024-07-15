@@ -5,8 +5,8 @@
 
 #include <furi_hal_i2c.h>
 
-#define FIRST_NON_RESERVED_I2C_ADDRESS 8
-#define HIGHEST_I2C_ADDRESS 127
+#define FIRST_NON_RESERVED_I2C_ADDRESS      8
+#define HIGHEST_I2C_ADDRESS                 127
 #define AVAILABLE_NONRESVERED_I2C_ADDRESSES 120
 
 typedef struct {

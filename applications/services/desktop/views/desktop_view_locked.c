@@ -13,13 +13,13 @@
 #include "desktop_view_locked.h"
 
 #define COVER_MOVING_INTERVAL_MS (50)
-#define LOCKED_HINT_TIMEOUT_MS (3000)
+#define LOCKED_HINT_TIMEOUT_MS   (3000)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
 #define COVER_OFFSET_START (-64)
-#define COVER_OFFSET_END (0)
+#define COVER_OFFSET_END   (0)
 
-#define UNLOCK_CNT (3)
+#define UNLOCK_CNT         (3)
 #define UNLOCK_RST_TIMEOUT (600)
 
 struct DesktopViewLocked {

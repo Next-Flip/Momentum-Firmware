@@ -11,8 +11,10 @@
 #include <assets_dolphin_internal.h>
 #include <assets_dolphin_blocking.h>
 #include <momentum/momentum.h>
-#define ANIMATION_META_FILE "meta.txt"
+
 #define TAG "AnimationStorage"
+
+#define ANIMATION_META_FILE "meta.txt"
 char ANIMATION_DIR[23 /* /ext/asset_packs//Anims */ + ASSET_PACKS_NAME_LEN + 1];
 char ANIMATION_MANIFEST_FILE[sizeof(ANIMATION_DIR) + 13 /*"/manifest.txt"*/];
 

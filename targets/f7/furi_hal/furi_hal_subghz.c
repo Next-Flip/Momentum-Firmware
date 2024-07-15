@@ -21,12 +21,12 @@
 static uint32_t furi_hal_subghz_debug_gpio_buff[2] = {0};
 
 /* DMA Channels definition */
-#define SUBGHZ_DMA (DMA2)
+#define SUBGHZ_DMA             (DMA2)
 #define SUBGHZ_DMA_CH1_CHANNEL (LL_DMA_CHANNEL_1)
 #define SUBGHZ_DMA_CH2_CHANNEL (LL_DMA_CHANNEL_2)
-#define SUBGHZ_DMA_CH1_IRQ (FuriHalInterruptIdDma2Ch1)
-#define SUBGHZ_DMA_CH1_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
-#define SUBGHZ_DMA_CH2_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
+#define SUBGHZ_DMA_CH1_IRQ     (FuriHalInterruptIdDma2Ch1)
+#define SUBGHZ_DMA_CH1_DEF     SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
+#define SUBGHZ_DMA_CH2_DEF     SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
 
 /** SubGhz state */
 typedef enum {
@@ -54,7 +54,7 @@ typedef struct {
 
     int8_t rolling_counter_mult;
     bool extended_range : 1;
-    bool bypass_region : 1;
+    bool bypass_region  : 1;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
@@ -286,7 +286,7 @@ bool furi_hal_subghz_is_rx_data_crc_valid(void) {
     uint8_t data[1];
     cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-    if(((data[0] >> 7) & 0x01)) {
+    if((data[0] >> 7) & 0x01) {
         return true;
     } else {
         return false;

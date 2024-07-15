@@ -1,7 +1,7 @@
 #include "../power_settings_app.h"
 #include <lib/toolbox/value_index.h>
 
-#define SHUTDOWN_IDLE_DELAY_COUNT 9
+#define SHUTDOWN_IDLE_DELAY_COUNT              9
 #define SCENE_EVENT_SELECT_SHUTDOWN_IDLE_DELAY 0
 
 const char* const shutdown_idle_delay_text[SHUTDOWN_IDLE_DELAY_COUNT] =

@@ -9,12 +9,12 @@
 #include <usb_hid.h>
 #include <ble/ble.h>
 
-#define HID_INFO_BASE_USB_SPECIFICATION (0x0101)
-#define HID_INFO_COUNTRY_CODE (0x00)
-#define BLE_PROFILE_HID_INFO_FLAG_REMOTE_WAKE_MSK (0x01)
+#define HID_INFO_BASE_USB_SPECIFICATION                    (0x0101)
+#define HID_INFO_COUNTRY_CODE                              (0x00)
+#define BLE_PROFILE_HID_INFO_FLAG_REMOTE_WAKE_MSK          (0x01)
 #define BLE_PROFILE_HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK (0x02)
 
-#define BLE_PROFILE_HID_KB_MAX_KEYS (6)
+#define BLE_PROFILE_HID_KB_MAX_KEYS   (6)
 #define BLE_PROFILE_CONSUMER_MAX_KEYS (1)
 
 // Report ids cant be 0

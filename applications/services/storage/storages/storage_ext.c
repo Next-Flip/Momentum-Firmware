@@ -352,7 +352,7 @@ static bool storage_ext_file_open(
     file->internal_error_id = f_open(file_data, drive_path, _mode);
     free(drive_path);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_ext_file_close(void* ctx, File* file) {
@@ -362,7 +362,7 @@ static bool storage_ext_file_close(void* ctx, File* file) {
     file->error_id = storage_ext_parse_error(file->internal_error_id);
     free(file_data);
     storage_set_storage_file_data(file, NULL, storage);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static uint16_t
@@ -407,7 +407,7 @@ static bool
     }
 
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static uint64_t storage_ext_file_tell(void* ctx, File* file) {
@@ -448,7 +448,7 @@ static bool storage_ext_file_truncate(void* ctx, File* file) {
     file->internal_error_id = f_truncate(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
 #endif
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_ext_file_sync(void* ctx, File* file) {
@@ -463,7 +463,7 @@ static bool storage_ext_file_sync(void* ctx, File* file) {
     file->internal_error_id = f_sync(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
 #endif
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static uint64_t storage_ext_file_size(void* ctx, File* file) {
@@ -497,7 +497,7 @@ static bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
     file->internal_error_id = f_opendir(file_data, drive_path);
     free(drive_path);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_ext_dir_close(void* ctx, File* file) {
@@ -507,7 +507,7 @@ static bool storage_ext_dir_close(void* ctx, File* file) {
     file->internal_error_id = f_closedir(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
     free(file_data);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_ext_dir_read(
@@ -538,7 +538,7 @@ static bool storage_ext_dir_read(
         file->error_id = FSE_NOT_EXIST;
     }
 
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 
 static bool storage_ext_dir_rewind(void* ctx, File* file) {
@@ -547,7 +547,7 @@ static bool storage_ext_dir_rewind(void* ctx, File* file) {
 
     file->internal_error_id = f_readdir(file_data, NULL);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
+    return file->error_id == FSE_OK;
 }
 /******************* Common FS Functions *******************/
 

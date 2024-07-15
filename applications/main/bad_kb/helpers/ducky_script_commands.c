@@ -250,6 +250,7 @@ static const DuckyCmd ducky_commands[] = {
 };
 
 #define TAG "BadKb"
+
 #define WORKER_TAG TAG "Worker"
 
 int32_t ducky_execute_cmd(BadKbScript* bad_kb, const char* line) {

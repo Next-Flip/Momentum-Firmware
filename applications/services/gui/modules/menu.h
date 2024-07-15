@@ -61,6 +61,14 @@ void menu_add_item(
  */
 void menu_reset(Menu* menu);
 
+/** Get current menu item
+ *
+ * @param      menu   Menu instance
+ *
+ * @return     Index of the selected item
+ */
+uint32_t menu_get_selected_item(Menu* menu);
+
 /** Set current menu item
  *
  * @param      menu   Menu instance
