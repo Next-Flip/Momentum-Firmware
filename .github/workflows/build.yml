@@ -59,23 +59,22 @@ jobs:
             exit 1
           fi
 
-      - name: "Check API versions for consistency with OFW release-candidate"
+      - name: "Check API version for consistency with OFW release-candidate"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
         run: |
           set -e
-          for symbols in targets/f*/api_symbols.csv; do
-            ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release-candidate/${symbols}" | head -n2)"
-            our_api="$(head -n2 "${symbols}")"
-            if [ "$our_api" != "$ofw_api" ] ; then
-              echo API versions aren\'t matching OFW. Please update!
-              echo API versions are:
-              echo "OFW: $(tail -n1 <<< "$ofw_api")"
-              echo "Us:  $(tail -n1 <<< "$our_api")"
-              exit 1
-            fi
-          done
+          symbols="targets/$TARGET/api_symbols.csv"
+          ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release-candidate/${symbols}" | head -n2)"
+          our_api="$(head -n2 "${symbols}")"
+          if [ "$our_api" != "$ofw_api" ] ; then
+            echo API versions aren\'t matching OFW. Please update!
+            echo API versions are:
+            echo "Official: $(tail -n1 <<< "$ofw_api")"
+            echo "Momentum: $(tail -n1 <<< "$our_api")"
+            exit 1
+          fi
 
       - name: "Build the firmware and apps"
         id: build-fw
@@ -97,7 +96,7 @@ jobs:
       - name: "Copy build output"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && (((github.ref_name == 'dev' || github.event.pull_request) && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
         run: |
           set -e
           rm -rf artifacts || true
@@ -113,7 +112,7 @@ jobs:
       - name: "Upload artifacts to update server"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && (((github.ref_name == 'dev' || github.event.pull_request) && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
         run: |
           curl "${{ secrets.INDEXER_URL }}"/firmware/directory.json > previndex.json
           FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
@@ -122,6 +121,27 @@ jobs:
               -F "version_token=${COMMIT_SHA}" \
               ${FILES[@]} \
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
+
+      - name: 'Find previous comment'
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.event.pull_request && !contains(github.event.head_commit.message, '--nobuild') && matrix.target == env.DEFAULT_TARGET }}
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Compiled ${{ matrix.target }} firmware for commit'
+
+      - name: 'Create or update comment'
+        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.event.pull_request && !contains(github.event.head_commit.message, '--nobuild') && matrix.target == env.DEFAULT_TARGET }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=https://up.momentum-fw.dev/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
+            - [📦 qFlipper Package](https://up.momentum-fw.dev/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
+          edit-mode: replace
 
       - name: Send devbuild webhook
         env:
