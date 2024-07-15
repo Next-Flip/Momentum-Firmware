@@ -68,13 +68,13 @@ static const struct {
             uint8_t u_sz;
         };
     };
-#define setting(t, n) .type = momentum_settings_type##t, .key = #n, .val = &momentum_settings.n
-#define setting_str(n) setting(_str, n), .str_len = sizeof(momentum_settings.n)
-#define num(t, n, min, max) .t##_min = min, .t##_max = max, .t##_sz = sizeof(momentum_settings.n)
-#define setting_int(n, min, max) setting(_int, n), num(i, n, min, max)
+#define setting(t, n)             .type = momentum_settings_type##t, .key = #n, .val = &momentum_settings.n
+#define setting_str(n)            setting(_str, n), .str_len = sizeof(momentum_settings.n)
+#define num(t, n, min, max)       .t##_min = min, .t##_max = max, .t##_sz = sizeof(momentum_settings.n)
+#define setting_int(n, min, max)  setting(_int, n), num(i, n, min, max)
 #define setting_uint(n, min, max) setting(_uint, n), num(u, n, min, max)
-#define setting_enum(n, cnt) setting_uint(n, 0, cnt - 1)
-#define setting_bool(n) setting(_bool, n)
+#define setting_enum(n, cnt)      setting_uint(n, 0, cnt - 1)
+#define setting_bool(n)           setting(_bool, n)
 } momentum_settings_entries[] = {
     {setting_str(asset_pack)},
     {setting_uint(anim_speed, 25, 300)},

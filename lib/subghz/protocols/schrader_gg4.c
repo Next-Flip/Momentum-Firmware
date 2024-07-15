@@ -40,7 +40,7 @@ Data layout:
 - C: 8 bit Checksum (CRC8, Poly 0x7, Init 0x0)
 */
 
-#define PREAMBLE 0b000
+#define PREAMBLE          0b000
 #define PREAMBLE_BITS_LEN 3
 
 static const SubGhzBlockConst tpms_protocol_schrader_gg4_const = {

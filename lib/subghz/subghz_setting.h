@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define SUBGHZ_SETTING_FILE_TYPE "Flipper SubGhz Setting File"
+#define SUBGHZ_SETTING_FILE_TYPE    "Flipper SubGhz Setting File"
 #define SUBGHZ_SETTING_FILE_VERSION 1
 
 #define SUBGHZ_SETTING_DEFAULT_PRESET_COUNT 4

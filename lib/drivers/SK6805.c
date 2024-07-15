@@ -29,7 +29,7 @@
 #define DEBUG_INIT() \
     furi_hal_gpio_init(DEBUG_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh)
 #define DEBUG_SET_HIGH() furi_hal_gpio_write(DEBUG_PIN, true)
-#define DEBUG_SET_LOW() furi_hal_gpio_write(DEBUG_PIN, false)
+#define DEBUG_SET_LOW()  furi_hal_gpio_write(DEBUG_PIN, false)
 #else
 #define DEBUG_INIT()
 #define DEBUG_SET_HIGH()

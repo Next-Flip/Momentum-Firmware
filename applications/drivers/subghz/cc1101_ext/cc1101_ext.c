@@ -20,7 +20,7 @@
 
 #define TAG "SubGhzDeviceCc1101Ext"
 
-#define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO (&gpio_ext_pb2)
+#define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO          (&gpio_ext_pb2)
 #define SUBGHZ_DEVICE_CC1101_EXT_E07M20S_AMP_GPIO &gpio_ext_pc3
 
 #define SUBGHZ_DEVICE_CC1101_CONFIG_VER 1
