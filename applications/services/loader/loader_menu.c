@@ -106,7 +106,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         app->primary_menu, last->name, last->icon, (uint32_t)last->path, loader_menu_callback, app);
     menu_add_item(
         app->primary_menu, "Settings", &A_Settings_14, 0, loader_menu_switch_to_settings, app);
-};
+}
 
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {

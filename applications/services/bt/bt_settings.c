@@ -5,7 +5,7 @@
 #include <storage/storage.h>
 
 #define BT_SETTINGS_VERSION (0)
-#define BT_SETTINGS_MAGIC (0x19)
+#define BT_SETTINGS_MAGIC   (0x19)
 
 bool bt_settings_load(BtSettings* bt_settings) {
     furi_assert(bt_settings);
