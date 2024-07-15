@@ -178,16 +178,6 @@ void cli_command_src(Cli* cli, FuriString* args, void* context) {
     printf("https://github.com/Next-Flip/Momentum-Firmware");
 }
 
-void cli_command_src(Cli* cli, FuriString* args, void* context) {
-    // Quality of life feature for people exploring CLI on lab.flipper.net/cli
-    // By Yousef AK
-    UNUSED(cli);
-    UNUSED(args);
-    UNUSED(context);
-
-    printf("https://github.com/Next-Flip/Momentum-Firmware");
-}
-
 #define CLI_COMMAND_LOG_RING_SIZE   2048
 #define CLI_COMMAND_LOG_BUFFER_SIZE 64
 

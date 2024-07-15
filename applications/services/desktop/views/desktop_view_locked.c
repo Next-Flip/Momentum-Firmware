@@ -16,11 +16,8 @@
 #define LOCKED_HINT_TIMEOUT_MS   (3000)
 #define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
-#define DOOR_OFFSET_START (-55)
-#define DOOR_OFFSET_END   (0)
-
-#define DOOR_L_FINAL_POS (0)
-#define DOOR_R_FINAL_POS (60)
+#define COVER_OFFSET_START (-64)
+#define COVER_OFFSET_END   (0)
 
 #define UNLOCK_CNT         (3)
 #define UNLOCK_RST_TIMEOUT (600)
