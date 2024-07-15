@@ -110,7 +110,9 @@
 - Archive:
   - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
   - Fix rename extension show/hide behavior (by @Willy-JL)
-- Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
+- Infrared:
+  - Correct Samsung.ir CH+ command (by @skyhawkillusions)
+  - OFW: Check for negative timings (by @gsurkov)
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
   - OFW: Fixed starting apps with spaces in path (by @hedger)
