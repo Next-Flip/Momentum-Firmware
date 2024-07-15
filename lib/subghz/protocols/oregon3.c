@@ -21,7 +21,7 @@ static const SubGhzBlockConst ws_oregon3_const = {
 #define OREGON3_PREAMBLE_BITS 28
 #define OREGON3_PREAMBLE_MASK 0b1111111111111111111111111111
 // 24 ones + 0101 (inverted A)
-#define OREGON3_PREAMBLE 0b1111111111111111111111110101
+#define OREGON3_PREAMBLE      0b1111111111111111111111110101
 
 // Fixed part contains:
 // - Sensor type: 16 bits
@@ -29,8 +29,8 @@ static const SubGhzBlockConst ws_oregon3_const = {
 // - ID (changes when batteries are changed): 8 bits
 // - Battery status: 4 bits
 #define OREGON3_FIXED_PART_BITS (16 + 4 + 8 + 4)
-#define OREGON3_SENSOR_ID(d) (((d) >> 16) & 0xFFFF)
-#define OREGON3_CHECKSUM_BITS 8
+#define OREGON3_SENSOR_ID(d)    (((d) >> 16) & 0xFFFF)
+#define OREGON3_CHECKSUM_BITS   8
 
 // bit indicating the low battery
 #define OREGON3_FLAG_BAT_LOW 0x4

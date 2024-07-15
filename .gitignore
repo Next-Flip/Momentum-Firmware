@@ -45,12 +45,6 @@ null.d
 .sconsign.dblite
 
 
-# Visual Studio Code
-/.vscode
-
-# Visual Studio
-/.vs
-
 # bundle output
 /dist
 

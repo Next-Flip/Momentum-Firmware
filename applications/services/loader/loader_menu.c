@@ -332,7 +332,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         app);
 
     menu_set_selected_item(app->primary_menu, menu->selected_primary);
-};
+}
 
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {

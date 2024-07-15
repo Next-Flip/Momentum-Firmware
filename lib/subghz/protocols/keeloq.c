@@ -760,7 +760,7 @@ static inline bool subghz_protocol_keeloq_check_decrypt_centurion(
     uint8_t btn) {
     furi_assert(instance);
 
-    if((decrypt >> 28 == btn) && (((((uint16_t)(decrypt >> 16)) & 0x3FF) == 0x1CE))) {
+    if((decrypt >> 28 == btn) && ((((uint16_t)(decrypt >> 16)) & 0x3FF) == 0x1CE)) {
         instance->cnt = decrypt & 0x0000FFFF;
         /*FURI_LOG_I(
             "KL",
@@ -829,7 +829,7 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                     man =
                         subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
                     decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                    if((strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0)) {
+                    if(strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0) {
                         if(subghz_protocol_keeloq_check_decrypt_centurion(instance, decrypt, btn)) {
                             *manufacture_name = furi_string_get_cstr(manufacture_code->name);
                             keystore->mfname = *manufacture_name;

@@ -10,9 +10,9 @@
 #include "subghz_read_raw.h"
 
 #define FRAME_HEIGHT 12
-#define MAX_LEN_PX 111
-#define MENU_ITEMS 4u
-#define UNLOCK_CNT 3
+#define MAX_LEN_PX   111
+#define MENU_ITEMS   4u
+#define UNLOCK_CNT   3
 
 #define FLIP_TIMEOUT (500)
 
@@ -190,7 +190,7 @@ void subghz_view_receiver_add_item_to_menu(
             item_menu->item_str = furi_string_alloc_set(name);
             item_menu->type = type;
             item_menu->repeats = repeats;
-            if((model->idx == model->history_item - 1)) {
+            if(model->idx == model->history_item - 1) {
                 model->history_item++;
                 model->idx++;
                 subghz_view_receiver_show_time_moment(subghz_receiver);

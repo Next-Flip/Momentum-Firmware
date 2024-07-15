@@ -35,12 +35,12 @@
  * - Temperature and Humidity are sent in different messages bursts.
 */
 
-#define LACROSSE_TX_GAP 1000
-#define LACROSSE_TX_BIT_SIZE 44
-#define LACROSSE_TX_SUNC_PATTERN 0x0A000000000
-#define LACROSSE_TX_SUNC_MASK 0x0F000000000
+#define LACROSSE_TX_GAP           1000
+#define LACROSSE_TX_BIT_SIZE      44
+#define LACROSSE_TX_SUNC_PATTERN  0x0A000000000
+#define LACROSSE_TX_SUNC_MASK     0x0F000000000
 #define LACROSSE_TX_MSG_TYPE_TEMP 0x00
-#define LACROSSE_TX_MSG_TYPE_HUM 0x0E
+#define LACROSSE_TX_MSG_TYPE_HUM  0x0E
 
 static const SubGhzBlockConst ws_protocol_lacrosse_tx_const = {
     .te_short = 550,

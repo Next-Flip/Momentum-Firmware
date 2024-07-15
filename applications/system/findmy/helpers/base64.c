@@ -10,7 +10,7 @@
 #include "base64.h"
 
 #define os_malloc malloc
-#define os_free free
+#define os_free   free
 #define os_memset memset
 
 static const unsigned char base64_table[65] =

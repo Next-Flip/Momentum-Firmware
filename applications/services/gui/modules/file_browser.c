@@ -15,15 +15,15 @@
 #include <m-array.h>
 #include <momentum/momentum.h>
 
-#define LIST_ITEMS 5u
-#define MAX_LEN_PX 110
+#define LIST_ITEMS   5u
+#define MAX_LEN_PX   110
 #define FRAME_HEIGHT 12
-#define Y_OFFSET 3
+#define Y_OFFSET     3
 
 #define ITEM_LIST_LEN_MAX 50
 
 #define SCROLL_INTERVAL (333)
-#define SCROLL_DELAY (2)
+#define SCROLL_DELAY    (2)
 
 typedef enum {
     BrowserItemTypeLoading,
