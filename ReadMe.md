@@ -133,7 +133,7 @@ Note that this repo is always updated with the great work from our friends at [U
 <h2 align="center">Install:</h2>
 <br>
 
-There are 3 methods to install Momentum, we recommend you use the **Web Updater**, but choose whichever one you prefer:
+There are 4 methods to install Momentum, we recommend you use the **Web Updater**, but choose whichever one you prefer:
 
 <br>
 
@@ -142,6 +142,17 @@ There are 3 methods to install Momentum, we recommend you use the **Web Updater*
 >   <li>Open the <a href="https://momentum-fw.dev/update">Web Updater</a></li>
 >   <li>Click <code>Connect</code> and select your Flipper from the list</li>
 >   <li>Click <code>Flash</code> and wait for the update to complete</li>
+> </ul></details>
+
+> <details><summary><code>Flipper Lab/App (chrome/mobile)</code></summary><ul>
+>   <li>(Desktop) Make sure qFlipper is closed</li>
+>   <li>(Mobile) Make sure you have the <a href="https://docs.flipper.net/mobile-app">Flipper Mobile App</a> installed and paired</li>
+>   <li>Open the <a href="https://github.com/Next-Flip/Momentum-Firmware/releases/latest">latest release page</a></li>
+>   <li>Click the <code>☁️ Flipper Lab/App (chrome/mobile)</code> link</li>
+>   <li>(Desktop) Click <code>Connect</code> and select your Flipper from the list</li>
+>   <li>(Desktop) Click <code>Install</code> and wait for the update to complete</li>
+>   <li>(Mobile) Accept the prompt to open the link in the Flipper Mobile App</li>
+>   <li>(Mobile) Confirm to proceed with the install and wait for the update to complete</li>
 > </ul></details>
 
 > <details><summary><code>qFlipper Package (.tgz)</code></summary><ul>
