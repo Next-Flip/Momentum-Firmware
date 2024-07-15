@@ -92,7 +92,9 @@
   - OFW: Coalesce some allocations, smaller memory footprint (by @CookiePLMonster)
   - OFW: Put Input state data on the stack of the service (by @CookiePLMonster)
 - OFW: BLE: Update to copro light stack v1.20.0 (by @hedger)
-- OFW: FBT: Toolchain v37 (by @hedger)
+-FBT:
+  - OFW: Toolchain v38, clangd as default language server (by @hedger)
+  - OFW: Code formatting update (by @hedger)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
@@ -109,7 +111,9 @@
   - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
   - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared: Correct Samsung.ir CH+ command (by @skyhawkillusions)
-- FBT: Consistent version/branch info, fix gitorigin (by @Willy-JL)
+- FBT:
+  - Consistent version/branch info, fix gitorigin (by @Willy-JL)
+  - OFW: Fixed starting apps with spaces in path (by @hedger)
 - AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
 - GUI: Return user-provided index from `menu_set_selected_item()`  like `submenu` equivalent (by @Willy-JL)
 - JS:
