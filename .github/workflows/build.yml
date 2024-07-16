@@ -96,7 +96,7 @@ jobs:
       - name: "Copy build output"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && (((github.ref_name == 'dev' || github.event.pull_request) && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
+        if: ${{ env.INDEXER_URL != '' && (github.event.pull_request || (github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')))) }}
         run: |
           set -e
           rm -rf artifacts || true
@@ -112,7 +112,7 @@ jobs:
       - name: "Upload artifacts to update server"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && (((github.ref_name == 'dev' || github.event.pull_request) && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
+        if: ${{ env.INDEXER_URL != '' && (github.event.pull_request || (github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')))) }}
         run: |
           curl "${{ secrets.INDEXER_URL }}"/firmware/directory.json > previndex.json
           FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
@@ -123,7 +123,9 @@ jobs:
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: 'Find previous comment'
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.event.pull_request && !contains(github.event.head_commit.message, '--nobuild') && matrix.target == env.DEFAULT_TARGET }}
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+        if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
         uses: peter-evans/find-comment@v3
         id: find-comment
         with:
@@ -132,15 +134,17 @@ jobs:
           body-includes: 'Compiled ${{ matrix.target }} firmware for commit'
 
       - name: 'Create or update comment'
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.event.pull_request && !contains(github.event.head_commit.message, '--nobuild') && matrix.target == env.DEFAULT_TARGET }}
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+        if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
-            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=https://up.momentum-fw.dev/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
-            - [📦 qFlipper Package](https://up.momentum-fw.dev/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
+            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=${{secrets.INDEXER_URL}}/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
+            - [📦 qFlipper Package](${{secrets.INDEXER_URL}}/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
           edit-mode: replace
 
       - name: Send devbuild webhook
