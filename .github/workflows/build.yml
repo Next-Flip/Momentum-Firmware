@@ -19,6 +19,8 @@ env:
 
 jobs:
   build:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
