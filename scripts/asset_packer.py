@@ -69,22 +69,24 @@ def pack_icon_animated(src: pathlib.Path, dst: pathlib.Path):
     frame_count = 0
     frame_rate = None
     size = None
-    for frame in src.iterdir():
+    files = [file for file in src.iterdir() if file.is_file()]
+    for frame in sorted(files, key=lambda x: x.name):
         if not frame.is_file():
             continue
         if frame.name == "frame_rate":
-            frame_rate = int(frame.read_text())
+            frame_rate = int(frame.read_text().strip())
         elif frame.name == "meta":
             shutil.copyfile(frame, dst / frame.name)
-        elif frame.name.startswith("frame_"):
+        else:
+            dst_frame = dst / f"frame_{frame_count:02}.bm"
             if frame.suffix == ".png":
                 if not size:
                     size = Image.open(frame).size
-                (dst / frame.with_suffix(".bm").name).write_bytes(convert_bm(frame))
+                dst_frame.write_bytes(convert_bm(frame))
                 frame_count += 1
             elif frame.suffix == ".bm":
-                if not (dst / frame.name).is_file():
-                    shutil.copyfile(frame, dst / frame.name)
+                if frame.with_suffix(".png") not in files:
+                    shutil.copyfile(frame, dst_frame)
                     frame_count += 1
     if size is not None and frame_rate is not None:
         (dst / "meta").write_bytes(struct.pack("<IIII", *size, frame_rate, frame_count))

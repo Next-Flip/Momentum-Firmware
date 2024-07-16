@@ -116,7 +116,7 @@
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
   - OFW: Fixed starting apps with spaces in path (by @hedger)
-- AssetPacker: Pack pre-compiled icons and fonts too (by @Willy-JL)
+- AssetPacker: Pack pre-compiled icons and fonts too, fix animated icons edge cases (by @Willy-JL)
 - GUI: Return user-provided index from `menu_set_selected_item()`  like `submenu` equivalent (by @Willy-JL)
 - JS:
   - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
