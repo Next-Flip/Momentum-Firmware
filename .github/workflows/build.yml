@@ -21,6 +21,7 @@ jobs:
   build:
     permissions:
       issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
