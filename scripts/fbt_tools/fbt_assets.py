@@ -74,6 +74,7 @@ def _packs_emitter(target, source, env):
     env.Replace(_PACKS_SRC_DIR=source_dir)
     target = set()
 
+    # Animations
     target.update(
         source_dir.rel_path(node)
         for node in env.GlobRecursive("*/Anims/manifest.txt", source_dir.srcnode())
@@ -86,14 +87,33 @@ def _packs_emitter(target, source, env):
         source_dir.rel_path(node).removesuffix(".png") + ".bm"
         for node in env.GlobRecursive("*/Anims/**/*.png", source_dir.srcnode())
     )
+    # Animated icons
     target.update(
         source_dir.rel_path(node)
-        for node in env.GlobRecursive("*/Icons/**/*.bmx", source_dir.srcnode())
+        for node in env.GlobRecursive("*/Icons/*/*/meta", source_dir.srcnode())
+    )
+    target.update(
+        source_dir.rel_path(node).removesuffix("frame_rate") + "meta"
+        for node in env.GlobRecursive("*/Icons/*/*/frame_rate", source_dir.srcnode())
+    )
+    target.update(
+        source_dir.rel_path(node)
+        for node in env.GlobRecursive("*/Icons/*/*/*.bm", source_dir.srcnode())
+    )
+    target.update(
+        source_dir.rel_path(node).removesuffix(".png") + ".bm"
+        for node in env.GlobRecursive("*/Icons/*/*/*.png", source_dir.srcnode())
+    )
+    # Static icons
+    target.update(
+        source_dir.rel_path(node)
+        for node in env.GlobRecursive("*/Icons/*/*.bmx", source_dir.srcnode())
     )
     target.update(
         source_dir.rel_path(node).removesuffix(".png") + ".bmx"
-        for node in env.GlobRecursive("*/Icons/**/*.png", source_dir.srcnode())
+        for node in env.GlobRecursive("*/Icons/*/*.png", source_dir.srcnode())
     )
+    # Fonts
     target.update(
         source_dir.rel_path(node)
         for node in env.GlobRecursive("*/Fonts/*.u8f", source_dir.srcnode())
