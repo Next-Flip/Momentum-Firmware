@@ -123,6 +123,8 @@ jobs:
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: 'Find previous comment'
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
         uses: peter-evans/find-comment@v3
         id: find-comment
@@ -132,6 +134,8 @@ jobs:
           body-includes: 'Compiled ${{ matrix.target }} firmware for commit'
 
       - name: 'Create or update comment'
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
         uses: peter-evans/create-or-update-comment@v4
         with:
@@ -139,8 +143,8 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
-            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=https://up.momentum-fw.dev/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
-            - [📦 qFlipper Package](https://up.momentum-fw.dev/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
+            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=${{secrets.INDEXER_URL}}/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
+            - [📦 qFlipper Package](${{secrets.INDEXER_URL}}/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
           edit-mode: replace
 
       - name: Send devbuild webhook
