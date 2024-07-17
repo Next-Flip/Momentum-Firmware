@@ -143,7 +143,7 @@ class Main(App):
         if "UFBT_HOME" in os.environ:
             symbols /= "sdk_headers/f7_sdk"
         symbols = (symbols / "targets/f7/api_symbols.csv").read_text()
-        api_has_icon = lambda name: f"Variable,+,{name},Icon," in symbols
+        api_has_icon = lambda name: f"Variable,+,{name},const Icon," in symbols
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")
