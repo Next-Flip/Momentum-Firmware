@@ -153,9 +153,8 @@ void asset_packs_init(void) {
     if(pack[0] == '\0') return;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* p = furi_string_alloc();
+    FuriString* p = furi_string_alloc_printf(ASSET_PACKS_PATH "/%s", pack);
     FileInfo info;
-    furi_string_printf(p, ASSET_PACKS_PATH "/%s", pack);
     if(storage_common_stat(storage, furi_string_get_cstr(p), &info) == FSE_OK &&
        info.flags & FSF_DIRECTORY) {
         File* f = storage_file_alloc(storage);
