@@ -175,18 +175,26 @@ void asset_packs_init(void) {
        info.flags & FSF_DIRECTORY) {
         File* f = storage_file_alloc(storage);
 
-        for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-            if(ICON_PATHS[i].icon->original == NULL) {
-                if(ICON_PATHS[i].icon->frame_count > 1) {
-                    load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
-                } else {
-                    load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+        furi_string_printf(p, ASSET_PACKS_PATH "/%s/Icons", pack);
+        if(storage_common_stat(storage, furi_string_get_cstr(p), &info) == FSE_OK &&
+           info.flags & FSF_DIRECTORY) {
+            for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
+                if(ICON_PATHS[i].icon->original == NULL) {
+                    if(ICON_PATHS[i].icon->frame_count > 1) {
+                        load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                    } else {
+                        load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                    }
                 }
             }
         }
 
-        for(Font font = 0; font < FontTotalNumber; font++) {
-            load_font(font, font_names[font], p, f);
+        furi_string_printf(p, ASSET_PACKS_PATH "/%s/Fonts", pack);
+        if(storage_common_stat(storage, furi_string_get_cstr(p), &info) == FSE_OK &&
+           info.flags & FSF_DIRECTORY) {
+            for(Font font = 0; font < FontTotalNumber; font++) {
+                load_font(font, font_names[font], p, f);
+            }
         }
 
         storage_file_free(f);
