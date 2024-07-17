@@ -15,5 +15,5 @@ struct Icon {
     const uint8_t frame_rate;
     const uint8_t* const* frames;
 
-    Icon* original;
+    const Icon* original;
 };

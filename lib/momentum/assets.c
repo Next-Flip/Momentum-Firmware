@@ -101,7 +101,7 @@ static void free_icon(const Icon* icon) {
     uint8_t** frames = (void*)icon->frames;
     int32_t frame_count = icon->frame_count;
 
-    Icon* original = icon->original;
+    Icon* original = (void*)icon->original;
     memcpy((void*)icon, original, sizeof(Icon));
 
     free(original);
