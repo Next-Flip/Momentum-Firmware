@@ -18,29 +18,38 @@ AssetPacks asset_packs = {
     .font_params = {NULL},
 };
 
+typedef struct {
+    Icon icon;
+    uint8_t* frames[];
+} AnimatedIconSwap;
+
+typedef struct {
+    int32_t width;
+    int32_t height;
+    int32_t frame_rate;
+    int32_t frame_count;
+} FURI_PACKED AnimatedIconMetaFile;
+
 static void
     load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
     const char* pack = momentum_settings.asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        int32_t icon_width, icon_height, frame_rate, frame_count;
-        bool ok =
-            (storage_file_read(file, &icon_width, 4) == 4 &&
-             storage_file_read(file, &icon_height, 4) == 4 &&
-             storage_file_read(file, &frame_rate, 4) == 4 &&
-             storage_file_read(file, &frame_count, 4) == 4);
+        AnimatedIconMetaFile meta;
+        bool ok = storage_file_read(file, &meta, sizeof(meta)) == sizeof(meta);
         storage_file_close(file);
 
         if(ok) {
-            uint8_t** frames = malloc(sizeof(const uint8_t*) * frame_count);
+            AnimatedIconSwap* swap =
+                malloc(sizeof(AnimatedIconSwap) + (sizeof(uint8_t*) * meta.frame_count));
             int i = 0;
-            for(; i < frame_count; i++) {
+            for(; i < meta.frame_count; i++) {
                 furi_string_printf(path, ICONS_FMT "/frame_%02d.bm", pack, name, i);
                 if(storage_file_open(
                        file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-                    uint64_t size = storage_file_size(file);
-                    frames[i] = malloc(size);
-                    ok = storage_file_read(file, frames[i], size) == size;
+                    uint64_t frame_size = storage_file_size(file);
+                    swap->frames[i] = malloc(frame_size);
+                    ok = storage_file_read(file, swap->frames[i], frame_size) == frame_size;
                     storage_file_close(file);
                     if(ok) continue;
                 } else {
@@ -50,20 +59,19 @@ static void
                 break;
             }
 
-            if(i == frame_count) {
-                Icon* original = malloc(sizeof(Icon));
-                memcpy(original, replace, sizeof(Icon));
-                FURI_CONST_ASSIGN_PTR(replace->original, original);
-                FURI_CONST_ASSIGN(replace->width, icon_width);
-                FURI_CONST_ASSIGN(replace->height, icon_height);
-                FURI_CONST_ASSIGN(replace->frame_rate, frame_rate);
-                FURI_CONST_ASSIGN(replace->frame_count, frame_count);
-                FURI_CONST_ASSIGN_PTR(replace->frames, frames);
+            if(i == meta.frame_count) {
+                FURI_CONST_ASSIGN(swap->icon.width, meta.width);
+                FURI_CONST_ASSIGN(swap->icon.height, meta.height);
+                FURI_CONST_ASSIGN(swap->icon.frame_count, meta.frame_count);
+                FURI_CONST_ASSIGN(swap->icon.frame_rate, meta.frame_rate);
+                FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
+
+                // FIXME: append to icon swap array
             } else {
                 for(; i >= 0; i--) {
-                    free(frames[i]);
+                    free(swap->frames[i]);
                 }
-                free(frames);
+                free(swap);
             }
         }
     }
@@ -90,10 +98,10 @@ static void load_icon_static(const Icon* replace, const char* name, FuriString* 
 
         if(storage_file_read(file, &header, sizeof(header)) == sizeof(header) &&
            storage_file_read(file, swap->frame, frame_size) == frame_size) {
-            FURI_CONST_ASSIGN(swap->icon.frame_rate, 0);
-            FURI_CONST_ASSIGN(swap->icon.frame_count, 1);
             FURI_CONST_ASSIGN(swap->icon.width, header.width);
             FURI_CONST_ASSIGN(swap->icon.height, header.height);
+            FURI_CONST_ASSIGN(swap->icon.frame_count, 1);
+            FURI_CONST_ASSIGN(swap->icon.frame_rate, 0);
             FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
             swap->frames[0] = swap->frame;
 
