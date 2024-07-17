@@ -70,28 +70,36 @@ static void
     storage_file_close(file);
 }
 
+typedef struct {
+    Icon icon;
+    uint8_t* frames[1];
+    uint8_t frame[];
+} StaticIconSwap;
+
+typedef struct {
+    int32_t width;
+    int32_t height;
+} FURI_PACKED StaticIconBmxHeader;
+
 static void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", momentum_settings.asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        uint64_t size = storage_file_size(file) - 8;
-        uint8_t* frame = malloc(size);
-        int32_t icon_width, icon_height;
+        StaticIconBmxHeader header;
+        uint64_t frame_size = storage_file_size(file) - sizeof(header);
+        StaticIconSwap* swap = malloc(sizeof(StaticIconSwap) + frame_size);
 
-        if(storage_file_read(file, &icon_width, 4) == 4 &&
-           storage_file_read(file, &icon_height, 4) == 4 &&
-           storage_file_read(file, frame, size) == size) {
-            Icon* original = malloc(sizeof(Icon));
-            memcpy(original, replace, sizeof(Icon));
-            FURI_CONST_ASSIGN_PTR(replace->original, original);
-            uint8_t** frames = malloc(sizeof(const uint8_t*));
-            frames[0] = frame;
-            FURI_CONST_ASSIGN(replace->frame_rate, 0);
-            FURI_CONST_ASSIGN(replace->frame_count, 1);
-            FURI_CONST_ASSIGN(replace->width, icon_width);
-            FURI_CONST_ASSIGN(replace->height, icon_height);
-            FURI_CONST_ASSIGN_PTR(replace->frames, frames);
+        if(storage_file_read(file, &header, sizeof(header)) == sizeof(header) &&
+           storage_file_read(file, swap->frame, frame_size) == frame_size) {
+            FURI_CONST_ASSIGN(swap->icon.frame_rate, 0);
+            FURI_CONST_ASSIGN(swap->icon.frame_count, 1);
+            FURI_CONST_ASSIGN(swap->icon.width, header.width);
+            FURI_CONST_ASSIGN(swap->icon.height, header.height);
+            FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
+            swap->frames[0] = swap->frame;
+
+            // FIXME: append to icon swap array
         } else {
-            free(frame);
+            free(swap);
         }
     }
     storage_file_close(file);
