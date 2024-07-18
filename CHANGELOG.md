@@ -4,6 +4,8 @@
   - If you used this, need to reflash your VGM and reconfigure the colors
 
 ### Added:
+- Apps:
+  - USB: MTP, allows SD card access on PC without qFlipper (by @Alex4386)
 - Sub-GHz:
   - New Legrand doorbell protocol (#120 by @user890104)
   - Choose RSSI threshold for Hopping mode (by @Willy-JL)
