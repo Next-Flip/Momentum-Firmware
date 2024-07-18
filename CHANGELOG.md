@@ -43,7 +43,7 @@
   - OFW: Event Loop Timers (by @gsurkov)
   - OFW: Count ISR time and show in top command (by @skotopes)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
-- OFW: USB/CCID: Add initial ISO7816 support, improve data handling (by @kidbomb)
+- OFW: USB/CCID: Add initial ISO7816 support, improve data handling, add CCIDWorker (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
 
 ### Updated:
@@ -64,6 +64,7 @@
   - UL: RFID Fuzzer: Fix worker not being in LFRFIDWorkerIdle before next key (by @xMasterX)
   - UL: Barcode: Fix backlight settings (by @xMasterX)
   - OFW: NFC/RFID Detector: Fix some typos (by @Skorpionm)
+  - OFW: BT/USB Remote: Improved keyboard UI (by @Astrrra)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
 - NFC:
   - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
