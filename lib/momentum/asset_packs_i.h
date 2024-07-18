@@ -16,6 +16,6 @@ typedef struct {
     CanvasFontParameters* font_params[FontTotalNumber];
 } AssetPacks;
 
-extern AssetPacks asset_packs;
+extern AssetPacks* asset_packs;
 
 const Icon* asset_packs_swap_icon(const Icon* requested);

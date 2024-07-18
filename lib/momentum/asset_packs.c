@@ -16,10 +16,7 @@
 // See lib/u8g2/u8g2_font.c
 #define U8G2_FONT_DATA_STRUCT_SIZE 23
 
-AssetPacks asset_packs = {
-    .fonts = {NULL},
-    .font_params = {NULL},
-};
+AssetPacks* asset_packs = NULL;
 
 typedef struct {
     Icon icon;
@@ -70,7 +67,7 @@ static void
                 FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
 
                 IconSwapList_push_back(
-                    asset_packs.icons,
+                    asset_packs->icons,
                     (IconSwap){
                         .original = original,
                         .replaced = &swap->icon,
@@ -115,7 +112,7 @@ static void
             swap->frames[0] = swap->frame;
 
             IconSwapList_push_back(
-                asset_packs.icons,
+                asset_packs->icons,
                 (IconSwap){
                     .original = original,
                     .replaced = &swap->icon,
@@ -128,17 +125,18 @@ static void
 }
 
 static void free_icon(const Icon* icon) {
-    uint8_t** frames = (void*)icon->frames;
-    int32_t frame_count = icon->frame_count;
-
-    Icon* original = (void*)icon->original;
-    memcpy((void*)icon, original, sizeof(Icon));
-
-    free(original);
-    for(int32_t i = 0; i < frame_count; i++) {
-        free(frames[i]);
+    StaticIconSwap* swap = (void*)icon;
+    // StaticIconSwap and AnimatedIconSwap have similar structure, but
+    // animated one has frames array of variable length, and frame data is
+    // in another allocation, while static includes frame in same allocation
+    // By checking if the first frame points to later in same allocation, we
+    // can tell if it is static or animated
+    if(swap->frames[0] != swap->frame) {
+        for(size_t i = 0; i < swap->icon.frame_count; i++) {
+            free(swap->frames[i]);
+        }
     }
-    free(frames);
+    free(swap);
 }
 
 static void load_font(Font font, const char* name, FuriString* path, File* file) {
@@ -148,14 +146,14 @@ static void load_font(Font font, const char* name, FuriString* path, File* file)
         uint8_t* swap = malloc(size);
 
         if(size > U8G2_FONT_DATA_STRUCT_SIZE && storage_file_read(file, swap, size) == size) {
-            asset_packs.fonts[font] = swap;
+            asset_packs->fonts[font] = swap;
             CanvasFontParameters* params = malloc(sizeof(CanvasFontParameters));
             // See lib/u8g2/u8g2_font.c
             params->leading_default = swap[10]; // max_char_height
             params->leading_min = params->leading_default - 2; // good enough
             params->height = MAX((int8_t)swap[15], 0); // ascent_para
             params->descender = MAX((int8_t)swap[16], 0); // descent_para
-            asset_packs.font_params[font] = params;
+            asset_packs->font_params[font] = params;
         } else {
             free(swap);
         }
@@ -164,10 +162,10 @@ static void load_font(Font font, const char* name, FuriString* path, File* file)
 }
 
 static void free_font(Font font) {
-    free(asset_packs.fonts[font]);
-    asset_packs.fonts[font] = NULL;
-    free(asset_packs.font_params[font]);
-    asset_packs.font_params[font] = NULL;
+    free(asset_packs->fonts[font]);
+    asset_packs->fonts[font] = NULL;
+    free(asset_packs->font_params[font]);
+    asset_packs->font_params[font] = NULL;
 }
 
 static const char* font_names[] = {
@@ -179,6 +177,8 @@ static const char* font_names[] = {
 };
 
 void asset_packs_init(void) {
+    if(asset_packs) return;
+
     const char* pack = momentum_settings.asset_pack;
     if(pack[0] == '\0') return;
 
@@ -187,18 +187,19 @@ void asset_packs_init(void) {
     FileInfo info;
     if(storage_common_stat(storage, furi_string_get_cstr(p), &info) == FSE_OK &&
        info.flags & FSF_DIRECTORY) {
+        asset_packs = malloc(sizeof(AssetPacks));
+        IconSwapList_init(asset_packs->icons);
+
         File* f = storage_file_alloc(storage);
 
         furi_string_printf(p, ASSET_PACKS_PATH "/%s/Icons", pack);
         if(storage_common_stat(storage, furi_string_get_cstr(p), &info) == FSE_OK &&
            info.flags & FSF_DIRECTORY) {
             for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-                if(ICON_PATHS[i].icon->original == NULL) {
-                    if(ICON_PATHS[i].icon->frame_count > 1) {
-                        load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
-                    } else {
-                        load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
-                    }
+                if(ICON_PATHS[i].icon->frame_count > 1) {
+                    load_icon_animated(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
+                } else {
+                    load_icon_static(ICON_PATHS[i].icon, ICON_PATHS[i].path, p, f);
                 }
             }
         }
@@ -218,25 +219,31 @@ void asset_packs_init(void) {
 }
 
 void asset_packs_free(void) {
-    for(size_t i = 0; i < ICON_PATHS_COUNT; i++) {
-        if(ICON_PATHS[i].icon->original != NULL) {
-            free_icon(ICON_PATHS[i].icon);
+    if(!asset_packs) return;
+
+    for
+        M_EACH(icon_swap, asset_packs->icons, IconSwapList_t) {
+            free_icon(icon_swap->replaced);
         }
-    }
+    IconSwapList_clear(asset_packs->icons);
 
     for(Font font = 0; font < FontTotalNumber; font++) {
-        if(asset_packs.fonts[font] != NULL) {
+        if(asset_packs->fonts[font] != NULL) {
             free_font(font);
         }
     }
+
+    free(asset_packs);
+    asset_packs = NULL;
 }
 
 const Icon* asset_packs_swap_icon(const Icon* requested) {
+    if(!asset_packs) return requested;
     if((uint32_t)requested < FLASH_BASE || (uint32_t)requested > (FLASH_BASE + FLASH_SIZE)) {
         return requested;
     }
     for
-        M_EACH(icon_swap, asset_packs.icons, IconSwapList_t) {
+        M_EACH(icon_swap, asset_packs->icons, IconSwapList_t) {
             if(icon_swap->original == requested) {
                 return icon_swap->replaced;
             }
