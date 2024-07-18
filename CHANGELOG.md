@@ -5,13 +5,13 @@
 
 ### Added:
 - Sub-GHz:
-  - New Legrand doorbell protocol (by @user890104)
+  - New Legrand doorbell protocol (#120 by @user890104)
   - Choose RSSI threshold for Hopping mode (by @Willy-JL)
   - UL: Novoferm remotes full support (by @xMasterX)
   - UL: Add manually Hormann EcoStar, also Sommer FM238 option when default won't work (by @xMasterX)
   - OFW: Princeton protocol add custom guard time (by @Skorpionm & @xMasterX)
 - NFC:
-  - Add parser for CSC Service Works Reloadable Cash Card (by @zinongli)
+  - Add parser for CSC Service Works Reloadable Cash Card (#137 by @zinongli)
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
@@ -22,7 +22,7 @@
   - OFW: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - JS:
-  - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
+  - Added ADC (analog voltage) support to gpio library (#143 by @jamisonderek)
   - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
 - FBT:
   - New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
@@ -35,7 +35,7 @@
 - OFW: JS: New modules documentation added (by @rnadyrshin)
 - Updater:
   - OFW: Resource compression refactor, uses heatshrink (by @hedger)
-  - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (by @Willy-JL)
+  - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (#152 by @Willy-JL)
 - OFW: CLI: New `top` command, replaces `ps`, ow includes CPU usage info too (by @skotopes)
 - Furi:
   - OFW: Event loop (by @skotopes)
@@ -84,9 +84,9 @@
 - RFID:
   - UL: Update T5577 password list (by @korden32)
   - UL: DEZ 8 display form for EM4100 (by @korden32 & @mishamyte)
-- Main Menu: Unload menu and app list when opening apps +7kb free RAM (by @Willy-JL)
-- Asset Packs: Refactor icon loader into draw step +4.2kb free RAM (by @Willy-JL)
-- Infrared: Added missing Koro Box entry to TV universal remote (by @skyhawkillusions)
+- Main Menu: Unload menu and app list when opening apps +7kb free RAM (#161 by @Willy-JL)
+- Asset Packs: Refactor icon loader into draw step +4.2kb free RAM (#164 by @Willy-JL)
+- Infrared: Added missing Koro Box entry to TV universal remote (#159 by @skyhawkillusions)
 - OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
 - CLI:
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
@@ -115,8 +115,8 @@
   - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
   - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared:
-  - Correct Samsung.ir CH+ command (by @skyhawkillusions)
-  - Remove duplicates from LED universal remote (by @Wemmy0)
+  - Correct Samsung.ir CH+ command (#156 by @skyhawkillusions)
+  - Remove duplicates from LED universal remote (#165 by @Wemmy0)
   - OFW: Check for negative timings (by @gsurkov)
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
