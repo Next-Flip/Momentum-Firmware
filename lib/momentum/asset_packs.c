@@ -34,7 +34,7 @@ typedef struct {
 } FURI_PACKED AnimatedIconMetaFile;
 
 static void
-    load_icon_animated(const Icon* replace, const char* name, FuriString* path, File* file) {
+    load_icon_animated(const Icon* original, const char* name, FuriString* path, File* file) {
     const char* pack = momentum_settings.asset_pack;
     furi_string_printf(path, ICONS_FMT "/meta", pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -69,8 +69,12 @@ static void
                 FURI_CONST_ASSIGN(swap->icon.frame_rate, meta.frame_rate);
                 FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
 
-                // FIXME: append to icon swap array
-                UNUSED(replace);
+                IconSwapList_push_back(
+                    asset_packs.icons,
+                    (IconSwap){
+                        .original = original,
+                        .replaced = &swap->icon,
+                    });
             } else {
                 for(; i >= 0; i--) {
                     free(swap->frames[i]);
@@ -93,7 +97,8 @@ typedef struct {
     int32_t height;
 } FURI_PACKED StaticIconBmxHeader;
 
-static void load_icon_static(const Icon* replace, const char* name, FuriString* path, File* file) {
+static void
+    load_icon_static(const Icon* original, const char* name, FuriString* path, File* file) {
     furi_string_printf(path, ICONS_FMT ".bmx", momentum_settings.asset_pack, name);
     if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         StaticIconBmxHeader header;
@@ -109,8 +114,12 @@ static void load_icon_static(const Icon* replace, const char* name, FuriString* 
             FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
             swap->frames[0] = swap->frame;
 
-            // FIXME: append to icon swap array
-            UNUSED(replace);
+            IconSwapList_push_back(
+                asset_packs.icons,
+                (IconSwap){
+                    .original = original,
+                    .replaced = &swap->icon,
+                });
         } else {
             free(swap);
         }
@@ -220,4 +229,17 @@ void asset_packs_free(void) {
             free_font(font);
         }
     }
+}
+
+const Icon* asset_packs_swap_icon(const Icon* requested) {
+    if((uint32_t)requested < FLASH_BASE || (uint32_t)requested > (FLASH_BASE + FLASH_SIZE)) {
+        return requested;
+    }
+    for
+        M_EACH(icon_swap, asset_packs.icons, IconSwapList_t) {
+            if(icon_swap->original == requested) {
+                return icon_swap->replaced;
+            }
+        }
+    return requested;
 }

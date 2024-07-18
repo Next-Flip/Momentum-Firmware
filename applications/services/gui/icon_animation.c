@@ -2,11 +2,13 @@
 #include "icon_i.h" // IWYU pragma: keep
 
 #include <furi.h>
+#include <momentum/asset_packs_i.h>
 
 IconAnimation* icon_animation_alloc(const Icon* icon) {
     furi_check(icon);
 
     IconAnimation* instance = malloc(sizeof(IconAnimation));
+    icon = asset_packs_swap_icon(icon);
     instance->icon = icon;
     instance->timer =
         furi_timer_alloc(icon_animation_timer_callback, FuriTimerTypePeriodic, instance);
