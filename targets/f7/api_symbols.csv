@@ -2815,7 +2815,6 @@ Function,-,mktemp,char*,char*
 Function,-,modf,double,"double, double*"
 Function,-,modff,float,"float, float*"
 Function,-,modfl,long double,"long double, long double*"
-Function,-,momentum_settings_load,void,
 Function,+,momentum_settings_save,void,
 Function,-,mrand48,long,
 Function,-,music_worker_alloc,MusicWorker*,
@@ -4131,7 +4130,6 @@ Variable,+,_impure_data,_reent,
 Variable,+,_impure_ptr,_reent*,
 Variable,-,_sys_errlist,const char*[],
 Variable,-,_sys_nerr,int,
-Variable,-,asset_packs,AssetPacks,
 Variable,-,ble_profile_hid,const FuriHalBleProfileTemplate*,
 Variable,-,ble_profile_serial,const FuriHalBleProfileTemplate*,
 Variable,+,cli_vcp,CliSession,

@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "settings_i.h"
 
 #include <furi_hal.h>
 #include <rgb_backlight.h>

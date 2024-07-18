@@ -5,7 +5,8 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
-#include <momentum/momentum.h>
+#include <momentum/asset_packs_i.h>
+#include <momentum/settings.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},

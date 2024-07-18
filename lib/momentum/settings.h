@@ -93,6 +93,5 @@ typedef struct {
     ScreenFrameColor rpc_color_bg;
 } MomentumSettings;
 
-void momentum_settings_load(void);
 void momentum_settings_save(void);
 extern MomentumSettings momentum_settings;

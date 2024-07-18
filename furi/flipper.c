@@ -45,7 +45,7 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <loader/loader_menu.h>
 #include <momentum/asset_packs.h>
 #include <momentum/namespoof.h>
-#include <momentum/settings.h>
+#include <momentum/settings_i.h>
 #include <notification/notification_app.h>
 #include <power/power_settings.h>
 
