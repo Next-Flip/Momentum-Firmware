@@ -83,6 +83,8 @@
 - RFID:
   - UL: Update T5577 password list (by @korden32)
   - UL: DEZ 8 display form for EM4100 (by @korden32 & @mishamyte)
+- Main Menu: Unload menu and app list when opening apps +7kb free RAM (by @Willy-JL)
+- Asset Packs: Refactor icon loader into draw step +4.2kb free RAM (by @Willy-JL)
 - Infrared: Added missing Koro Box entry to TV universal remote (by @skyhawkillusions)
 - OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
 - CLI:
@@ -113,11 +115,12 @@
   - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared:
   - Correct Samsung.ir CH+ command (by @skyhawkillusions)
+  - Remove duplicates from LED universal remote (by @Wemmy0)
   - OFW: Check for negative timings (by @gsurkov)
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
   - OFW: Fixed starting apps with spaces in path (by @hedger)
-- AssetPacker: Pack pre-compiled icons and fonts too, fix animated icons edge cases (by @Willy-JL)
+- Asset Packs: Pack pre-compiled icons and fonts too, fix animated icons edge cases (by @Willy-JL)
 - GUI: Return user-provided index from `menu_set_selected_item()`  like `submenu` equivalent (by @Willy-JL)
 - JS:
   - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
