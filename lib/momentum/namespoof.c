@@ -1,6 +1,7 @@
 #include "namespoof.h"
-#include <furi_hal.h>
+
 #include <flipper_format/flipper_format.h>
+#include <furi_hal_version.h>
 
 #define TAG "NameSpoof"
 

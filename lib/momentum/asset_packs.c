@@ -1,9 +1,12 @@
-#include "momentum.h"
+#include "asset_packs.h"
+
+#include "settings.h"
+
+#include <assets_icons.h>
+#include <core/dangerous_defines.h>
 #include <furi_hal.h>
 #include <gui/icon_i.h>
-#include <assets_icons.h>
 #include <storage/storage.h>
-#include <core/dangerous_defines.h>
 
 #define TAG "AssetPacks"
 
@@ -67,6 +70,7 @@ static void
                 FURI_CONST_ASSIGN_PTR(swap->icon.frames, swap->frames);
 
                 // FIXME: append to icon swap array
+                UNUSED(replace);
             } else {
                 for(; i >= 0; i--) {
                     free(swap->frames[i]);
@@ -106,6 +110,7 @@ static void load_icon_static(const Icon* replace, const char* name, FuriString* 
             swap->frames[0] = swap->frame;
 
             // FIXME: append to icon swap array
+            UNUSED(replace);
         } else {
             free(swap);
         }

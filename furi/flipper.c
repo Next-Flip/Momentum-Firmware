@@ -33,19 +33,21 @@ static void flipper_print_version(const char* target, const Version* version) {
 }
 
 #ifndef FURI_RAM_EXEC
-#include <bt/bt_settings.h>
-#include <bt/bt_service/bt_i.h>
-#include <power/power_settings.h>
-#include <desktop/desktop_settings.h>
-#include <notification/notification_app.h>
-#include <dolphin/helpers/dolphin_state.h>
-#include <applications/main/u2f/u2f_data.h>
-#include <applications/main/infrared/infrared_app.h>
-#include <expansion/expansion_settings_filename.h>
 #include <applications/main/archive/helpers/archive_favorites.h>
-#include <momentum/namespoof.h>
-#include <momentum/momentum.h>
+#include <applications/main/infrared/infrared_app.h>
+#include <applications/main/u2f/u2f_data.h>
 #include <assets_icons.h>
+#include <bt/bt_service/bt_i.h>
+#include <bt/bt_settings.h>
+#include <desktop/desktop_settings.h>
+#include <dolphin/helpers/dolphin_state.h>
+#include <expansion/expansion_settings_filename.h>
+#include <loader/loader_menu.h>
+#include <momentum/asset_packs.h>
+#include <momentum/namespoof.h>
+#include <momentum/settings.h>
+#include <notification/notification_app.h>
+#include <power/power_settings.h>
 
 void flipper_migrate_files() {
     Storage* storage = furi_record_open(RECORD_STORAGE);

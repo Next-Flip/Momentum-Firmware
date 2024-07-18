@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define MAINMENU_APPS_PATH CFG_PATH("mainmenu_apps.txt")
+
 typedef struct LoaderMenu LoaderMenu;
 
 LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool settings);
