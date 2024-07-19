@@ -2,7 +2,7 @@ Filetype: IR library file
 Version: 1
 # Last Updated 18th Feb, 2024
 # Last Checked 18th Feb, 2024
-# 
+#
 # TEMP FIX FOR POWER
 #
 name: Power
@@ -508,6 +508,7 @@ type: parsed
 protocol: NECext
 address: 87 4E 00 00
 command: 0D 00 00 00
+#
 name: Vol_up
 type: raw
 frequency: 38000
