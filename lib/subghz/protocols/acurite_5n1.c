@@ -82,12 +82,15 @@ const SubGhzProtocolEncoder ws_protocol_acurite_5n1_encoder = {
 
 const SubGhzProtocol ws_protocol_acurite_5n1 = {
     .name = WS_PROTOCOL_ACURITE_5N1_NAME,
-    .type = SubGhzProtocolWeatherStation,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_acurite_5n1_decoder,
     .encoder = &ws_protocol_acurite_5n1_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_acurite_5n1_alloc(SubGhzEnvironment* environment) {

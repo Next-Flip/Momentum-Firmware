@@ -80,12 +80,15 @@ const SubGhzProtocolEncoder ws_protocol_emose601x_encoder = {
 
 const SubGhzProtocol ws_protocol_emose601x = {
     .name = WS_PROTOCOL_EMOSE601X_NAME,
-    .type = SubGhzProtocolWeatherStation,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
-            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
+            SubGhzProtocolFlag_Save,
 
     .decoder = &ws_protocol_emose601x_decoder,
     .encoder = &ws_protocol_emose601x_encoder,
+
+    .filter = SubGhzProtocolFilter_Weather,
 };
 
 void* ws_protocol_decoder_emose601x_alloc(SubGhzEnvironment* environment) {
