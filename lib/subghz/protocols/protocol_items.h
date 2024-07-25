@@ -71,3 +71,5 @@
 #include "x10.h"
 #include "hormann_bisecur.h"
 #include "legrand.h"
+#include "emos_e601x.h"
+#include "acurite_5n1.h"

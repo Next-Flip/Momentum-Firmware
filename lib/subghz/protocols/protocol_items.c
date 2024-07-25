@@ -70,6 +70,8 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_x10,
     &subghz_protocol_hormann_bisecur,
     &subghz_protocol_legrand,
+    &ws_protocol_emose601x,
+    &ws_protocol_acurite_5n1,
 };
 
 const SubGhzProtocolRegistry subghz_protocol_registry = {
