@@ -5,13 +5,13 @@
 
 ### Added:
 - Sub-GHz:
-  - New Legrand doorbell protocol (by @user890104)
+  - New Legrand doorbell protocol (#120 by @user890104)
   - Choose RSSI threshold for Hopping mode (by @Willy-JL)
   - UL: Novoferm remotes full support (by @xMasterX)
   - UL: Add manually Hormann EcoStar, also Sommer FM238 option when default won't work (by @xMasterX)
   - OFW: Princeton protocol add custom guard time (by @Skorpionm & @xMasterX)
 - NFC:
-  - Add parser for CSC Service Works Reloadable Cash Card (by @zinongli)
+  - Add parser for CSC Service Works Reloadable Cash Card (#137 by @zinongli)
   - OFW: Mifare Plus detection support (by @Astrrra)
   - OFW: Felica emulation (by @RebornedBrain)
   - OFW: Write to Ultralight cards is now possible (by @RebornedBrain & @gornekich)
@@ -22,7 +22,7 @@
   - OFW: Added Support for Securakey Protocol and RKKTH Plain Text Format (by @zinongli)
 - MNTM Settings: Click Ok on Asset Pack setting to choose from a full-screen list (by @Willy-JL)
 - JS:
-  - Added ADC (analog voltage) support to gpio library (by @jamisonderek)
+  - Added ADC (analog voltage) support to gpio library (#143 by @jamisonderek)
   - Support `subghz` custom modulation, support `transmitFile(path, repeats)`, new `end()` function (by @Willy-JL)
 - FBT:
   - New `SKIP_EXTERNAL` toggle and `EXTRA_EXT_APPS` config option (by @Willy-JL)
@@ -35,7 +35,7 @@
 - OFW: JS: New modules documentation added (by @rnadyrshin)
 - Updater:
   - OFW: Resource compression refactor, uses heatshrink (by @hedger)
-  - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (by @Willy-JL)
+  - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (#152 by @Willy-JL)
 - OFW: CLI: New `top` command, replaces `ps`, ow includes CPU usage info too (by @skotopes)
 - Furi:
   - OFW: Event loop (by @skotopes)
@@ -43,7 +43,7 @@
   - OFW: Event Loop Timers (by @gsurkov)
   - OFW: Count ISR time and show in top command (by @skotopes)
 - OFW: RPC: Add TarExtract command, some small fixes (by @Willy-JL)
-- OFW: USB/CCID: Add initial ISO7816 support, improve data handling (by @kidbomb)
+- OFW: USB/CCID: Add initial ISO7816 support, improve data handling, add CCIDWorker (by @kidbomb)
 - OFW: FBT/VsCode: Tweaks for cdb generation for clangd (by @hedger)
 
 ### Updated:
@@ -51,19 +51,20 @@
   - VGM Tool: New RGB VGM firmware to support Flipper FW changes (by @HaxSam)
   - MFKey: 30% speedup, fix half speed mode, fix UI bugs (by @noproto)
   - Picopass: Acknowledgements page, Elite VB6 RNG keygen attack, plugin and app improvements (by @bettse)
-  - Seader: Handle SAM removal better, UI improvements, validate LRC (by @bettse)
+  - Seader: Handle SAM removal better, UI improvements, validate LRC, memory management fixes (by @bettse)
   - NFC Magic: Gen1 backdoor read support (by @Astrrra)
   - Authenticator: Support multiple BT profiles, fix URL format (by @akopachov)
   - NFC Playlist: Various fixes and improvements, new icon (by @acegoal07)
   - BMI160 Air Mouse: Add support for LSM6DSO (by @alex-vg & @ginkage)
   - ESP32CAM Camera Suite: Fix pinout diagram GND, fix horizontal flip (by @CodyTolene)
-  - Quac: Fix IR import busfault, explain to hold right when empty (by @Willy-JL)
+  - Quac: Fix IR import busfault on empty, add hint text on Empty group (by @Willy-JL)
   - UL: ESubGHz Chat: Add back NFC key sharing with nfclegacy (by @xMasterX)
   - UL: Mifare Nested: Free some space by simplifying nfclegacy lib (by @xMasterX)
   - UL: WAV Player: Reconfigure to use 8-bit memory buffer, halving memory usage (by @CookiePLMonster)
   - UL: RFID Fuzzer: Fix worker not being in LFRFIDWorkerIdle before next key (by @xMasterX)
   - UL: Barcode: Fix backlight settings (by @xMasterX)
   - OFW: NFC/RFID Detector: Fix some typos (by @Skorpionm)
+  - OFW: BT/USB Remote: Improved keyboard UI (by @Astrrra)
   - Many apps updated for new refactors (by @Willy-JL & @xMasterX)
 - NFC:
   - EMV Transactions menu less nested in UI, hide if data unavailable (by @Willy-JL)
@@ -83,9 +84,9 @@
 - RFID:
   - UL: Update T5577 password list (by @korden32)
   - UL: DEZ 8 display form for EM4100 (by @korden32 & @mishamyte)
-- Main Menu: Unload menu and app list when opening apps +7kb free RAM (by @Willy-JL)
-- Asset Packs: Refactor icon loader into draw step +4.2kb free RAM (by @Willy-JL)
-- Infrared: Added missing Koro Box entry to TV universal remote (by @skyhawkillusions)
+- Main Menu: Unload menu and app list when opening apps +7kb free RAM (#161 by @Willy-JL)
+- Asset Packs: Refactor icon loader into draw step +4.2kb free RAM (#164 by @Willy-JL)
+- Infrared: Added missing Koro Box entry to TV universal remote (#159 by @skyhawkillusions)
 - OFW: iButton/RFID: Separate editing and renaming (by @Astrrra)
 - CLI:
   - Simpler plugin wrapper +0.5k free flash (by @Willy-JL)
@@ -114,8 +115,8 @@
   - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
   - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared:
-  - Correct Samsung.ir CH+ command (by @skyhawkillusions)
-  - Remove duplicates from LED and Projector universal remotes (by @Wemmy0)
+  - Correct Samsung.ir CH+ command (#156 by @skyhawkillusions)
+  - Remove duplicates from LED and Projector universal remotes (#165 by @Wemmy0)
   - OFW: Check for negative timings (by @gsurkov)
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
