@@ -6,6 +6,7 @@
 ### Added:
 - Sub-GHz:
   - New Legrand doorbell protocol (#120 by @user890104)
+  - Integrate EmosE601x and Acurite 5in1 protocols from WS app (#170 by @htotoo)
   - Choose RSSI threshold for Hopping mode (by @Willy-JL)
   - UL: Novoferm remotes full support (by @xMasterX)
   - UL: Add manually Hormann EcoStar, also Sommer FM238 option when default won't work (by @xMasterX)
