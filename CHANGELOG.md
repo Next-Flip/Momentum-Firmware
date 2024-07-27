@@ -76,6 +76,7 @@
 - Sub-GHz:
   - Refactor Weather protocols in Sub-GHz app, shows only correct data (by @Willy-JL)
   - Streamline generic serialize +1.5k free flash (by @Willy-JL)
+  - UL: Refactor frequency analyzer code for better readability (by @derskythe)
 - JS: Refactored `widget` and `keyboard` modules with `ViewHolder`, fix crash (by @Willy-JL)
 - Desktop:
   - Slim down internal anims, +3.4kb free flash (by @Willy-JL)
@@ -100,6 +101,7 @@
 -FBT:
   - OFW: Toolchain v38, clangd as default language server (by @hedger)
   - OFW: Code formatting update (by @hedger)
+- UL: Documentation: Cleanup and format markdown better (by @derskythe)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
 ### Fixed:
