@@ -67,6 +67,7 @@ const SubGhzProtocolDecoder ws_protocol_emose601x_decoder = {
     .serialize = ws_protocol_decoder_emose601x_serialize,
     .deserialize = ws_protocol_decoder_emose601x_deserialize,
     .get_string = ws_protocol_decoder_emose601x_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder ws_protocol_emose601x_encoder = {
