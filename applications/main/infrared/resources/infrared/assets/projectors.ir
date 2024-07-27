@@ -3,7 +3,7 @@ Version: 1
 # Last Updated 18th Feb, 2024
 # Last Checked 18th Feb, 2024
 # 
-# TEMP FIX FOR POWER
+# TEMP FIX FOR POWER: Power signals are duplicated, since projectors require second confirm to poweroff
 #
 # ON
 name: Power
@@ -1555,3 +1555,27 @@ type: raw
 frequency: 38000
 duty_cycle: 0.330000
 data: 9010 4253 564 566 566 1671 566 1699 565 565 539 568 564 566 565 539 566 1699 565 1672 565 566 566 1672 564 567 565 1672 565 567 565 567 564 541 564 1698 566 539 565 567 565 567 562 542 565 1699 564 539 567 1699 565 540 564 1698 566 1672 565 1698 566 1672 565 567 565 1671 565 566 566
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 48 50 00 00
+command: 02 FD 00 00
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 48 50 00 00
+command: 02 FD 00 00
+# 
+name: Mute
+type: parsed
+protocol: NECext
+address: 48 50 00 00
+command: 27 D8 00 00
+# 
+name: Vol_down
+type: parsed
+protocol: NECext
+address: 4F 50 00 00
+command: 0B F4 00 00
