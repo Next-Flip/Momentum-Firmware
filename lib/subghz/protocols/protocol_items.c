@@ -63,6 +63,8 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &ws_protocol_wendox_w6726,
     &ws_protocol_auriol_ahfl,
     &ws_protocol_kedsum_th,
+    &ws_protocol_emose601x,
+    &ws_protocol_acurite_5n1,
     &subghz_protocol_pocsag,
     &tpms_protocol_schrader_gg4,
     &subghz_protocol_bin_raw,
@@ -70,8 +72,6 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_x10,
     &subghz_protocol_hormann_bisecur,
     &subghz_protocol_legrand,
-    &ws_protocol_emose601x,
-    &ws_protocol_acurite_5n1,
 };
 
 const SubGhzProtocolRegistry subghz_protocol_registry = {
