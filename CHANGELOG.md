@@ -117,7 +117,7 @@
   - Fix rename extension show/hide behavior (by @Willy-JL)
 - Infrared:
   - Correct Samsung.ir CH+ command (#156 by @skyhawkillusions)
-  - Remove duplicates from LED and Projector universal remotes (#165 by @Wemmy0)
+  - Remove duplicates from LED and Projector universal remotes (#165 #167 by @Wemmy0)
   - OFW: Check for negative timings (by @gsurkov)
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
