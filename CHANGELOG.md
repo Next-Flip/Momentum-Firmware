@@ -114,6 +114,7 @@
   - UL: Fix Hormann HSM 44bit static button code decoding (by @xMasterX)
   - UL: Sync signal delete scene with OFW (by @xMasterX)
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
+  - UL: Fix crash on wrong rx key states (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
 - Archive:
   - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
