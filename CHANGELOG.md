@@ -98,9 +98,10 @@
   - OFW: Coalesce some allocations, smaller memory footprint (by @CookiePLMonster)
   - OFW: Put Input state data on the stack of the service (by @CookiePLMonster)
 - OFW: BLE: Update to copro light stack v1.20.0 (by @hedger)
--FBT:
+- FBT:
   - OFW: Toolchain v38, clangd as default language server (by @hedger)
   - OFW: Code formatting update (by @hedger)
+  - OFW: Reordered VS-Code Tasks to follow the [Release] > [Debug] schema (by @janwiesemann)
 - UL: Documentation: Cleanup and format markdown better (by @derskythe)
 - OFW: Code Cleanup: Unused includes, useless checks, unused variables, etc... (by @skotopes)
 
@@ -138,11 +139,13 @@
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
 - OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: iButton/RFID: Fix Add Manually results being discarded (by @Astrrra)
+- OFW: Power: Fix typo in "charge me" screen (by @liamhays)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
 - OFW: Updater: Slightly smaller image (by @hedger)
 - OFW: Debug: Backup openocd work area, fix crash after fresh debugger connect and continue (by @skotopes)
 - OFW: Cleanup of various warnings from clangd (by @hedger)
 - OFW: ReadMe: update outdated bits and pieces (by @skotopes)
+- OFW: Fix .editorconfig (by @leon0399)
 
 ### Removed:
 - Furi:
