@@ -37,7 +37,7 @@
 - Updater:
   - OFW: Resource compression refactor, uses heatshrink (by @hedger)
   - Adapted gzip to new `CompressStreamDecoder` API, better compression ratio (#152 by @Willy-JL)
-- OFW: CLI: New `top` command, replaces `ps`, ow includes CPU usage info too (by @skotopes)
+- OFW: CLI: New `top` command, replaces `ps`, now includes CPU usage info too (by @skotopes)
 - Furi:
   - OFW: Event loop (by @skotopes)
   - OFW: Thread signals, loader close, loader get app name (by @gsurkov)
@@ -107,6 +107,17 @@
 
 ### Fixed:
 - OFW: USB: IRQ, CDC and EP fixes, no more "Operation timeout (generic)" updating from OFW (by @skotopes)
+- Archive:
+  - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
+  - Fix rename extension show/hide behavior (by @Willy-JL)
+  - OFW: Fix memory leak in favorites add/remove (by @skotopes)
+- JS:
+  - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
+  - OFW: Disable logging in mjs +2k free flash (by @hedger)
+- Infrared:
+  - Correct Samsung.ir CH+ command (#156 by @skyhawkillusions)
+  - Remove duplicates from LED universal remote, add missing Fan and Projector signals (#165 #167 by @Wemmy0)
+  - OFW: Check for negative timings (by @gsurkov)
 - Sub-GHz:
   - UL: Fix Add Manually for Princeton, Normstahl, Sommer, MHouse, Aprimatic (by @xMasterX)
   - UL: Improve custom buttons for MHouse, Novoferm, Nice Smilo (by @xMasterX)
@@ -116,21 +127,11 @@
   - UL: Fix incorrect rx key state when opening Read menu (by @xMasterX)
   - UL: Fix crash on wrong rx key states (by @xMasterX)
   - OFW: Fixed transition to Saved menu after Delete RAW (by @Skorpionm)
-- Archive:
-  - Fix favorite's parent folders thinking they are favorited too (by @Willy-JL)
-  - Fix rename extension show/hide behavior (by @Willy-JL)
-- Infrared:
-  - Correct Samsung.ir CH+ command (#156 by @skyhawkillusions)
-  - Remove duplicates from LED universal remote, add missing Fan and Projector signals (#165 #167 by @Wemmy0)
-  - OFW: Check for negative timings (by @gsurkov)
 - FBT:
   - Consistent version/branch info, fix gitorigin (by @Willy-JL)
   - OFW: Fixed starting apps with spaces in path (by @hedger)
 - Asset Packs: Pack pre-compiled icons and fonts too, fix animated icons edge cases (by @Willy-JL)
 - GUI: Return user-provided index from `menu_set_selected_item()`  like `submenu` equivalent (by @Willy-JL)
-- JS:
-  - Fix `subghz` RAW files, fix memory leaks, deinit correctly, better error handling (by @Willy-JL)
-  - OFW: Disable logging in mjs +2k free flash (by @hedger)
 - OFW: RPC: Fix input lockup on disconnect (by @Willy-JL)
 - OFW: ELF/Flipper application: Do not crash on "out of memory" (by @DrZlo13)
 - NFC:
@@ -138,7 +139,6 @@
   - OFW: ISO15693 Render Typo Fix (by @zinongli)
 - OFW: Desktop: Lockup fix, GUI improvements (by @skotopes)
 - OFW: Loader: Fix crash on locked via cli loader (by @DrZlo13)
-- OFW: Archive: Fix memory leak in favorites add/remove (by @skotopes)
 - OFW: iButton/RFID: Fix Add Manually results being discarded (by @Astrrra)
 - OFW: Power: Fix typo in "charge me" screen (by @liamhays)
 - OFW: Accessor: Disable expansion service on start (by @skotopes)
@@ -150,10 +150,10 @@
 
 ### Removed:
 - Furi:
-  - Temp disabled `FURI_TRACE` due to DFU size, some crashes will say "furi_check failed" instead of source path
+  - Temp disabled `FURI_TRACE` due to DFU size, some crashes will say `furi_check failed` instead of source path
   - Reverted TLSF allocator due to diminishing results on RAM usage
 - API:
   - Removed unused `Rgb565Color` and `rgb565cmp()` since VGM colors use normal RGB colors now
   - Removed unused `furi_hal_usb_get_config_context()` function since BadKB doesn't use it anymore
-- UL: Sub-GHz: Removed broken HND_1 modulation
+- UL: Sub-GHz: Removed broken `HND_1` modulation
 - OFW: CLI: Removed `ps` command, replaced by `top`
