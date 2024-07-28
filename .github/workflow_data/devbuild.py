@@ -1,12 +1,74 @@
 #!/usr/bin/env python
 import datetime as dt
+import subprocess
 import requests
 import json
+import re
 import os
 
 artifact_tgz = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG']}.tgz"
 artifact_sdk = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG'].replace('update', 'sdk')}.zip"
 artifact_lab = f"https://lab.flipper.net/?url={artifact_tgz}&channel=dev-cfw&version={os.environ['VERSION_TAG']}"
+
+
+def parse_diff(diff: str):
+    lines = diff.splitlines()[5:]
+    parsed = {}
+    previndent = ""
+    prevtext = ""
+    categories = []
+
+    for line in lines:
+        text = line[1:]
+        if not text.strip():
+            continue
+
+        indent = re.match("^[-# ]+", text)
+        if not indent:
+            continue
+        indent = indent[0].rstrip()
+        if indent.startswith("#"):
+            categories = []
+            indent = ""
+        elif indent != previndent:
+            if len(indent) > len(previndent):
+                categories.append(prevtext)
+            else:
+                categories.pop()
+        previndent = indent
+        prevtext = text
+
+        change = line[0]
+        if change != " ":
+            section = parsed
+            for category in categories:
+                section.setdefault(category, {})
+                section = section[category]
+            section.setdefault(text, {})
+            section[text][None] = change
+
+    return parsed
+
+
+def format_changes(section, name=None, lines=None):
+    if not name:
+        lines = []
+    else:
+        if name.startswith("#"):
+            lines.append(f"\n{name}")
+        else:
+            change = section.get(None)
+            name = name.replace("-", change or "*", 1)
+            if change:
+                name = change + name[1:]
+            lines.append(name)
+
+    for key, value in section.items():
+        if key is not None:
+            format_changes(value, name=key, lines=lines)
+
+    if not name:
+        return "\n".join(lines).lstrip()
 
 
 if __name__ == "__main__":
@@ -26,6 +88,10 @@ if __name__ == "__main__":
             release = channel["versions"][0]["version"]
         if channel["id"] == "development":
             before = channel["versions"][0]["version"]
+
+    last_build_diff = subprocess.check_output(["git", "diff", f"{before}:CHANGELOG.md", f"{after}:CHANGELOG.md", "-U99999"]).decode()
+    parsed = parse_diff(last_build_diff)
+    changes = format_changes(parsed)
 
     requests.post(
         os.environ["BUILD_WEBHOOK"],
@@ -50,6 +116,10 @@ if __name__ == "__main__":
                             "name": "Changelog:",
                             "value": "\n".join([
                                 f"[Since last release ({release})]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)",
+                                f"Since last build ({before[:8]}):",
+                                "```diff",
+                                changes,
+                                "```",
                             ])
                         },
                         {
