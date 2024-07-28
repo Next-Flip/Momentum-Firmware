@@ -40,19 +40,20 @@ if __name__ == "__main__":
                     "color": 16751147,
                     "fields": [
                         {
-                            "name": "Diff since last build:",
-                            "value": f"[Compare {before[:8]} to {after[:8]}]({compare}/{before}...{after})"
+                            "name": "Code Diff:",
+                            "value": "\n".join([
+                                f"[From last release ({release} to {after[:8]})]({compare}/{release}...{after})",
+                                f"[From last build ({before[:8]} to {after[:8]})]({compare}/{before}...{after})",
+                            ])
                         },
                         {
-                            "name": "Diff since last release:",
-                            "value": f"[Compare {release} to {after[:8]}]({compare}/{release}...{after})"
+                            "name": "Changelog:",
+                            "value": "\n".join([
+                                f"[Since last release ({release})]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)",
+                            ])
                         },
                         {
-                            "name": "Changelog since last release:",
-                            "value": f"[Changes since {release}]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)"
-                        },
-                        {
-                            "name": "Firmware artifacts:",
+                            "name": "Firmware Artifacts:",
                             "value": "\n".join([
                                 f"- [🖥️ Install with Web Updater](https://momentum-fw.dev/update)",
                                 f"- [☁️ Open in Flipper Lab/App]({artifact_lab})",
