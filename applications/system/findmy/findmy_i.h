@@ -20,7 +20,7 @@
 #include <gui/modules/popup.h>
 #include "scenes/findmy_scene.h"
 #include "helpers/base64.h"
-#if FW_ORIGIN_Official
+#ifdef FW_ORIGIN_Official
 void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
 #endif
 
