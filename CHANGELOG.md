@@ -7,6 +7,8 @@
   - Seader: Remove some optional asn1 fields (by @bettse)
   - NFC Playlist: Fix extension check and error messages (by @acegoal07)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
+- OFW: NFC: Refactor detected protocols list (by @Astrrra)
+- OFW: CCID: App refactor (by @kidbomb)
 - OFW: Furi: Update string documentation (by @skotopes)
 - OFW: FBT: Toolchain v39 (by @hedger)
 
