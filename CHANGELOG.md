@@ -1,6 +1,7 @@
 ### Added:
+- OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
-- FBT: Add `-Wundef` to compiler options (by @hedger)
+- OFW: FBT: Add `-Wundef` to compiler options (by @hedger)
 
 ### Updated:
 - Apps:
