@@ -14,6 +14,7 @@
 - OFW: FBT: Toolchain v39 (by @hedger)
 
 ### Fixed:
+- GUI: Fix Dark Mode after XOR canvas color, like in NFC dict attack (by @Willy-JL)
 - OFW: NFC: Fix plantain balance string (by @Astrrra)
 - OFW: JS: Ensure proper closure of variadic function in `mjs_array` (by @derskythe)
 
