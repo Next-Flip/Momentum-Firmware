@@ -5,7 +5,8 @@
 #include <furi_hal.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
-#include <momentum/momentum.h>
+#include <momentum/asset_packs_i.h>
+#include <momentum/settings.h>
 
 const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
     [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
@@ -137,8 +138,8 @@ size_t canvas_current_font_width(const Canvas* canvas) {
 const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_check(canvas);
     furi_check(font < FontTotalNumber);
-    if(asset_packs.font_params[font]) {
-        return asset_packs.font_params[font];
+    if(asset_packs && asset_packs->font_params[font]) {
+        return asset_packs->font_params[font];
     }
     return &canvas_font_params[font];
 }
@@ -176,8 +177,8 @@ void canvas_invert_color(Canvas* canvas) {
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_check(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
-    if(asset_packs.fonts[font]) {
-        u8g2_SetFont(&canvas->fb, asset_packs.fonts[font]);
+    if(asset_packs && asset_packs->fonts[font]) {
+        u8g2_SetFont(&canvas->fb, asset_packs->fonts[font]);
         return;
     }
     switch(font) {
@@ -424,6 +425,7 @@ void canvas_draw_icon_ex(
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
+    icon = asset_packs_swap_icon(icon);
     compress_icon_decode(canvas->compress_icon, icon_get_frame_data(icon, 0), &icon_data);
     canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, rotation);
@@ -436,6 +438,7 @@ void canvas_draw_icon(Canvas* canvas, int32_t x, int32_t y, const Icon* icon) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
+    icon = asset_packs_swap_icon(icon);
     compress_icon_decode(canvas->compress_icon, icon_get_frame_data(icon, 0), &icon_data);
     canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, IconRotation0);

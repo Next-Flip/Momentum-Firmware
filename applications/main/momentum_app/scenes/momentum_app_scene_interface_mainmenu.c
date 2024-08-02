@@ -141,7 +141,6 @@ bool momentum_app_scene_interface_mainmenu_on_event(void* context, SceneManagerE
             /* fall through */
         case VarItemListIndexMoveApp: {
             app->save_mainmenu_apps = true;
-            app->require_reboot = true;
             size_t count = CharList_size(app->mainmenu_app_labels);
             VariableItem* item = variable_item_list_get(app->var_item_list, VarItemListIndexApp);
             if(count) {

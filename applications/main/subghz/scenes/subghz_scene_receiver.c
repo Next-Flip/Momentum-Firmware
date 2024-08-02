@@ -235,11 +235,11 @@ static void subghz_scene_add_to_history_callback(
                 subghz->state_notifications = SubGhzNotificationStateRxDone;
             }
         }
+        subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
     }
     subghz_receiver_reset(receiver);
     furi_string_free(item_name);
     furi_string_free(item_time);
-    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
 }
 
 void subghz_scene_receiver_on_enter(void* context) {

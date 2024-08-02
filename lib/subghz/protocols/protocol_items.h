@@ -64,6 +64,8 @@
 #include "wendox_w6726.h"
 #include "auriol_ahfl.h"
 #include "kedsum_th.h"
+#include "emos_e601x.h"
+#include "acurite_5n1.h"
 #include "pocsag.h"
 #include "schrader_gg4.h"
 #include "bin_raw.h"

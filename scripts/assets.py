@@ -15,7 +15,7 @@ ICONS_TEMPLATE_H_HEADER = """#pragma once
 #include <gui/icon.h>
 
 """
-ICONS_TEMPLATE_H_ICON_NAME = "extern Icon {name};\n"
+ICONS_TEMPLATE_H_ICON_NAME = "extern const Icon {name};\n"
 
 ICONS_TEMPLATE_C_HEADER = """#include "{assets_filename}.h"
 
@@ -24,7 +24,7 @@ ICONS_TEMPLATE_C_HEADER = """#include "{assets_filename}.h"
 """
 ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t* const {name}[] = {data};\n"
-ICONS_TEMPLATE_C_ICONS = "Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
+ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
 
 MAX_IMAGE_WIDTH = 2**16 - 1
 MAX_IMAGE_HEIGHT = 2**16 - 1
@@ -143,7 +143,7 @@ class Main(App):
         if "UFBT_HOME" in os.environ:
             symbols /= "sdk_headers/f7_sdk"
         symbols = (symbols / "targets/f7/api_symbols.csv").read_text()
-        api_has_icon = lambda name: f"Variable,+,{name},Icon," in symbols
+        api_has_icon = lambda name: f"Variable,+,{name},const Icon," in symbols
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")

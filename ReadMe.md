@@ -112,7 +112,7 @@ Note that this repo is always updated with the great work from our friends at [U
 [Updated]
 
 - Enhanced WiFi support for easiest setup ever
-- Extended keyboard with cursor movevent and symbols
+- Extended keyboard with cursor movement and symbols
 - File Browser with Sorting, More supported File Types
 - Advanced and optimized Level System (Up to 30 levels)
 - Desktop Keybind system for full key and press/hold remapping
