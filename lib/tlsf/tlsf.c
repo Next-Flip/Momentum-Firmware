@@ -934,7 +934,7 @@ void tlsf_remove_pool(tlsf_t tlsf, pool_t pool)
 ** TLSF main interface.
 */
 
-#if _DEBUG
+#if defined(_DEBUG) && _DEBUG
 int test_ffs_fls()
 {
 	/* Verify ffs/fls work properly. */
@@ -964,7 +964,7 @@ int test_ffs_fls()
 
 tlsf_t tlsf_create(void* mem, size_t max_bytes)
 {
-#if _DEBUG
+#if defined(_DEBUG) && _DEBUG
 	if (test_ffs_fls())
 	{
 		return NULL;
