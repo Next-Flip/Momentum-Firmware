@@ -28,7 +28,6 @@ libs = env.BuildModules(
         "one_wire",
         "ibutton",
         "infrared",
-        "littlefs",
         "subghz",
         "nfc",
         "digital_signal",

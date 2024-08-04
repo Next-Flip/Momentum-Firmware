@@ -70,18 +70,17 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == BtSettingOn) {
-            furi_hal_bt_start_advertising();
-            app->bt->bt_settings.enabled = true;
+            app->settings.enabled = true;
             consumed = true;
         } else if(event.event == BtSettingOff) {
-            app->bt->bt_settings.enabled = false;
-            furi_hal_bt_stop_advertising();
+            app->settings.enabled = false;
             consumed = true;
         } else if(event.event == BtSettingsCustomEventForgetDevices) {
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevConfirm);
             consumed = true;
         }
     }
+
     return consumed;
 }
 

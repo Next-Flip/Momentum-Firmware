@@ -2,9 +2,11 @@
 #include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
 
+#include <desktop/desktop.h>
+#include <desktop/views/desktop_view_pin_input.h>
+
 #include "desktop_settings_app.h"
 #include "scenes/desktop_settings_scene.h"
-#include <desktop/views/desktop_view_pin_input.h>
 
 const char* EXTRA_KEYBINDS[] = {
     "Apps Menu",
@@ -146,19 +148,20 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
 }
 
 extern int32_t desktop_settings_app(void* p) {
-    DesktopSettingsApp* app = desktop_settings_app_alloc();
+    UNUSED(p);
 
-    if(p && (strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG) == 0)) {
-        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
-    } else {
-        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
-    }
+    DesktopSettingsApp* app = desktop_settings_app_alloc();
+    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+
+    desktop_api_get_settings(desktop, &app->settings);
+
+    scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
-    if(app->save_settings) {
-        DESKTOP_SETTINGS_SAVE(&app->desktop->settings);
-    }
+    desktop_api_set_settings(desktop, &app->settings);
+    furi_record_close(RECORD_DESKTOP);
+
     desktop_settings_app_free(app);
 
     return 0;

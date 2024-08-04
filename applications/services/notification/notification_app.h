@@ -10,6 +10,7 @@ typedef enum {
     NotificationLayerMessage,
     InternalLayerMessage,
     SaveSettingsMessage,
+    LoadSettingsMessage,
 } NotificationAppMessageType;
 
 typedef struct {

@@ -25,11 +25,6 @@
 #define SUBGHZ_FREQUENCY_RANGE_STR \
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
 
-// Tx/Rx Carrier | only internal module
-// Tx/Rx command | both
-// Rx RAW        | only internal module
-// Chat          | both
-
 #define TAG "SubGhzCli"
 
 static void subghz_cli_radio_device_power_on(void) {
@@ -478,7 +473,7 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
 void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* file_name = furi_string_alloc();
-    furi_string_set(file_name, ANY_PATH("subghz/test.sub"));
+    furi_string_set(file_name, EXT_PATH("subghz/test.sub"));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
@@ -592,7 +587,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
     UNUSED(context);
     FuriString* file_name;
     file_name = furi_string_alloc();
-    furi_string_set(file_name, ANY_PATH("subghz/test.sub"));
+    furi_string_set(file_name, EXT_PATH("subghz/test.sub"));
     uint32_t repeat = 10;
     uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
 

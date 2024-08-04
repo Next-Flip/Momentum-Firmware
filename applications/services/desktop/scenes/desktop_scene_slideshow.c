@@ -46,10 +46,7 @@ bool desktop_scene_slideshow_on_event(void* context, SceneManagerEvent event) {
 }
 
 void desktop_scene_slideshow_on_exit(void* context) {
-    Desktop* desktop = (Desktop*)context;
-
+    Desktop* desktop = context;
     gui_set_hide_statusbar(desktop->gui, false);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_remove(storage, SLIDESHOW_FS_PATH);
-    furi_record_close(RECORD_STORAGE);
+    storage_common_remove(desktop->storage, SLIDESHOW_FS_PATH);
 }

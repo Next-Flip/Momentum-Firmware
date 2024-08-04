@@ -19,3 +19,4 @@
 - OFW: JS: Ensure proper closure of variadic function in `mjs_array` (by @derskythe)
 
 ### Removed:
+- Storage: Remove LFS, all config on SD Card (by @skotopes)
