@@ -514,7 +514,8 @@ static bool archive_is_dir_exists(FuriString* path) {
     FileInfo file_info;
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    if(furi_string_equal(path, STORAGE_EXT_PATH_PREFIX)) {
+    if(furi_string_equal(path, STORAGE_EXT_PATH_PREFIX) ||
+       furi_string_equal(path, STORAGE_MNT_PATH_PREFIX)) {
         state = storage_sd_status(storage) == FSE_OK;
     } else if(storage_common_stat(storage, furi_string_get_cstr(path), &file_info) == FSE_OK) {
         state = file_info_is_dir(&file_info);
