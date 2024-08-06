@@ -193,7 +193,7 @@ static NotificationAppSettings* alloc_settings(void) {
     variable_item_set_current_value_text(item, contrast_text[value_index]);
 
     item = variable_item_list_add(
-        app->variable_item_list, "LCD Brightness", BACKLIGHT_COUNT, backlight_changed, app);
+        app->variable_item_list, "LCD Backlight", BACKLIGHT_COUNT, backlight_changed, app);
     value_index = value_index_float(
         app->notification->settings.display_brightness, backlight_value, BACKLIGHT_COUNT);
     variable_item_set_current_value_index(item, value_index);

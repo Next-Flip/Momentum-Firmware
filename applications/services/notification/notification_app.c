@@ -471,26 +471,24 @@ static NotificationApp* notification_app_alloc(void) {
     app->settings.display_off_delay_ms = 30000;
     app->settings.vibro_on = true;
 
-    // malloc() also does memset(0), no need to init 0 values
-    _Static_assert(LayerInternal == 0, "need to init layer values");
-    // app->display.value[LayerInternal] = 0x00;
-    // app->display.value[LayerNotification] = 0x00;
-    // app->display.index = LayerInternal;
+    app->display.value[LayerInternal] = 0x00;
+    app->display.value[LayerNotification] = 0x00;
+    app->display.index = LayerInternal;
     app->display.light = LightBacklight;
 
-    // app->led[0].value[LayerInternal] = 0x00;
-    // app->led[0].value[LayerNotification] = 0x00;
-    // app->led[0].index = LayerInternal;
+    app->led[0].value[LayerInternal] = 0x00;
+    app->led[0].value[LayerNotification] = 0x00;
+    app->led[0].index = LayerInternal;
     app->led[0].light = LightRed;
 
-    // app->led[1].value[LayerInternal] = 0x00;
-    // app->led[1].value[LayerNotification] = 0x00;
-    // app->led[1].index = LayerInternal;
+    app->led[1].value[LayerInternal] = 0x00;
+    app->led[1].value[LayerNotification] = 0x00;
+    app->led[1].index = LayerInternal;
     app->led[1].light = LightGreen;
 
-    // app->led[2].value[LayerInternal] = 0x00;
-    // app->led[2].value[LayerNotification] = 0x00;
-    // app->led[2].index = LayerInternal;
+    app->led[2].value[LayerInternal] = 0x00;
+    app->led[2].value[LayerNotification] = 0x00;
+    app->led[2].index = LayerInternal;
     app->led[2].light = LightBlue;
 
     app->settings.version = NOTIFICATION_SETTINGS_VERSION;

@@ -6,8 +6,6 @@
 extern "C" {
 #endif
 
-#define BT_SETTINGS_PATH CFG_PATH("bt.settings")
-
 typedef struct {
     bool enabled;
 } BtSettings;

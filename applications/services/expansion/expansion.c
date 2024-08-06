@@ -1,5 +1,4 @@
 #include "expansion.h"
-#include "expansion_i.h"
 
 #include <furi_hal_serial_control.h>
 
@@ -34,10 +33,8 @@ typedef enum {
 } ExpansionMessageType;
 
 typedef union {
-    union {
-        FuriHalSerialId serial_id;
-        bool* is_connected;
-    };
+    FuriHalSerialId serial_id;
+    bool* is_connected;
 } ExpansionMessageData;
 
 typedef struct {
@@ -52,8 +49,6 @@ struct Expansion {
     FuriHalSerialId serial_id;
     ExpansionWorker* worker;
     ExpansionState state;
-
-    ExpansionSettings settings;
 };
 
 static const char* const expansion_uart_names[] = {
@@ -110,7 +105,7 @@ static void
 
     if(settings.uart_index < FuriHalSerialIdMax) {
         instance->state = ExpansionStateEnabled;
-        instance->serial_id = instance->settings.uart_index;
+        instance->serial_id = settings.uart_index;
         furi_hal_serial_control_set_expansion_callback(
             instance->serial_id, expansion_detect_callback, instance);
 
@@ -307,7 +302,6 @@ void expansion_on_system_start(void* arg) {
         return;
     }
 
-    expansion_settings_load(&instance->settings);
     expansion_enable(instance);
 }
 
@@ -365,8 +359,4 @@ void expansion_set_listen_serial(Expansion* instance, FuriHalSerialId serial_id)
 
     furi_message_queue_put(instance->queue, &message, FuriWaitForever);
     api_lock_wait_unlock_and_free(message.api_lock);
-}
-
-ExpansionSettings* expansion_get_settings(Expansion* instance) {
-    return &instance->settings;
 }

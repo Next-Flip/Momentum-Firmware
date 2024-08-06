@@ -19,7 +19,7 @@
 #include <bt/bt_settings.h>
 #include <bt/bt_service/bt_keys_storage.h>
 
-#define BT_KEYS_STORAGE_PATH CFG_PATH("bt.keys")
+#include "bt_keys_filename.h"
 
 typedef enum {
     BtMessageTypeUpdateStatus,

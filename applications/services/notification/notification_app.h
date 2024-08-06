@@ -2,6 +2,7 @@
 #include <furi_hal.h>
 #include "notification.h"
 #include "notification_messages.h"
+#include "notification_settings_filename.h"
 
 #define NOTIFICATION_LED_COUNT      3
 #define NOTIFICATION_EVENT_COMPLETE 0x00000001U
@@ -34,7 +35,6 @@ typedef struct {
 
 #define NOTIFICATION_SETTINGS_VERSION 0x02
 #define NOTIFICATION_SETTINGS_MAGIC   0x16
-#define NOTIFICATION_SETTINGS_PATH    CFG_PATH("notification.settings")
 
 typedef struct {
     uint8_t version;

@@ -1,8 +1,9 @@
-#include <momentum/momentum.h>
 #include "gui_i.h"
 #include <assets_icons.h>
+
 #include <storage/storage.h>
 #include <storage/storage_i.h>
+#include <momentum/momentum.h>
 
 #define TAG "GuiSrv"
 
@@ -628,7 +629,6 @@ Gui* gui_alloc(void) {
     gui->ascii_events = furi_record_open(RECORD_ASCII_EVENTS);
 
     furi_pubsub_subscribe(gui->input_events, gui_input_events_callback, gui);
-    furi_check(gui->ascii_events);
     furi_pubsub_subscribe(gui->ascii_events, gui_ascii_events_callback, gui);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);

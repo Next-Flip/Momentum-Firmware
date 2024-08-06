@@ -27,6 +27,7 @@ enum BtSettingsCustomEvent {
 };
 
 typedef struct {
+    BtSettings settings;
     Bt* bt;
     Gui* gui;
     SceneManager* scene_manager;
