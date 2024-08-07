@@ -97,7 +97,7 @@ bool momentum_app_apply(MomentumApp* app) {
         }
     }
 
-    if(app->save_level || app->save_angry) {
+    if(app->save_dolphin) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         if(app->save_level) {
             int32_t xp = app->dolphin_level > 1 ? DOLPHIN_LEVELS[app->dolphin_level - 2] : 0;
@@ -107,7 +107,8 @@ bool momentum_app_apply(MomentumApp* app) {
             dolphin->state->data.butthurt = app->dolphin_angry;
         }
         dolphin->state->dirty = true;
-        dolphin_state_save(dolphin->state);
+        dolphin_flush(dolphin);
+        dolphin_reload_state(dolphin);
         furi_record_close(RECORD_DOLPHIN);
     }
 

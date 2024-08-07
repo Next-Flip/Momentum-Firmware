@@ -75,6 +75,7 @@ typedef struct {
     bool save_name;
     bool save_level;
     bool save_angry;
+    bool save_dolphin;
     bool save_backlight;
     bool save_settings;
     bool apply_pack;

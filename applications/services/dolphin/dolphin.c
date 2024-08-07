@@ -85,6 +85,15 @@ FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin) {
     return dolphin->pubsub;
 }
 
+void dolphin_reload_state(Dolphin* dolphin) {
+    furi_check(dolphin);
+
+    DolphinEvent event;
+    event.type = DolphinEventTypeReloadState;
+
+    dolphin_event_send_wait(dolphin, &event);
+}
+
 // Private functions
 
 static void dolphin_butthurt_timer_callback(void* context) {
@@ -228,6 +237,7 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
             !dolphin_state_xp_to_levelup(dolphin->state->data.icounter);
 
     } else if(event.type == DolphinEventTypeFlush) {
+        dolphin_flush_timer_callback(dolphin);
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
     } else if(event.type == DolphinEventTypeLevel) {
