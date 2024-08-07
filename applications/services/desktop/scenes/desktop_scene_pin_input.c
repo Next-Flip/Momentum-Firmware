@@ -59,10 +59,9 @@ static void desktop_scene_pin_input_done_callback(const DesktopPinCode* pin_code
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails() + 1;
         if(pin_fails >= 10 && momentum_settings.bad_pins_format) {
-            furi_hal_rtc_reset_registers();
-            furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
             storage_sd_format(furi_record_open(RECORD_STORAGE));
             furi_record_close(RECORD_STORAGE);
+            furi_hal_rtc_reset_registers();
             power_reboot(PowerBootModeNormal);
         }
         furi_hal_rtc_set_pin_fails(pin_fails);

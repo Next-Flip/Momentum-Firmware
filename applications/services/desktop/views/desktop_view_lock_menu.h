@@ -23,14 +23,21 @@ struct DesktopLockMenuView {
     bool save_bt;
 };
 
+typedef enum {
+    DesktopLockMenuPopupIndexKeypad,
+    DesktopLockMenuPopupIndexPinCode,
+    DesktopLockMenuPopupIndexPinOff,
+    DesktopLockMenuPopupIndexMAX,
+} DesktopLockMenuPopupIndex;
+
 typedef struct {
     uint8_t idx;
     bool _dummy_mode; // Unused, kept for compatibility
     bool stealth_mode;
 
     bool pin_is_set;
-    int pin_lock;
-    bool show_lock_menu;
+    bool show_lock_popup;
+    DesktopLockMenuPopupIndex lock_popup_index;
     DesktopLockMenuView* lock_menu;
 } DesktopLockMenuViewModel;
 
