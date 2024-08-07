@@ -5,9 +5,12 @@
 
 ### Updated:
 - Apps:
+  - BLE Spam: Can use 20ms advertising again with LFS gone (by @Willy-JL)
   - Seader: Remove some optional asn1 fields (by @bettse)
   - NFC Playlist: Fix extension check and error messages (by @acegoal07)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
+- BadKB: Lower BLE conn interval like base HID profile (by @Willy-JL)
+- Services: Big cleanup of services and settings handling (by @Willy-JL)
 - OFW: NFC: Refactor detected protocols list (by @Astrrra)
 - OFW: CCID: App refactor (by @kidbomb)
 - OFW: Furi: Update string documentation (by @skotopes)
@@ -19,4 +22,5 @@
 - OFW: JS: Ensure proper closure of variadic function in `mjs_array` (by @derskythe)
 
 ### Removed:
-- Storage: Remove LFS, all config on SD Card (by @skotopes)
+- OFW: Storage: Remove LFS / LittleFS Internal Storage, all config on SD Card (by @skotopes)
+- Storage: Remove `CFG_PATH()` and `.config/` folder, `INT_PATH()` is now on SD card at `.int/` due to LFS removal and should be used instead (by @Willy-JL)
