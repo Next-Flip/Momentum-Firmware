@@ -8,7 +8,7 @@
 #include <flipper.pb.h>
 
 #include <furi.h>
-#include <furi_hal.h>
+#include <furi_hal_rtc.h>
 
 #include <cli/cli.h>
 #include <stdint.h>

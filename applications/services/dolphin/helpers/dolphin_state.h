@@ -5,6 +5,16 @@
 
 #include "dolphin_deed.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern const uint32_t DOLPHIN_LEVELS[];
+extern const size_t DOLPHIN_LEVEL_COUNT;
+
+#define BUTTHURT_MAX 14
+#define BUTTHURT_MIN 0
+
 typedef struct DolphinState DolphinState;
 typedef struct {
     uint8_t icounter_daily_limit[DolphinAppMAX];
