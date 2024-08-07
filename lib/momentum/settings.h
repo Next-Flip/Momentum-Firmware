@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <toolbox/colors.h>
 
-#define MOMENTUM_SETTINGS_PATH CFG_PATH("momentum_settings.txt")
+#define MOMENTUM_SETTINGS_PATH INT_PATH(".momentum_settings.txt")
 
 #define ASSET_PACKS_NAME_LEN 32
 

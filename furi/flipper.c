@@ -64,10 +64,10 @@ void flipper_migrate_files() {
         bool delete;
     } renames[] = {
         // Renames on ext
-        {CFG_PATH("favorites.txt"), ARCHIVE_FAV_PATH, true}, // Adapt to OFW/UL
-        {CFG_PATH(".desktop.keybinds"), DESKTOP_KEYBINDS_PATH, true}, // Old naming
-        {CFG_PATH("xtreme_menu.txt"), MAINMENU_APPS_PATH, false}, // Keep both
-        {CFG_PATH("xtreme_settings.txt"), MOMENTUM_SETTINGS_PATH, false}, // Keep both
+        {EXT_PATH(".config/favorites.txt"), ARCHIVE_FAV_PATH, true}, // Adapt to OFW/UL
+        {EXT_PATH(".config/.desktop.keybinds"), DESKTOP_KEYBINDS_PATH, true}, // Old naming
+        {EXT_PATH(".config/xtreme_menu.txt"), MAINMENU_APPS_PATH, false}, // Keep both
+        {EXT_PATH(".config/xtreme_settings.txt"), MOMENTUM_SETTINGS_PATH, false}, // Keep both
         // Int -> Ext
         {INT_PATH(".bt.settings"), BT_SETTINGS_PATH, true},
         {INT_PATH(".dolphin.state"), DOLPHIN_STATE_PATH, true},
@@ -77,7 +77,7 @@ void flipper_migrate_files() {
         {INT_PATH(".notification.settings"), NOTIFICATION_SETTINGS_PATH, true},
         {INT_PATH(".infrared.settings"), INFRARED_SETTINGS_PATH, true},
         // Ext -> Int
-        {CFG_PATH("desktop.settings"), DESKTOP_SETTINGS_PATH, true},
+        {EXT_PATH(".config/desktop.settings"), DESKTOP_SETTINGS_PATH, true},
     };
     for(size_t i = 0; i < COUNT_OF(renames); ++i) {
         // Use copy+remove to not overwrite dst but still delete src

@@ -13,7 +13,7 @@
 #include <toolbox/tar/tar_archive.h>
 #include <toolbox/crc32_calc.h>
 
-#define FIRSTBOOT_FLAG_PATH CFG_PATH("momentum_firstboot.flag")
+#define FIRSTBOOT_FLAG_PATH INT_PATH(".momentum_firstboot.flag")
 
 #define TAG "UpdWorkerBackup"
 
@@ -173,7 +173,11 @@ static bool update_task_post_update(UpdateTask* update_task) {
             tmp_path = furi_string_alloc_set(update_task->update_path);
             storage_common_rename(
                 update_task->storage,
-                CFG_PATH("firstboot.flag"), // Poor naming, shouldn't be generic for all FW
+                EXT_PATH(".config/firstboot.flag"), // Poor naming, shouldn't be generic for all FW
+                FIRSTBOOT_FLAG_PATH);
+            storage_common_rename(
+                update_task->storage,
+                EXT_PATH(".config/momentum_firstboot.flag"), // Migrate to int on ext
                 FIRSTBOOT_FLAG_PATH);
             if(storage_common_stat(update_task->storage, FIRSTBOOT_FLAG_PATH, NULL) ==
                FSE_NOT_EXIST) {

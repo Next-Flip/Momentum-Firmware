@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define MAINMENU_APPS_PATH CFG_PATH("mainmenu_apps.txt")
+#define MAINMENU_APPS_PATH INT_PATH(".mainmenu_apps.txt")
 
 typedef struct LoaderMenu LoaderMenu;
 
