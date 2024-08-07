@@ -10,7 +10,7 @@
 #include <dialogs/dialogs.h>
 #include <assets_icons.h>
 
-#include <desktop/desktop_i.h>
+#include <desktop/desktop_settings.h>
 #include <desktop/views/desktop_view_pin_input.h>
 #include "views/desktop_settings_view_pin_setup_howto.h"
 #include "views/desktop_settings_view_pin_setup_howto2.h"
@@ -37,7 +37,7 @@ extern const char* EXTRA_KEYBINDS[];
 extern const size_t EXTRA_KEYBINDS_COUNT;
 
 typedef struct {
-    Desktop* desktop;
+    DesktopSettings settings;
 
     Gui* gui;
     DialogsApp* dialogs;
@@ -55,8 +55,6 @@ typedef struct {
     bool pincode_buffer_filled;
 
     uint32_t pin_menu_idx;
-
-    bool save_settings;
 } DesktopSettingsApp;
 
 const char* desktop_settings_app_get_keybind(DesktopSettingsApp* app);

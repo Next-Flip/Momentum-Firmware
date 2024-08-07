@@ -4,7 +4,6 @@
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
-#include "desktop/helpers/pin.h"
 
 #define SCENE_EVENT_SET_PIN     0
 #define SCENE_EVENT_CHANGE_PIN  1

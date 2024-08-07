@@ -73,7 +73,6 @@ DesktopSettingsApp* desktop_settings_app_alloc(void) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->desktop = furi_record_open(RECORD_DESKTOP);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&desktop_settings_scene_handlers, app);
@@ -142,20 +141,21 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
     scene_manager_free(app->scene_manager);
     // Records
     furi_record_close(RECORD_DIALOGS);
-    furi_record_close(RECORD_DESKTOP);
     furi_record_close(RECORD_GUI);
     free(app);
 }
 
 extern int32_t desktop_settings_app(void* p) {
-    UNUSED(p);
-
     DesktopSettingsApp* app = desktop_settings_app_alloc();
     Desktop* desktop = furi_record_open(RECORD_DESKTOP);
 
     desktop_api_get_settings(desktop, &app->settings);
 
-    scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
+    if(p && (strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG) == 0)) {
+        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
+    } else {
+        scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
+    }
 
     view_dispatcher_run(app->view_dispatcher);
 

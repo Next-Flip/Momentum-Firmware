@@ -49,8 +49,6 @@ bool desktop_settings_scene_pin_setup_done_on_event(void* context, SceneManagerE
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SCENE_EVENT_DONE: {
-            memcpy(&app->desktop->settings.pin_code, &app->pincode_buffer, sizeof(PinCode));
-            app->save_settings = true;
             bool scene_found = false;
             scene_found = scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, DesktopSettingsAppScenePinMenu);
