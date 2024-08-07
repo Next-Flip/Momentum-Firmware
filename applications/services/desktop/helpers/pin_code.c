@@ -27,20 +27,6 @@ static const NotificationSequence sequence_pin_fail = {
     NULL,
 };
 
-static const uint8_t desktop_helpers_fails_timeout[] = {
-    0,
-    0,
-    0,
-    0,
-    30,
-    60,
-    90,
-    120,
-    150,
-    180,
-    /* +60 for every next fail */
-};
-
 static uint32_t desktop_pin_code_pack(const DesktopPinCode* pin_code) {
     furi_check(pin_code);
     furi_check(pin_code->length <= sizeof(pin_code->data));
@@ -91,13 +77,14 @@ void desktop_pin_lock_error_notify(void) {
 
 uint32_t desktop_pin_lock_get_fail_timeout(void) {
     uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
-    uint32_t pin_timeout = 0;
-    uint32_t max_index = COUNT_OF(desktop_helpers_fails_timeout) - 1;
-    if(pin_fails <= max_index) {
-        pin_timeout = desktop_helpers_fails_timeout[pin_fails];
-    } else {
-        pin_timeout = desktop_helpers_fails_timeout[max_index] + (pin_fails - max_index) * 60;
+    if(pin_fails < 3) {
+        return 0;
     }
 
-    return pin_timeout;
+    // Use for loop to avoid including pow() function (4kb of dfu flash)
+    uint32_t mult = 1;
+    for(size_t i = 0; i < pin_fails - 3; i++) {
+        mult *= 2;
+    }
+    return 30 * mult;
 }
