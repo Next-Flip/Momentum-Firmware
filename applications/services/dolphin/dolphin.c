@@ -193,6 +193,15 @@ static void dolphin_update_clear_limits_timer_period(void* context) {
     FURI_LOG_D(TAG, "Daily limits reset in %lu ms", time_to_clear_limits);
 }
 
+static void dolphin_reset_butthurt_timer(Dolphin* dolphin) {
+    uint32_t period_ticks = BUTTHURT_INCREASE_PERIOD_TICKS;
+    if(period_ticks > 0) {
+        furi_event_loop_timer_start(dolphin->butthurt_timer, period_ticks);
+    } else {
+        furi_eventloop_timer_stop(dolphin->butthurt_timer);
+    }
+}
+
 static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
     UNUSED(queue);
 
@@ -207,9 +216,7 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
 
         DolphinPubsubEvent event = DolphinPubsubEventUpdate;
         furi_pubsub_publish(dolphin->pubsub, &event);
-        if(BUTTHURT_INCREASE_PERIOD_TICKS > 0) {
-            furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
-        }
+        dolphin_reset_butthurt_timer(dolphin);
         furi_event_loop_timer_start(dolphin->flush_timer, FLUSH_TIMEOUT_TICKS);
 
     } else if(event.type == DolphinEventTypeStats) {
@@ -229,7 +236,7 @@ static bool dolphin_process_event(FuriMessageQueue* queue, void* context) {
 
     } else if(event.type == DolphinEventTypeReloadState) {
         dolphin_state_load(dolphin->state);
-        furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
+        dolphin_reset_butthurt_timer(dolphin);
 
     } else {
         furi_crash();
@@ -290,9 +297,7 @@ int32_t dolphin_srv(void* p) {
         dolphin_process_event,
         dolphin);
 
-    if(BUTTHURT_INCREASE_PERIOD_TICKS > 0) {
-        furi_event_loop_timer_start(dolphin->butthurt_timer, BUTTHURT_INCREASE_PERIOD_TICKS);
-    }
+    dolphin_reset_butthurt_timer(dolphin);
     furi_event_loop_timer_start(dolphin->clear_limits_timer, CLEAR_LIMITS_PERIOD_TICKS);
 
     furi_event_loop_tick_set(
