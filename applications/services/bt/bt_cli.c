@@ -181,12 +181,12 @@ static void bt_cli_print_usage(void) {
 
 static void bt_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
-    furi_record_open(RECORD_BT);
+    Bt* bt = furi_record_open(RECORD_BT);
 
     FuriString* cmd;
     cmd = furi_string_alloc();
     BtSettings bt_settings;
-    bt_settings_load(&bt_settings);
+    bt_get_settings(bt, &bt_settings);
 
     do {
         if(!args_read_string_and_trim(args, cmd)) {
