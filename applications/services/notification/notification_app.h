@@ -49,7 +49,6 @@ typedef struct {
 struct NotificationApp {
     FuriMessageQueue* queue;
     FuriPubSub* event_record;
-    FuriPubSub* ascii_record;
     FuriTimer* display_timer;
 
     NotificationLedLayer display;
@@ -57,6 +56,8 @@ struct NotificationApp {
     uint8_t display_led_lock;
 
     NotificationSettings settings;
+
+    FuriPubSub* ascii_record;
 };
 
 #ifdef __cplusplus

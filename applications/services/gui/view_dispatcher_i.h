@@ -16,7 +16,6 @@ DICT_DEF2(ViewDict, uint32_t, M_DEFAULT_OPLIST, View*, M_PTR_OPLIST) // NOLINT
 struct ViewDispatcher {
     FuriEventLoop* event_loop;
     FuriMessageQueue* input_queue;
-    FuriMessageQueue* ascii_queue;
     FuriMessageQueue* event_queue;
 
     Gui* gui;
@@ -33,6 +32,8 @@ struct ViewDispatcher {
     ViewDispatcherTickEventCallback tick_event_callback;
     uint32_t tick_period;
     void* event_context;
+
+    FuriMessageQueue* ascii_queue;
 };
 
 /** ViewPort Draw Callback */
