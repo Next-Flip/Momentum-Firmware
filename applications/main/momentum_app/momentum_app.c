@@ -26,6 +26,10 @@ bool momentum_app_apply(MomentumApp* app) {
         stream_free(stream);
     }
 
+    if(app->save_desktop) {
+        desktop_api_set_settings(app->desktop, &app->desktop_settings);
+    }
+
     if(app->save_subghz_freqs) {
         FlipperFormat* file = flipper_format_file_alloc(storage);
         do {
@@ -181,6 +185,7 @@ static void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* label, 
 MomentumApp* momentum_app_alloc() {
     MomentumApp* app = malloc(sizeof(MomentumApp));
     app->gui = furi_record_open(RECORD_GUI);
+    app->desktop = furi_record_open(RECORD_DESKTOP);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->expansion = furi_record_open(RECORD_EXPANSION);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
@@ -323,6 +328,8 @@ MomentumApp* momentum_app_alloc() {
     file_stream_close(stream);
     stream_free(stream);
 
+    desktop_api_get_settings(app->desktop, &app->desktop_settings);
+
     FlipperFormat* file = flipper_format_file_alloc(storage);
     FrequencyList_init(app->subghz_static_freqs);
     FrequencyList_init(app->subghz_hopper_freqs);
@@ -446,6 +453,7 @@ void momentum_app_free(MomentumApp* app) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_DESKTOP);
     furi_record_close(RECORD_GUI);
     free(app);
 }

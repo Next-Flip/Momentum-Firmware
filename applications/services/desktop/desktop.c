@@ -74,13 +74,13 @@ static void desktop_clock_reconfigure(Desktop* desktop) {
 
     desktop_clock_update(desktop);
 
-    if(momentum_settings.statusbar_clock) {
+    if(desktop->settings.display_clock) {
         furi_timer_start(desktop->update_clock_timer, furi_ms_to_ticks(1000));
     } else {
         furi_timer_stop(desktop->update_clock_timer);
     }
 
-    view_port_enabled_set(desktop->clock_viewport, momentum_settings.statusbar_clock);
+    view_port_enabled_set(desktop->clock_viewport, desktop->settings.display_clock);
 }
 
 static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
@@ -146,6 +146,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         desktop_apply_settings(desktop);
 
     } else if(event == DesktopGlobalReloadSettings) {
+        desktop_keybinds_migrate(desktop);
         desktop_settings_load(&desktop->settings);
         desktop_apply_settings(desktop);
 
@@ -252,6 +253,7 @@ static void desktop_init_settings(Desktop* desktop) {
         return;
     }
 
+    desktop_keybinds_migrate(desktop);
     desktop_settings_load(&desktop->settings);
     desktop_apply_settings(desktop);
 }
@@ -493,55 +495,6 @@ void desktop_api_set_settings(Desktop* instance, const DesktopSettings* settings
 
     instance->settings = *settings;
     view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopGlobalSaveSettings);
-}
-
-static const KeybindType keybind_types[] = {
-    [InputTypeShort] = KeybindTypePress,
-    [InputTypeLong] = KeybindTypeHold,
-};
-
-static const KeybindKey keybind_keys[] = {
-    [InputKeyUp] = KeybindKeyUp,
-    [InputKeyDown] = KeybindKeyDown,
-    [InputKeyRight] = KeybindKeyRight,
-    [InputKeyLeft] = KeybindKeyLeft,
-};
-
-void desktop_run_keybind(Desktop* instance, InputType _type, InputKey _key) {
-    if(_type != InputTypeShort && _type != InputTypeLong) return;
-    if(_key != InputKeyUp && _key != InputKeyDown && _key != InputKeyRight && _key != InputKeyLeft)
-        return;
-
-    KeybindType type = keybind_types[_type];
-    KeybindKey key = keybind_keys[_key];
-    const char* keybind = instance->keybinds[type][key].data;
-    if(!strnlen(keybind, MAX_KEYBIND_LENGTH)) return;
-
-    if(!strncmp(keybind, "Apps Menu", MAX_KEYBIND_LENGTH)) {
-        loader_start_detached_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
-    } else if(!strncmp(keybind, "Archive", MAX_KEYBIND_LENGTH)) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
-    } else if(!strncmp(keybind, "Clock", MAX_KEYBIND_LENGTH)) {
-        loader_start_detached_with_gui_error(
-            instance->loader, EXT_PATH("apps/Tools/nightstand.fap"), "");
-    } else if(!strncmp(keybind, "Device Info", MAX_KEYBIND_LENGTH)) {
-        loader_start_detached_with_gui_error(instance->loader, "Power", "about_battery");
-    } else if(!strncmp(keybind, "Lock Menu", MAX_KEYBIND_LENGTH)) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenLockMenu);
-    } else if(!strncmp(keybind, "Lock Keypad", MAX_KEYBIND_LENGTH)) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockKeypad);
-    } else if(!strncmp(keybind, "Lock with PIN", MAX_KEYBIND_LENGTH)) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockWithPin);
-    } else if(!strncmp(keybind, "Wipe Device", MAX_KEYBIND_LENGTH)) {
-        loader_start_detached_with_gui_error(instance->loader, "Storage", "wipe");
-    } else {
-        if(storage_common_exists(furi_record_open(RECORD_STORAGE), keybind)) {
-            run_with_default_app(keybind);
-        } else {
-            loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
-        }
-        furi_record_close(RECORD_STORAGE);
-    }
 }
 
 /*

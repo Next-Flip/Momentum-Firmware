@@ -1,3 +1,8 @@
+### Breaking Changes:
+- Desktop: Settings restructured due to LFS removal
+  - You might need to reconfigure Desktop Settings (PIN code, auto lock, show clock)
+  - Desktop Keybinds should transfer correctly automatically
+
 ### Added:
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
@@ -10,6 +15,8 @@
   - NFC Playlist: Fix extension check and error messages (by @acegoal07)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
 - BadKB: Lower BLE conn interval like base HID profile (by @Willy-JL)
+- Desktop: Refactor Keybinds, no more 63 character limit, keybinds only loaded when pressed to save RAM (by @Willy-JL)
+- Settings: Statusbar Clock and Left Handed options show in normal Settings app like OFW (by @Willy-JL)
 - Services: Big cleanup of services and settings handling (by @Willy-JL)
 - OFW: NFC: Refactor detected protocols list (by @Astrrra)
 - OFW: CCID: App refactor (by @kidbomb)

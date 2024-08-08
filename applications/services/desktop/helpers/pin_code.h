@@ -5,6 +5,8 @@
 
 #define DESKTOP_PIN_CODE_MAX_LEN (10)
 
+#define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
+
 typedef struct {
     uint8_t data[DESKTOP_PIN_CODE_MAX_LEN];
     uint8_t length;

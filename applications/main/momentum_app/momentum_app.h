@@ -2,6 +2,7 @@
 
 #include <applications.h>
 #include <assets_icons.h>
+#include <desktop/desktop.h>
 #include <dialogs/dialogs.h>
 #include <dolphin/dolphin_i.h>
 #include <dolphin/dolphin.h>
@@ -37,6 +38,7 @@ ARRAY_DEF(CharList, char*)
 
 typedef struct {
     Gui* gui;
+    Desktop* desktop;
     DialogsApp* dialogs;
     Expansion* expansion;
     NotificationApp* notification;
@@ -54,6 +56,7 @@ typedef struct {
     CharList_t mainmenu_app_labels;
     CharList_t mainmenu_app_exes;
     uint8_t mainmenu_app_index;
+    DesktopSettings desktop_settings;
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_freqs;
     uint8_t subghz_static_index;
@@ -70,6 +73,7 @@ typedef struct {
     FuriString* version_tag;
 
     bool save_mainmenu_apps;
+    bool save_desktop;
     bool save_subghz_freqs;
     bool save_subghz;
     bool save_name;

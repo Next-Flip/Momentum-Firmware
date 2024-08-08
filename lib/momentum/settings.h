@@ -71,7 +71,6 @@ typedef struct {
     bool lockscreen_prompt;
     bool lockscreen_transparent;
     BatteryIcon battery_icon;
-    bool statusbar_clock;
     bool status_icons;
     bool bar_borders;
     bool bar_background;
