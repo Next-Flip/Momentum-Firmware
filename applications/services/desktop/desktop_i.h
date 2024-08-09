@@ -87,7 +87,6 @@ struct Desktop {
     bool app_running;
     bool locked;
 
-    Keybinds keybinds;
     FuriPubSub* ascii_events_pubsub;
     FuriPubSubSubscription* ascii_events_subscription;
 };

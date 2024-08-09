@@ -9,8 +9,11 @@
 #include <gui/modules/variable_item_list.h>
 #include <dialogs/dialogs.h>
 #include <assets_icons.h>
+#include <storage/storage.h>
 
 #include <desktop/desktop_settings.h>
+#include <desktop/desktop_keybinds.h>
+#include <desktop/desktop_keybinds_filename.h>
 #include <desktop/views/desktop_view_pin_input.h>
 #include "views/desktop_settings_view_pin_setup_howto.h"
 #include "views/desktop_settings_view_pin_setup_howto2.h"

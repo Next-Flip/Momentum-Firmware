@@ -8,7 +8,6 @@
 #include <locale/locale.h>
 #include <storage/storage.h>
 #include <momentum/settings.h>
-#include <applications/main/archive/helpers/archive_helpers_ext.h>
 
 #include <assets_icons.h>
 

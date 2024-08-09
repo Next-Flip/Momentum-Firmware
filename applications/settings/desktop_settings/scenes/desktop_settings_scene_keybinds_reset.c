@@ -33,7 +33,6 @@ bool desktop_settings_scene_keybinds_reset_on_event(void* context, SceneManagerE
         case DialogExResultRight:
             storage_common_remove(furi_record_open(RECORD_STORAGE), DESKTOP_KEYBINDS_PATH);
             furi_record_close(RECORD_STORAGE);
-            DESKTOP_KEYBINDS_LOAD(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
             /* fall through */
         case DialogExResultLeft:
             consumed = scene_manager_previous_scene(app->scene_manager);

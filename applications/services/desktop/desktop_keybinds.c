@@ -2,8 +2,11 @@
 #include "desktop_keybinds_filename.h"
 #include "desktop_i.h"
 
+#include <applications/main/archive/helpers/archive_helpers_ext.h>
 #include <flipper_format/flipper_format.h>
 #include <storage/storage.h>
+#include <saved_struct.h>
+#include <input/input.h>
 
 #define TAG "DesktopKeybinds"
 
@@ -31,7 +34,7 @@ void desktop_keybinds_migrate(Desktop* desktop) {
         DesktopKeybinds new;
         for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
             for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
-                FuriString* keybind = furi_string_alloc_set(old[type][key]);
+                FuriString* keybind = furi_string_alloc_set(old[type][key].data);
                 if(furi_string_equal(keybind, EXT_PATH("apps/Misc/nightstand.fap"))) {
                     furi_string_set(keybind, "Clock");
                 } else if(furi_string_equal(keybind, "RFID")) {
@@ -88,9 +91,8 @@ static FuriString*
 
     if(flipper_format_file_open_existing(file, DESKTOP_KEYBINDS_PATH)) {
         FuriString* keybind_name = furi_string_alloc_printf(
-            keybind_name, "%s%s", desktop_keybind_types[type], desktop_keybind_keys[type]);
-        success = flipper_format_read_string(
-            file, furi_string_get_cstr(keybind_name), keybinds[type][key]);
+            "%s%s", desktop_keybind_types[type], desktop_keybind_keys[type]);
+        success = flipper_format_read_string(file, furi_string_get_cstr(keybind_name), keybind);
         furi_string_free(keybind_name);
     }
 
@@ -167,12 +169,12 @@ void desktop_keybinds_free(DesktopKeybinds* keybinds) {
     }
 }
 
-static const DesktopKeybindType keybind_types[DesktopKeybindTypeMAX] = {
+static const DesktopKeybindType keybind_types[] = {
     [InputTypeShort] = DesktopKeybindTypePress,
     [InputTypeLong] = DesktopKeybindTypeHold,
 };
 
-static const DesktopKeybindKey keybind_keys[DesktopKeybindKeyMAX] = {
+static const DesktopKeybindKey keybind_keys[] = {
     [InputKeyUp] = DesktopKeybindKeyUp,
     [InputKeyDown] = DesktopKeybindKeyDown,
     [InputKeyRight] = DesktopKeybindKeyRight,
@@ -189,27 +191,30 @@ void desktop_run_keybind(Desktop* desktop, InputType _type, InputKey _key) {
     FuriString* keybind = desktop_keybinds_load_one(desktop, type, key);
 
     if(furi_string_equal(keybind, "Apps Menu")) {
-        loader_start_detached_with_gui_error(instance->loader, LOADER_APPLICATIONS_NAME, NULL);
+        loader_start_detached_with_gui_error(desktop->loader, LOADER_APPLICATIONS_NAME, NULL);
     } else if(furi_string_equal(keybind, "Archive")) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenArchive);
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventOpenArchive);
     } else if(furi_string_equal(keybind, "Clock")) {
         loader_start_detached_with_gui_error(
-            instance->loader, EXT_PATH("apps/Tools/nightstand.fap"), "");
+            desktop->loader, EXT_PATH("apps/Tools/nightstand.fap"), "");
     } else if(furi_string_equal(keybind, "Device Info")) {
-        loader_start_detached_with_gui_error(instance->loader, "Power", "about_battery");
+        loader_start_detached_with_gui_error(desktop->loader, "Power", "about_battery");
     } else if(furi_string_equal(keybind, "Lock Menu")) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventOpenLockMenu);
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventOpenLockMenu);
     } else if(furi_string_equal(keybind, "Lock Keypad")) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockKeypad);
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventLockKeypad);
     } else if(furi_string_equal(keybind, "Lock with PIN")) {
-        view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopMainEventLockWithPin);
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventLockWithPin);
     } else if(furi_string_equal(keybind, "Wipe Device")) {
-        loader_start_detached_with_gui_error(instance->loader, "Storage", "wipe");
+        loader_start_detached_with_gui_error(desktop->loader, "Storage", "wipe");
     } else {
-        if(storage_common_exists(desktop->storage, keybind)) {
-            run_with_default_app(keybind);
+        if(storage_common_exists(desktop->storage, furi_string_get_cstr(keybind))) {
+            run_with_default_app(furi_string_get_cstr(keybind));
         } else {
-            loader_start_detached_with_gui_error(instance->loader, keybind, NULL);
+            loader_start_detached_with_gui_error(
+                desktop->loader, furi_string_get_cstr(keybind), NULL);
         }
     }
+
+    furi_string_free(keybind);
 }
