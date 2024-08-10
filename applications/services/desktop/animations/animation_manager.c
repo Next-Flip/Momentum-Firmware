@@ -6,7 +6,6 @@
 #include <power/power_service/power.h>
 #include <storage/storage.h>
 #include <assets_icons.h>
-#include <assets_dolphin_internal.h>
 
 #include "views/bubble_animation_view.h"
 #include "views/one_shot_animation_view.h"

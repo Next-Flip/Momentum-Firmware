@@ -13,6 +13,8 @@
 #include "desktop_scene.h"
 #include "desktop_scene_locked.h"
 
+#include <momentum/settings.h>
+
 #define WRONG_PIN_HEADER_TIMEOUT 3000
 #define INPUT_PIN_VIEW_TIMEOUT   15000
 

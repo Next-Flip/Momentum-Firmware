@@ -207,7 +207,7 @@ static void dolphin_reset_butthurt_timer(Dolphin* dolphin) {
     if(period_ticks > 0) {
         furi_event_loop_timer_start(dolphin->butthurt_timer, period_ticks);
     } else {
-        furi_eventloop_timer_stop(dolphin->butthurt_timer);
+        furi_event_loop_timer_stop(dolphin->butthurt_timer);
     }
 }
 

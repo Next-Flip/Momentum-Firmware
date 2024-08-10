@@ -4,8 +4,8 @@
 #include <lib/toolbox/args.h>
 
 #include <ble/ble.h>
-#include "bt_settings.h"
 #include "bt_service/bt.h"
+#include "bt_service/bt_settings_api_i.h"
 #include <profiles/serial_profile.h>
 
 static void bt_cli_command_hci_info(Cli* cli, FuriString* args, void* context) {

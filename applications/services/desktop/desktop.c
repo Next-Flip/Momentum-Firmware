@@ -235,8 +235,6 @@ static void desktop_apply_settings(Desktop* desktop) {
 
     desktop_clock_reconfigure(desktop);
 
-    view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
-
     if(!desktop->app_running && !desktop->locked) {
         desktop_auto_lock_arm(desktop);
     }

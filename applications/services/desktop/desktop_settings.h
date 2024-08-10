@@ -4,7 +4,7 @@
 
 typedef struct {
     uint32_t auto_lock_delay_ms;
-    bool auto_lock_with_pin;
+    uint8_t auto_lock_with_pin;
     uint8_t display_clock;
 } DesktopSettings;
 
