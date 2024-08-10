@@ -93,7 +93,7 @@ static FuriString*
 
     if(flipper_format_file_open_existing(file, DESKTOP_KEYBINDS_PATH)) {
         FuriString* keybind_name = furi_string_alloc_printf(
-            "%s%s", desktop_keybind_types[type], desktop_keybind_keys[type]);
+            "%s%s", desktop_keybind_types[type], desktop_keybind_keys[key]);
         success = flipper_format_read_string(file, furi_string_get_cstr(keybind_name), keybind);
         furi_string_free(keybind_name);
     }
@@ -109,7 +109,7 @@ static FuriString*
 void desktop_keybinds_load(Desktop* desktop, DesktopKeybinds* keybinds) {
     for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
         for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
-            *keybinds[type][key] = furi_string_alloc_set(desktop_keybinds_defaults[type][key]);
+            (*keybinds)[type][key] = furi_string_alloc_set(desktop_keybinds_defaults[type][key]);
         }
     }
 
@@ -120,10 +120,10 @@ void desktop_keybinds_load(Desktop* desktop, DesktopKeybinds* keybinds) {
         for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
             for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
                 furi_string_printf(
-                    keybind_name, "%s%s", desktop_keybind_types[type], desktop_keybind_keys[type]);
+                    keybind_name, "%s%s", desktop_keybind_types[type], desktop_keybind_keys[key]);
                 if(!flipper_format_read_string(
-                       file, furi_string_get_cstr(keybind_name), *keybinds[type][key])) {
-                    furi_string_set(*keybinds[type][key], desktop_keybinds_defaults[type][key]);
+                       file, furi_string_get_cstr(keybind_name), (*keybinds)[type][key])) {
+                    furi_string_set((*keybinds)[type][key], desktop_keybinds_defaults[type][key]);
                     goto fail;
                 }
             }
@@ -145,11 +145,11 @@ void desktop_keybinds_save(Desktop* desktop, const DesktopKeybinds* keybinds) {
         for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
             for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
                 furi_string_printf(
-                    keybind_name, "%s%s", desktop_keybind_types[type], desktop_keybind_keys[type]);
+                    keybind_name, "%s%s", desktop_keybind_types[type], desktop_keybind_keys[key]);
                 if(!flipper_format_write_string_cstr(
                        file,
                        furi_string_get_cstr(keybind_name),
-                       furi_string_get_cstr(*keybinds[type][key]))) {
+                       furi_string_get_cstr((*keybinds)[type][key]))) {
                     goto fail;
                 }
             }
@@ -166,7 +166,7 @@ void desktop_keybinds_save(Desktop* desktop, const DesktopKeybinds* keybinds) {
 void desktop_keybinds_free(DesktopKeybinds* keybinds) {
     for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
         for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
-            furi_string_free(*keybinds[type][key]);
+            furi_string_free((*keybinds)[type][key]);
         }
     }
 }
