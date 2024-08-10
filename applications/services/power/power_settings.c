@@ -1,4 +1,5 @@
 #include "power_settings.h"
+#include "power_settings_filename.h"
 
 bool SAVE_POWER_SETTINGS(uint32_t* x) {
     return saved_struct_save(

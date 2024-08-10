@@ -12,7 +12,7 @@
 
 #define OLD_DESKTOP_KEYBINDS_VER   (1)
 #define OLD_DESKTOP_KEYBINDS_MAGIC (0x14)
-#define OLD_DESKTOP_KEYBINDS_PATH  INT_PATH(".desktop.keybinds") // Moved from .config by migrate
+#define OLD_DESKTOP_KEYBINDS_PATH  DESKTOP_KEYBINDS_PATH_MIGRATE
 #define OLD_MAX_KEYBIND_LENGTH     (64)
 
 typedef struct {
@@ -22,33 +22,35 @@ typedef struct {
 typedef OldKeybind OldKeybinds[DesktopKeybindTypeMAX][DesktopKeybindKeyMAX];
 
 void desktop_keybinds_migrate(Desktop* desktop) {
-    OldKeybinds old;
-    const bool success = saved_struct_load(
-        OLD_DESKTOP_KEYBINDS_PATH,
-        &old,
-        sizeof(old),
-        OLD_DESKTOP_KEYBINDS_MAGIC,
-        OLD_DESKTOP_KEYBINDS_VER);
+    if(!storage_common_exists(desktop->storage, DESKTOP_KEYBINDS_PATH)) {
+        OldKeybinds old;
+        const bool success = saved_struct_load(
+            OLD_DESKTOP_KEYBINDS_PATH,
+            &old,
+            sizeof(old),
+            OLD_DESKTOP_KEYBINDS_MAGIC,
+            OLD_DESKTOP_KEYBINDS_VER);
 
-    if(success) {
-        DesktopKeybinds new;
-        for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
-            for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
-                FuriString* keybind = furi_string_alloc_set(old[type][key].data);
-                if(furi_string_equal(keybind, EXT_PATH("apps/Misc/nightstand.fap"))) {
-                    furi_string_set(keybind, "Clock");
-                } else if(furi_string_equal(keybind, "RFID")) {
-                    furi_string_set(keybind, "125 kHz RFID");
-                } else if(furi_string_equal(keybind, "SubGHz")) {
-                    furi_string_set(keybind, "Sub-GHz");
-                } else if(furi_string_equal(keybind, "Xtreme")) {
-                    furi_string_set(keybind, "Momentum");
+        if(success) {
+            DesktopKeybinds new;
+            for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
+                for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
+                    FuriString* keybind = furi_string_alloc_set(old[type][key].data);
+                    if(furi_string_equal(keybind, EXT_PATH("apps/Misc/nightstand.fap"))) {
+                        furi_string_set(keybind, "Clock");
+                    } else if(furi_string_equal(keybind, "RFID")) {
+                        furi_string_set(keybind, "125 kHz RFID");
+                    } else if(furi_string_equal(keybind, "SubGHz")) {
+                        furi_string_set(keybind, "Sub-GHz");
+                    } else if(furi_string_equal(keybind, "Xtreme")) {
+                        furi_string_set(keybind, "Momentum");
+                    }
+                    new[type][key] = keybind;
                 }
-                new[type][key] = keybind;
             }
+            desktop_keybinds_save(desktop, &new);
+            desktop_keybinds_free(&new);
         }
-        desktop_keybinds_save(desktop, &new);
-        desktop_keybinds_free(&new);
     }
 
     storage_common_remove(desktop->storage, OLD_DESKTOP_KEYBINDS_PATH);
