@@ -14,5 +14,4 @@ App(
     conflicts=["updater"],
     stack_size=2 * 1024,
     order=60,
-    sdk_headers=["desktop.h"],
 )

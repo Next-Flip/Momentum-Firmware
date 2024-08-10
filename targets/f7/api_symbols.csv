@@ -6,16 +6,11 @@ Header,+,applications/main/subghz/subghz_fap.h,,
 Header,+,applications/services/applications.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/bt/bt_service/bt_keys_storage.h,,
-Header,+,applications/services/bt/bt_settings.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
-Header,+,applications/services/desktop/desktop_settings.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
-Header,+,applications/services/dolphin/helpers/dolphin_state.h,,
 Header,+,applications/services/expansion/expansion.h,,
-Header,+,applications/services/expansion/expansion_i.h,,
-Header,+,applications/services/expansion/expansion_settings.h,,
 Header,+,applications/services/gui/elements.h,,
 Header,+,applications/services/gui/gui.h,,
 Header,+,applications/services/gui/icon_i.h,,
@@ -44,10 +39,8 @@ Header,+,applications/services/loader/firmware_api/firmware_api.h,,
 Header,+,applications/services/loader/loader.h,,
 Header,+,applications/services/locale/locale.h,,
 Header,+,applications/services/notification/notification.h,,
-Header,+,applications/services/notification/notification_app.h,,
 Header,+,applications/services/notification/notification_messages.h,,
 Header,+,applications/services/power/power_service/power.h,,
-Header,+,applications/services/power/power_settings.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
 Header,+,applications/services/storage/storage.h,,
 Header,+,build/icons/assets_icons.h,,
@@ -319,10 +312,6 @@ Header,+,targets/furi_hal_include/furi_hal_usb_hid.h,,
 Header,+,targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,targets/furi_hal_include/furi_hal_version.h,,
 Header,+,targets/furi_hal_include/furi_hal_vibro.h,,
-Function,+,DESKTOP_KEYBINDS_LOAD,_Bool,"Keybinds*, size_t"
-Function,+,DESKTOP_KEYBINDS_SAVE,_Bool,"Keybinds*, size_t"
-Function,-,DESKTOP_SETTINGS_LOAD,_Bool,DesktopSettings*
-Function,+,DESKTOP_SETTINGS_SAVE,_Bool,DesktopSettings*
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, const LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -420,11 +409,9 @@ Function,-,LL_USART_DeInit,ErrorStatus,const USART_TypeDef*
 Function,+,LL_USART_Init,ErrorStatus,"USART_TypeDef*, const LL_USART_InitTypeDef*"
 Function,-,LL_USART_StructInit,void,LL_USART_InitTypeDef*
 Function,-,LL_mDelay,void,uint32_t
-Function,+,LOAD_POWER_SETTINGS,_Bool,uint32_t*
 Function,-,Osal_MemCmp,int,"const void*, const void*, unsigned int"
 Function,-,Osal_MemCpy,void*,"void*, const void*, unsigned int"
 Function,-,Osal_MemSet,void*,"void*, int, unsigned int"
-Function,+,SAVE_POWER_SETTINGS,_Bool,uint32_t*
 Function,-,SK6805_get_led_count,uint8_t,
 Function,-,SK6805_init,void,
 Function,-,SK6805_set_led_color,void,"uint8_t, uint8_t, uint8_t, uint8_t"
@@ -805,8 +792,6 @@ Function,+,bt_profile_restore_default,_Bool,Bt*
 Function,+,bt_profile_start,FuriHalBleProfileBase*,"Bt*, const FuriHalBleProfileTemplate*, FuriHalBleProfileParams"
 Function,+,bt_remote_rssi,_Bool,"Bt*, uint8_t*"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
-Function,-,bt_settings_load,_Bool,BtSettings*
-Function,+,bt_settings_save,_Bool,const BtSettings*
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
 Function,+,buffered_file_stream_close,_Bool,Stream*
 Function,+,buffered_file_stream_get_error,FS_Error,Stream*
@@ -988,20 +973,8 @@ Function,+,dolphin_deed_get_app,DolphinApp,DolphinDeed
 Function,+,dolphin_deed_get_app_limit,uint8_t,DolphinApp
 Function,+,dolphin_deed_get_weight,uint8_t,DolphinDeed
 Function,+,dolphin_flush,void,Dolphin*
-Function,+,dolphin_get_level,uint8_t,uint32_t
 Function,+,dolphin_get_pubsub,FuriPubSub*,Dolphin*
-Function,+,dolphin_state_alloc,DolphinState*,
-Function,+,dolphin_state_butthurted,void,DolphinState*
-Function,+,dolphin_state_clear_limits,void,DolphinState*
-Function,+,dolphin_state_free,void,DolphinState*
-Function,+,dolphin_state_increase_level,void,DolphinState*
-Function,+,dolphin_state_is_levelup,_Bool,uint32_t
-Function,+,dolphin_state_load,_Bool,DolphinState*
-Function,+,dolphin_state_on_deed,void,"DolphinState*, DolphinDeed"
-Function,+,dolphin_state_save,_Bool,DolphinState*
-Function,+,dolphin_state_timestamp,uint64_t,
-Function,+,dolphin_state_xp_above_last_levelup,uint32_t,uint32_t
-Function,+,dolphin_state_xp_to_levelup,uint32_t,uint32_t
+Function,+,dolphin_reload_state,void,Dolphin*
 Function,+,dolphin_stats,DolphinStats,Dolphin*
 Function,+,dolphin_upgrade_level,void,Dolphin*
 Function,-,dprintf,int,"int, const char*, ..."
@@ -1070,11 +1043,8 @@ Function,-,exp2f,float,float
 Function,-,exp2l,long double,long double
 Function,+,expansion_disable,void,Expansion*
 Function,+,expansion_enable,void,Expansion*
-Function,+,expansion_get_settings,ExpansionSettings*,Expansion*
 Function,+,expansion_is_connected,_Bool,Expansion*
 Function,+,expansion_set_listen_serial,void,"Expansion*, FuriHalSerialId"
-Function,-,expansion_settings_load,_Bool,ExpansionSettings*
-Function,+,expansion_settings_save,_Bool,const ExpansionSettings*
 Function,-,expf,float,float
 Function,-,expl,long double,long double
 Function,-,explicit_bzero,void,"void*, size_t"
@@ -2052,8 +2022,8 @@ Function,+,ibutton_protocols_render_data,void,"iButtonProtocols*, const iButtonK
 Function,+,ibutton_protocols_render_error,void,"iButtonProtocols*, const iButtonKey*, FuriString*"
 Function,+,ibutton_protocols_render_uid,void,"iButtonProtocols*, const iButtonKey*, FuriString*"
 Function,+,ibutton_protocols_save,_Bool,"iButtonProtocols*, const iButtonKey*, const char*"
-Function,+,ibutton_protocols_write_id,_Bool,"iButtonProtocols*, iButtonKey*"
 Function,+,ibutton_protocols_write_copy,_Bool,"iButtonProtocols*, iButtonKey*"
+Function,+,ibutton_protocols_write_id,_Bool,"iButtonProtocols*, iButtonKey*"
 Function,+,ibutton_worker_alloc,iButtonWorker*,iButtonProtocols*
 Function,+,ibutton_worker_emulate_set_callback,void,"iButtonWorker*, iButtonWorkerEmulateCallback, void*"
 Function,+,ibutton_worker_emulate_start,void,"iButtonWorker*, iButtonKey*"
@@ -2063,8 +2033,8 @@ Function,+,ibutton_worker_read_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,ibutton_worker_start_thread,void,iButtonWorker*
 Function,+,ibutton_worker_stop,void,iButtonWorker*
 Function,+,ibutton_worker_stop_thread,void,iButtonWorker*
-Function,+,ibutton_worker_write_id_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,ibutton_worker_write_copy_start,void,"iButtonWorker*, iButtonKey*"
+Function,+,ibutton_worker_write_id_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,ibutton_worker_write_set_callback,void,"iButtonWorker*, iButtonWorkerWriteCallback, void*"
 Function,+,icon_animation_alloc,IconAnimation*,const Icon*
 Function,+,icon_animation_free,void,IconAnimation*
@@ -2917,7 +2887,6 @@ Function,+,notification_internal_message,void,"NotificationApp*, const Notificat
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message_block,void,"NotificationApp*, const NotificationSequence*"
-Function,+,notification_message_save_settings,void,NotificationApp*
 Function,-,nrand48,long,unsigned short[3]
 Function,-,on_exit,int,"void (*)(int, void*), void*"
 Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
@@ -3853,8 +3822,6 @@ Variable,+,A_Settings_14,const Icon,
 Variable,+,A_Sub1ghz_14,const Icon,
 Variable,+,A_U2F_14,const Icon,
 Variable,+,A_iButton_14,const Icon,
-Variable,+,DOLPHIN_LEVELS,const uint32_t[],
-Variable,+,DOLPHIN_LEVEL_COUNT,const size_t,
 Variable,+,FLIPPER_APPS,const FlipperInternalApplication[],
 Variable,+,FLIPPER_APPS_COUNT,const size_t,
 Variable,-,FLIPPER_ARCHIVE,const FlipperInternalApplication,
