@@ -7,6 +7,8 @@ static void
     DesktopSettingsApp* app = context;
 
     desktop_settings_app_set_keybind(app, (const char*)index);
+    scene_manager_search_and_switch_to_previous_scene(
+        app->scene_manager, DesktopSettingsAppSceneStart);
 }
 
 void desktop_settings_scene_keybinds_action_on_enter(void* context) {

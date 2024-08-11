@@ -61,12 +61,16 @@ static void
         furi_record_close(RECORD_STORAGE);
         if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
             desktop_settings_app_set_keybind(app, furi_string_get_cstr(temp_path));
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, DesktopSettingsAppSceneStart);
         }
         furi_string_free(temp_path);
         break;
     }
     case DesktopSettingsAppKeybindActionTypeRemoveKeybind:
         desktop_settings_app_set_keybind(app, "");
+        scene_manager_search_and_switch_to_previous_scene(
+            app->scene_manager, DesktopSettingsAppSceneStart);
         break;
     default:
         break;
