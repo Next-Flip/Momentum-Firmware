@@ -4,6 +4,7 @@
   - Desktop Keybinds should transfer correctly automatically
 
 ### Added:
+- Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
 - OFW: FBT: Add `-Wundef` to compiler options (by @hedger)
