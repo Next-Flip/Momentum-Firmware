@@ -450,6 +450,8 @@ void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagStealthMode);
     }
 
+    desktop_lock_menu_set_stealth_mode_state(desktop->lock_menu, enabled);
+
     view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
 
     desktop->in_transition = false;
