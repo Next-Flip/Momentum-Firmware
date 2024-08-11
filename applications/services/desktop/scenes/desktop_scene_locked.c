@@ -50,7 +50,7 @@ void desktop_scene_locked_on_enter(void* context) {
         gui_set_lockdown(gui, true);
         furi_record_close(RECORD_GUI);
 
-        if(desktop_pin_code_is_set()) {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
             desktop_view_locked_lock(desktop->locked_view, true);
             uint32_t pin_timeout = desktop_pin_lock_get_fail_timeout();
             if(pin_timeout > 0) {
