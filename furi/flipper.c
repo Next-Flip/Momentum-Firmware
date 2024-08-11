@@ -82,6 +82,7 @@ void flipper_migrate_files() {
         {EXT_PATH(".config/xtreme_settings.txt"), MOMENTUM_SETTINGS_PATH},
         {EXT_PATH(".config/notification.settings"), NOTIFICATION_SETTINGS_PATH},
         {EXT_PATH(".config/power.settings"), POWER_SETTINGS_PATH},
+        {EXT_PATH("dolphin/name.txt"), NAMESPOOF_PATH}, // Adapt to UL
         {EXT_PATH("infrared/.infrared.settings"), INFRARED_SETTINGS_PATH}, // Adapt to OFW
     };
     for(size_t i = 0; i < COUNT_OF(renames); ++i) {
