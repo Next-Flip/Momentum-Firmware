@@ -19,7 +19,7 @@ void bt_settings_load(BtSettings* bt_settings) {
     if(!success) {
         FURI_LOG_W(TAG, "Failed to load settings, using defaults");
         memset(bt_settings, 0, sizeof(BtSettings));
-        bt_settings_save(bt_settings);
+        // bt_settings_save(bt_settings);
     }
 }
 

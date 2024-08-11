@@ -23,7 +23,7 @@ void expansion_settings_load(ExpansionSettings* settings) {
     if(!success) {
         FURI_LOG_W(TAG, "Failed to load file, using defaults");
         memset(settings, 0, sizeof(ExpansionSettings));
-        expansion_settings_save(settings);
+        // expansion_settings_save(settings);
     }
 }
 

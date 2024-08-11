@@ -476,6 +476,7 @@ static void infrared_load_settings(InfraredApp* infrared) {
            INFRARED_SETTINGS_MAGIC,
            INFRARED_SETTINGS_VERSION)) {
         FURI_LOG_D(TAG, "Failed to load settings, using defaults");
+        // infrared_save_settings(infrared);
     }
 
     infrared_set_tx_pin(infrared, settings.tx_pin);

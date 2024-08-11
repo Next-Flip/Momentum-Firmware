@@ -519,7 +519,7 @@ static void notification_storage_callback(const void* message, void* context) {
 
 static void notification_apply_settings(NotificationApp* app) {
     if(!notification_load_settings(app)) {
-        notification_save_settings(app);
+        // notification_save_settings(app);
     }
 
     notification_apply_lcd_contrast(app);

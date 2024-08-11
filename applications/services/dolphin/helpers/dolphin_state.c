@@ -66,7 +66,7 @@ void dolphin_state_load(DolphinState* dolphin_state) {
         memset(dolphin_state, 0, sizeof(DolphinState));
 
         dolphin_state->dirty = true;
-        dolphin_state_save(dolphin_state);
+        // dolphin_state_save(dolphin_state);
     }
 }
 
