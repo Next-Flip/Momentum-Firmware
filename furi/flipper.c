@@ -114,6 +114,34 @@ void flipper_migrate_files() {
 
     furi_record_close(RECORD_STORAGE);
 }
+
+// Cannot use pubsub to schedule on SD insert like other services because
+// we want migration to happen before others load settings and new pubsub
+// subscriptions are put first in callback list so migration would be last
+// Also we cannot block the pubsub by loading files as it means storage
+// service is deadlocked processing pubsub and cannot process file operations
+// So instead storage runs this function in background thread and then
+// dispatches the pubsub event to everyone else
+void flipper_mount_callback(const void* message, void* context) {
+    UNUSED(context);
+    const StorageEvent* event = message;
+
+    if(event->type == StorageEventTypeCardMount) {
+        // Migrate locations before other services load on SD insert
+        flipper_migrate_files();
+
+        // TODO: Need to restart services that already applied previous name
+        namespoof_init();
+
+        // TODO: If new SD doesn't contain all current settings IDs, values
+        // from previous SD are kept for these settings
+        momentum_settings_load();
+
+        // TODO: Could lock kernel on free to avoid GUI using assets while being free'd
+        asset_packs_free();
+        asset_packs_init();
+    }
+}
 #endif
 
 void flipper_start_service(const FlipperInternalApplication* service) {
@@ -146,25 +174,29 @@ void flipper_init(void) {
 #ifndef FURI_RAM_EXEC
     if(furi_hal_is_normal_boot()) {
         // Wait for storage record
-        furi_record_open(RECORD_STORAGE);
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        if(storage_sd_status(storage) != FSE_OK) {
+            FURI_LOG_D(TAG, "SD Card not ready, skipping early init");
+            // Init on SD insert done by storage using flipper_mount_callback()
+        } else {
+            canvas_draw_icon(canvas, 39, 43, &I_dir_10px);
+            canvas_commit(canvas);
+            flipper_migrate_files();
+
+            canvas_draw_icon(canvas, 59, 42, &I_Apps_10px);
+            canvas_commit(canvas);
+            namespoof_init();
+
+            canvas_draw_icon(canvas, 79, 44, &I_Rpc_active_7x8);
+            canvas_commit(canvas);
+            momentum_settings_load();
+
+            furi_hal_light_sequence("rgb RB");
+            canvas_draw_icon(canvas, 99, 44, &I_Hidden_window_9x8);
+            canvas_commit(canvas);
+            asset_packs_init();
+        }
         furi_record_close(RECORD_STORAGE);
-
-        canvas_draw_icon(canvas, 39, 43, &I_dir_10px);
-        canvas_commit(canvas);
-        flipper_migrate_files();
-
-        canvas_draw_icon(canvas, 59, 42, &I_Apps_10px);
-        canvas_commit(canvas);
-        namespoof_init();
-
-        canvas_draw_icon(canvas, 79, 44, &I_Rpc_active_7x8);
-        canvas_commit(canvas);
-        momentum_settings_load();
-
-        furi_hal_light_sequence("rgb RB");
-        canvas_draw_icon(canvas, 99, 44, &I_Hidden_window_9x8);
-        canvas_commit(canvas);
-        asset_packs_init();
     } else {
         FURI_LOG_I(TAG, "Special boot, skipping optional components");
     }

@@ -56,6 +56,25 @@ Storage* storage_app_alloc(void) {
     return app;
 }
 
+#ifndef FURI_RAM_EXEC
+#include <furi/flipper.h>
+#include <toolbox/run_parallel.h>
+
+static int32_t sd_mount_handler(void* context) {
+    Storage* app = context;
+    StorageEvent event = {.type = StorageEventTypeCardMount};
+
+    // Needs to happen before other services load their settings
+    flipper_mount_callback(&event, NULL);
+
+    // Everything else
+    furi_pubsub_publish(app->pubsub, &event);
+
+    furi_record_close(RECORD_STORAGE);
+    return 0;
+}
+#endif
+
 void storage_tick(Storage* app) {
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
         StorageApi api = app->storage[i].api;
@@ -86,8 +105,14 @@ void storage_tick(Storage* app) {
 
         if(app->storage[ST_EXT].status == StorageStatusOK) {
             FURI_LOG_I(TAG, "SD card mount");
+#ifndef FURI_RAM_EXEC
+            // Can't use pubsub for migration and can't lockup storage thread,
+            // see more explanation in flipper_mount_callback()
+            run_parallel(sd_mount_handler, app, 3 * 1024);
+#else
             StorageEvent event = {.type = StorageEventTypeCardMount};
             furi_pubsub_publish(app->pubsub, &event);
+#endif
         } else {
             FURI_LOG_I(TAG, "SD card mount error");
             StorageEvent event = {.type = StorageEventTypeCardMountError};
