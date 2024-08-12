@@ -14,6 +14,7 @@
 - FBT:
   - OFW: Add `-Wundef` to compiler options (by @hedger)
   - OFW: Ensure that all images conform specification (by @skyhawkillusions & @hedger)
+  - Don't format images in external apps folder, only firmware (by @Willy-JL)
 
 ### Updated:
 - Apps:

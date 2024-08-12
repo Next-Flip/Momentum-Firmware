@@ -57,10 +57,15 @@ class ImageLint(App):
     def _gather_images(self, folders):
         images = []
         for folder in folders:
-            for dirpath, _, filenames in os.walk(folder):
+            exclude = folder.startswith("!")
+            for dirpath, _, filenames in os.walk(folder.removeprefix("!")):
                 for filename in filenames:
                     if self.is_file_an_icon(filename):
-                        images.append(os.path.join(dirpath, filename))
+                        filepath = os.path.join(dirpath, filename)
+                        if exclude:
+                            images.remove(filepath)
+                        else:
+                            images.append(filepath)
         return images
 
     def is_file_an_icon(self, filename):

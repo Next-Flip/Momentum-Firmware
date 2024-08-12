@@ -326,6 +326,7 @@ firmware_env.Append(
     IMG_LINT_SOURCES=[
         # Image assets
         "applications",
+        "!applications/external",
         "assets",
     ],
 )
