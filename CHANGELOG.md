@@ -17,6 +17,8 @@
   - BLE Spam: Can use 20ms advertising again with LFS gone (by @Willy-JL)
   - Seader: Remove some optional asn1 fields (by @bettse)
   - NFC Playlist: Fix extension check and error messages (by @acegoal07)
+  - ESP Flasher: Update Marauder bins to v1.0.0 (by @justcallmekoko)
+  - Sub-GHz Bruteforcer: Fix one/two byte text (by @Willy-JL)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
 - BadKB: Lower BLE conn interval like base HID profile (by @Willy-JL)
 - Desktop: Refactor Keybinds, no more 63 character limit, keybinds only loaded when pressed to save RAM (by @Willy-JL)
