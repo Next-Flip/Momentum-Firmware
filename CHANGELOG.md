@@ -11,7 +11,9 @@
 - Furi: Re-enabled `FURI_TRACE` since LFS removal frees DFU, will get better crash messages with source code path (by @Willy-JL)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
-- OFW: FBT: Add `-Wundef` to compiler options (by @hedger)
+- FBT:
+  - OFW: Add `-Wundef` to compiler options (by @hedger)
+  - OFW: Ensure that all images conform specification (by @skyhawkillusions & @hedger)
 
 ### Updated:
 - Apps:
@@ -35,6 +37,7 @@
 ### Fixed:
 - GUI: Fix Dark Mode after XOR canvas color, like in NFC dict attack (by @Willy-JL)
 - OFW: NFC: Fix plantain balance string (by @Astrrra)
+- OFW: Infrared: Fix cumulative error in infrared signals (by @gsurkov)
 - OFW: JS: Ensure proper closure of variadic function in `mjs_array` (by @derskythe)
 
 ### Removed:
