@@ -8,6 +8,7 @@
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
   - On SD insert also load Momentum settings, Asset Packs, FindMy Flipper, NameSpoof, SubGHz options, and migrate files (by @Willy-JL)
+- Furi: Re-enabled `FURI_TRACE` since LFS removal frees DFU, will get better crash messages with source code path (by @Willy-JL)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
 - OFW: FBT: Add `-Wundef` to compiler options (by @hedger)
