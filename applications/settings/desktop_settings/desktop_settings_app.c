@@ -47,6 +47,7 @@ void desktop_settings_app_set_keybind(DesktopSettingsApp* app, const char* value
     DesktopKeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
     furi_string_set(app->keybinds[type][key], value);
+    app->save_keybinds = true;
 }
 
 DesktopSettingsApp* desktop_settings_app_alloc(void) {
@@ -140,7 +141,9 @@ extern int32_t desktop_settings_app(void* p) {
 
     view_dispatcher_run(app->view_dispatcher);
 
-    desktop_keybinds_save(desktop, &app->keybinds);
+    if(app->save_keybinds) {
+        desktop_keybinds_save(desktop, &app->keybinds);
+    }
     desktop_keybinds_free(&app->keybinds);
     desktop_api_set_settings(desktop, &app->settings);
     furi_record_close(RECORD_DESKTOP);

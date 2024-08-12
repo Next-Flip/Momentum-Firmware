@@ -59,6 +59,8 @@ typedef struct {
     bool pincode_buffer_filled;
 
     uint32_t pin_menu_idx;
+
+    bool save_keybinds;
 } DesktopSettingsApp;
 
 FuriString* desktop_settings_app_get_keybind(DesktopSettingsApp* app);
