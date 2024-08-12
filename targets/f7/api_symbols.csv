@@ -23,6 +23,7 @@ Header,+,applications/services/gui/modules/file_browser.h,,
 Header,+,applications/services/gui/modules/file_browser_worker.h,,
 Header,+,applications/services/gui/modules/loading.h,,
 Header,+,applications/services/gui/modules/menu.h,,
+Header,+,applications/services/gui/modules/number_input.h,,
 Header,+,applications/services/gui/modules/popup.h,,
 Header,+,applications/services/gui/modules/submenu.h,,
 Header,+,applications/services/gui/modules/text_box.h,,
@@ -1263,11 +1264,13 @@ Function,+,furi_event_flag_set,uint32_t,"FuriEventFlag*, uint32_t"
 Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, uint32_t"
 Function,+,furi_event_loop_alloc,FuriEventLoop*,
 Function,+,furi_event_loop_free,void,FuriEventLoop*
-Function,+,furi_event_loop_message_queue_subscribe,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopMessageQueueCallback, void*"
-Function,+,furi_event_loop_message_queue_unsubscribe,void,"FuriEventLoop*, FuriMessageQueue*"
 Function,+,furi_event_loop_pend_callback,void,"FuriEventLoop*, FuriEventLoopPendingCallback, void*"
 Function,+,furi_event_loop_run,void,FuriEventLoop*
 Function,+,furi_event_loop_stop,void,FuriEventLoop*
+Function,+,furi_event_loop_subscribe_message_queue,void,"FuriEventLoop*, FuriMessageQueue*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
+Function,+,furi_event_loop_subscribe_mutex,void,"FuriEventLoop*, FuriMutex*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
+Function,+,furi_event_loop_subscribe_semaphore,void,"FuriEventLoop*, FuriSemaphore*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
+Function,+,furi_event_loop_subscribe_stream_buffer,void,"FuriEventLoop*, FuriStreamBuffer*, FuriEventLoopEvent, FuriEventLoopEventCallback, void*"
 Function,+,furi_event_loop_tick_set,void,"FuriEventLoop*, uint32_t, FuriEventLoopTickCallback, void*"
 Function,+,furi_event_loop_timer_alloc,FuriEventLoopTimer*,"FuriEventLoop*, FuriEventLoopTimerCallback, FuriEventLoopTimerType, void*"
 Function,+,furi_event_loop_timer_free,void,FuriEventLoopTimer*
@@ -1277,6 +1280,7 @@ Function,+,furi_event_loop_timer_is_running,_Bool,const FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_restart,void,FuriEventLoopTimer*
 Function,+,furi_event_loop_timer_start,void,"FuriEventLoopTimer*, uint32_t"
 Function,+,furi_event_loop_timer_stop,void,FuriEventLoopTimer*
+Function,+,furi_event_loop_unsubscribe,void,"FuriEventLoop*, FuriEventLoopObject*"
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_adc_acquire,FuriHalAdcHandle*,
 Function,+,furi_hal_adc_configure,void,FuriHalAdcHandle*
@@ -1821,6 +1825,7 @@ Function,+,furi_semaphore_acquire,FuriStatus,"FuriSemaphore*, uint32_t"
 Function,+,furi_semaphore_alloc,FuriSemaphore*,"uint32_t, uint32_t"
 Function,+,furi_semaphore_free,void,FuriSemaphore*
 Function,+,furi_semaphore_get_count,uint32_t,FuriSemaphore*
+Function,+,furi_semaphore_get_space,uint32_t,FuriSemaphore*
 Function,+,furi_semaphore_release,FuriStatus,FuriSemaphore*
 Function,+,furi_stream_buffer_alloc,FuriStreamBuffer*,"size_t, size_t"
 Function,+,furi_stream_buffer_bytes_available,size_t,FuriStreamBuffer*
@@ -1849,6 +1854,8 @@ Function,+,furi_string_cmpi_str,int,"const FuriString*, const char[]"
 Function,+,furi_string_empty,_Bool,const FuriString*
 Function,+,furi_string_end_with,_Bool,"const FuriString*, const FuriString*"
 Function,+,furi_string_end_with_str,_Bool,"const FuriString*, const char[]"
+Function,+,furi_string_end_withi,_Bool,"const FuriString*, const FuriString*"
+Function,+,furi_string_end_withi_str,_Bool,"const FuriString*, const char[]"
 Function,+,furi_string_equal,_Bool,"const FuriString*, const FuriString*"
 Function,+,furi_string_equal_str,_Bool,"const FuriString*, const char[]"
 Function,+,furi_string_free,void,FuriString*
@@ -2888,6 +2895,11 @@ Function,+,notification_internal_message_block,void,"NotificationApp*, const Not
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,-,nrand48,long,unsigned short[3]
+Function,+,number_input_alloc,NumberInput*,
+Function,+,number_input_free,void,NumberInput*
+Function,+,number_input_get_view,View*,NumberInput*
+Function,+,number_input_set_header_text,void,"NumberInput*, const char*"
+Function,+,number_input_set_result_callback,void,"NumberInput*, NumberInputCallback, void*, int32_t, int32_t, int32_t"
 Function,-,on_exit,int,"void (*)(int, void*), void*"
 Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
 Function,+,onewire_host_free,void,OneWireHost*
@@ -2987,7 +2999,7 @@ Function,+,power_get_pubsub,FuriPubSub*,Power*
 Function,+,power_get_settings_events_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
 Function,+,power_off,void,Power*
-Function,+,power_reboot,void,PowerBootMode
+Function,+,power_reboot,void,"Power*, PowerBootMode"
 Function,+,power_set_battery_icon_enabled,void,"Power*, _Bool"
 Function,-,power_trigger_ui_update,void,Power*
 Function,+,powf,float,"float, float"
@@ -3740,11 +3752,11 @@ Function,+,view_holder_alloc,ViewHolder*,
 Function,+,view_holder_attach_to_gui,void,"ViewHolder*, Gui*"
 Function,+,view_holder_free,void,ViewHolder*
 Function,+,view_holder_get_free_context,void*,ViewHolder*
+Function,+,view_holder_send_to_back,void,ViewHolder*
+Function,+,view_holder_send_to_front,void,ViewHolder*
 Function,+,view_holder_set_back_callback,void,"ViewHolder*, BackCallback, void*"
 Function,+,view_holder_set_free_callback,void,"ViewHolder*, FreeCallback, void*"
 Function,+,view_holder_set_view,void,"ViewHolder*, View*"
-Function,+,view_holder_start,void,ViewHolder*
-Function,+,view_holder_stop,void,ViewHolder*
 Function,+,view_holder_update,void,"View*, void*"
 Function,+,view_port_alloc,ViewPort*,
 Function,+,view_port_ascii_callback_set,void,"ViewPort*, ViewPortAsciiCallback, void*"

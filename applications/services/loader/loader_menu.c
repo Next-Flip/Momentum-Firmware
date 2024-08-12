@@ -102,7 +102,6 @@ LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context, bool sett
     view_holder_attach_to_gui(loader_menu->view_holder, gui);
     view_holder_set_back_callback(loader_menu->view_holder, NULL, NULL);
     loader_menu_set_view(loader_menu, loader_menu->dummy);
-    view_holder_start(loader_menu->view_holder);
 
     loader_menu->loader = furi_record_open(RECORD_LOADER);
     loader_menu->subscription = furi_pubsub_subscribe(

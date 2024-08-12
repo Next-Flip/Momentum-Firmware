@@ -9,8 +9,10 @@
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
   - On SD insert also load Momentum settings, Asset Packs, FindMy Flipper, NameSpoof, SubGHz options, and migrate files (by @Willy-JL)
 - Furi: Re-enabled `FURI_TRACE` since LFS removal frees DFU, will get better crash messages with source code path (by @Willy-JL)
+- OFW: Sub-GHz: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
+- OFW: GUI: Added a text input that only accepts full numbers (by @leedave)
 - FBT:
   - OFW: Add `-Wundef` to compiler options (by @hedger)
   - OFW: Ensure that all images conform specification (by @skyhawkillusions & @hedger)
@@ -31,14 +33,22 @@
   - Big cleanup of services and settings handling, refactor some old code (by @Willy-JL)
   - Update all settings paths to use equivalents like OFW or UL for better compatibility (by @Willy-JL)
 - OFW: NFC: Refactor detected protocols list (by @Astrrra)
+- Furi:
+  - OFW: FuriEventLoop Pt.2 with `Mutex` `Semaphore` `StreamBuffer`, refactor Power service (by @gsurkov)
+  - OFW: Update string documentation (by @skotopes)
 - OFW: CCID: App refactor (by @kidbomb)
-- OFW: Furi: Update string documentation (by @skotopes)
 - OFW: FBT: Toolchain v39 (by @hedger)
 
 ### Fixed:
-- GUI: Fix Dark Mode after XOR canvas color, like in NFC dict attack (by @Willy-JL)
-- OFW: NFC: Fix plantain balance string (by @Astrrra)
+- GUI:
+  - Fix Dark Mode after XOR canvas color, like in NFC dict attack (by @Willy-JL)
+  - OFW: Make file extensions case-insensitive (by @gsurkov))
+- NFC:
+  - OFW: Fix plantain balance string (by @Astrrra)
+  - OFW: Now fifo size in ST25 chip is calculated properly (by @RebornedBrain)
 - OFW: Infrared: Fix cumulative error in infrared signals (by @gsurkov)
+- OFW: Desktop: Separate callbacks for dolphin and storage subscriptions (by @skotopes)
+- OFW: FBT: Improved size validator for updater image (by @hedger)
 - OFW: JS: Ensure proper closure of variadic function in `mjs_array` (by @derskythe)
 
 ### Removed:
