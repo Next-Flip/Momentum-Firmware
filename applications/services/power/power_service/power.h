@@ -56,8 +56,6 @@ typedef struct {
 
     uint8_t charge;
     uint8_t health;
-
-    bool is_charge_capped;
 } PowerInfo;
 
 /** Power off device
@@ -85,14 +83,6 @@ void power_get_info(Power* power, PowerInfo* info);
  */
 FuriPubSub* power_get_pubsub(Power* power);
 
-/** Get power settings events pubsub handler
- *
- * @param power     Power instance
- *
- * @return          FuriPubSub instance
- */
-FuriPubSub* power_get_settings_events_pubsub(Power* power);
-
 /** Check battery health
  *
  * @return          true if battery is healthy
@@ -105,19 +95,6 @@ bool power_is_battery_healthy(Power* power);
  * @param enable    true - enable, false - disable
  */
 void power_enable_low_battery_level_notification(Power* power, bool enable);
-
-/** Trigger UI update for changing battery layout
- *
- * @param power     Power instance
- */
-void power_trigger_ui_update(Power* power);
-
-/** Enable or disable battery icon
- *
- * @param power         Power instance
- * @param is_enabled    Show battery or not
- */
-void power_set_battery_icon_enabled(Power* power, bool is_enabled);
 
 #ifdef __cplusplus
 }

@@ -3,5 +3,5 @@
 // Instead of copying the file, can (ab)use the preprocessor to insert the source code here
 // Then, we still use the Header from original code as if nothing happened
 
-// LOAD_POWER_SETTINGS(), SAVE_POWER_SETTINGS()
-#include <applications/services/power/power_settings.c>
+// power_get_settings(), power_set_settings()
+#include <applications/services/power/power_service/power_api.c>

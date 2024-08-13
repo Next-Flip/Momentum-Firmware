@@ -10,8 +10,9 @@
 #include <loader/loader.h>
 
 #include "views/power_off.h"
-#include <power/power_settings.h>
 #include "views/power_unplug_usb.h"
+
+#include <power/power_settings.h>
 
 typedef enum {
     PowerStateNotCharging,
@@ -38,16 +39,14 @@ struct Power {
     uint8_t battery_level;
     uint8_t power_off_timeout;
 
-    FuriPubSub* settings_events;
     FuriPubSub* input_events_pubsub;
-    FuriPubSubSubscription* input_events_subscription;
     FuriPubSub* ascii_events_pubsub;
+    FuriPubSubSubscription* input_events_subscription;
     FuriPubSubSubscription* ascii_events_subscription;
-    FuriPubSubSubscription* app_start_stop_subscription;
-    FuriPubSubSubscription* settings_events_subscription;
-    uint32_t shutdown_idle_delay_ms;
     FuriTimer* auto_shutdown_timer;
-    Loader* loader;
+    PowerSettings settings;
+    bool is_charge_capped;
+    bool app_running;
 };
 
 typedef enum {
@@ -61,6 +60,10 @@ typedef enum {
     PowerMessageTypeGetInfo,
     PowerMessageTypeIsBatteryHealthy,
     PowerMessageTypeShowBatteryLowWarning,
+
+    PowerMessageTypeGetSettings,
+    PowerMessageTypeSetSettings,
+    PowerMessageTypeReloadSettings,
 } PowerMessageType;
 
 typedef struct {
@@ -69,6 +72,9 @@ typedef struct {
         PowerBootMode boot_mode;
         PowerInfo* power_info;
         bool* bool_param;
+
+        PowerSettings* settings;
+        const PowerSettings* csettings;
     };
     FuriApiLock lock;
 } PowerMessage;
