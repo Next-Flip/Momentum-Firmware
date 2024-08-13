@@ -49,10 +49,12 @@ const SubGhzProtocolDecoder subghz_protocol_dickert_mahs_decoder = {
     .feed = subghz_protocol_decoder_dickert_mahs_feed,
     .reset = subghz_protocol_decoder_dickert_mahs_reset,
 
-    .get_hash_data = subghz_protocol_decoder_dickert_mahs_get_hash_data,
+    .get_hash_data = NULL,
+    .get_hash_data_long = subghz_protocol_decoder_dickert_mahs_get_hash_data,
     .serialize = subghz_protocol_decoder_dickert_mahs_serialize,
     .deserialize = subghz_protocol_decoder_dickert_mahs_deserialize,
     .get_string = subghz_protocol_decoder_dickert_mahs_get_string,
+    .get_string_brief = NULL,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_dickert_mahs_encoder = {
@@ -341,10 +343,10 @@ void subghz_protocol_decoder_dickert_mahs_feed(void* context, bool level, uint32
     }
 }
 
-uint8_t subghz_protocol_decoder_dickert_mahs_get_hash_data(void* context) {
+uint32_t subghz_protocol_decoder_dickert_mahs_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderDickertMAHS* instance = context;
-    return subghz_protocol_blocks_get_hash_data(
+    return subghz_protocol_blocks_get_hash_data_long(
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 

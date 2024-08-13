@@ -84,7 +84,7 @@ void subghz_protocol_decoder_dickert_mahs_feed(void* context, bool level, uint32
  *
  * @return     hash Hash sum
  */
-uint8_t subghz_protocol_decoder_dickert_mahs_get_hash_data(void* context);
+uint32_t subghz_protocol_decoder_dickert_mahs_get_hash_data(void* context);
 
 /** Serialize data SubGhzProtocolDecoderDickertMAHS.
  *
