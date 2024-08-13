@@ -42,7 +42,7 @@ static const NumberInputKey keyboard_keys_row_1[] = {
     {'2', 22, 12},
     {'3', 33, 12},
     {'4', 44, 12},
-    {backspace_symbol, 103, 4},
+    {backspace_symbol, 100, 3},
 };
 
 static const NumberInputKey keyboard_keys_row_2[] = {
@@ -256,13 +256,13 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeySaveBlockedSelected_24x11);
+                            &I_KeySaveBlockedSelected_22x11);
                     } else {
                         canvas_draw_icon(
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeySaveBlocked_24x11);
+                            &I_KeySaveBlocked_22x11);
                     }
                 } else {
                     if(model->selected_row == row && model->selected_column == column) {
@@ -270,13 +270,13 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeySaveSelected_24x11);
+                            &I_KeySaveSelected_22x11);
                     } else {
                         canvas_draw_icon(
                             canvas,
                             keyboard_origin_x + keys[column].x,
                             keyboard_origin_y + keys[column].y,
-                            &I_KeySave_24x11);
+                            &I_KeySave_22x11);
                     }
                 }
             } else if(keys[column].text == backspace_symbol) {
