@@ -36,7 +36,7 @@ void momentum_app_scene_protocols_freqs_add_on_enter(void* context) {
         momentum_app_scene_protocols_freqs_add_number_input_callback,
         app,
         0,
-        0, // TODO: support leaving default value empty, change min to 100000
+        100000,
         999999);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MomentumAppViewNumberInput);
