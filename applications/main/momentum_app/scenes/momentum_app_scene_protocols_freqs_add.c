@@ -5,12 +5,12 @@ enum TextInputResult {
     TextInputResultError,
 };
 
-static void momentum_app_scene_protocols_freqs_add_text_input_callback(void* context) {
+static void
+    momentum_app_scene_protocols_freqs_add_number_input_callback(void* context, int32_t number) {
     MomentumApp* app = context;
 
-    char* end;
-    uint32_t value = strtol(app->subghz_freq_buffer, &end, 0) * 1000;
-    if(*end || !furi_hal_subghz_is_frequency_valid(value)) {
+    uint32_t value = number * 1000;
+    if(!furi_hal_subghz_is_frequency_valid(value)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultError);
         return;
     }
@@ -27,26 +27,24 @@ static void momentum_app_scene_protocols_freqs_add_text_input_callback(void* con
 
 void momentum_app_scene_protocols_freqs_add_on_enter(void* context) {
     MomentumApp* app = context;
-    TextInput* text_input = app->text_input;
+    NumberInput* number_input = app->number_input;
 
-    text_input_set_header_text(text_input, "Ex: 123456 for 123.456 MHz");
+    number_input_set_header_text(number_input, "Use kHz values, like 433920");
 
-    strlcpy(app->subghz_freq_buffer, "", sizeof(app->subghz_freq_buffer));
-
-    text_input_set_result_callback(
-        text_input,
-        momentum_app_scene_protocols_freqs_add_text_input_callback,
+    number_input_set_result_callback(
+        number_input,
+        momentum_app_scene_protocols_freqs_add_number_input_callback,
         app,
-        app->subghz_freq_buffer,
-        sizeof(app->subghz_freq_buffer),
-        true);
+        0,
+        0, // TODO: support leaving default value empty, change min to 100000
+        999999);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, MomentumAppViewTextInput);
+    view_dispatcher_switch_to_view(app->view_dispatcher, MomentumAppViewNumberInput);
 }
 
 void callback_return(void* context) {
     MomentumApp* app = context;
-    scene_manager_previous_scene(app->scene_manager);
+    view_dispatcher_switch_to_view(app->view_dispatcher, MomentumAppViewNumberInput);
 }
 
 bool momentum_app_scene_protocols_freqs_add_on_event(void* context, SceneManagerEvent event) {
@@ -60,9 +58,15 @@ bool momentum_app_scene_protocols_freqs_add_on_event(void* context, SceneManager
             scene_manager_previous_scene(app->scene_manager);
             break;
         case TextInputResultError:
-            popup_set_header(app->popup, "Invalid value!", 64, 26, AlignCenter, AlignCenter);
+            popup_set_header(app->popup, "Invalid frequency!", 64, 18, AlignCenter, AlignCenter);
             popup_set_text(
-                app->popup, "Frequency was not added...", 64, 40, AlignCenter, AlignCenter);
+                app->popup,
+                "Must be 281-361,\n"
+                "378-481, 749-962 MHz",
+                64,
+                40,
+                AlignCenter,
+                AlignCenter);
             popup_set_callback(app->popup, callback_return);
             popup_set_context(app->popup, app);
             popup_set_timeout(app->popup, 1000);

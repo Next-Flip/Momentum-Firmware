@@ -223,6 +223,12 @@ MomentumApp* momentum_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, MomentumAppViewByteInput, byte_input_get_view(app->byte_input));
 
+    app->number_input = number_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        MomentumAppViewNumberInput,
+        number_input_get_view(app->number_input));
+
     app->popup = popup_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, MomentumAppViewPopup, popup_get_view(app->popup));
@@ -421,6 +427,8 @@ void momentum_app_free(MomentumApp* app) {
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewByteInput);
     byte_input_free(app->byte_input);
+    view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewNumberInput);
+    number_input_free(app->number_input);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewPopup);
     popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewDialogEx);

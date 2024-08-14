@@ -1,5 +1,5 @@
 ### Breaking Changes:
-- Desktop: Settings restructured due to LFS removal
+- Desktop: Settings restructured due to removal of LFS / LittleFS Internal Storage
   - You might need to reconfigure Desktop Settings (PIN code, auto lock, show clock)
   - Desktop Keybinds should transfer correctly automatically
 
@@ -7,7 +7,7 @@
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
-  - On SD insert also load Momentum settings, Asset Packs, FindMy Flipper, NameSpoof, SubGHz options, and migrate files (by @Willy-JL)
+  - On SD insert also load Momentum Settings, Asset Packs, FindMy Flipper, NameSpoof, SubGHz options, and migrate files (by @Willy-JL)
 - Furi: Re-enabled `FURI_TRACE` since LFS removal frees DFU, will get better crash messages with source code path (by @Willy-JL)
 - OFW: Sub-GHz: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
@@ -27,10 +27,11 @@
   - Sub-GHz Bruteforcer: Fix one/two byte text (by @Willy-JL)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
 - BadKB: Lower BLE conn interval like base HID profile (by @Willy-JL)
-- Desktop: Refactor Keybinds, no more 63 character limit, keybinds only loaded when pressed to save RAM (by @Willy-JL)
+- Desktop: Refactor Keybinds, no more 63 character limit, only load when activated to save RAM (by @Willy-JL)
+- MNTM Settings: SubGHz frequency add screen uses new NumberInput view (by @Willy-JL)
 - Settings: Statusbar Clock and Left Handed options show in normal Settings app like OFW (by @Willy-JL)
 - Services:
-  - Big cleanup of services and settings handling, refactor some old code (by @Willy-JL)
+  - Big cleanup of all services and settings handling, refactor lots old code (by @Willy-JL)
   - Update all settings paths to use equivalents like OFW or UL for better compatibility (by @Willy-JL)
 - OFW: NFC: Refactor detected protocols list (by @Astrrra)
 - Furi:
