@@ -285,13 +285,13 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        &I_KeyBackspaceSelected_16x9);
+                        &I_KeyBackspaceSelected_17x11);
                 } else {
                     canvas_draw_icon(
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        &I_KeyBackspace_16x9);
+                        &I_KeyBackspace_17x11);
                 }
             } else if(keys[column].text == sign_symbol) {
                 if(model->selected_row == row && model->selected_column == column) {

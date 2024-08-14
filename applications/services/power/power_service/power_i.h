@@ -7,7 +7,6 @@
 
 #include <toolbox/api_lock.h>
 #include <assets_icons.h>
-#include <loader/loader.h>
 
 #include "views/power_off.h"
 #include "views/power_unplug_usb.h"

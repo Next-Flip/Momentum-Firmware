@@ -8,7 +8,8 @@ static bool momentum_app_custom_event_callback(void* context, uint32_t event) {
 
 void callback_reboot(void* context) {
     UNUSED(context);
-    power_reboot(PowerBootModeNormal);
+    Power* power = furi_record_open(RECORD_POWER);
+    power_reboot(power, PowerBootModeNormal);
 }
 
 bool momentum_app_apply(MomentumApp* app) {

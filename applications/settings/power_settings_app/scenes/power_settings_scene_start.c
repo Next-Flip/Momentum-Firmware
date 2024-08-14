@@ -12,8 +12,8 @@ enum PowerSettingsSubmenuIndex {
 #define SHUTDOWN_IDLE_DELAY_COUNT 9
 const char* const shutdown_idle_delay_text[SHUTDOWN_IDLE_DELAY_COUNT] = {
     "OFF",
-    "15min",
-    "30min",
+    "15m",
+    "30m",
     "1h",
     "2h",
     "6h",
@@ -71,7 +71,7 @@ void power_settings_scene_start_on_enter(void* context) {
     variable_item_list_set_enter_callback(
         variable_item_list, power_settings_scene_start_submenu_callback, app);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, PowerSettingsAppViewSubmenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, PowerSettingsAppViewVariableItemList);
 }
 
 bool power_settings_scene_start_on_event(void* context, SceneManagerEvent event) {

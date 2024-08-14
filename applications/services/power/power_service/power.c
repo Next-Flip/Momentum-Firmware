@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <loader/loader.h>
 #include <momentum/momentum.h>
 
 #include <update_util/update_operation.h>
@@ -598,7 +599,6 @@ static Power* power_alloc(void) {
     power->ascii_events_pubsub = furi_record_open(RECORD_ASCII_EVENTS);
     power->auto_shutdown_timer =
         furi_timer_alloc(power_auto_shutdown_timer_callback, FuriTimerTypeOnce, power);
-    power->app_running = loader_is_locked(loader);
 
     power->view_holder = view_holder_alloc();
     power->view_power_off = power_off_alloc();
@@ -634,10 +634,16 @@ int32_t power_srv(void* p) {
     }
 
     Power* power = power_alloc();
-    power_init_settings(power);
     power_update_info(power);
 
     furi_record_create(RECORD_POWER, power);
+
+    // Can't be done in alloc, other things in startup need power service and it would deadlock by waiting for loader
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    power->app_running = loader_is_locked(loader);
+    furi_record_close(RECORD_LOADER);
+    power_init_settings(power);
+
     furi_event_loop_run(power->event_loop);
 
     return 0;
