@@ -4,6 +4,9 @@
   - Desktop Keybinds should transfer correctly automatically
 
 ### Added:
+- Apps:
+  - Tools: Key Copier (by @zinongli)
+  - Sub-GHz: Music to Sub-GHz Radio (by @jamisonderek)
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
