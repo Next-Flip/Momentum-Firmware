@@ -25,6 +25,11 @@
 #define SUBGHZ_FREQUENCY_RANGE_STR \
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
 
+// Tx/Rx Carrier | only internal module
+// Tx/Rx command | both
+// Rx RAW        | only internal module
+// Chat          | both
+
 #define TAG "SubGhzCli"
 
 static void subghz_cli_radio_device_power_on(void) {
