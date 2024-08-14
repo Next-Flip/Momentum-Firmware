@@ -93,7 +93,7 @@ static void number_input_draw_input(Canvas* canvas, NumberInputModel* model) {
     const size_t text_x = 8;
     const size_t text_y = 25;
 
-    elements_slightly_rounded_frame(canvas, 6, 14, 116, 15);
+    elements_slightly_rounded_frame(canvas, 4, 14, 120, 15);
 
     canvas_draw_str(canvas, text_x, text_y, furi_string_get_cstr(model->text_buffer));
 }
@@ -309,7 +309,7 @@ static void number_input_view_draw_callback(Canvas* canvas, void* _model) {
                 }
             } else {
                 if(model->selected_row == row && model->selected_column == column) {
-                    canvas_draw_box(
+                    elements_slightly_rounded_box(
                         canvas,
                         keyboard_origin_x + keys[column].x - 3,
                         keyboard_origin_y + keys[column].y - 10,
