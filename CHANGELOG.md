@@ -41,6 +41,7 @@
 - Services:
   - Big cleanup of all services and settings handling, refactor lots old code (by @Willy-JL)
   - Update all settings paths to use equivalents like OFW or UL for better compatibility (by @Willy-JL)
+- Updater: Change to `resources.tar.gz` filename to avoid confusion with update `.tgz` (by @Willy-JL)
 - OFW: NFC: Refactor detected protocols list (by @Astrrra)
 - Furi:
   - OFW: FuriEventLoop Pt.2 with `Mutex` `Semaphore` `StreamBuffer`, refactor Power service (by @gsurkov)
