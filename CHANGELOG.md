@@ -24,12 +24,16 @@
 ### Updated:
 - Apps:
   - BLE Spam: Can use 20ms advertising again with LFS gone (by @Willy-JL)
-  - Seader: Remove some optional asn1 fields (by @bettse)
+  - Seader: Remove some optional ASN1 fields, disable ASN1 debug (by @bettse)
   - NFC Playlist: Fix extension check and error messages, bugfixes and improvements (by @acegoal07)
   - ESP Flasher: Update Marauder bins to v1.0.0 (by @justcallmekoko)
   - Sub-GHz Bruteforcer: Fix one/two byte text (by @Willy-JL)
   - Pokemon Trading: Reset trade without affecting current pokemon, major refactoring (by @kbembedded)
   - T5577 Raw Writer: Code refactor, bugfixes and improvements (by @zinongli)
+  - AirMouse: Fix compatibility with new firmwares (by @ginkage)
+  - Flizzer Tracker: Fix app not responding to keypresses (by @LTVA1)
+  - UHF RFID: Bugfixes, some refactoring, write modes (by @frux-c)
+  - UL: UART Terminal: Configurable CRLF or newline mode (by @xMasterX)
   - UL: SubGHz Bruteforcer: App refactoring and code documentation (by @derskythe)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
   - Many app fixes for deprecated `view_dispatcher_enable_queue()` (by @xMasterX & @Willy-JL)
