@@ -56,6 +56,7 @@
 - NFC:
   - OFW: Fix plantain balance string (by @Astrrra)
   - OFW: Now fifo size in ST25 chip is calculated properly (by @RebornedBrain)
+- OFW: Sub-GHz: Fix RPC status for ButtonRelease event (by @Skorpionm)
 - OFW: Infrared: Fix cumulative error in infrared signals (by @gsurkov)
 - OFW: Desktop: Separate callbacks for dolphin and storage subscriptions (by @skotopes)
 - OFW: FBT: Improved size validator for updater image (by @hedger)
