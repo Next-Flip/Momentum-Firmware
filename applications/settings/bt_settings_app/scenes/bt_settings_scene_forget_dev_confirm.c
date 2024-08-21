@@ -37,7 +37,10 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
             const char* keys_paths[] = {
                 BAD_KB_KEYS_PATH,
                 EXT_PATH("apps_data/hid_ble/.bt_hid.keys"),
-                EXT_PATH("apps_data/totp/.bt_hid.keys"),
+                EXT_PATH("apps_data/air_mouse/.bt_hid.keys"),
+                EXT_PATH("apps_data/vgm_air_mouse/.bt_hid.keys"),
+                EXT_PATH("apps_data/pc_monitor/.bt_serial.keys"),
+                EXT_PATH("apps_data/totp/.bt_hid_ 0.keys"),
             };
             Storage* storage = furi_record_open(RECORD_STORAGE);
             for(size_t i = 0; i < COUNT_OF(keys_paths); i++) {

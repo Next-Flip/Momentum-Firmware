@@ -41,7 +41,9 @@
 - Desktop: Refactor Keybinds, no more 63 character limit, only load when activated to save RAM (by @Willy-JL)
 - MNTM Settings: SubGHz frequency add screen uses new NumberInput view (by @Willy-JL)
 - GUI: Small tweaks to NumberInput to match Text and Byte, and for better usability (by @Willy-JL)
-- Settings: Statusbar Clock and Left Handed options show in normal Settings app like OFW (by @Willy-JL)
+- Settings:
+  - Statusbar Clock and Left Handed options show in normal Settings app like OFW (by @Willy-JL)
+  - Update list of keys files for forget all devices (by @Willy-JL)
 - Services:
   - Big cleanup of all services and settings handling, refactor lots old code (by @Willy-JL)
   - Update all settings paths to use equivalents like OFW or UL for better compatibility (by @Willy-JL)
