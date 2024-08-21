@@ -10,7 +10,7 @@
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
-  - On SD insert also load Momentum Settings, Asset Packs, FindMy Flipper, NameSpoof, Power, SubGHz options, and migrate files (by @Willy-JL)
+  - On SD insert also load Momentum Settings, Asset Packs, FindMy Flipper, NameSpoof, RGB Backlight, Power, SubGHz options, and migrate files (by @Willy-JL)
 - Furi: Re-enabled `FURI_TRACE` since LFS removal frees DFU, will get better crash messages with source code path (by @Willy-JL)
 - OFW: Sub-GHz: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)

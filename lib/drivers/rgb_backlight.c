@@ -62,11 +62,16 @@ static struct {
 };
 
 void rgb_backlight_load_settings(bool enabled) {
-    if(rgb_state.settings_loaded) return;
-    rgb_state.enabled = enabled;
-    rgb_state.mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
+    // This function is called from momentum_settings_load()
+    // No need to setup storage pubsub, just expect multiple calls
 
-    // Do not load data from internal memory when booting in DFU mode
+    rgb_state.settings_loaded = false;
+    rgb_state.enabled = enabled;
+    if(!rgb_state.mutex) {
+        rgb_state.mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
+    }
+
+    // Do not load and apply settings when booting in update/RAM mode
     if(!furi_hal_is_normal_boot()) {
         rgb_state.settings_loaded = true;
         return;
