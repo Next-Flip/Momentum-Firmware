@@ -16,14 +16,14 @@ void desktop_settings_scene_keybinds_type_on_enter(void* context) {
     submenu_add_item(
         submenu,
         "Press",
-        KeybindTypePress,
+        DesktopKeybindTypePress,
         desktop_settings_scene_keybinds_type_submenu_callback,
         app);
 
     submenu_add_item(
         submenu,
         "Hold",
-        KeybindTypeHold,
+        DesktopKeybindTypeHold,
         desktop_settings_scene_keybinds_type_submenu_callback,
         app);
 

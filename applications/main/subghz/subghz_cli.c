@@ -426,7 +426,7 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
 
     // Configure radio
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_650khz_async_regs);
+    furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_270khz_async_regs);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
@@ -478,7 +478,7 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
 void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     FuriString* file_name = furi_string_alloc();
-    furi_string_set(file_name, ANY_PATH("subghz/test.sub"));
+    furi_string_set(file_name, EXT_PATH("subghz/test.sub"));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
@@ -592,7 +592,7 @@ void subghz_cli_command_tx_from_file(Cli* cli, FuriString* args, void* context) 
     UNUSED(context);
     FuriString* file_name;
     file_name = furi_string_alloc();
-    furi_string_set(file_name, ANY_PATH("subghz/test.sub"));
+    furi_string_set(file_name, EXT_PATH("subghz/test.sub"));
     uint32_t repeat = 10;
     uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
 
@@ -959,9 +959,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
         subghz_cli_radio_device_power_off();
         return;
     }
-
-    // TODO
-    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
+    if(!furi_hal_region_is_frequency_allowed(frequency)) {
         printf(
             "In your settings/region, only reception on this frequency (%lu) is allowed,\r\n"
             "the actual operation of the application is not possible\r\n ",

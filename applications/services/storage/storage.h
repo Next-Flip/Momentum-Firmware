@@ -14,18 +14,17 @@ extern "C" {
 
 #define STORAGE_INT_PATH_PREFIX        "/int"
 #define STORAGE_EXT_PATH_PREFIX        "/ext"
-#define STORAGE_MNT_PATH_PREFIX        "/mnt"
 #define STORAGE_ANY_PATH_PREFIX        "/any"
+#define STORAGE_MNT_PATH_PREFIX        "/mnt"
 #define STORAGE_APP_DATA_PATH_PREFIX   "/data"
 #define STORAGE_APP_ASSETS_PATH_PREFIX "/assets"
-#define STORAGE_CFG_PATH_PREFIX        STORAGE_EXT_PATH_PREFIX "/.config"
 
 #define INT_PATH(path)        STORAGE_INT_PATH_PREFIX "/" path
 #define EXT_PATH(path)        STORAGE_EXT_PATH_PREFIX "/" path
 #define ANY_PATH(path)        STORAGE_ANY_PATH_PREFIX "/" path
+#define MNT_PATH(path)        STORAGE_MNT_PATH_PREFIX "/" path
 #define APP_DATA_PATH(path)   STORAGE_APP_DATA_PATH_PREFIX "/" path
 #define APP_ASSETS_PATH(path) STORAGE_APP_ASSETS_PATH_PREFIX "/" path
-#define CFG_PATH(path)        STORAGE_CFG_PATH_PREFIX "/" path
 
 #define RECORD_STORAGE "storage"
 
@@ -534,7 +533,7 @@ FS_Error storage_sd_status(Storage* storage);
 
 /******************* Internal LFS Functions *******************/
 
-typedef void (*Storage_name_converter)(FuriString*);
+typedef void (*StorageNameConverter)(FuriString*);
 
 /**
  * @brief Back up the internal storage contents to a *.tar archive.
@@ -554,7 +553,7 @@ FS_Error storage_int_backup(Storage* storage, const char* dstname);
  * @return FSE_OK if the storage was successfully restored, any other error code on failure.
  */
 FS_Error
-    storage_int_restore(Storage* storage, const char* dstname, Storage_name_converter converter);
+    storage_int_restore(Storage* storage, const char* dstname, StorageNameConverter converter);
 
 /******************* FatFs Virtual Mount Functions *******************/
 

@@ -10,9 +10,16 @@
 #include <desktop/desktop_settings.h>
 #include "../views/desktop_view_lock_menu.h"
 #include "desktop_scene.h"
-#include "../helpers/pin.h"
+#include "../helpers/pin_code.h"
 #include <power/power_service/power.h>
+
 #define TAG "DesktopSceneLock"
+
+typedef enum {
+    CheckPinNo,
+    CheckPinLock,
+    CheckPinLockOff,
+} CheckPin;
 
 void desktop_scene_lock_menu_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -22,17 +29,14 @@ void desktop_scene_lock_menu_callback(DesktopEvent event, void* context) {
 void desktop_scene_lock_menu_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
 
-    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
+    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, CheckPinNo);
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
-    desktop_lock_menu_set_pin_state(
-        desktop->lock_menu, desktop_pin_is_valid(&desktop->settings.pin_code));
+    desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop_pin_code_is_set());
     desktop_lock_menu_set_stealth_mode_state(
         desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 3);
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_set_hide_statusbar(gui, true);
-    furi_record_close(RECORD_GUI);
+    gui_set_hide_statusbar(desktop->gui, true);
 
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
 }
@@ -57,19 +61,18 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeTick) {
-        int check_pin_changed =
+        CheckPin check_pin_changed =
             scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLockMenu);
-        if(check_pin_changed) {
-            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
-                desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
-                desktop_lock(desktop, true);
-                if(check_pin_changed == 2) {
-                    Power* power = furi_record_open(RECORD_POWER);
-                    furi_delay_ms(500);
-                    power_off(power);
-                    furi_record_close(RECORD_POWER);
-                }
+        if(check_pin_changed != CheckPinNo && desktop_pin_code_is_set()) {
+            desktop_lock_menu_set_pin_state(desktop->lock_menu, true);
+            scene_manager_set_scene_state(
+                desktop->scene_manager, DesktopSceneLockMenu, CheckPinNo);
+            desktop_lock(desktop, true);
+            if(check_pin_changed == CheckPinLockOff) {
+                Power* power = furi_record_open(RECORD_POWER);
+                furi_delay_ms(500);
+                power_off(power);
+                furi_record_close(RECORD_POWER);
             }
         }
     } else if(event.type == SceneManagerEventTypeCustom) {
@@ -87,18 +90,19 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventLockPinCode:
             desktop_scene_lock_menu_save_settings(desktop);
-            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
+            if(desktop_pin_code_is_set()) {
                 desktop_lock(desktop, true);
             } else {
                 loader_start_detached_with_gui_error(
                     desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 1);
+                scene_manager_set_scene_state(
+                    desktop->scene_manager, DesktopSceneLockMenu, CheckPinLock);
             }
             consumed = true;
             break;
         case DesktopLockMenuEventLockPinOff:
             desktop_scene_lock_menu_save_settings(desktop);
-            if(desktop_pin_is_valid(&desktop->settings.pin_code)) {
+            if(desktop_pin_code_is_set()) {
                 desktop_lock(desktop, true);
                 Power* power = furi_record_open(RECORD_POWER);
                 furi_delay_ms(500);
@@ -107,7 +111,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             } else {
                 loader_start_detached_with_gui_error(
                     desktop->loader, "Desktop", DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG);
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 2);
+                scene_manager_set_scene_state(
+                    desktop->scene_manager, DesktopSceneLockMenu, CheckPinLockOff);
             }
             consumed = true;
             break;
@@ -126,7 +131,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
+        scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, CheckPinNo);
     }
     return consumed;
 }
@@ -135,7 +140,5 @@ void desktop_scene_lock_menu_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
     desktop_scene_lock_menu_save_settings(desktop);
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_set_hide_statusbar(gui, false);
-    furi_record_close(RECORD_GUI);
+    gui_set_hide_statusbar(desktop->gui, false);
 }

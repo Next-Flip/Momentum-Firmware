@@ -74,3 +74,4 @@
 #include "x10.h"
 #include "hormann_bisecur.h"
 #include "legrand.h"
+#include "dickert_mahs.h"

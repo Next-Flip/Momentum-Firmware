@@ -320,7 +320,6 @@ BadKbApp* bad_kb_app_alloc(char* arg) {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
 
     app->scene_manager = scene_manager_alloc(&bad_kb_scene_handlers, app);
 

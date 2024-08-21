@@ -19,15 +19,18 @@ TarOpenMode tar_archive_get_mode_for_path(const char* path) {
 
     FuriString* path_str = furi_string_alloc_set_str(path);
     path_extract_extension(path_str, ext, sizeof(ext));
-    furi_string_free(path_str);
+    TarOpenMode open_mode;
 
     if(strcmp(ext, ".ths") == 0) {
-        return TarOpenModeReadHeatshrink;
-    } else if(strcmp(ext, ".tgz") == 0) {
-        return TarOpenModeReadGzip;
+        open_mode = TarOpenModeReadHeatshrink;
+    } else if(strcmp(ext, ".tgz") == 0 || furi_string_end_with(path_str, ".tar.gz")) {
+        open_mode = TarOpenModeReadGzip;
     } else {
-        return TarOpenModeRead;
+        open_mode = TarOpenModeRead;
     }
+
+    furi_string_free(path_str);
+    return open_mode;
 }
 
 typedef struct TarArchive {
@@ -325,7 +328,7 @@ bool tar_archive_file_finalize(TarArchive* archive) {
 typedef struct {
     TarArchive* archive;
     const char* work_dir;
-    Storage_name_converter converter;
+    TarArchiveNameConverter converter;
 } TarArchiveDirectoryOpParams;
 
 static bool archive_extract_current_file(TarArchive* archive, const char* dst_path) {
@@ -429,7 +432,7 @@ static int archive_extract_foreach_cb(mtar_t* tar, const mtar_header_t* header, 
 bool tar_archive_unpack_to(
     TarArchive* archive,
     const char* destination,
-    Storage_name_converter converter) {
+    TarArchiveNameConverter converter) {
     furi_check(archive);
     TarArchiveDirectoryOpParams param = {
         .archive = archive,

@@ -28,16 +28,14 @@ static void momentum_app_scene_interface_statusbar_battery_icon_changed(Variable
     variable_item_set_current_value_text(item, battery_icon_names[index]);
     momentum_settings.battery_icon = index;
     app->save_settings = true;
-    power_set_battery_icon_enabled(furi_record_open(RECORD_POWER), index != BatteryIconOff);
-    furi_record_close(RECORD_POWER);
 }
 
 static void momentum_app_scene_interface_statusbar_statusbar_clock_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    momentum_settings.statusbar_clock = value;
-    app->save_settings = true;
+    app->desktop_settings.display_clock = value;
+    app->save_desktop = true;
 }
 
 static void momentum_app_scene_interface_statusbar_status_icons_changed(VariableItem* item) {
@@ -84,8 +82,8 @@ void momentum_app_scene_interface_statusbar_on_enter(void* context) {
         2,
         momentum_app_scene_interface_statusbar_statusbar_clock_changed,
         app);
-    variable_item_set_current_value_index(item, momentum_settings.statusbar_clock);
-    variable_item_set_current_value_text(item, momentum_settings.statusbar_clock ? "ON" : "OFF");
+    variable_item_set_current_value_index(item, app->desktop_settings.display_clock);
+    variable_item_set_current_value_text(item, app->desktop_settings.display_clock ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,
