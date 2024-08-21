@@ -123,11 +123,18 @@ void flipper_migrate_files() {
 // service is deadlocked processing pubsub and cannot process file operations
 // So instead storage runs this function in background thread and then
 // dispatches the pubsub event to everyone else
+bool skip_double_mount = false;
 void flipper_mount_callback(const void* message, void* context) {
     UNUSED(context);
     const StorageEvent* event = message;
 
     if(event->type == StorageEventTypeCardMount) {
+        // Workaround to avoid double load on boot but also have animated boot screen
+        if(skip_double_mount) {
+            skip_double_mount = false;
+            return;
+        }
+
         // Migrate locations before other services load on SD insert
         flipper_migrate_files();
 
@@ -180,6 +187,9 @@ void flipper_init(void) {
             FURI_LOG_D(TAG, "SD Card not ready, skipping early init");
             // Init on SD insert done by storage using flipper_mount_callback()
         } else {
+            // Workaround to avoid double load on boot but also have animated boot screen
+            skip_double_mount = true;
+
             canvas_draw_icon(canvas, 39, 43, &I_dir_10px);
             canvas_commit(canvas);
             flipper_migrate_files();
