@@ -45,14 +45,12 @@
  *
  */
 
-
 static const SubGhzBlockConst ws_protocol_solight_te44_const = {
     .te_short = 490,
     .te_long = 3000,
     .te_delta = 150,
     .min_count_bit_for_found = 36,
 };
-
 
 struct WSProtocolDecoderSolightTE44 {
     SubGhzProtocolDecoderBase base;
@@ -61,14 +59,12 @@ struct WSProtocolDecoderSolightTE44 {
     WSBlockGeneric generic;
 };
 
-
 struct WSProtocolEncoderSolightTE44 {
     SubGhzProtocolEncoderBase base;
 
     SubGhzProtocolBlockEncoder encoder;
     WSBlockGeneric generic;
 };
-
 
 const SubGhzProtocolDecoder ws_protocol_solight_te44_decoder = {
     .alloc = ws_protocol_decoder_solight_te44_alloc,
@@ -85,7 +81,6 @@ const SubGhzProtocolDecoder ws_protocol_solight_te44_decoder = {
     .get_string_brief = NULL,
 };
 
-
 const SubGhzProtocolEncoder ws_protocol_solight_te44_encoder = {
     .alloc = NULL,
     .free = NULL,
@@ -94,8 +89,6 @@ const SubGhzProtocolEncoder ws_protocol_solight_te44_encoder = {
     .stop = NULL,
     .yield = NULL,
 };
-
-
 
 const SubGhzProtocol ws_protocol_solight_te44 = {
     .name = WS_PROTOCOL_SOLIGHT_TE44_NAME,
@@ -108,15 +101,13 @@ const SubGhzProtocol ws_protocol_solight_te44 = {
     .encoder = &ws_protocol_solight_te44_encoder,
 };
 
-
 typedef enum {
     SolightTE44DecoderStepReset = 0,
     SolightTE44DecoderStepSaveDuration,
     SolightTE44DecoderStepCheckDuration,
 } SolightTE44DecoderStep;
 
-
-void* ws_protocol_decoder_solight_te44_alloc(SubGhzEnvironment* environment){
+void* ws_protocol_decoder_solight_te44_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
     WSProtocolDecoderSolightTE44* instance = malloc(sizeof(WSProtocolDecoderSolightTE44));
     instance->base.protocol = &ws_protocol_solight_te44;
@@ -124,20 +115,17 @@ void* ws_protocol_decoder_solight_te44_alloc(SubGhzEnvironment* environment){
     return instance;
 }
 
-
-void ws_protocol_decoder_solight_te44_free(void* context){
+void ws_protocol_decoder_solight_te44_free(void* context) {
     furi_assert(context);
     WSProtocolDecoderSolightTE44* instance = context;
     free(instance);
 }
 
-
-void ws_protocol_decoder_solight_te44_reset(void* context){
+void ws_protocol_decoder_solight_te44_reset(void* context) {
     furi_assert(context);
     WSProtocolDecoderSolightTE44* instance = context;
     instance->decoder.parser_step = SolightTE44DecoderStepReset;
 }
-
 
 static bool ws_protocol_solight_te44_check(WSProtocolDecoderSolightTE44* instance) {
     if(!instance->decoder.decode_data) return false;
@@ -149,14 +137,12 @@ static bool ws_protocol_solight_te44_check(WSProtocolDecoderSolightTE44* instanc
         instance->decoder.decode_data >> 20,
         instance->decoder.decode_data >> 12,
         0xf0,
-        (instance->decoder.decode_data & 0xf0) | (instance->decoder.decode_data & 0x0f)
-    };
+        (instance->decoder.decode_data & 0xf0) | (instance->decoder.decode_data & 0x0f)};
 
     uint8_t rubicson_crc = subghz_protocol_blocks_crc8(msg_rubicson_crc, 5, 0x31, 0x6c);
 
     return rubicson_crc == 0;
 }
-
 
 /**
  * Analysis of received data
@@ -164,7 +150,7 @@ static bool ws_protocol_solight_te44_check(WSProtocolDecoderSolightTE44* instanc
  */
 static void ws_protocol_solight_te44_extract_data(WSBlockGeneric* instance) {
     instance->id = (instance->data >> 28) & 0xff;
-    instance->battery_low = ! (instance->data >> 27) & 0x01;
+    instance->battery_low = !(instance->data >> 27) & 0x01;
     instance->channel = ((instance->data >> 24) & 0x03) + 1;
 
     int16_t temp = (instance->data >> 12) & 0x0fff;
@@ -178,63 +164,67 @@ static void ws_protocol_solight_te44_extract_data(WSBlockGeneric* instance) {
     instance->humidity = WS_NO_HUMIDITY;
 }
 
-
-void ws_protocol_decoder_solight_te44_feed(void* context, bool level, uint32_t duration){
+void ws_protocol_decoder_solight_te44_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     WSProtocolDecoderSolightTE44* instance = context;
 
     switch(instance->decoder.parser_step) {
-        case SolightTE44DecoderStepReset:
-            if((!level) && duration >= ws_protocol_solight_te44_const.te_long) {
-                instance->decoder.parser_step = SolightTE44DecoderStepSaveDuration;
-                instance->decoder.decode_data = 0;
-                instance->decoder.decode_count_bit = 0;
-            }
+    case SolightTE44DecoderStepReset:
+        if((!level) && duration >= ws_protocol_solight_te44_const.te_long) {
+            instance->decoder.parser_step = SolightTE44DecoderStepSaveDuration;
+            instance->decoder.decode_data = 0;
+            instance->decoder.decode_count_bit = 0;
+        }
         break;
 
-        case SolightTE44DecoderStepSaveDuration:
-            if(level) {
-                instance->decoder.te_last = duration;
-                instance->decoder.parser_step = SolightTE44DecoderStepCheckDuration;
-            } else {
-                instance->decoder.parser_step = SolightTE44DecoderStepReset;
-            }
-            break;
+    case SolightTE44DecoderStepSaveDuration:
+        if(level) {
+            instance->decoder.te_last = duration;
+            instance->decoder.parser_step = SolightTE44DecoderStepCheckDuration;
+        } else {
+            instance->decoder.parser_step = SolightTE44DecoderStepReset;
+        }
+        break;
 
-        case SolightTE44DecoderStepCheckDuration:
-            if(!level) {
-                if(DURATION_DIFF(duration, ws_protocol_solight_te44_const.te_short) < 
-                   ws_protocol_solight_te44_const.te_delta) {
-                    if(instance->decoder.decode_count_bit == ws_protocol_solight_te44_const.min_count_bit_for_found &&
-                       ws_protocol_solight_te44_check(instance)) {
-                        instance->generic.data = instance->decoder.decode_data;
-                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
-                        ws_protocol_solight_te44_extract_data(&instance->generic);
+    case SolightTE44DecoderStepCheckDuration:
+        if(!level) {
+            if(DURATION_DIFF(duration, ws_protocol_solight_te44_const.te_short) <
+               ws_protocol_solight_te44_const.te_delta) {
+                if(instance->decoder.decode_count_bit ==
+                       ws_protocol_solight_te44_const.min_count_bit_for_found &&
+                   ws_protocol_solight_te44_check(instance)) {
+                    instance->generic.data = instance->decoder.decode_data;
+                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+                    ws_protocol_solight_te44_extract_data(&instance->generic);
 
-                        if(instance->base.callback) {
-                            instance->base.callback(&instance->base, instance->base.context);
-                        }
+                    if(instance->base.callback) {
+                        instance->base.callback(&instance->base, instance->base.context);
                     }
-                    instance->decoder.decode_data = 0;
-                    instance->decoder.decode_count_bit = 0;
+                }
+                instance->decoder.decode_data = 0;
+                instance->decoder.decode_count_bit = 0;
+                instance->decoder.parser_step = SolightTE44DecoderStepReset;
+            } else if(
+                DURATION_DIFF(instance->decoder.te_last, ws_protocol_solight_te44_const.te_short) <
+                ws_protocol_solight_te44_const.te_delta) {
+                if(DURATION_DIFF(duration, ws_protocol_solight_te44_const.te_short * 2) <
+                   ws_protocol_solight_te44_const.te_delta) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                    instance->decoder.parser_step = SolightTE44DecoderStepSaveDuration;
+                } else if(
+                    DURATION_DIFF(duration, ws_protocol_solight_te44_const.te_short * 4) <
+                    ws_protocol_solight_te44_const.te_delta) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                    instance->decoder.parser_step = SolightTE44DecoderStepSaveDuration;
+                } else
                     instance->decoder.parser_step = SolightTE44DecoderStepReset;
-                } else if(DURATION_DIFF(instance->decoder.te_last, ws_protocol_solight_te44_const.te_short) <
-                          ws_protocol_solight_te44_const.te_delta) {
-                    if(DURATION_DIFF(duration, ws_protocol_solight_te44_const.te_short * 2) <
-                        ws_protocol_solight_te44_const.te_delta) {
-                        subghz_protocol_blocks_add_bit(&instance->decoder, 0);
-                        instance->decoder.parser_step = SolightTE44DecoderStepSaveDuration;
-                    } else if(DURATION_DIFF(duration, ws_protocol_solight_te44_const.te_short * 4) <
-                              ws_protocol_solight_te44_const.te_delta) {
-                        subghz_protocol_blocks_add_bit(&instance->decoder, 1);
-                        instance->decoder.parser_step = SolightTE44DecoderStepSaveDuration;
-                    } else instance->decoder.parser_step = SolightTE44DecoderStepReset;
-                } else instance->decoder.parser_step = SolightTE44DecoderStepReset;
-            } else instance->decoder.parser_step = SolightTE44DecoderStepReset;
-            break;
+            } else
+                instance->decoder.parser_step = SolightTE44DecoderStepReset;
+        } else
+            instance->decoder.parser_step = SolightTE44DecoderStepReset;
+        break;
     }
 }
-
 
 uint32_t ws_protocol_decoder_solight_te44_get_hash_data(void* context) {
     furi_assert(context);
@@ -243,26 +233,27 @@ uint32_t ws_protocol_decoder_solight_te44_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-
-SubGhzProtocolStatus ws_protocol_decoder_solight_te44_serialize(void* context, FlipperFormat* flipper_format,
-                                                                SubGhzRadioPreset* preset) {
+SubGhzProtocolStatus ws_protocol_decoder_solight_te44_serialize(
+    void* context,
+    FlipperFormat* flipper_format,
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     WSProtocolDecoderSolightTE44* instance = context;
     return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-
-SubGhzProtocolStatus ws_protocol_decoder_solight_te44_deserialize(void* context, FlipperFormat* flipper_format){
+SubGhzProtocolStatus
+    ws_protocol_decoder_solight_te44_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderSolightTE44* instance = context;
     return ws_block_generic_deserialize_check_count_bit(
-        &instance->generic, flipper_format, ws_protocol_solight_te44_const.min_count_bit_for_found);
+        &instance->generic,
+        flipper_format,
+        ws_protocol_solight_te44_const.min_count_bit_for_found);
 }
 
-
-void ws_protocol_decoder_solight_te44_get_string(void* context, FuriString* output){
+void ws_protocol_decoder_solight_te44_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderSolightTE44* instance = context;
     ws_block_generic_get_string(&instance->generic, output);
 }
-

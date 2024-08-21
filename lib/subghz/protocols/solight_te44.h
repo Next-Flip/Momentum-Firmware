@@ -10,16 +10,12 @@
 
 #define WS_PROTOCOL_SOLIGHT_TE44_NAME "Solight TE44"
 
-
 typedef struct WSProtocolDecoderSolightTE44 WSProtocolDecoderSolightTE44;
 typedef struct WSProtocolEncoderSolightTE44 WSProtocolEncoderSolightTE44;
-
 
 extern const SubGhzProtocolDecoder ws_protocol_solight_te44_decoder;
 extern const SubGhzProtocolEncoder ws_protocol_solight_te44_encoder;
 extern const SubGhzProtocol ws_protocol_solight_te44;
-
-
 
 /**
  * Allocate WSProtocolDecoderSolightTE44.
@@ -73,7 +69,8 @@ SubGhzProtocolStatus ws_protocol_decoder_solight_te44_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return status
  */
-SubGhzProtocolStatus ws_protocol_decoder_solight_te44_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    ws_protocol_decoder_solight_te44_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
