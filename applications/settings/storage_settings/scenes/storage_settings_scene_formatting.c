@@ -53,7 +53,8 @@ void storage_settings_scene_formatting_on_enter(void* context) {
             dialog_ex, storage_error_get_desc(error), 64, 32, AlignCenter, AlignCenter);
     } else {
         if(scene_manager_get_scene_state(app->scene_manager, StorageSettingsFormatting)) {
-            power_reboot(PowerBootModeNormal);
+            Power* power = furi_record_open(RECORD_POWER);
+            power_reboot(power, PowerBootModeNormal);
         } else {
             dialog_ex_set_icon(dialog_ex, 48, 6, &I_DolphinDone_80x58);
             dialog_ex_set_header(dialog_ex, "Formatted", 5, 10, AlignLeft, AlignTop);

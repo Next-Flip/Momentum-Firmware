@@ -57,6 +57,7 @@ static bool animation_storage_load_single_manifest_info(
     const char* name) {
     furi_assert(manifest_info);
     animation_handler_select_manifest();
+
     bool result = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);

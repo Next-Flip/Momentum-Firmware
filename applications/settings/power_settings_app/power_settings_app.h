@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <power/power_service/power.h>
+#include <power/power_service/power_settings_api_i.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
@@ -13,21 +14,21 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/variable_item_list.h>
 
-#include <power/power_settings.h>
 #include "scenes/power_settings_scene.h"
 
 typedef struct {
+    PowerSettings settings;
+
     Power* power;
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     BatteryInfo* battery_info;
     Submenu* submenu;
+    VariableItemList* variable_item_list;
     DialogEx* dialog;
     PowerInfo info;
-    VariableItemList* variable_item_list;
-    uint32_t shutdown_idle_delay_ms;
-    FuriPubSub* settings_events;
+
     bool about_battery;
 } PowerSettingsApp;
 

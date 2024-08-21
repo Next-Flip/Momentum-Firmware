@@ -11,7 +11,7 @@
 #include "../desktop_i.h"
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_pin_input.h"
-#include "../helpers/pin.h"
+#include "../helpers/pin_code.h"
 #include "desktop_scene.h"
 
 #define WRONG_PIN_HEADER_TIMEOUT 3000
@@ -50,18 +50,21 @@ static void desktop_scene_pin_input_back_callback(void* context) {
     view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventBack);
 }
 
-static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void* context) {
+static void desktop_scene_pin_input_done_callback(const DesktopPinCode* pin_code, void* context) {
     Desktop* desktop = (Desktop*)context;
-    if(desktop_pin_compare(&desktop->settings.pin_code, pin_code)) {
+
+    if(desktop_pin_code_check(pin_code)) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopPinInputEventUnlocked);
+
     } else {
         uint32_t pin_fails = furi_hal_rtc_get_pin_fails() + 1;
         if(pin_fails >= 10 && momentum_settings.bad_pins_format) {
-            furi_hal_rtc_reset_registers();
-            furi_hal_rtc_set_flag(FuriHalRtcFlagStorageFormatInternal);
-            storage_sd_format(furi_record_open(RECORD_STORAGE));
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            storage_sd_format(storage);
             furi_record_close(RECORD_STORAGE);
-            power_reboot(PowerBootModeNormal);
+            furi_hal_rtc_reset_registers();
+            Power* power = furi_record_open(RECORD_POWER);
+            power_reboot(power, PowerBootModeNormal);
         }
         furi_hal_rtc_set_pin_fails(pin_fails);
         view_dispatcher_send_custom_event(

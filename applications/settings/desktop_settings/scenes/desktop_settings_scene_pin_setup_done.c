@@ -11,7 +11,7 @@
 
 #define SCENE_EVENT_DONE (0U)
 
-static void pin_setup_done_callback(const PinCode* pin_code, void* context) {
+static void pin_setup_done_callback(const DesktopPinCode* pin_code, void* context) {
     furi_assert(pin_code);
     furi_assert(context);
     DesktopSettingsApp* app = context;
@@ -21,6 +21,8 @@ static void pin_setup_done_callback(const PinCode* pin_code, void* context) {
 
 void desktop_settings_scene_pin_setup_done_on_enter(void* context) {
     DesktopSettingsApp* app = context;
+
+    desktop_pin_code_set(&app->pincode_buffer);
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_single_vibro);
@@ -47,8 +49,6 @@ bool desktop_settings_scene_pin_setup_done_on_event(void* context, SceneManagerE
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SCENE_EVENT_DONE: {
-            memcpy(&app->desktop->settings.pin_code, &app->pincode_buffer, sizeof(PinCode));
-            app->save_settings = true;
             bool scene_found = false;
             scene_found = scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, DesktopSettingsAppScenePinMenu);

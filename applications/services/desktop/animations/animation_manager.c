@@ -6,7 +6,6 @@
 #include <power/power_service/power.h>
 #include <storage/storage.h>
 #include <assets_icons.h>
-#include <assets_dolphin_internal.h>
 
 #include "views/bubble_animation_view.h"
 #include "views/one_shot_animation_view.h"
@@ -68,8 +67,7 @@ static void animation_manager_start_new_idle(AnimationManager* animation_manager
 static bool animation_manager_check_blocking(AnimationManager* animation_manager);
 static bool animation_manager_is_valid_idle_animation(
     const StorageAnimationManifestInfo* info,
-    const DolphinStats* stats,
-    const bool unlock);
+    const DolphinStats* stats);
 static void animation_manager_switch_to_one_shot_view(AnimationManager* animation_manager);
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager);
 
@@ -99,7 +97,7 @@ void animation_manager_set_interact_callback(
     animation_manager->interact_callback = callback;
 }
 
-static void animation_manager_check_blocking_callback(const void* message, void* context) {
+static void animation_manager_storage_callback(const void* message, void* context) {
     const StorageEvent* storage_event = message;
 
     switch(storage_event->type) {
@@ -113,6 +111,22 @@ static void animation_manager_check_blocking_callback(const void* message, void*
         }
         break;
 
+    default:
+        break;
+    }
+}
+
+static void animation_manager_dolphin_callback(const void* message, void* context) {
+    const DolphinPubsubEvent* dolphin_event = message;
+
+    switch(*dolphin_event) {
+    case DolphinPubsubEventUpdate:
+        furi_assert(context);
+        AnimationManager* animation_manager = context;
+        if(animation_manager->check_blocking_callback) {
+            animation_manager->check_blocking_callback(animation_manager->context);
+        }
+        break;
     default:
         break;
     }
@@ -148,8 +162,7 @@ void animation_manager_check_blocking_process(AnimationManager* animation_manage
 
             const StorageAnimationManifestInfo* manifest_info =
                 animation_storage_get_meta(animation_manager->current_animation);
-            bool valid = animation_manager_is_valid_idle_animation(
-                manifest_info, &stats, momentum_settings.unlock_anims);
+            bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
 
             if(!valid) {
                 animation_manager_start_new_idle(animation_manager);
@@ -299,12 +312,12 @@ AnimationManager* animation_manager_alloc(void) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     animation_manager->pubsub_subscription_storage = furi_pubsub_subscribe(
-        storage_get_pubsub(storage), animation_manager_check_blocking_callback, animation_manager);
+        storage_get_pubsub(storage), animation_manager_storage_callback, animation_manager);
     furi_record_close(RECORD_STORAGE);
 
     Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
     animation_manager->pubsub_subscription_dolphin = furi_pubsub_subscribe(
-        dolphin_get_pubsub(dolphin), animation_manager_check_blocking_callback, animation_manager);
+        dolphin_get_pubsub(dolphin), animation_manager_dolphin_callback, animation_manager);
     furi_record_close(RECORD_DOLPHIN);
 
     animation_manager->blocking_shown_sd_ok = true;
@@ -343,8 +356,7 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager) 
 
 static bool animation_manager_is_valid_idle_animation(
     const StorageAnimationManifestInfo* info,
-    const DolphinStats* stats,
-    const bool unlock) {
+    const DolphinStats* stats) {
     furi_assert(info);
     furi_assert(info->name);
 
@@ -364,7 +376,7 @@ static bool animation_manager_is_valid_idle_animation(
 
         result = (sd_status == FSE_NOT_READY);
     }
-    if(!unlock) {
+    if(!momentum_settings.unlock_anims) {
         if((stats->butthurt < info->min_butthurt) || (stats->butthurt > info->max_butthurt)) {
             result = false;
         }
@@ -394,13 +406,12 @@ static StorageAnimation*
     uint32_t whole_weight = 0;
 
     // Filter valid animations
-    bool unlock = momentum_settings.unlock_anims;
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationManifestInfo* manifest_info =
             animation_storage_get_meta(storage_animation);
-        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats, unlock);
+        bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
 
         if(strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) == 0) {
             // Dont pick error anim randomly
@@ -546,8 +557,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                 furi_record_close(RECORD_DOLPHIN);
                 const StorageAnimationManifestInfo* manifest_info =
                     animation_storage_get_meta(restore_animation);
-                bool valid = animation_manager_is_valid_idle_animation(
-                    manifest_info, &stats, momentum_settings.unlock_anims);
+                bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
                 // Restore only if anim is valid and not the error anim
                 if(valid && strcmp(manifest_info->name, HARDCODED_ANIMATION_NAME) != 0) {
                     animation_manager_replace_current_animation(
@@ -559,11 +569,10 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                             animation_manager->idle_animation_timer,
                             animation_manager->freezed_animation_time_left);
                     } else {
-                        const BubbleAnimation* bubble_animation =
-                            animation_storage_get_bubble_animation(
-                                animation_manager->current_animation);
+                        const BubbleAnimation* animation = animation_storage_get_bubble_animation(
+                            animation_manager->current_animation);
                         int32_t duration = (momentum_settings.cycle_anims == 0) ?
-                                               (bubble_animation->duration) :
+                                               (animation->duration) :
                                                (momentum_settings.cycle_anims);
                         furi_timer_start(
                             animation_manager->idle_animation_timer,

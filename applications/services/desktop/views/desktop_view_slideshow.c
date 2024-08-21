@@ -13,6 +13,7 @@ struct DesktopSlideshowView {
     DesktopSlideshowViewCallback callback;
     void* context;
     FuriTimer* timer;
+
     FuriTimer* auto_timer;
 };
 

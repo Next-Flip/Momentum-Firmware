@@ -6,16 +6,15 @@ static void
     desktop_settings_scene_keybinds_action_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
 
-    if(desktop_settings_app_set_keybind(app, (const char*)index)) {
-        scene_manager_search_and_switch_to_previous_scene(
-            app->scene_manager, DesktopSettingsAppSceneStart);
-    }
+    desktop_settings_app_set_keybind(app, (const char*)index);
+    scene_manager_search_and_switch_to_previous_scene(
+        app->scene_manager, DesktopSettingsAppSceneStart);
 }
 
 void desktop_settings_scene_keybinds_action_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     Submenu* submenu = app->submenu;
-    const char* keybind = desktop_settings_app_get_keybind(app);
+    FuriString* keybind = desktop_settings_app_get_keybind(app);
     submenu_reset(submenu);
 
     uint32_t pre_select_item = 0;
@@ -32,7 +31,7 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
                 app);
 
             // Select keybind item in submenu
-            if(!strncmp(FLIPPER_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
+            if(furi_string_equal(keybind, FLIPPER_APPS[i].name)) {
                 pre_select_item = (uint32_t)FLIPPER_APPS[i].name;
             }
         }
@@ -45,7 +44,7 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
                 app);
 
             // Select keybind item in submenu
-            if(!strncmp(FLIPPER_EXTERNAL_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
+            if(furi_string_equal(keybind, FLIPPER_EXTERNAL_APPS[i].name)) {
                 pre_select_item = (uint32_t)FLIPPER_EXTERNAL_APPS[i].name;
             }
         }
@@ -59,7 +58,7 @@ void desktop_settings_scene_keybinds_action_on_enter(void* context) {
                 app);
 
             // Select keybind item in submenu
-            if(!strncmp(EXTRA_KEYBINDS[i], keybind, MAX_KEYBIND_LENGTH)) {
+            if(furi_string_equal(keybind, EXTRA_KEYBINDS[i])) {
                 pre_select_item = (uint32_t)EXTRA_KEYBINDS[i];
             }
         }

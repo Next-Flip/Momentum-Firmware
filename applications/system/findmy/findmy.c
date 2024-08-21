@@ -20,7 +20,6 @@ static FindMy* findmy_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
 
     app->scene_manager = scene_manager_alloc(&findmy_scene_handlers, app);
 

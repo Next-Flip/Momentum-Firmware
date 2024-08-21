@@ -8,7 +8,8 @@ static bool momentum_app_custom_event_callback(void* context, uint32_t event) {
 
 void callback_reboot(void* context) {
     UNUSED(context);
-    power_reboot(PowerBootModeNormal);
+    Power* power = furi_record_open(RECORD_POWER);
+    power_reboot(power, PowerBootModeNormal);
 }
 
 bool momentum_app_apply(MomentumApp* app) {
@@ -24,6 +25,10 @@ bool momentum_app_apply(MomentumApp* app) {
         }
         file_stream_close(stream);
         stream_free(stream);
+    }
+
+    if(app->save_desktop) {
+        desktop_api_set_settings(app->desktop, &app->desktop_settings);
     }
 
     if(app->save_subghz_freqs) {
@@ -97,7 +102,7 @@ bool momentum_app_apply(MomentumApp* app) {
         }
     }
 
-    if(app->save_level || app->save_angry) {
+    if(app->save_dolphin) {
         Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
         if(app->save_level) {
             int32_t xp = app->dolphin_level > 1 ? DOLPHIN_LEVELS[app->dolphin_level - 2] : 0;
@@ -107,7 +112,8 @@ bool momentum_app_apply(MomentumApp* app) {
             dolphin->state->data.butthurt = app->dolphin_angry;
         }
         dolphin->state->dirty = true;
-        dolphin_state_save(dolphin->state);
+        dolphin_flush(dolphin);
+        dolphin_reload_state(dolphin);
         furi_record_close(RECORD_DOLPHIN);
     }
 
@@ -180,6 +186,7 @@ static void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* label, 
 MomentumApp* momentum_app_alloc() {
     MomentumApp* app = malloc(sizeof(MomentumApp));
     app->gui = furi_record_open(RECORD_GUI);
+    app->desktop = furi_record_open(RECORD_DESKTOP);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->expansion = furi_record_open(RECORD_EXPANSION);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
@@ -187,7 +194,7 @@ MomentumApp* momentum_app_alloc() {
     // View Dispatcher and Scene Manager
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&momentum_app_scene_handlers, app);
-    view_dispatcher_enable_queue(app->view_dispatcher);
+
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
     view_dispatcher_set_custom_event_callback(
@@ -215,6 +222,12 @@ MomentumApp* momentum_app_alloc() {
     app->byte_input = byte_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, MomentumAppViewByteInput, byte_input_get_view(app->byte_input));
+
+    app->number_input = number_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        MomentumAppViewNumberInput,
+        number_input_get_view(app->number_input));
 
     app->popup = popup_alloc();
     view_dispatcher_add_view(
@@ -275,6 +288,8 @@ MomentumApp* momentum_app_alloc() {
                     furi_string_set(line, "125 kHz RFID");
                 } else if(furi_string_equal(line, "SubGHz")) {
                     furi_string_set(line, "Sub-GHz");
+                } else if(furi_string_equal(line, "Xtreme")) {
+                    furi_string_set(line, "Momentum");
                 }
             }
             if(furi_string_start_with(line, "/")) {
@@ -321,6 +336,8 @@ MomentumApp* momentum_app_alloc() {
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
+
+    desktop_api_get_settings(app->desktop, &app->desktop_settings);
 
     FlipperFormat* file = flipper_format_file_alloc(storage);
     FrequencyList_init(app->subghz_static_freqs);
@@ -410,6 +427,8 @@ void momentum_app_free(MomentumApp* app) {
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewByteInput);
     byte_input_free(app->byte_input);
+    view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewNumberInput);
+    number_input_free(app->number_input);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewPopup);
     popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewDialogEx);
@@ -445,6 +464,7 @@ void momentum_app_free(MomentumApp* app) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_DESKTOP);
     furi_record_close(RECORD_GUI);
     free(app);
 }

@@ -2,9 +2,11 @@
 #include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
 
+#include <desktop/desktop.h>
+#include <desktop/views/desktop_view_pin_input.h>
+
 #include "desktop_settings_app.h"
 #include "scenes/desktop_settings_scene.h"
-#include <desktop/views/desktop_view_pin_input.h>
 
 const char* EXTRA_KEYBINDS[] = {
     "Apps Menu",
@@ -31,51 +33,30 @@ static bool desktop_settings_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-const char* desktop_settings_app_get_keybind(DesktopSettingsApp* app) {
-    KeybindType type =
+FuriString* desktop_settings_app_get_keybind(DesktopSettingsApp* app) {
+    DesktopKeybindType type =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsType);
-    KeybindKey key =
+    DesktopKeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
-    return app->desktop->keybinds[type][key].data;
+    return app->keybinds[type][key];
 }
 
-bool desktop_settings_app_set_keybind(DesktopSettingsApp* app, const char* value) {
-    if(strnlen(value, MAX_KEYBIND_LENGTH) == MAX_KEYBIND_LENGTH) {
-        // No NULL terminator, value is too long for keybind
-        DialogMessage* message = dialog_message_alloc();
-        dialog_message_set_header(message, "Keybind Too Long", 64, 0, AlignCenter, AlignTop);
-        dialog_message_set_buttons(message, NULL, "Ok", NULL);
-        dialog_message_set_text(
-            message,
-            "Keybinds are max 63 chars.\n"
-            "Shorten the file path or\n"
-            "choose something else.",
-            64,
-            32,
-            AlignCenter,
-            AlignCenter);
-        dialog_message_show(app->dialogs, message);
-        dialog_message_free(message);
-        return false;
-    }
-    KeybindType type =
+void desktop_settings_app_set_keybind(DesktopSettingsApp* app, const char* value) {
+    DesktopKeybindType type =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsType);
-    KeybindKey key =
+    DesktopKeybindKey key =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneKeybindsKey);
-    strlcpy(app->desktop->keybinds[type][key].data, value, MAX_KEYBIND_LENGTH);
-    DESKTOP_KEYBINDS_SAVE(&app->desktop->keybinds, sizeof(app->desktop->keybinds));
-    return true;
+    furi_string_set(app->keybinds[type][key], value);
+    app->save_keybinds = true;
 }
 
 DesktopSettingsApp* desktop_settings_app_alloc(void) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->desktop = furi_record_open(RECORD_DESKTOP);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&desktop_settings_scene_handlers, app);
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
     view_dispatcher_set_custom_event_callback(
@@ -140,13 +121,16 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
     scene_manager_free(app->scene_manager);
     // Records
     furi_record_close(RECORD_DIALOGS);
-    furi_record_close(RECORD_DESKTOP);
     furi_record_close(RECORD_GUI);
     free(app);
 }
 
 extern int32_t desktop_settings_app(void* p) {
     DesktopSettingsApp* app = desktop_settings_app_alloc();
+    Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+
+    desktop_api_get_settings(desktop, &app->settings);
+    desktop_keybinds_load(desktop, &app->keybinds);
 
     if(p && (strcmp(p, DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG) == 0)) {
         scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinSetupHowto);
@@ -156,9 +140,13 @@ extern int32_t desktop_settings_app(void* p) {
 
     view_dispatcher_run(app->view_dispatcher);
 
-    if(app->save_settings) {
-        DESKTOP_SETTINGS_SAVE(&app->desktop->settings);
+    if(app->save_keybinds) {
+        desktop_keybinds_save(desktop, &app->keybinds);
     }
+    desktop_keybinds_free(&app->keybinds);
+    desktop_api_set_settings(desktop, &app->settings);
+    furi_record_close(RECORD_DESKTOP);
+
     desktop_settings_app_free(app);
 
     return 0;
