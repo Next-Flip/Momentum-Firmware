@@ -33,6 +33,7 @@
   - AirMouse: Fix compatibility with new firmwares (by @ginkage)
   - Flizzer Tracker: Fix app not responding to keypresses (by @LTVA1)
   - UHF RFID: Bugfixes, some refactoring, write modes (by @frux-c)
+  - Authenticator: Fix BT keys filenames format (by @akopachov)
   - UL: UART Terminal: Configurable CRLF or newline mode (by @xMasterX)
   - UL: SubGHz Bruteforcer: App refactoring and code documentation (by @derskythe)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
