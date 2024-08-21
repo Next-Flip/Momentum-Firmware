@@ -426,7 +426,7 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
 
     // Configure radio
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_650khz_async_regs);
+    furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_270khz_async_regs);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
@@ -959,9 +959,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
         subghz_cli_radio_device_power_off();
         return;
     }
-
-    // TODO
-    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
+    if(!furi_hal_region_is_frequency_allowed(frequency)) {
         printf(
             "In your settings/region, only reception on this frequency (%lu) is allowed,\r\n"
             "the actual operation of the application is not possible\r\n ",
