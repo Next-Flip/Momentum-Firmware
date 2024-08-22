@@ -93,7 +93,7 @@ bool momentum_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexShowMomentumIntro: {
             for(int i = 0; i < 10; i++) {
                 if(storage_common_copy(
-                       app->storage, EXT_PATH("dolphin/firstboot.bin"), EXT_PATH(".slideshow"))) {
+                       app->storage, EXT_PATH("dolphin/firstboot.bin"), SLIDESHOW_FS_PATH)) {
                     app->show_slideshow = true;
                     momentum_app_apply(app);
                     break;

@@ -27,6 +27,7 @@
 #include <dolphin/dolphin_i.h>
 #include <dolphin/helpers/dolphin_state.h>
 #include <momentum/settings.h>
+#include <desktop/views/desktop_view_slideshow.h>
 
 #include <applications.h>
 #include <assets_icons.h>
