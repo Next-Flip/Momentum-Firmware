@@ -51,7 +51,9 @@
   - Big cleanup of all services and settings handling, refactor lots old code (by @Willy-JL)
   - Update all settings paths to use equivalents like OFW or UL for better compatibility (by @Willy-JL)
 - Updater: Change to `resources.tar.gz` filename to avoid confusion with update `.tgz` (by @Willy-JL)
-- OFW: NFC: Refactor detected protocols list (by @Astrrra)
+- NFC:
+  - Updated MFC dict, +5 from RRG proxmark3, +3 from Mifare Classic Tool, +26 from Stepzor11 repo
+  - OFW: Refactor detected protocols list (by @Astrrra)
 - Furi:
   - OFW: FuriEventLoop Pt.2 with `Mutex` `Semaphore` `StreamBuffer`, refactor Power service (by @gsurkov)
   - OFW: Update string documentation (by @skotopes)
@@ -76,3 +78,4 @@
 ### Removed:
 - OFW: Storage: Remove LFS / LittleFS Internal Storage, all config on SD Card (by @skotopes & @gsurkov)
 - Storage: Remove `CFG_PATH()` and `.config/` folder, `INT_PATH()` is now on SD card at `.int/` due to LFS removal and should be used instead (by @Willy-JL)
+- NFC: Removed abandoned unverified `bmp_sorted` and `icbmp_sorted` proxmark3 key dict sections
