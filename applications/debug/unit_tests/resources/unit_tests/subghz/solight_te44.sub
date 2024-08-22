@@ -1,0 +1,16 @@
+Filetype: Flipper SubGhz Key File
+Version: 1
+Frequency: 433920000
+Preset: FuriHalSubGhzPresetOok650Async
+Latitute: nan
+Longitude: nan
+Protocol: Solight TE44
+Id: 148
+Bit: 36
+Data: 00 00 00 09 49 11 5F E9
+Batt: 0
+Hum: 255
+Ts: 1723592365
+Ch: 2
+Btn: 255
+Temp: 27.700001
