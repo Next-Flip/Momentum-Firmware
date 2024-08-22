@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gui/gui.h>
+#include <storage/storage.h>
 #include <desktop/desktop.h>
 #include <dialogs/dialogs.h>
 #include <expansion/expansion.h>
@@ -43,6 +44,7 @@ ARRAY_DEF(CharList, char*)
 
 typedef struct {
     Gui* gui;
+    Storage* storage;
     Desktop* desktop;
     DialogsApp* dialogs;
     Expansion* expansion;
@@ -104,3 +106,6 @@ typedef enum {
 } MomentumAppView;
 
 bool momentum_app_apply(MomentumApp* app);
+
+void momentum_app_load_mainmenu_apps(MomentumApp* app);
+void momentum_app_empty_mainmenu_apps(MomentumApp* app);

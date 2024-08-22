@@ -31,10 +31,12 @@ bool momentum_app_scene_interface_mainmenu_reset_on_event(void* context, SceneMa
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DialogExResultRight:
-            storage_common_remove(furi_record_open(RECORD_STORAGE), MAINMENU_APPS_PATH);
-            furi_record_close(RECORD_STORAGE);
+            storage_common_remove(app->storage, MAINMENU_APPS_PATH);
+            momentum_app_empty_mainmenu_apps(app);
+            momentum_app_load_mainmenu_apps(app);
+            app->mainmenu_app_index = 0;
             app->save_mainmenu_apps = false;
-            break;
+            /* fall through */
         case DialogExResultLeft:
             scene_manager_previous_scene(app->scene_manager);
             break;

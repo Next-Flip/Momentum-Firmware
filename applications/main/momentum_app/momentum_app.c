@@ -13,10 +13,8 @@ void callback_reboot(void* context) {
 }
 
 bool momentum_app_apply(MomentumApp* app) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-
     if(app->save_mainmenu_apps) {
-        Stream* stream = file_stream_alloc(storage);
+        Stream* stream = file_stream_alloc(app->storage);
         if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
             stream_write_format(stream, "MenuAppList Version %u\n", 1);
             for(size_t i = 0; i < CharList_size(app->mainmenu_app_exes); i++) {
@@ -32,7 +30,7 @@ bool momentum_app_apply(MomentumApp* app) {
     }
 
     if(app->save_subghz_freqs) {
-        FlipperFormat* file = flipper_format_file_alloc(storage);
+        FlipperFormat* file = flipper_format_file_alloc(app->storage);
         do {
             FrequencyList_it_t it;
             if(!flipper_format_file_open_always(file, EXT_PATH("subghz/assets/setting_user")))
@@ -68,7 +66,7 @@ bool momentum_app_apply(MomentumApp* app) {
     }
 
     if(app->save_subghz) {
-        FlipperFormat* file = flipper_format_file_alloc(storage);
+        FlipperFormat* file = flipper_format_file_alloc(app->storage);
         do {
             if(!flipper_format_file_open_always(file, "/ext/subghz/assets/extend_range.txt"))
                 break;
@@ -87,9 +85,9 @@ bool momentum_app_apply(MomentumApp* app) {
 
     if(app->save_name) {
         if(strcmp(app->device_name, "") == 0) {
-            storage_simply_remove(storage, NAMESPOOF_PATH);
+            storage_simply_remove(app->storage, NAMESPOOF_PATH);
         } else {
-            FlipperFormat* file = flipper_format_file_alloc(storage);
+            FlipperFormat* file = flipper_format_file_alloc(app->storage);
 
             do {
                 if(!flipper_format_file_open_always(file, NAMESPOOF_PATH)) break;
@@ -147,8 +145,6 @@ bool momentum_app_apply(MomentumApp* app) {
         view_dispatcher_switch_to_view(app->view_dispatcher, MomentumAppViewPopup);
         asset_packs_init();
     }
-
-    furi_record_close(RECORD_STORAGE);
     return false;
 }
 
@@ -183,9 +179,91 @@ static void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* label, 
     CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(label)));
 }
 
+void momentum_app_load_mainmenu_apps(MomentumApp* app) {
+    // Loading logic mimics applications/services/loader/loader_menu.c
+    Stream* stream = file_stream_alloc(app->storage);
+    FuriString* line = furi_string_alloc();
+    FuriString* label = furi_string_alloc();
+    uint32_t version;
+    uint8_t* unused_icon = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
+    if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
+       stream_read_line(stream, line) &&
+       sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
+       version <= 1) {
+        while(stream_read_line(stream, line)) {
+            furi_string_trim(line);
+            if(version == 0) {
+                if(furi_string_equal(line, "RFID")) {
+                    furi_string_set(line, "125 kHz RFID");
+                } else if(furi_string_equal(line, "SubGHz")) {
+                    furi_string_set(line, "Sub-GHz");
+                } else if(furi_string_equal(line, "Xtreme")) {
+                    furi_string_set(line, "Momentum");
+                }
+            }
+            if(furi_string_start_with(line, "/")) {
+                if(!flipper_application_load_name_and_icon(
+                       line, app->storage, &unused_icon, label)) {
+                    furi_string_reset(label);
+                }
+            } else {
+                furi_string_reset(label);
+                bool found = false;
+                for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
+                        furi_string_set(label, FLIPPER_APPS[i].name);
+                        found = true;
+                    }
+                }
+                for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
+                        furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
+                        found = true;
+                    }
+                }
+            }
+            if(furi_string_empty(label)) {
+                // Ignore unknown apps just like in main menu, prevents "ghost" apps when saving
+                continue;
+            }
+            momentum_app_push_mainmenu_app(app, label, line);
+        }
+    } else {
+        for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+            furi_string_set(label, FLIPPER_APPS[i].name);
+            furi_string_set(line, FLIPPER_APPS[i].name);
+            momentum_app_push_mainmenu_app(app, label, line);
+        }
+        // Until count - 1 because last app is hardcoded below
+        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
+            furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
+            furi_string_set(line, FLIPPER_EXTERNAL_APPS[i].name);
+            momentum_app_push_mainmenu_app(app, label, line);
+        }
+    }
+    free(unused_icon);
+    furi_string_free(label);
+    furi_string_free(line);
+    file_stream_close(stream);
+    stream_free(stream);
+}
+
+void momentum_app_empty_mainmenu_apps(MomentumApp* app) {
+    CharList_it_t it;
+    for(CharList_it(it, app->mainmenu_app_labels); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_reset(app->mainmenu_app_labels);
+    for(CharList_it(it, app->mainmenu_app_exes); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_reset(app->mainmenu_app_exes);
+}
+
 MomentumApp* momentum_app_alloc() {
     MomentumApp* app = malloc(sizeof(MomentumApp));
     app->gui = furi_record_open(RECORD_GUI);
+    app->storage = furi_record_open(RECORD_STORAGE);
     app->desktop = furi_record_open(RECORD_DESKTOP);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->expansion = furi_record_open(RECORD_EXPANSION);
@@ -241,8 +319,7 @@ MomentumApp* momentum_app_alloc() {
 
     app->asset_pack_index = 0;
     CharList_init(app->asset_pack_names);
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* folder = storage_file_alloc(storage);
+    File* folder = storage_file_alloc(app->storage);
     FileInfo info;
     char* name = malloc(ASSET_PACKS_NAME_LEN);
     if(storage_dir_open(folder, ASSET_PACKS_PATH)) {
@@ -271,75 +348,11 @@ MomentumApp* momentum_app_alloc() {
 
     CharList_init(app->mainmenu_app_labels);
     CharList_init(app->mainmenu_app_exes);
-    // Loading logic mimics applications/services/loader/loader_menu.c
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
-    FuriString* label = furi_string_alloc();
-    uint32_t version;
-    uint8_t* unused_icon = malloc(FAP_MANIFEST_MAX_ICON_SIZE);
-    if(file_stream_open(stream, MAINMENU_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
-       stream_read_line(stream, line) &&
-       sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) == 1 &&
-       version <= 1) {
-        while(stream_read_line(stream, line)) {
-            furi_string_trim(line);
-            if(version == 0) {
-                if(furi_string_equal(line, "RFID")) {
-                    furi_string_set(line, "125 kHz RFID");
-                } else if(furi_string_equal(line, "SubGHz")) {
-                    furi_string_set(line, "Sub-GHz");
-                } else if(furi_string_equal(line, "Xtreme")) {
-                    furi_string_set(line, "Momentum");
-                }
-            }
-            if(furi_string_start_with(line, "/")) {
-                if(!flipper_application_load_name_and_icon(line, storage, &unused_icon, label)) {
-                    furi_string_reset(label);
-                }
-            } else {
-                furi_string_reset(label);
-                bool found = false;
-                for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
-                        furi_string_set(label, FLIPPER_APPS[i].name);
-                        found = true;
-                    }
-                }
-                for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
-                        furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
-                        found = true;
-                    }
-                }
-            }
-            if(furi_string_empty(label)) {
-                // Ignore unknown apps just like in main menu, prevents "ghost" apps when saving
-                continue;
-            }
-            momentum_app_push_mainmenu_app(app, label, line);
-        }
-    } else {
-        for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-            furi_string_set(label, FLIPPER_APPS[i].name);
-            furi_string_set(line, FLIPPER_APPS[i].name);
-            momentum_app_push_mainmenu_app(app, label, line);
-        }
-        // Until count - 1 because last app is hardcoded below
-        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
-            furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
-            furi_string_set(line, FLIPPER_EXTERNAL_APPS[i].name);
-            momentum_app_push_mainmenu_app(app, label, line);
-        }
-    }
-    free(unused_icon);
-    furi_string_free(label);
-    furi_string_free(line);
-    file_stream_close(stream);
-    stream_free(stream);
+    momentum_app_load_mainmenu_apps(app);
 
     desktop_api_get_settings(app->desktop, &app->desktop_settings);
 
-    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FlipperFormat* file = flipper_format_file_alloc(app->storage);
     FrequencyList_init(app->subghz_static_freqs);
     FrequencyList_init(app->subghz_hopper_freqs);
     app->subghz_use_defaults = true;
@@ -365,13 +378,12 @@ MomentumApp* momentum_app_alloc() {
     } while(false);
     flipper_format_free(file);
 
-    file = flipper_format_file_alloc(storage);
+    file = flipper_format_file_alloc(app->storage);
     if(flipper_format_file_open_existing(file, "/ext/subghz/assets/extend_range.txt")) {
         flipper_format_read_bool(file, "use_ext_range_at_own_risk", &app->subghz_extend, 1);
         flipper_format_read_bool(file, "ignore_default_tx_region", &app->subghz_bypass, 1);
     }
     flipper_format_free(file);
-    furi_record_close(RECORD_STORAGE);
 
     strlcpy(app->device_name, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 
@@ -446,13 +458,8 @@ void momentum_app_free(MomentumApp* app) {
     }
     CharList_clear(app->asset_pack_names);
 
-    for(CharList_it(it, app->mainmenu_app_labels); !CharList_end_p(it); CharList_next(it)) {
-        free(*CharList_cref(it));
-    }
+    momentum_app_empty_mainmenu_apps(app);
     CharList_clear(app->mainmenu_app_labels);
-    for(CharList_it(it, app->mainmenu_app_exes); !CharList_end_p(it); CharList_next(it)) {
-        free(*CharList_cref(it));
-    }
     CharList_clear(app->mainmenu_app_exes);
 
     FrequencyList_clear(app->subghz_static_freqs);
@@ -465,6 +472,7 @@ void momentum_app_free(MomentumApp* app) {
     furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_DESKTOP);
+    furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
     free(app);
 }

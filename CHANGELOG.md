@@ -62,6 +62,7 @@
   - Fix Dark Mode after XOR canvas color, like in NFC dict attack (by @Willy-JL)
   - OFW: Make file extensions case-insensitive (by @gsurkov)
 - File Browser: Fix race condition for switch folder and refresh (by @Willy-JL)
+- MNTM Settings: Fix UI desync after reset mainmenu (by @Willy-JL)
 - NFC:
   - OFW: Fix plantain balance string (by @Astrrra)
   - OFW: Now fifo size in ST25 chip is calculated properly (by @RebornedBrain)
