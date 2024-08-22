@@ -23,7 +23,7 @@ static void
     DesktopSettingsApp* app = context;
     scene_manager_set_scene_state(
         app->scene_manager, DesktopSettingsAppSceneKeybindsActionType, index);
-    const char* keybind = desktop_settings_app_get_keybind(app);
+    FuriString* keybind = desktop_settings_app_get_keybind(app);
 
     switch(index) {
     case DesktopSettingsAppKeybindActionTypeMainApp:
@@ -55,24 +55,22 @@ static void
             .base_path = base_path,
         };
         FuriString* temp_path = furi_string_alloc_set_str(base_path);
-        if(storage_file_exists(furi_record_open(RECORD_STORAGE), keybind)) {
-            furi_string_set_str(temp_path, keybind);
+        if(storage_file_exists(furi_record_open(RECORD_STORAGE), furi_string_get_cstr(keybind))) {
+            furi_string_set(temp_path, keybind);
         }
         furi_record_close(RECORD_STORAGE);
         if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
-            if(desktop_settings_app_set_keybind(app, furi_string_get_cstr(temp_path))) {
-                scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, DesktopSettingsAppSceneStart);
-            }
+            desktop_settings_app_set_keybind(app, furi_string_get_cstr(temp_path));
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, DesktopSettingsAppSceneStart);
         }
         furi_string_free(temp_path);
         break;
     }
     case DesktopSettingsAppKeybindActionTypeRemoveKeybind:
-        if(desktop_settings_app_set_keybind(app, "")) {
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, DesktopSettingsAppSceneStart);
-        }
+        desktop_settings_app_set_keybind(app, "");
+        scene_manager_search_and_switch_to_previous_scene(
+            app->scene_manager, DesktopSettingsAppSceneStart);
         break;
     default:
         break;
@@ -82,7 +80,7 @@ static void
 void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     Submenu* submenu = app->submenu;
-    const char* keybind = desktop_settings_app_get_keybind(app);
+    FuriString* keybind = desktop_settings_app_get_keybind(app);
 
     submenu_add_item(
         submenu,
@@ -123,34 +121,32 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
         app->scene_manager, DesktopSettingsAppSceneKeybindsActionType);
     if(selected == DesktopSettingsAppKeybindActionTypeRemoveKeybind) {
         for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-            if(!strncmp(FLIPPER_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
+            if(furi_string_equal(keybind, FLIPPER_APPS[i].name)) {
                 selected = DesktopSettingsAppKeybindActionTypeMainApp;
             }
         }
         for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-            if(!strncmp(FLIPPER_EXTERNAL_APPS[i].name, keybind, MAX_KEYBIND_LENGTH)) {
+            if(furi_string_equal(keybind, FLIPPER_EXTERNAL_APPS[i].name)) {
                 selected = DesktopSettingsAppKeybindActionTypeMainApp;
             }
         }
 
-        if(storage_file_exists(furi_record_open(RECORD_STORAGE), keybind)) {
-            FuriString* tmp = furi_string_alloc_set(keybind);
-            if(furi_string_end_with_str(tmp, ".fap")) {
+        if(storage_file_exists(furi_record_open(RECORD_STORAGE), furi_string_get_cstr(keybind))) {
+            if(furi_string_end_with_str(keybind, ".fap")) {
                 selected = DesktopSettingsAppKeybindActionTypeExternalApp;
             } else {
                 selected = DesktopSettingsAppKeybindActionTypeOpenFile;
             }
-            furi_string_free(tmp);
         }
         furi_record_close(RECORD_STORAGE);
 
         for(size_t i = 0; i < EXTRA_KEYBINDS_COUNT; i++) {
-            if(!strncmp(EXTRA_KEYBINDS[i], keybind, MAX_KEYBIND_LENGTH)) {
+            if(furi_string_equal(keybind, EXTRA_KEYBINDS[i])) {
                 selected = DesktopSettingsAppKeybindActionTypeMoreActions;
             }
         }
 
-        if(!strnlen(keybind, MAX_KEYBIND_LENGTH)) {
+        if(furi_string_empty(keybind)) {
             selected = DesktopSettingsAppKeybindActionTypeRemoveKeybind;
         }
     }

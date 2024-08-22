@@ -45,6 +45,8 @@ void dolphin_upgrade_level(Dolphin* dolphin);
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin);
 
+void dolphin_reload_state(Dolphin* dolphin);
+
 #ifdef __cplusplus
 }
 #endif

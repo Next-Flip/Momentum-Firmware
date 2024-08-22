@@ -23,4 +23,4 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: "Check code formatting"
-        run: ./fbt lint lint_py
+        run: ./fbt lint_all

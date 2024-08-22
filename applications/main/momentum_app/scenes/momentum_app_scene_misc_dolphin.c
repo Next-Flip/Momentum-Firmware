@@ -18,6 +18,7 @@ static void momentum_app_scene_misc_dolphin_dolphin_level_changed(VariableItem* 
     snprintf(level_str, 4, "%li", app->dolphin_level);
     variable_item_set_current_value_text(item, level_str);
     app->save_level = true;
+    app->save_dolphin = true;
 }
 
 static void momentum_app_scene_misc_dolphin_dolphin_angry_changed(VariableItem* item) {
@@ -27,6 +28,7 @@ static void momentum_app_scene_misc_dolphin_dolphin_angry_changed(VariableItem* 
     snprintf(angry_str, 4, "%li", app->dolphin_angry);
     variable_item_set_current_value_text(item, angry_str);
     app->save_angry = true;
+    app->save_dolphin = true;
 }
 
 const char* const butthurt_timer_names[] = {
@@ -59,7 +61,7 @@ static void momentum_app_scene_misc_dolphin_butthurt_timer_changed(VariableItem*
     variable_item_set_current_value_text(item, butthurt_timer_names[index]);
     momentum_settings.butthurt_timer = butthurt_timer_values[index];
     app->save_settings = true;
-    app->require_reboot = true;
+    app->save_dolphin = true;
 }
 
 void momentum_app_scene_misc_dolphin_on_enter(void* context) {

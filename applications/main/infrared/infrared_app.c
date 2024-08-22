@@ -150,7 +150,6 @@ static InfraredApp* infrared_alloc(void) {
     infrared->gui = furi_record_open(RECORD_GUI);
 
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
-    view_dispatcher_enable_queue(view_dispatcher);
     view_dispatcher_set_event_callback_context(view_dispatcher, infrared);
     view_dispatcher_set_custom_event_callback(view_dispatcher, infrared_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(view_dispatcher, infrared_back_event_callback);
@@ -476,6 +475,7 @@ static void infrared_load_settings(InfraredApp* infrared) {
            INFRARED_SETTINGS_MAGIC,
            INFRARED_SETTINGS_VERSION)) {
         FURI_LOG_D(TAG, "Failed to load settings, using defaults");
+        // infrared_save_settings(infrared);
     }
 
     infrared_set_tx_pin(infrared, settings.tx_pin);

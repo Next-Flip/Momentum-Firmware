@@ -14,20 +14,32 @@ void desktop_settings_scene_keybinds_key_on_enter(void* context) {
     submenu_reset(submenu);
 
     submenu_add_item(
-        submenu, "Up", KeybindKeyUp, desktop_settings_scene_keybinds_key_submenu_callback, app);
-
-    submenu_add_item(
-        submenu, "Down", KeybindKeyDown, desktop_settings_scene_keybinds_key_submenu_callback, app);
-
-    submenu_add_item(
         submenu,
-        "Right",
-        KeybindKeyRight,
+        "Up",
+        DesktopKeybindKeyUp,
         desktop_settings_scene_keybinds_key_submenu_callback,
         app);
 
     submenu_add_item(
-        submenu, "Left", KeybindKeyLeft, desktop_settings_scene_keybinds_key_submenu_callback, app);
+        submenu,
+        "Down",
+        DesktopKeybindKeyDown,
+        desktop_settings_scene_keybinds_key_submenu_callback,
+        app);
+
+    submenu_add_item(
+        submenu,
+        "Right",
+        DesktopKeybindKeyRight,
+        desktop_settings_scene_keybinds_key_submenu_callback,
+        app);
+
+    submenu_add_item(
+        submenu,
+        "Left",
+        DesktopKeybindKeyLeft,
+        desktop_settings_scene_keybinds_key_submenu_callback,
+        app);
 
     submenu_set_header(submenu, "Keybind key:");
 

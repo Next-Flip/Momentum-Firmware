@@ -1,0 +1,5 @@
+#pragma once
+
+#define DESKTOP_SETTINGS_FILE_NAME ".desktop.settings"
+
+#define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)

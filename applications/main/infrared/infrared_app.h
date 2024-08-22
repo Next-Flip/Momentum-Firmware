@@ -17,7 +17,7 @@ typedef struct InfraredApp InfraredApp;
 #include <storage/storage.h>
 #include <furi_hal_infrared.h>
 
-#define INFRARED_SETTINGS_PATH    EXT_PATH("infrared/.infrared.settings")
+#define INFRARED_SETTINGS_PATH    INT_PATH(".infrared.settings")
 #define INFRARED_SETTINGS_VERSION (1)
 #define INFRARED_SETTINGS_MAGIC   (0x1F)
 

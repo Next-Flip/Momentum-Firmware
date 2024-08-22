@@ -15,7 +15,7 @@
 #define TAG "BrowserWorker"
 
 #define ASSETS_DIR          "assets"
-#define BROWSER_ROOT        STORAGE_ANY_PATH_PREFIX
+#define BROWSER_ROOT        STORAGE_EXT_PATH_PREFIX
 #define FILE_NAME_LEN_MAX   254
 #define LONG_LOAD_THRESHOLD 100
 
@@ -56,6 +56,7 @@ struct BrowserWorker {
     BrowserWorkerLongLoadCallback long_load_cb;
 
     bool keep_selection;
+    FuriString* select_next;
     FuriString* passed_ext_filter;
 };
 
@@ -137,7 +138,7 @@ static bool browser_filter_by_name(BrowserWorker* browser, FuriString* name, boo
             if((furi_string_empty(ext)) || (furi_string_cmp_str(ext, "*") == 0)) {
                 return true;
             }
-            if(furi_string_end_with(name, ext)) {
+            if(furi_string_end_withi(name, ext)) {
                 return true;
             }
         }
@@ -452,7 +453,7 @@ static int32_t browser_worker(void* context) {
         }
 
         if(flags & WorkerEvtFolderRefresh) {
-            furi_string_set(filename, browser->path_next);
+            furi_string_set(filename, browser->select_next);
 
             bool is_root = browser_folder_check_and_switch(path);
 
@@ -505,6 +506,7 @@ BrowserWorker* file_browser_worker_alloc(
 
     browser_parse_ext_filter(browser->ext_filter, ext_filter);
     browser->passed_ext_filter = furi_string_alloc_set(ext_filter);
+    browser->select_next = furi_string_alloc();
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
 
@@ -533,6 +535,7 @@ void file_browser_worker_free(BrowserWorker* browser) {
     furi_string_free(browser->path_current);
     furi_string_free(browser->path_start);
     furi_string_free(browser->passed_ext_filter);
+    furi_string_free(browser->select_next);
 
     ExtFilterArray_clear(browser->ext_filter);
 
@@ -625,9 +628,9 @@ void file_browser_worker_folder_exit(BrowserWorker* browser) {
 void file_browser_worker_folder_refresh_sel(BrowserWorker* browser, const char* item_name) {
     furi_check(browser);
     if(item_name != NULL) {
-        furi_string_set(browser->path_next, item_name);
+        furi_string_set(browser->select_next, item_name);
     } else {
-        furi_string_reset(browser->path_next);
+        furi_string_reset(browser->select_next);
     }
     furi_thread_flags_set(furi_thread_get_id(browser->thread), WorkerEvtFolderRefresh);
 }
