@@ -7,6 +7,7 @@
 - Apps:
   - Tools: Key Copier (by @zinongli)
   - Sub-GHz: Music to Sub-GHz Radio (by @jamisonderek)
+- Sub-GHz: Added Solight TE44 weather station recognition (by @m7i-org)
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
