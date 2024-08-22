@@ -7,13 +7,14 @@
 - Apps:
   - Tools: Key Copier (by @zinongli)
   - Sub-GHz: Music to Sub-GHz Radio (by @jamisonderek)
-- Sub-GHz: Added Solight TE44 weather station recognition (by @m7i-org)
+- Sub-GHz:
+  - Added Solight TE44 weather station recognition (by @m7i-org)
+  - OFW: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)
   - On SD insert also load Momentum Settings, Asset Packs, FindMy Flipper, NameSpoof, RGB Backlight, Power, SubGHz options, and migrate files (by @Willy-JL)
 - Furi: Re-enabled `FURI_TRACE` since LFS removal frees DFU, will get better crash messages with source code path (by @Willy-JL)
-- OFW: Sub-GHz: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
 - OFW: RFID: Add GProxII support (by @BarTenderNZ)
 - OFW: iButton: Support ID writing (by @Astrrra)
 - OFW: GUI: Added a text input that only accepts full numbers (by @leedave)
