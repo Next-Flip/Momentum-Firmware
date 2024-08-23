@@ -51,6 +51,7 @@
   - Big cleanup of all services and settings handling, refactor lots old code (by @Willy-JL)
   - Update all settings paths to use equivalents like OFW or UL for better compatibility (by @Willy-JL)
 - Updater: Change to `resources.tar.gz` filename to avoid confusion with update `.tgz` (by @Willy-JL)
+- Storage: Improved handling of VirtualMount status and added logging (by @Willy-JL)
 - NFC:
   - Updated MFC dict, +5 from RRG proxmark3, +3 from Mifare Classic Tool, +26 from Stepzor11 repo
   - OFW: Refactor detected protocols list (by @Astrrra)

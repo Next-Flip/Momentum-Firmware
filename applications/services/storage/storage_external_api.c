@@ -1037,7 +1037,16 @@ FS_Error storage_virtual_init(Storage* storage, File* image) {
         }};
     S_API_MESSAGE(StorageCommandVirtualInit);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error error = S_RETURN_ERROR;
+
+    FURI_LOG_T(
+        TAG,
+        "VirtualInit %p - %p %s",
+        (void*)((uint32_t)image - SRAM_BASE),
+        (void*)(image->file_id - SRAM_BASE),
+        storage_error_get_desc(error));
+
+    return error;
 }
 
 FS_Error storage_virtual_format(Storage* storage) {
@@ -1047,7 +1056,11 @@ FS_Error storage_virtual_format(Storage* storage) {
     SAData data = {};
     S_API_MESSAGE(StorageCommandVirtualFormat);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error error = S_RETURN_ERROR;
+
+    FURI_LOG_T(TAG, "VirtualFormat %s", storage_error_get_desc(error));
+
+    return error;
 }
 
 FS_Error storage_virtual_mount(Storage* storage) {
@@ -1057,7 +1070,11 @@ FS_Error storage_virtual_mount(Storage* storage) {
     SAData data = {};
     S_API_MESSAGE(StorageCommandVirtualMount);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error error = S_RETURN_ERROR;
+
+    FURI_LOG_T(TAG, "VirtualMount %s", storage_error_get_desc(error));
+
+    return error;
 }
 
 FS_Error storage_virtual_unmount(Storage* storage) {
@@ -1067,7 +1084,11 @@ FS_Error storage_virtual_unmount(Storage* storage) {
     SAData data = {};
     S_API_MESSAGE(StorageCommandVirtualUnmount);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error error = S_RETURN_ERROR;
+
+    FURI_LOG_T(TAG, "VirtualUnmount %s", storage_error_get_desc(error));
+
+    return error;
 }
 
 FS_Error storage_virtual_quit(Storage* storage) {
@@ -1077,7 +1098,11 @@ FS_Error storage_virtual_quit(Storage* storage) {
     SAData data = {};
     S_API_MESSAGE(StorageCommandVirtualQuit);
     S_API_EPILOGUE;
-    return S_RETURN_ERROR;
+    FS_Error error = S_RETURN_ERROR;
+
+    FURI_LOG_T(TAG, "VirtualQuit %s", storage_error_get_desc(error));
+
+    return error;
 }
 
 File* storage_file_alloc(Storage* storage) {
