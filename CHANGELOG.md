@@ -67,10 +67,12 @@
   - OFW: Make file extensions case-insensitive (by @gsurkov)
 - File Browser: Fix race condition for switch folder and refresh (by @Willy-JL)
 - MNTM Settings: Fix UI desync after reset mainmenu (by @Willy-JL)
+- Sub-GHz:
+  - Make sure previous frequency is in list, fix UI desync (by @Willy-JL)
+  - OFW: Fix RPC status for ButtonRelease event (by @Skorpionm)
 - NFC:
   - OFW: Fix plantain balance string (by @Astrrra)
   - OFW: Now fifo size in ST25 chip is calculated properly (by @RebornedBrain)
-- OFW: Sub-GHz: Fix RPC status for ButtonRelease event (by @Skorpionm)
 - OFW: Infrared: Fix cumulative error in infrared signals (by @gsurkov)
 - OFW: Desktop: Separate callbacks for dolphin and storage subscriptions (by @skotopes)
 - OFW: FBT: Improved size validator for updater image (by @hedger)
