@@ -1,6 +1,6 @@
 ## Intro
 
-Asset Packs are an exclusive feature of Momentum Firmware that allows you to load custom Animation and Icon sets without recompiling the firmware or messing with manifest.txt files (as a user). Here you can find info on how to install Asset Packs and also how to make your own.
+Asset Packs are a feature exclusive to Momentum Firmware (and the outdated Xtreme Firmware) that allows you to load custom Animation and Icon sets without recompiling the firmware or messing with manifest.txt files (as a user). Here you can find info on how to install Asset Packs and also how to make your own.
 
 <br>
 
