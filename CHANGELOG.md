@@ -8,7 +8,7 @@
   - Tools: Key Copier (by @zinongli)
   - Sub-GHz: Music to Sub-GHz Radio (by @jamisonderek)
 - Sub-GHz:
-  - Added Solight TE44 weather station recognition (by @m7i-org)
+  - Added Solight TE44 weather station recognition (#183 by @m7i-org)
   - OFW: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
@@ -27,7 +27,7 @@
 - Apps:
   - BLE Spam: Can use 20ms advertising again with LFS gone (by @Willy-JL)
   - Seader: Remove some optional ASN1 fields, disable ASN1 debug (by @bettse)
-  - NFC Playlist: Fix extension check and error messages, bugfixes and improvements (by @acegoal07)
+  - NFC Playlist: Move playlist items, many bugfixes and improvements (by @acegoal07)
   - ESP Flasher: Update Marauder bins to v1.0.0 (by @justcallmekoko)
   - Sub-GHz Bruteforcer: Fix one/two byte text (by @Willy-JL)
   - Pokemon Trading: Reset trade without affecting current pokemon, major refactoring (by @kbembedded)
@@ -36,6 +36,8 @@
   - Flizzer Tracker: Fix app not responding to keypresses (by @LTVA1)
   - UHF RFID: Bugfixes, some refactoring, write modes (by @frux-c)
   - Authenticator: Fix BT keys filenames format (by @akopachov)
+  - Mifare Fuzzer: Fix crash on unsupported card type loaded (by @Willy-JL)
+  - Cross Remote: Use system provided NumberInput (by @leedave)
   - UL: UART Terminal: Configurable CRLF or newline mode (by @xMasterX)
   - UL: SubGHz Bruteforcer: App refactoring and code documentation (by @derskythe)
   - Various app fixes for `-Wundef` option (by @Willy-JL)
