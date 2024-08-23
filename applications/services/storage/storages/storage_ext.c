@@ -792,18 +792,26 @@ void storage_ext_init(StorageData* storage) {
 #endif
 }
 
+/*
+ * Virtual Mount API for Disk Images on /mnt
+ */
+
 #include "fatfs/ff_gen_drv.h"
 
 #define SCSI_BLOCK_SIZE (0x200UL)
 static File* mnt_image = NULL;
 static StorageData* mnt_image_storage = NULL;
-bool mnt_mounted = false;
-;
+// We use 3 states:
+// StorageStatusNotReady: no image provided yet
+// StorageStatusNotMounted: image provided but not mounted
+// StorageStatusOK: image provided and mounted
 
-FS_Error storage_process_virtual_init(StorageData* image_storage, File* image) {
-    if(mnt_image) return FSE_ALREADY_OPEN;
+FS_Error
+    storage_process_virtual_init(StorageData* storage, File* image, StorageData* image_storage) {
+    if(storage->status != StorageStatusNotReady) return FSE_ALREADY_OPEN;
     mnt_image = image;
     mnt_image_storage = image_storage;
+    storage->status = StorageStatusNotMounted;
     return FSE_OK;
 }
 
@@ -812,7 +820,8 @@ FS_Error storage_process_virtual_format(StorageData* storage) {
     UNUSED(storage);
     return FSE_NOT_READY;
 #else
-    if(!mnt_image) return FSE_NOT_READY;
+    if(storage->status == StorageStatusOK) return FSE_ALREADY_OPEN;
+    if(storage->status != StorageStatusNotMounted) return FSE_NOT_READY;
     SDData* sd_data = storage->data;
     uint8_t* work = malloc(_MAX_SS);
     SDError error = f_mkfs(sd_data->path, FM_ANY, 0, work, _MAX_SS);
@@ -837,29 +846,31 @@ FS_Error storage_process_virtual_format(StorageData* storage) {
 }
 
 FS_Error storage_process_virtual_mount(StorageData* storage) {
-    if(!mnt_image) return FSE_NOT_READY;
+    if(storage->status == StorageStatusOK) return FSE_ALREADY_OPEN;
+    if(storage->status != StorageStatusNotMounted) return FSE_NOT_READY;
     SDData* sd_data = storage->data;
     SDError error = f_mount(sd_data->fs, sd_data->path, 1);
     if(error == FR_NO_FILESYSTEM) return FSE_INVALID_PARAMETER;
     if(error != FR_OK) return FSE_INTERNAL;
-    mnt_mounted = true;
+    storage->status = StorageStatusOK;
     return FSE_OK;
 }
 
 FS_Error storage_process_virtual_unmount(StorageData* storage) {
-    if(!mnt_image) return FSE_NOT_READY;
+    if(storage->status != StorageStatusOK) return FSE_NOT_READY;
     SDData* sd_data = storage->data;
     SDError error = f_mount(0, sd_data->path, 0);
     if(error != FR_OK) return FSE_INTERNAL;
-    mnt_mounted = false;
+    storage->status = StorageStatusNotMounted;
     return FSE_OK;
 }
 
 FS_Error storage_process_virtual_quit(StorageData* storage) {
-    if(!mnt_image) return FSE_NOT_READY;
-    if(mnt_mounted) storage_process_virtual_unmount(storage);
+    if(storage->status == StorageStatusOK) storage_process_virtual_unmount(storage);
+    if(storage->status != StorageStatusNotMounted) return FSE_NOT_READY;
     mnt_image = NULL;
     mnt_image_storage = NULL;
+    storage->status = StorageStatusNotReady;
     return FSE_OK;
 }
 

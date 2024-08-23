@@ -793,7 +793,8 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
     case StorageCommandVirtualInit:
         File* image = message->data->virtualinit.image;
         StorageData* image_storage = get_storage_by_file(image, app->storage);
-        message->return_data->error_value = storage_process_virtual_init(image_storage, image);
+        message->return_data->error_value =
+            storage_process_virtual_init(&app->storage[ST_MNT], image, image_storage);
         break;
     case StorageCommandVirtualFormat:
         message->return_data->error_value = storage_process_virtual_format(&app->storage[ST_MNT]);
