@@ -3,6 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <dolphin/dolphin.h>
+#include <dolphin/helpers/dolphin_state.h>
 #include <power/power_service/power.h>
 #include <storage/storage.h>
 #include <assets_icons.h>
@@ -609,6 +610,14 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     furi_assert(animation_manager);
     furi_assert(!animation_manager->one_shot_view);
 
+    // For some reason, removing this unused check has a change to cause NULL pointer crashes
+    // Maybe getting stats has a side effect of synchronizing some state in dolphin service?
+    // Anyway dolphin_get_level() will always return between 1 and COUNT+1 (included) so can
+    // check this boundary to also prevent compiler optimizing it out (I don't trust GCC anymore)
+    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+    DolphinStats stats = dolphin_stats(dolphin);
+    furi_record_close(RECORD_DOLPHIN);
+
     animation_manager->one_shot_view = one_shot_view_alloc();
     one_shot_view_set_interact_callback(
         animation_manager->one_shot_view, animation_manager_interact_callback, animation_manager);
@@ -616,7 +625,11 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     View* next_view = one_shot_view_get_view(animation_manager->one_shot_view);
     view_stack_remove_view(animation_manager->view_stack, prev_view);
     view_stack_add_view(animation_manager->view_stack, next_view);
-    one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup_128x64);
+    if(stats.level > 0 && stats.level <= DOLPHIN_LEVEL_COUNT + 1) {
+        one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup_128x64);
+    } else {
+        furi_crash();
+    }
 }
 
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager) {
