@@ -10,6 +10,7 @@
 - Sub-GHz:
   - Added Solight TE44 weather station recognition (#183 by @m7i-org)
   - OFW: Add Dickert MAHS garage door protocol (by @OevreFlataeker)
+- MNTM Settings: Allow setting Dolphin XP manually (by @Willy-JL)
 - Settings: Show free flash amount in internal storage info (by @Willy-JL)
 - Services:
   - OFW: On SD insert load BT, Desktop, Dolphin, Expansion, Notification, Region files (by @gsurkov)

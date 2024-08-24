@@ -101,18 +101,15 @@ bool momentum_app_apply(MomentumApp* app) {
     }
 
     if(app->save_dolphin) {
-        Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-        if(app->save_level) {
-            int32_t xp = app->dolphin_level > 1 ? DOLPHIN_LEVELS[app->dolphin_level - 2] : 0;
-            dolphin->state->data.icounter = xp + 1;
+        if(app->save_xp) {
+            app->dolphin->state->data.icounter = app->dolphin_xp;
         }
         if(app->save_angry) {
-            dolphin->state->data.butthurt = app->dolphin_angry;
+            app->dolphin->state->data.butthurt = app->dolphin_angry;
         }
-        dolphin->state->dirty = true;
-        dolphin_flush(dolphin);
-        dolphin_reload_state(dolphin);
-        furi_record_close(RECORD_DOLPHIN);
+        app->dolphin->state->dirty = true;
+        dolphin_flush(app->dolphin);
+        dolphin_reload_state(app->dolphin);
     }
 
     if(app->save_backlight) {
@@ -265,6 +262,7 @@ MomentumApp* momentum_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->storage = furi_record_open(RECORD_STORAGE);
     app->desktop = furi_record_open(RECORD_DESKTOP);
+    app->dolphin = furi_record_open(RECORD_DOLPHIN);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->expansion = furi_record_open(RECORD_EXPANSION);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
@@ -387,11 +385,9 @@ MomentumApp* momentum_app_alloc() {
 
     strlcpy(app->device_name, furi_hal_version_get_name_ptr(), FURI_HAL_VERSION_ARRAY_NAME_LENGTH);
 
-    Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-    DolphinStats stats = dolphin_stats(dolphin);
-    app->dolphin_level = stats.level;
+    DolphinStats stats = dolphin_stats(app->dolphin);
+    app->dolphin_xp = stats.icounter;
     app->dolphin_angry = stats.butthurt;
-    furi_record_close(RECORD_DOLPHIN);
 
     // Will be "(version) (commit or date)"
     app->version_tag = furi_string_alloc_set(version_get_version(NULL));
@@ -471,6 +467,7 @@ void momentum_app_free(MomentumApp* app) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_EXPANSION);
     furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_DOLPHIN);
     furi_record_close(RECORD_DESKTOP);
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);

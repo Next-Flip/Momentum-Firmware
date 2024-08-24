@@ -43,10 +43,13 @@
 
 ARRAY_DEF(CharList, char*)
 
+#define DOLPHIN_MAX_XP (DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT - 1] + 1)
+
 typedef struct {
     Gui* gui;
     Storage* storage;
     Desktop* desktop;
+    Dolphin* dolphin;
     DialogsApp* dialogs;
     Expansion* expansion;
     NotificationApp* notification;
@@ -77,8 +80,8 @@ typedef struct {
     RgbColor lcd_color;
     RgbColor vgm_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
-    int32_t dolphin_level;
-    int32_t dolphin_angry;
+    uint32_t dolphin_xp;
+    uint32_t dolphin_angry;
     FuriString* version_tag;
 
     bool save_mainmenu_apps;
@@ -86,7 +89,7 @@ typedef struct {
     bool save_subghz_freqs;
     bool save_subghz;
     bool save_name;
-    bool save_level;
+    bool save_xp;
     bool save_angry;
     bool save_dolphin;
     bool save_backlight;
