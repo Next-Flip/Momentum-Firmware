@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi/core/string.h>
+#include <input/input.h>
 
 #include "desktop.h"
 

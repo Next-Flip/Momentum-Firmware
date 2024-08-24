@@ -109,7 +109,12 @@ static FuriString*
 void desktop_keybinds_load(Desktop* desktop, DesktopKeybinds* keybinds) {
     for(DesktopKeybindType type = 0; type < DesktopKeybindTypeMAX; type++) {
         for(DesktopKeybindKey key = 0; key < DesktopKeybindKeyMAX; key++) {
-            (*keybinds)[type][key] = furi_string_alloc_set(desktop_keybinds_defaults[type][key]);
+            const char* default_keybind = desktop_keybinds_defaults[type][key];
+            if((*keybinds)[type][key]) {
+                furi_string_set((*keybinds)[type][key], default_keybind);
+            } else {
+                (*keybinds)[type][key] = furi_string_alloc_set(default_keybind);
+            }
         }
     }
 

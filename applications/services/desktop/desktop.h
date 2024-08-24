@@ -1,7 +1,6 @@
 #pragma once
 
 #include <furi.h>
-#include <input/input.h>
 
 #include "desktop_settings.h"
 
