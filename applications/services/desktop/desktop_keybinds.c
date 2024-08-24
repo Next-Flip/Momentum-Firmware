@@ -197,7 +197,8 @@ void desktop_run_keybind(Desktop* desktop, InputType _type, InputKey _key) {
     DesktopKeybindKey key = keybind_keys[_key];
     FuriString* keybind = desktop_keybinds_load_one(desktop, type, key);
 
-    if(furi_string_equal(keybind, "Apps Menu")) {
+    if(furi_string_empty(keybind)) {
+    } else if(furi_string_equal(keybind, "Apps Menu")) {
         loader_start_detached_with_gui_error(desktop->loader, LOADER_APPLICATIONS_NAME, NULL);
     } else if(furi_string_equal(keybind, "Archive")) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventOpenArchive);
