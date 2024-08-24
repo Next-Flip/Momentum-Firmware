@@ -19,7 +19,7 @@ static void momentum_app_scene_misc_charge_cap_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
     char cap_str[6];
     uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_CAP_INTV;
-    snprintf(cap_str, 6, "%lu%%", value);
+    snprintf(cap_str, sizeof(cap_str), "%lu%%", value);
     variable_item_set_current_value_text(item, cap_str);
     momentum_settings.charge_cap = value;
     app->save_settings = true;
@@ -45,7 +45,7 @@ void momentum_app_scene_misc_on_enter(void* context) {
 
     char cap_str[6];
     value_index = momentum_settings.charge_cap / CHARGE_CAP_INTV;
-    snprintf(cap_str, 6, "%lu%%", (uint32_t)value_index * CHARGE_CAP_INTV);
+    snprintf(cap_str, sizeof(cap_str), "%lu%%", (uint32_t)value_index * CHARGE_CAP_INTV);
     item = variable_item_list_add(
         var_item_list,
         "Charge Cap",

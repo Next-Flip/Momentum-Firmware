@@ -1,8 +1,8 @@
 #include "../momentum_app.h"
 
-enum TextInputResult {
-    TextInputResultOk,
-    TextInputResultError,
+enum NumberInputResult {
+    NumberInputResultOk,
+    NumberInputResultError,
 };
 
 static void
@@ -11,7 +11,7 @@ static void
 
     uint32_t value = number * 1000;
     if(!furi_hal_subghz_is_frequency_valid(value)) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultError);
+        view_dispatcher_send_custom_event(app->view_dispatcher, NumberInputResultError);
         return;
     }
     bool is_hopper =
@@ -22,7 +22,7 @@ static void
         FrequencyList_push_back(app->subghz_static_freqs, value);
     }
     app->save_subghz_freqs = true;
-    view_dispatcher_send_custom_event(app->view_dispatcher, TextInputResultOk);
+    view_dispatcher_send_custom_event(app->view_dispatcher, NumberInputResultOk);
 }
 
 void momentum_app_scene_protocols_freqs_add_on_enter(void* context) {
@@ -54,10 +54,10 @@ bool momentum_app_scene_protocols_freqs_add_on_event(void* context, SceneManager
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         switch(event.event) {
-        case TextInputResultOk:
+        case NumberInputResultOk:
             scene_manager_previous_scene(app->scene_manager);
             break;
-        case TextInputResultError:
+        case NumberInputResultError:
             popup_set_header(app->popup, "Invalid frequency!", 64, 18, AlignCenter, AlignCenter);
             popup_set_text(
                 app->popup,
@@ -83,5 +83,6 @@ bool momentum_app_scene_protocols_freqs_add_on_event(void* context, SceneManager
 
 void momentum_app_scene_protocols_freqs_add_on_exit(void* context) {
     MomentumApp* app = context;
-    text_input_reset(app->text_input);
+    number_input_set_result_callback(app->number_input, NULL, NULL, 0, 0, 0);
+    number_input_set_header_text(app->number_input, "");
 }
