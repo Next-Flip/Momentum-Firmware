@@ -30,7 +30,6 @@
   - Seader: Remove some optional ASN1 fields, disable ASN1 debug, correct key for Save as SR (by @bettse)
   - NFC Playlist: Move playlist items, many bugfixes and improvements (by @acegoal07)
   - ESP Flasher: Update Marauder bins to v1.0.0 (by @justcallmekoko)
-  - Sub-GHz Bruteforcer: Fix one/two byte text (by @Willy-JL)
   - Pokemon Trading: Reset trade without affecting current pokemon, major refactoring (by @kbembedded)
   - T5577 Raw Writer: Code refactor, bugfixes and improvements (by @zinongli)
   - AirMouse: Fix compatibility with new firmwares (by @ginkage)
