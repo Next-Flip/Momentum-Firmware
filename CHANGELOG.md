@@ -27,7 +27,7 @@
 ### Updated:
 - Apps:
   - BLE Spam: Can use 20ms advertising again with LFS gone (by @Willy-JL)
-  - Seader: Remove some optional ASN1 fields, disable ASN1 debug (by @bettse)
+  - Seader: Remove some optional ASN1 fields, disable ASN1 debug, correct key for Save as SR (by @bettse)
   - NFC Playlist: Move playlist items, many bugfixes and improvements (by @acegoal07)
   - ESP Flasher: Update Marauder bins to v1.0.0 (by @justcallmekoko)
   - Sub-GHz Bruteforcer: Fix one/two byte text (by @Willy-JL)
