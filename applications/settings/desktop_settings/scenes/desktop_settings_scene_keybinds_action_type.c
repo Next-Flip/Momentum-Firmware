@@ -68,7 +68,7 @@ static void
         break;
     }
     case DesktopSettingsAppKeybindActionTypeRemoveKeybind:
-        desktop_settings_app_set_keybind(app, "");
+        desktop_settings_app_set_keybind(app, "_");
         scene_manager_search_and_switch_to_previous_scene(
             app->scene_manager, DesktopSettingsAppSceneStart);
         break;
@@ -146,7 +146,7 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
             }
         }
 
-        if(furi_string_empty(keybind)) {
+        if(furi_string_equal(keybind, "_")) {
             selected = DesktopSettingsAppKeybindActionTypeRemoveKeybind;
         }
     }
