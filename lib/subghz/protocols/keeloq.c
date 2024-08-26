@@ -80,7 +80,7 @@ const SubGhzProtocolEncoder subghz_protocol_keeloq_encoder = {
 
 const SubGhzProtocol subghz_protocol_keeloq = {
     .name = SUBGHZ_PROTOCOL_KEELOQ_NAME,
-    .type = SubGhzProtocolTypeDynamic,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
             SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
@@ -135,6 +135,7 @@ static bool subghz_protocol_keeloq_gen_data(
     SubGhzProtocolEncoderKeeloq* instance,
     uint8_t btn,
     bool counter_up) {
+    counter_up = false ;
     uint32_t fix = (uint32_t)btn << 28 | instance->generic.serial;
     uint32_t hop = 0;
     uint64_t man = 0;
