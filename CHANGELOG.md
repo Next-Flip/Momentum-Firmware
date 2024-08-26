@@ -1,3 +1,7 @@
+### Added:
+- Apps:
+  - Games: Laser Tag (by @RocketGod-git)
+
 ### Updated:
 - Apps:
   - Picopass: CVE-2024-41566, When keys are unknown emulate with a dummy MAC and ignore reader MACs (by @nvx)
