@@ -322,7 +322,7 @@ MomentumApp* momentum_app_alloc() {
     char* name = malloc(ASSET_PACKS_NAME_LEN);
     if(storage_dir_open(folder, ASSET_PACKS_PATH)) {
         while(storage_dir_read(folder, &info, name, ASSET_PACKS_NAME_LEN)) {
-            if(info.flags & FSF_DIRECTORY) {
+            if(info.flags & FSF_DIRECTORY && name[0] != '.') {
                 char* copy = strdup(name);
                 size_t idx = 0;
                 for(; idx < CharList_size(app->asset_pack_names); idx++) {
