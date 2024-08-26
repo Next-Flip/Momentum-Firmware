@@ -49,6 +49,7 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <loader/loader_menu.h>
 #include <notification/notification_settings_filename.h>
 #include <power/power_settings_filename.h>
+#include <drivers/rgb_backlight_filename.h>
 #include <applications/main/infrared/infrared_app.h>
 #include <applications/main/u2f/u2f_data.h>
 
@@ -82,6 +83,7 @@ void flipper_migrate_files() {
         {EXT_PATH(".config/xtreme_settings.txt"), MOMENTUM_SETTINGS_PATH},
         {EXT_PATH(".config/notification.settings"), NOTIFICATION_SETTINGS_PATH},
         {EXT_PATH(".config/power.settings"), POWER_SETTINGS_PATH},
+        {EXT_PATH(".config/rgb_backlight.settings"), RGB_BACKLIGHT_SETTINGS_PATH},
         {EXT_PATH("dolphin/name.txt"), NAMESPOOF_PATH}, // Adapt to UL
         {EXT_PATH("infrared/.infrared.settings"), INFRARED_SETTINGS_PATH}, // Adapt to OFW
     };

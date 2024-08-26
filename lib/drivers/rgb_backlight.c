@@ -18,13 +18,14 @@
 */
 
 #include "rgb_backlight.h"
+#include "rgb_backlight_filename.h"
+
 #include <furi_hal.h>
 #include <storage/storage.h>
 #include <toolbox/saved_struct.h>
 
 #define RGB_BACKLIGHT_SETTINGS_MAGIC   0x15
 #define RGB_BACKLIGHT_SETTINGS_VERSION 6
-#define RGB_BACKLIGHT_SETTINGS_PATH    INT_PATH(".rgb_backlight.settings")
 
 static struct {
     RgbColor colors[SK6805_LED_COUNT];
