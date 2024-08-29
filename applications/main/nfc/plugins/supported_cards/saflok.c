@@ -318,7 +318,7 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
         FuriString* restricted_weekday_string = furi_string_alloc();
         // Check each bit from Monday to Sunday
         for(int i = 0; i < 7; i++) {
-            if(restricted_weekday & (1 << i)) {
+            if(restricted_weekday & (0b01000000 >> i )) {
                 // If the bit is set, append the corresponding weekday to the buffer
                 if(restricted_count > 0) {
                     furi_string_cat_printf(restricted_weekday_string, ", ");
