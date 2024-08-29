@@ -1,6 +1,7 @@
 ### Added:
 - Apps:
   - Games: Laser Tag (by @RocketGod-git)
+- OFW: Desktop: New Procrastination dolphin animation (by @Astrrra)
 
 ### Updated:
 - Apps:
