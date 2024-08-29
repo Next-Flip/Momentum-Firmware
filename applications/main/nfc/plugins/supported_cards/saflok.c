@@ -272,8 +272,8 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         // Decrypt basic access
         uint8_t basicAccess[BASIC_ACCESS_BYTE_NUM];
-        memcpy(&basicAccess,&data->block[1].data,16);
-        memcpy(&basicAccess[16],&data->block[2].data[0],1);
+        memcpy(&basicAccess, &data->block[1].data, 16);
+        memcpy(&basicAccess[16], &data->block[2].data[0], 1);
         uint8_t decodedBA[BASIC_ACCESS_BYTE_NUM];
         DecryptCard(basicAccess, BASIC_ACCESS_BYTE_NUM, decodedBA);
 
