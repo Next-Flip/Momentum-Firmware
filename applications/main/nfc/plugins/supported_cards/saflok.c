@@ -56,6 +56,9 @@ static SaflokKeyLevel key_levels[] = {
     {16, "Primary Programming Key (PPK)"},
 };
 
+const char* weekdays[] =
+    {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
 static MfClassicKeyPair saflok_1k_keys[] = {
     {.a = 0x000000000000, .b = 0xffffffffffff}, // 000
     {.a = 0x2a2c13cc242a, .b = 0xffffffffffff}, // 001
@@ -289,6 +292,7 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
         uint16_t key_record = (key_record_high << 8) | decodedBA[3];
 
         // Byte 4 & 5: Pass level in reversed binary
+        // This part is commented because the relevance of this info is still unknown
         // uint16_t pass_level = ((decodedBA[4] & 0xFF) << 8) | decodedBA[5];
         // uint8_t pass_levels[12];
         // int pass_levels_count = 0;
@@ -308,6 +312,34 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
         // Byte 7: OverrideDeadbolt and Days
         uint8_t override_deadbolt = (decodedBA[7] & 0x80) >> 7;
         uint8_t restricted_weekday = decodedBA[7] & 0x7F;
+        // Counter to keep track of the number of restricted days
+        int restricted_count = 0;
+        // Buffer to store the resulting string
+        FuriString* restricted_weekday_string = furi_string_alloc();
+        // Check each bit from Monday to Sunday
+        for(int i = 0; i < 7; i++) {
+            if(restricted_weekday & (1 << i)) {
+                // If the bit is set, append the corresponding weekday to the buffer
+                if(restricted_count > 0) {
+                    furi_string_cat_printf(restricted_weekday_string, ", ");
+                }
+                furi_string_cat_printf(restricted_weekday_string, "%s", weekdays[i]);
+                restricted_count++;
+            }
+        }
+
+        // Determine if all weekdays are restricted
+        if(restricted_weekday == 0b01111100) {
+            furi_string_printf(restricted_weekday_string, "weekdays");
+        }
+        // If there are specific restricted days
+        else if(restricted_weekday == 0b00000011) {
+            furi_string_printf(restricted_weekday_string, "weekends");
+        }
+        // If no weekdays are restricted
+        else if(restricted_weekday == 0) {
+            furi_string_printf(restricted_weekday_string, "none");
+        }
 
         // Bytes 8-10: Expiry interval
         uint16_t interval_year = (decodedBA[8] >> 4);
@@ -339,13 +371,14 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
         }
         FURI_LOG_D(TAG, "CS decrypted: %02X", checksum);
         FURI_LOG_D(TAG, "CS calculated: %02X", checksum_calculated);
+
         furi_string_cat_printf(parsed_data, "\e#Saflok Card\n");
         furi_string_cat_printf(
             parsed_data,
             "Key Level: %u, %s\n",
             key_levels[key_level].level_num,
             key_levels[key_level].level_name);
-        furi_string_cat_printf(parsed_data, "LED Warning: %s\n", led_warning ? "Yes" : "No");
+        furi_string_cat_printf(parsed_data, "LED Exp. Warning: %s\n", led_warning ? "Yes" : "No");
         furi_string_cat_printf(parsed_data, "Key ID: %02X\n", key_id);
         furi_string_cat_printf(parsed_data, "Key Record: %04X\n", key_record);
         furi_string_cat_printf(parsed_data, "Opening key: %s\n", opening_key ? "Yes" : "No");
@@ -353,7 +386,10 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
             parsed_data, "Seq. & Combination: %04X\n", sequence_combination_number);
         furi_string_cat_printf(
             parsed_data, "Override Deadbolt: %s\n", override_deadbolt ? "Yes" : "No");
-        furi_string_cat_printf(parsed_data, "Restricted Weekday: %02X\n", restricted_weekday);
+        furi_string_cat_printf(
+            parsed_data,
+            "Restricted Weekday: %s\n",
+            furi_string_get_cstr(restricted_weekday_string));
         furi_string_cat_printf(
             parsed_data,
             "Valid Start Date: \n%u-%02d-%02d\n%02d:%02d:00\n",
