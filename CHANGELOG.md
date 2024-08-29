@@ -1,6 +1,7 @@
 ### Added:
 - Apps:
   - Games: Laser Tag (by @RocketGod-git)
+- NFC: Added new Saflok parser (#196 by @zinongli & @xtruan & @zacharyweiss & @evilmog & @Arkwin)
 - OFW: Desktop: New Procrastination dolphin animation (by @Astrrra)
 
 ### Updated:
