@@ -195,7 +195,7 @@ Min butthurt: 0
 Max butthurt: 12
 Min level: 29
 Max level: 30
-Weight: 4
+Weight: 3
 
 Name: L1_Akira_128x64
 Min butthurt: 0
@@ -208,6 +208,13 @@ Name: L3_Intruder_alert_128x64
 Min butthurt: 0
 Max butthurt: 12
 Min level: 26
+Max level: 30
+Weight: 4
+
+Name: L1_Procrastinating_128x64
+Min butthurt: 0
+Max butthurt: 8
+Min level: 12
 Max level: 30
 Weight: 6
 
