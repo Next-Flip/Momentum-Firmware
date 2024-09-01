@@ -384,20 +384,20 @@ void desktop_lock(Desktop* desktop, bool with_pin) {
     furi_assert(!desktop->locked);
 
     with_pin = with_pin && desktop_pin_code_is_set();
-    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+    if(with_pin) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
+    } else {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
         furi_hal_rtc_set_pin_fails(0);
     }
 
-    if(with_pin) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-        if(!momentum_settings.allow_locked_rpc_commands) {
-            Cli* cli = furi_record_open(RECORD_CLI);
-            cli_session_close(cli);
-            furi_record_close(RECORD_CLI);
-            Bt* bt = furi_record_open(RECORD_BT);
-            bt_close_rpc_connection(bt);
-            furi_record_close(RECORD_BT);
-        }
+    if(with_pin && !momentum_settings.allow_locked_rpc_commands) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_close(cli);
+        furi_record_close(RECORD_CLI);
+        Bt* bt = furi_record_open(RECORD_BT);
+        bt_close_rpc_connection(bt);
+        furi_record_close(RECORD_BT);
     }
 
     desktop_auto_lock_inhibit(desktop);
