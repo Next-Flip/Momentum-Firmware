@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define DESKTOP_PIN_CODE_MIN_LEN (4)
 #define DESKTOP_PIN_CODE_MAX_LEN (10)
 
 #define DESKTOP_SETTINGS_RUN_PIN_SETUP_ARG "run_pin_setup"
