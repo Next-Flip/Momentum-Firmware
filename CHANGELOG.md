@@ -8,6 +8,7 @@
 - Apps:
   - Picopass: CVE-2024-41566, When keys are unknown emulate with a dummy MAC and ignore reader MACs (by @nvx)
   - Seader: Card parsing and saving UI and logic improvements (by @bettse)
+- API: Publishing T5577 page 1 block count macro (by @zinongli)
 
 ### Fixed:
 - Desktop:
