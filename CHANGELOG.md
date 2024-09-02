@@ -14,6 +14,7 @@
 - API: Publishing T5577 page 1 block count macro (by @zinongli)
 
 ### Fixed:
+- Sub-GHz: Fix Acurite 986 temperature value conversion (by @Willy-JL)
 - Desktop:
   - Fix disabling keybinds (by @Willy-JL)
   - Sanity check PIN length for good measure (by @Willy-JL)
