@@ -153,34 +153,30 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
         parse_trip_data(block_data, &sr_data.last_trips[i], offset_in_block(trip_offsets[i]));
     }
 
-    // Format the parsed data
-    furi_string_printf(
-        parsed_data,
-        "\e#SmartRider Card\n"
-        "Balance: $%lu.%02lu\n"
-        "Concession: %s\n"
-        "Serial: %s\n"
-        "Purchase Cost: $%lu.%02lu\n"
-        "Last Trip: %s $%lu.%02lu %s (Txn: %u, Jrn: %u)\n"
-        "Previous Trip: %s $%lu.%02lu %s (Txn: %u, Jrn: %u)",
-        sr_data.balance / 100, sr_data.balance % 100,
-        get_concession_type(sr_data.token),
-        sr_data.card_serial_number,
-        sr_data.purchase_cost / 100, sr_data.purchase_cost % 100,
-        sr_data.last_trips[0].tap_on ? "Tag on" : "Tag off",
-        (unsigned long)(sr_data.last_trips[0].cost / 100), 
-        (unsigned long)(sr_data.last_trips[0].cost % 100),
-        sr_data.last_trips[0].route,
-        sr_data.last_trips[0].transaction_number,
-        sr_data.last_trips[0].journey_number,
-        sr_data.last_trips[1].tap_on ? "Tag on" : "Tag off",
-        (unsigned long)(sr_data.last_trips[1].cost / 100), 
-        (unsigned long)(sr_data.last_trips[1].cost % 100),
-        sr_data.last_trips[1].route,
-        sr_data.last_trips[1].transaction_number,
-        sr_data.last_trips[1].journey_number);
+	furi_string_printf(
+		parsed_data,
+		"\e#SmartRider\n"
+		"Balance: $%lu.%02lu\n"
+		"Concession: %s\n"
+		"Serial: %s\n"
+		"Total Cost: $%lu.%02lu\n"
+		"Last Trip: %s $%lu.%02lu %s\n"  // Optimized trip display
+		"Prev Trip: %s $%lu.%02lu %s",  // Optimized trip display and shortened label
+		sr_data.balance / 100, sr_data.balance % 100,
+		get_concession_type(sr_data.token),
+		sr_data.card_serial_number,
+		sr_data.purchase_cost / 100, sr_data.purchase_cost % 100,
+		sr_data.last_trips[0].tap_on ? "Tag on" : "Tag off",
+		(unsigned long)(sr_data.last_trips[0].cost / 100), 
+		(unsigned long)(sr_data.last_trips[0].cost % 100),
+		sr_data.last_trips[0].route,
+		sr_data.last_trips[1].tap_on ? "Tag on" : "Tag off",
+		(unsigned long)(sr_data.last_trips[1].cost / 100), 
+		(unsigned long)(sr_data.last_trips[1].cost % 100),
+		sr_data.last_trips[1].route);
 
-    return true;
+	return true;
+
 }
 
 static const char* get_concession_type(uint8_t token) {
