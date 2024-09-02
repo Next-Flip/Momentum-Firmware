@@ -1,6 +1,6 @@
 ### Added:
 - Apps:
-  - Games: Laser Tag (by @RocketGod-git)
+  - Games: Laser Tag (by @RocketGod-git & @jamisonderek)
 - NFC: Added new Saflok parser (#196 by @zinongli & @xtruan & @zacharyweiss & @evilmog & @Arkwin)
 - OFW: Desktop: New Procrastination dolphin animation (by @Astrrra)
 
@@ -8,6 +8,9 @@
 - Apps:
   - Picopass: CVE-2024-41566, When keys are unknown emulate with a dummy MAC and ignore reader MACs (by @nvx)
   - Seader: Card parsing and saving UI and logic improvements (by @bettse)
+  - Authenticator: Confirm token export on Flipper (by @akopachov)
+  - NFC Playlist: Allow delay up to 12s (by @xtruan)
+  - BLE Spam: Fix delay help section (by @Willy-JL)
 - API: Publishing T5577 page 1 block count macro (by @zinongli)
 
 ### Fixed:
