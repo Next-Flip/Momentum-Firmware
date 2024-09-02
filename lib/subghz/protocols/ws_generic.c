@@ -219,7 +219,7 @@ void ws_block_generic_get_string(WSBlockGeneric* instance, FuriString* output) {
 
     furi_string_cat_printf(
         output,
-        "Data:0x%lX%08lX\r\n",
+        "Data: 0x%lX%08lX\r\n",
         (uint32_t)(instance->data >> 32),
         (uint32_t)(instance->data));
 
