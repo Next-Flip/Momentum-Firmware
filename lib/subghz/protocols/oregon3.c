@@ -312,33 +312,22 @@ static void oregon3_append_check_sum(uint32_t fix_data, uint64_t var_data, FuriS
     // swap calculated sum nibbles
     sum = (((sum >> 4) & 0xF) | (sum << 4)) & 0xFF;
     if(sum == ref_sum)
-        furi_string_cat_printf(output, "Sum ok: 0x%hhX", ref_sum);
+        furi_string_cat_printf(output, "\r\nChkSm: 0x%02hhX ok", ref_sum);
     else
-        furi_string_cat_printf(output, "Sum err: 0x%hhX vs 0x%hhX", ref_sum, sum);
+        furi_string_cat_printf(output, "\r\nChkSm: 0x%02hhX != 0x%02hhX error", ref_sum, sum);
 }
 
 void ws_protocol_decoder_oregon3_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderOregon3* instance = context;
-    furi_string_cat_printf(
-        output,
-        "%s\r\n"
-        "ID: 0x%04lX, ch: %d,\r\nbat: %d, rc: 0x%02lX\r\n",
-        instance->generic.protocol_name,
-        instance->generic.id,
-        instance->generic.channel,
-        instance->generic.battery_low,
-        (uint32_t)(instance->generic.data >> 4) & 0xFF);
+    if(instance->var_bits == 0) {
+        // Funny fix based on old funny code, not sure if this is needed
+        instance->generic.temp = WS_NO_TEMPERATURE;
+        instance->generic.humidity = WS_NO_HUMIDITY;
+    }
+    ws_block_generic_get_string(&instance->generic, output);
 
     if(instance->var_bits > 0) {
-        furi_string_cat_printf(
-            output,
-            "Temp:%d.%d C Hum:%d%%",
-            (int16_t)instance->generic.temp,
-            abs(
-                ((int16_t)(instance->generic.temp * 10) -
-                 (((int16_t)instance->generic.temp) * 10))),
-            instance->generic.humidity);
         oregon3_append_check_sum((uint32_t)instance->generic.data, instance->var_data, output);
     }
 }
