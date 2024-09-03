@@ -11,6 +11,7 @@
   - Authenticator: Confirm token export on Flipper (by @akopachov)
   - NFC Playlist: Allow delay up to 12s (by @xtruan)
   - BLE Spam: Fix delay help section (by @Willy-JL)
+  - WAV Player: Fix unresponsiveness (by @Willy-JL)
 - Sub-GHz:
   - Show Weather Station icon for WS signals (by @Willy-JL)
   - Update Oregon 2 and 3 weather info display to new design (by @Willy-JL)
