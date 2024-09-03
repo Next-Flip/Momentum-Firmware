@@ -1,7 +1,10 @@
+### Note:
+- This is a smaller release due to the bugfixes it contains, make sure to also read the changelog for [mntm-006](https://github.com/Next-Flip/Momentum-Firmware/releases/tag/mntm-006)
+
 ### Added:
 - Apps:
   - Games: Laser Tag (by @RocketGod-git & @jamisonderek)
-- NFC: Added new Saflok parser (#196 by @zinongli & @xtruan & @zacharyweiss & @evilmog & @Arkwin)
+- NFC: Added new Saflok parser (#196 #201 by @zinongli & @xtruan & @zacharyweiss & @evilmog & @Arkwin)
 - OFW: Desktop: New Procrastination dolphin animation (by @Astrrra)
 
 ### Updated:
