@@ -177,3 +177,60 @@ void crypto1_encrypt_reader_nonce(
         bit_buffer_set_byte_with_parity(out, i, byte, parity_bit);
     }
 }
+
+static uint8_t lfsr_rollback_bit(Crypto1* crypto1, uint32_t in, int fb) {
+    int out;
+    uint8_t ret;
+    uint32_t t;
+
+    crypto1->odd &= 0xffffff;
+    t = crypto1->odd;
+    crypto1->odd = crypto1->even;
+    crypto1->even = t;
+
+    out = crypto1->even & 1;
+    out ^= LF_POLY_EVEN & (crypto1->even >>= 1);
+    out ^= LF_POLY_ODD & crypto1->odd;
+    out ^= !!in;
+    out ^= (ret = crypto1_filter(crypto1->odd)) & (!!fb);
+
+    crypto1->even |= (nfc_util_even_parity32(out)) << 23;
+    return ret;
+}
+
+uint32_t lfsr_rollback_word(Crypto1* crypto1, uint32_t in, int fb) {
+    uint32_t ret = 0;
+    for(int i = 31; i >= 0; i--) {
+        ret |= lfsr_rollback_bit(crypto1, BEBIT(in, i), fb) << (24 ^ i);
+    }
+    return ret;
+}
+
+bool nonce_matches_encrypted_parity_bits(uint32_t nt, uint32_t ks, uint8_t nt_par_enc) {
+    return (nfc_util_even_parity8((nt >> 24) & 0xFF) ==
+            (((nt_par_enc >> 3) & 1) ^ FURI_BIT(ks, 16))) &&
+           (nfc_util_even_parity8((nt >> 16) & 0xFF) ==
+            (((nt_par_enc >> 2) & 1) ^ FURI_BIT(ks, 8))) &&
+           (nfc_util_even_parity8((nt >> 8) & 0xFF) ==
+            (((nt_par_enc >> 1) & 1) ^ FURI_BIT(ks, 0)));
+}
+
+bool is_weak_prng_nonce(uint32_t nonce) {
+    if(nonce == 0) return false;
+    uint16_t x = nonce >> 16;
+    x = (x & 0xff) << 8 | x >> 8;
+    for(uint8_t i = 0; i < 16; i++) {
+        x = x >> 1 | (x ^ x >> 2 ^ x >> 3 ^ x >> 5) << 15;
+    }
+    x = (x & 0xff) << 8 | x >> 8;
+    return x == (nonce & 0xFFFF);
+}
+
+uint32_t decrypt_nt_enc(uint32_t cuid, uint32_t nt_enc, MfClassicKey known_key) {
+    uint64_t known_key_int = bit_lib_bytes_to_num_be(known_key.data, 6);
+    Crypto1 crypto_temp;
+    crypto1_init(&crypto_temp, known_key_int);
+    crypto1_word(&crypto_temp, nt_enc ^ cuid, 1);
+    uint32_t decrypted_nt_enc = (nt_enc ^ lfsr_rollback_word(&crypto_temp, nt_enc ^ cuid, 1));
+    return decrypted_nt_enc;
+}
