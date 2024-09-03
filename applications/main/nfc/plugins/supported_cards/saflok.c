@@ -371,7 +371,8 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
         while(true) {
             uint8_t max_days = days_in_month[expire_month - 1];
             // Adjust for leap years
-            if(expire_month == 2 && (expire_year % 4 == 0 && (expire_year % 100 != 0 || expire_year % 400 == 0))) {
+            if(expire_month == 2 &&
+               (expire_year % 4 == 0 && (expire_year % 100 != 0 || expire_year % 400 == 0))) {
                 max_days = 29;
             }
             if(expire_day <= max_days) {
