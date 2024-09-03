@@ -360,6 +360,32 @@ bool saflok_parse(const NfcDevice* device, FuriString* parsed_data) {
         uint8_t expire_hour = interval_hour;
         uint8_t expire_minute = interval_minute;
 
+        // Handle month rollover
+        while(expire_month > 12) {
+            expire_month -= 12;
+            expire_year++;
+        }
+
+        // Handle day rollover
+        static const uint8_t days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        while(true) {
+            uint8_t max_days = days_in_month[expire_month - 1];
+            // Adjust for leap years
+            if(expire_month == 2 &&
+               (expire_year % 4 == 0 && (expire_year % 100 != 0 || expire_year % 400 == 0))) {
+                max_days = 29;
+            }
+            if(expire_day <= max_days) {
+                break;
+            }
+            expire_day -= max_days;
+            expire_month++;
+            if(expire_month > 12) {
+                expire_month = 1;
+                expire_year++;
+            }
+        }
+
         // Byte 16: Checksum
         uint8_t checksum = decodedBA[16];
         uint8_t checksum_calculated = CalculateCheckSum(decodedBA);
