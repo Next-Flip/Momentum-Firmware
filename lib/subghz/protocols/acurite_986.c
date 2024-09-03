@@ -136,7 +136,7 @@ static void ws_protocol_acurite_986_remote_controller(WSBlockGeneric* instance) 
     if(temp & 0x80) {
         temp = -(temp & 0x7F);
     }
-    instance->temp = (float)temp;
+    instance->temp = locale_fahrenheit_to_celsius((float)temp);
     instance->btn = WS_NO_BTN;
     instance->humidity = WS_NO_HUMIDITY;
 }
