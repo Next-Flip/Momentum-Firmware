@@ -75,3 +75,5 @@
 #include "hormann_bisecur.h"
 #include "legrand.h"
 #include "dickert_mahs.h"
+#include "gangqi.h"
+#include "marantec24.h"
