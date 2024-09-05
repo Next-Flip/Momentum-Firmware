@@ -115,48 +115,6 @@ static bool smartrider_verify(Nfc* nfc) {
     return true;
 }
 
-
-static bool smartrider_read(Nfc* nfc, NfcDevice* device) {
-    furi_assert(nfc);
-    furi_assert(device);
-
-    MfClassicData* data = mf_classic_alloc();
-    nfc_device_copy_data(device, NfcProtocolMfClassic, data);
-
-    MfClassicType type = MfClassicTypeMini;
-    MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
-    if (error != MfClassicErrorNone) {
-        mf_classic_free(data);
-        return false;
-    }
-
-    data->type = type;
-    if (type != MfClassicType1k) {
-        mf_classic_free(data);
-        return false;
-    }
-
-    MfClassicDeviceKeys keys = {.key_a_mask = 0, .key_b_mask = 0};
-    for (size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-        memcpy(keys.key_a[i].data, STANDARD_KEY_1, sizeof(STANDARD_KEY_1));
-        FURI_BIT_SET(keys.key_a_mask, i);
-    }
-
-    error = mf_classic_poller_sync_read(nfc, &keys, data);
-    if (error == MfClassicErrorNotPresent) {
-        mf_classic_free(data);
-        return false;
-    }
-
-    nfc_device_set_data(device, NfcProtocolMfClassic, data);
-    bool is_read = (error == MfClassicErrorNone);
-    mf_classic_free(data);
-
-    return is_read;
-}
-
-
-
 static bool parse_trip_data(const MfClassicBlock* block_data, TripData* trip, int trip_offset) {
     trip->timestamp = bit_lib_bytes_to_num_le(block_data->data + trip_offset + 3, 4);
     trip->tap_on = (block_data->data[trip_offset + 7] & 0x10) == 0x10;
@@ -168,62 +126,120 @@ static bool parse_trip_data(const MfClassicBlock* block_data, TripData* trip, in
     return true;
 }
 
+
+static bool smartrider_read(Nfc* nfc, NfcDevice* device) {
+    furi_assert(nfc);
+    furi_assert(device);
+    bool is_read = false;
+    MfClassicData* data = mf_classic_alloc();
+    nfc_device_copy_data(device, NfcProtocolMfClassic, data);
+    do {
+        MfClassicType type = MfClassicTypeMini;
+        MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
+        if(error != MfClassicErrorNone) break;
+        data->type = type;
+        if(type != MfClassicType1k) break;
+        MfClassicDeviceKeys keys = {
+            .key_a_mask = 0,
+            .key_b_mask = 0,
+        };
+        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+            if(i == 0) {
+                memcpy(keys.key_a[i].data, STANDARD_KEY_1, sizeof(STANDARD_KEY_1));
+                FURI_BIT_SET(keys.key_a_mask, i);
+            } else {
+                memcpy(keys.key_a[i].data, STANDARD_KEY_2, sizeof(STANDARD_KEY_2));
+                memcpy(keys.key_b[i].data, STANDARD_KEY_3, sizeof(STANDARD_KEY_3));
+                FURI_BIT_SET(keys.key_a_mask, i);
+                FURI_BIT_SET(keys.key_b_mask, i);
+            }
+        }
+        error = mf_classic_poller_sync_read(nfc, &keys, data);
+        if(error == MfClassicErrorNotPresent) {
+            FURI_LOG_W(TAG, "Failed to read data");
+            break;
+        }
+        nfc_device_set_data(device, NfcProtocolMfClassic, data);
+        is_read = (error == MfClassicErrorNone);
+    } while(false);
+    mf_classic_free(data);
+    return is_read;
+}
+
 static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
     bool parsed = false;
-
     do {
-        // Verify keys
-        const uint8_t verify_sectors[] = {0, 6};
-        for(size_t i = 0; i < COUNT_OF(verify_sectors); i++) {
-            const MfClassicSectorTrailer* sec_tr =
-                mf_classic_get_sector_trailer_by_sector(data, verify_sectors[i]);
-            uint64_t key_a = bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
-            uint64_t key_b = bit_lib_bytes_to_num_be(sec_tr->key_b.data, COUNT_OF(sec_tr->key_b.data));
-            
-            if(verify_sectors[i] == 0 && key_a != 0x203141E57A3B) break; // STANDARD_KEY_1
-            if(verify_sectors[i] == 6 && (key_a != 0x4CA6029F9473 || key_b != 0x1919539853F)) break; // STANDARD_KEY_2 and STANDARD_KEY_3
+        // Verify key
+        const uint8_t verify_sector = 0;  // We'll check sector 0 for SmartRider
+        const MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
+        if(sec_tr == NULL) {
+            FURI_LOG_E(TAG, "Failed to get sector trailer for sector %d", verify_sector);
+            break;
+        }
+        const uint64_t key =
+            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
+        if(key != bit_lib_bytes_to_num_be(STANDARD_KEY_1, sizeof(STANDARD_KEY_1))) {
+            FURI_LOG_E(TAG, "Key mismatch for sector 0");
+            break;
         }
 
-        // Pre-check block readability for required blocks
-        int required_blocks[] = {offset_to_block(0xe0), offset_to_block(0x40), offset_to_block(0x50), 1, offset_to_block(0x340), offset_to_block(0x320)};
-        for (size_t i = 0; i < COUNT_OF(required_blocks); i++) {
-            if (!mf_classic_is_block_read(data, required_blocks[i])) break;
+        // Check if required blocks are read
+        const uint8_t required_blocks[] = {
+            offset_to_block(0xe0), offset_to_block(0x40), offset_to_block(0x50),
+            1, offset_to_block(0x340), offset_to_block(0x320), offset_to_block(0x06)
+        };
+        for(size_t i = 0; i < COUNT_OF(required_blocks); i++) {
+            if(!mf_classic_is_block_read(data, required_blocks[i])) {
+                FURI_LOG_E(TAG, "Required block %d is not read", required_blocks[i]);
+                break;
+            }
         }
 
         SmartRiderData sr_data = {0};
-        const MfClassicBlock* block_data;
 
         // Parse balance
-        block_data = &data->block[offset_to_block(0xe0)];
-        sr_data.balance = bit_lib_bytes_to_num_le(block_data->data + offset_in_block(0xe0) + 7, 2);
+        const uint8_t balance_block = offset_to_block(0xe0);
+        const uint8_t* block_data = data->block[balance_block].data;
+        sr_data.balance = bit_lib_bytes_to_num_le(block_data + offset_in_block(0xe0) + 7, 2);
 
         // Parse configuration data (Sector 1)
-        block_data = &data->block[offset_to_block(0x40)];
-        sr_data.issued_days = bit_lib_bytes_to_num_le(block_data->data + 16, 2);
-        sr_data.expiry_days = bit_lib_bytes_to_num_le(block_data->data + 18, 2);
-        sr_data.auto_load_threshold = bit_lib_bytes_to_num_le(block_data->data + 20, 2);
-        sr_data.auto_load_value = bit_lib_bytes_to_num_le(block_data->data + 22, 2);
+        const uint8_t config_block = offset_to_block(0x40);
+        block_data = data->block[config_block].data;
+        sr_data.issued_days = bit_lib_bytes_to_num_le(block_data + 16, 2);
+        sr_data.expiry_days = bit_lib_bytes_to_num_le(block_data + 18, 2);
+        sr_data.auto_load_threshold = bit_lib_bytes_to_num_le(block_data + 20, 2);
+        sr_data.auto_load_value = bit_lib_bytes_to_num_le(block_data + 22, 2);
 
-        // Parse current token (in the next block of Sector 1)
-        block_data = &data->block[offset_to_block(0x50)];
-        sr_data.token = block_data->data[8];  // Current token at offset 24 in Sector 1
+        // Parse current token
+        const uint8_t token_block = offset_to_block(0x50);
+        block_data = data->block[token_block].data;
+        sr_data.token = block_data[8];
 
         // Parse card serial number
-        block_data = &data->block[1];
-        snprintf(sr_data.card_serial_number, sizeof(sr_data.card_serial_number), "%02X%02X%02X%02X%02X",
-                 block_data->data[6], block_data->data[7], block_data->data[8], block_data->data[9], block_data->data[10]);
-                 
+        block_data = data->block[1].data;
+        snprintf(
+            sr_data.card_serial_number,
+            sizeof(sr_data.card_serial_number),
+            "%02X%02X%02X%02X%02X",
+            block_data[6], block_data[7], block_data[8], block_data[9], block_data[10]);
+
         // Parse purchase cost
-        block_data = &data->block[offset_to_block(0x06)];
-        sr_data.purchase_cost = bit_lib_bytes_to_num_le(block_data->data + offset_in_block(0x06) + 8, 2);
+        const uint8_t purchase_block = offset_to_block(0x06);
+        block_data = data->block[purchase_block].data;
+        sr_data.purchase_cost = bit_lib_bytes_to_num_le(block_data + offset_in_block(0x06) + 8, 2);
 
         // Parse last two trips
-        int trip_offsets[] = {0x340, 0x320}; // Last two trip offsets
-        for (int i = 0; i < 2; i++) {
-            block_data = &data->block[offset_to_block(trip_offsets[i])];
-            parse_trip_data(block_data, &sr_data.last_trips[i], offset_in_block(trip_offsets[i]));
+        const uint16_t trip_offsets[] = {0x340, 0x320};
+        for(int i = 0; i < 2; i++) {
+            const uint8_t trip_block = offset_to_block(trip_offsets[i]);
+            block_data = data->block[trip_block].data;
+            if(!parse_trip_data(&data->block[trip_block], &sr_data.last_trips[i], offset_in_block(trip_offsets[i]))) {
+                FURI_LOG_E(TAG, "Failed to parse trip data for offset 0x%03X", trip_offsets[i]);
+                break;
+            }
         }
 
         furi_string_printf(
@@ -254,7 +270,6 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         parsed = true;
     } while(false);
-
     return parsed;
 }
 
