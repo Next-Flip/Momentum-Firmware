@@ -497,7 +497,10 @@ void cli_plugin_wrapper(const char* name, Cli* cli, FuriString* args, void* cont
         const CliCallback handler = plugin_manager_get_ep(manager, 0);
         handler(cli, args, context);
     } else {
-        printf("CLI plugin failed (code %" PRIu16 "), update firmware or check logs\r\n", error);
+        printf(
+            "CLI plugin '%s' failed (code %" PRIu16 "), update firmware or check logs\r\n",
+            name,
+            error);
     }
     furi_string_free(path);
     plugin_manager_free(manager);

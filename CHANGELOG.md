@@ -8,6 +8,7 @@
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
   - Picopass: File loading improvements and fixes (by @bettse)
   - Quac!: Setting for external IR board support (by @daniilty), code improvements (by @rdefeo)
+- CLI: Print plugin name on load fail (by @Willy-JL)
 
 ### Fixed:
 - RFID:
