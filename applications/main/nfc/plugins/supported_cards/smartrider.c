@@ -7,9 +7,11 @@
 
 #define TAG "SmartRider"
 
-static const uint8_t STANDARD_KEY_1[6] = {0x20, 0x31, 0xD1, 0xE5, 0x7A, 0x3B};
-static const uint8_t STANDARD_KEY_2[6] = {0x4C, 0xA6, 0x02, 0x9F, 0x94, 0x73};
-static const uint8_t STANDARD_KEY_3[6] = {0x19, 0x19, 0x53, 0x98, 0xE3, 0x2F};
+static const uint8_t STANDARD_KEYS[3][6] = {
+    {0x20, 0x31, 0xD1, 0xE5, 0x7A, 0x3B},
+    {0x4C, 0xA6, 0x02, 0x9F, 0x94, 0x73},
+    {0x19, 0x19, 0x53, 0x98, 0xE3, 0x2F}
+};
 
 typedef struct {
     uint32_t timestamp;
@@ -57,63 +59,42 @@ static const char* get_concession_type(uint8_t token) {
 }
 
 
+static bool authenticate_and_read(Nfc* nfc, uint8_t sector, const uint8_t* key, MfClassicKeyType key_type, MfClassicBlock* block_data) {
+    MfClassicKey mf_key = {};
+    memcpy(mf_key.data, key, 6);
+    MfClassicError error = mf_classic_poller_sync_auth(nfc, mf_classic_get_first_block_num_of_sector(sector), &mf_key, key_type, NULL);
+    if (error != MfClassicErrorNone) {
+        FURI_LOG_D(TAG, "Authentication failed for sector %d key type %d", sector, key_type);
+        return false;
+    }
+    error = mf_classic_poller_sync_read_block(nfc, mf_classic_get_first_block_num_of_sector(sector), &mf_key, key_type, block_data);
+    if (error != MfClassicErrorNone) {
+        FURI_LOG_D(TAG, "Read failed for sector %d", sector);
+        return false;
+    }
+    return true;
+}
+
 static bool smartrider_verify(Nfc* nfc) {
     furi_assert(nfc);
-
-    MfClassicKey key = {};
-    MfClassicError error;
     MfClassicBlock block_data;
 
-    // Check Sector 0 Key A (STANDARD_KEY_1)
-    memcpy(key.data, STANDARD_KEY_1, sizeof(STANDARD_KEY_1));
-    error = mf_classic_poller_sync_auth(nfc, 0, &key, MfClassicKeyTypeA, NULL);
-    if (error != MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Sector 0 Key A authentication failed");
-        return false;
+    // Authenticate and read blocks for each standard key
+    for (int i = 0; i < 3; i++) {
+        if (!authenticate_and_read(nfc, i * 6, STANDARD_KEYS[i], i % 2 == 0 ? MfClassicKeyTypeA : MfClassicKeyTypeB, &block_data)) {
+            FURI_LOG_D(TAG, "Authentication or read failed for key %d", i);
+            return false;
+        }
+        if (memcmp(block_data.data, STANDARD_KEYS[i], 6) != 0) {
+            FURI_LOG_D(TAG, "Key mismatch for key %d", i);
+            return false;
+        }
     }
 
-    // Read the key from the card and compare
-    error = mf_classic_poller_sync_read_block(nfc, 0, &key, MfClassicKeyTypeA, &block_data);
-    if (error != MfClassicErrorNone || memcmp(block_data.data, STANDARD_KEY_1, 6) != 0) {
-        FURI_LOG_D(TAG, "Sector 0 Key A mismatch");
-        return false;
-    }
-
-    // Check Sector 6 Key A (STANDARD_KEY_2)
-    uint8_t sector_6_first_block = mf_classic_get_first_block_num_of_sector(6);
-    memcpy(key.data, STANDARD_KEY_2, sizeof(STANDARD_KEY_2));
-    error = mf_classic_poller_sync_auth(nfc, sector_6_first_block, &key, MfClassicKeyTypeA, NULL);
-    if (error != MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Sector 6 Key A authentication failed");
-        return false;
-    }
-
-    // Read the key from the card and compare
-    error = mf_classic_poller_sync_read_block(nfc, sector_6_first_block, &key, MfClassicKeyTypeA, &block_data);
-    if (error != MfClassicErrorNone || memcmp(block_data.data, STANDARD_KEY_2, 6) != 0) {
-        FURI_LOG_D(TAG, "Sector 6 Key A mismatch");
-        return false;
-    }
-
-    // Check Sector 6 Key B (STANDARD_KEY_3)
-    memcpy(key.data, STANDARD_KEY_3, sizeof(STANDARD_KEY_3));
-    error = mf_classic_poller_sync_auth(nfc, sector_6_first_block, &key, MfClassicKeyTypeB, NULL);
-    if (error != MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Sector 6 Key B authentication failed");
-        return false;
-    }
-
-    // Read the key from the card and compare
-    error = mf_classic_poller_sync_read_block(nfc, sector_6_first_block + 3, &key, MfClassicKeyTypeB, &block_data);
-    if (error != MfClassicErrorNone || memcmp(&block_data.data[10], STANDARD_KEY_3, 6) != 0) {
-        FURI_LOG_D(TAG, "Sector 6 Key B mismatch");
-        return false;
-    }
-
-    // If all checks pass, it's likely a SmartRider card
     FURI_LOG_I(TAG, "SmartRider card verified");
     return true;
 }
+
 
 static bool parse_trip_data(const MfClassicBlock* block_data, TripData* trip, int trip_offset) {
     trip->timestamp = bit_lib_bytes_to_num_le(block_data->data + trip_offset + 3, 4);
@@ -133,35 +114,46 @@ static bool smartrider_read(Nfc* nfc, NfcDevice* device) {
     bool is_read = false;
     MfClassicData* data = mf_classic_alloc();
     nfc_device_copy_data(device, NfcProtocolMfClassic, data);
-    do {
-        MfClassicType type = MfClassicTypeMini;
-        MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
-        if(error != MfClassicErrorNone) break;
-        data->type = type;
-        if(type != MfClassicType1k) break;
-        MfClassicDeviceKeys keys = {
-            .key_a_mask = 0,
-            .key_b_mask = 0,
-        };
-        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
-            if(i == 0) {
-                memcpy(keys.key_a[i].data, STANDARD_KEY_1, sizeof(STANDARD_KEY_1));
-                FURI_BIT_SET(keys.key_a_mask, i);
-            } else {
-                memcpy(keys.key_a[i].data, STANDARD_KEY_2, sizeof(STANDARD_KEY_2));
-                memcpy(keys.key_b[i].data, STANDARD_KEY_3, sizeof(STANDARD_KEY_3));
-                FURI_BIT_SET(keys.key_a_mask, i);
-                FURI_BIT_SET(keys.key_b_mask, i);
-            }
-        }
-        error = mf_classic_poller_sync_read(nfc, &keys, data);
-        if(error == MfClassicErrorNotPresent) {
-            FURI_LOG_W(TAG, "Failed to read data");
-            break;
-        }
-        nfc_device_set_data(device, NfcProtocolMfClassic, data);
-        is_read = (error == MfClassicErrorNone);
-    } while(false);
+
+    MfClassicType type = MfClassicTypeMini;
+    MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
+    if (error != MfClassicErrorNone) {
+        mf_classic_free(data);
+        return false;
+    }
+
+    data->type = type;
+    if (type != MfClassicType1k) {
+        mf_classic_free(data);
+        return false;
+    }
+
+    MfClassicDeviceKeys keys = {
+        .key_a_mask = 0,
+        .key_b_mask = 0
+    };
+
+    // Pre-set all keys to the default for sectors beyond the first
+    for (size_t i = 1; i < mf_classic_get_total_sectors_num(data->type); i++) {
+        memcpy(keys.key_a[i].data, STANDARD_KEYS[1], sizeof(STANDARD_KEYS[1]));
+        memcpy(keys.key_b[i].data, STANDARD_KEYS[2], sizeof(STANDARD_KEYS[2]));
+        FURI_BIT_SET(keys.key_a_mask, i);
+        FURI_BIT_SET(keys.key_b_mask, i);
+    }
+
+    // Set key for the first sector
+    memcpy(keys.key_a[0].data, STANDARD_KEYS[0], sizeof(STANDARD_KEYS[0]));
+    FURI_BIT_SET(keys.key_a_mask, 0);
+
+    error = mf_classic_poller_sync_read(nfc, &keys, data);
+    if (error == MfClassicErrorNotPresent) {
+        FURI_LOG_W(TAG, "Failed to read data");
+        mf_classic_free(data);
+        return false;
+    }
+
+    nfc_device_set_data(device, NfcProtocolMfClassic, data);
+    is_read = (error == MfClassicErrorNone);
     mf_classic_free(data);
     return is_read;
 }
@@ -173,15 +165,13 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
     do {
         // Verify key
         const uint8_t verify_sector = 0;  // We'll check sector 0 for SmartRider
-        const MfClassicSectorTrailer* sec_tr =
-            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
+        const MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         if(sec_tr == NULL) {
             FURI_LOG_E(TAG, "Failed to get sector trailer for sector %d", verify_sector);
             break;
         }
-        const uint64_t key =
-            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
-        if(key != bit_lib_bytes_to_num_be(STANDARD_KEY_1, sizeof(STANDARD_KEY_1))) {
+        const uint64_t key = bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
+        if(key != bit_lib_bytes_to_num_be(STANDARD_KEYS[0], sizeof(STANDARD_KEYS[0]))) {
             FURI_LOG_E(TAG, "Key mismatch for sector 0");
             break;
         }
