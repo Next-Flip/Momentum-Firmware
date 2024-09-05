@@ -1,7 +1,7 @@
 App(
     appid="expansion_settings",
     name="Expansion Modules",
-    apptype=FlipperAppType.SETTINGS,
+    apptype=FlipperAppType.SETTINGSEXTERNAL,
     entry_point="expansion_settings_app",
     requires=["gui"],
     flags=["InsomniaSafe"],

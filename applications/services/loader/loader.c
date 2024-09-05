@@ -16,18 +16,21 @@
 
 // helpers
 
-static const char*
-    loader_find_external_application_by_name(const char* app_name, FlipperApplicationFlag* flags) {
+static const char* loader_find_external_application_by_name(
+    const char* app_name,
+    FlipperInternalApplicationFlag* flags) {
     for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            if(flags) *flags = FLIPPER_EXTERNAL_APPS[i].flags;
+            if(flags) *flags = FlipperInternalApplicationFlagDefault;
             return FLIPPER_EXTERNAL_APPS[i].path;
         }
     }
 
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
+        FlipperInternalApplicationFlag app_flags = FLIPPER_SETTINGS_APPS[i].flags;
+        if(!(app_flags & FlipperInternalApplicationFlagExternal)) continue;
         if(strcmp(FLIPPER_SETTINGS_APPS[i].name, app_name) == 0) {
-            if(flags) *flags = FLIPPER_SETTINGS_APPS[i].flags;
+            if(flags) *flags = app_flags & ~FlipperInternalApplicationFlagExternal;
             return FLIPPER_SETTINGS_APPS[i].path;
         }
     }
@@ -358,6 +361,7 @@ static FlipperInternalApplication const* loader_find_application_by_name_in_list
     const FlipperInternalApplication* list,
     const uint32_t n_apps) {
     for(size_t i = 0; i < n_apps; i++) {
+        if(list[i].flags & FlipperInternalApplicationFlagExternal) continue;
         if((strcmp(name, list[i].name) == 0) || (strcmp(name, list[i].appid) == 0)) {
             return &list[i];
         }
@@ -371,6 +375,7 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
         const uint32_t count;
     } lists[] = {
         {FLIPPER_APPS, FLIPPER_APPS_COUNT},
+        {FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT},
         {FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT},
         {FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT},
     };
@@ -386,7 +391,7 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
     return NULL;
 }
 
-static void loader_start_app_thread(Loader* loader, FlipperApplicationFlag flags) {
+static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
     // setup heap trace
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
     if(mode > FuriHalRtcHeapTrackModeNone) {
@@ -396,7 +401,7 @@ static void loader_start_app_thread(Loader* loader, FlipperApplicationFlag flags
     }
 
     // setup insomnia
-    if(!(flags & FlipperApplicationFlagInsomniaSafe)) {
+    if(!(flags & FlipperInternalApplicationFlagInsomniaSafe)) {
         furi_hal_power_insomnia_enter();
         loader->app.insomniac = true;
     } else {
@@ -502,7 +507,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
     const char* path,
     const char* args,
     FuriString* error_message,
-    FlipperApplicationFlag flags) {
+    FlipperInternalApplicationFlag flags) {
     LoaderMessageLoaderStatusResult result;
     result.value = loader_make_success_status(error_message);
     result.error = LoaderStatusErrorUnknown;
@@ -700,7 +705,7 @@ static LoaderMessageLoaderStatusResult loader_do_start_by_name(
         }
 
         // check External Applications
-        FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
+        FlipperInternalApplicationFlag flags = FlipperInternalApplicationFlagDefault;
         {
             const char* path = loader_find_external_application_by_name(name, &flags);
             if(path) {

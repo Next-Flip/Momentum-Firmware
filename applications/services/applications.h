@@ -4,24 +4,31 @@
 #include <gui/icon.h>
 
 typedef enum {
-    FlipperApplicationFlagDefault = 0,
-    FlipperApplicationFlagInsomniaSafe = (1 << 0),
-} FlipperApplicationFlag;
+    FlipperInternalApplicationFlagDefault = 0,
+    FlipperInternalApplicationFlagInsomniaSafe = (1 << 0),
+
+    // Workaround for int and ext apps in same array:
+    // - use FlipperInternalApplication struct and array
+    // - set this flag to indicate it is external
+    FlipperInternalApplicationFlagExternal = (1 << 7),
+} FlipperInternalApplicationFlag;
 
 typedef struct {
     const FuriThreadCallback app;
     const char* name;
-    const char* appid;
+    union {
+        const char* appid; // When internal
+        const char* path; // When flag FlipperInternalApplicationFlagExternal is set
+    };
     const size_t stack_size;
     const Icon* icon;
-    const FlipperApplicationFlag flags;
+    const FlipperInternalApplicationFlag flags;
 } FlipperInternalApplication;
 
 typedef struct {
     const char* name;
     const Icon* icon;
     const char* path;
-    const FlipperApplicationFlag flags;
 } FlipperExternalApplication;
 
 typedef void (*FlipperInternalOnStartHook)(void);
@@ -63,7 +70,7 @@ extern const FlipperInternalApplication FLIPPER_ARCHIVE;
 /* Settings list
  * Spawned by loader
  */
-extern const FlipperExternalApplication FLIPPER_SETTINGS_APPS[];
+extern const FlipperInternalApplication FLIPPER_SETTINGS_APPS[];
 extern const size_t FLIPPER_SETTINGS_APPS_COUNT;
 
 /* External Menu Apps list
