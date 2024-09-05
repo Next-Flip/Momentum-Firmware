@@ -6,6 +6,8 @@
   - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
   - Laster Tag: External Infrared board support (by @RocketGod-git), RFID support for ammo reload (by @jamisonderek)
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
+  - Picopass: File loading improvements and fixes (by @bettse)
+  - Quac!: Setting for external IR board support (by @daniilty), code improvements (by @rdefeo)
 
 ### Fixed:
 - RFID:
