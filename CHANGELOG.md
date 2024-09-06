@@ -11,6 +11,7 @@
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
   - Picopass: File loading improvements and fixes (by @bettse)
   - Quac!: Setting for external IR board support (by @daniilty), code improvements (by @rdefeo)
+  - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - Infrared:
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
