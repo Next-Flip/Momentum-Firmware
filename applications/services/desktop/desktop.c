@@ -441,6 +441,7 @@ void desktop_unlock(Desktop* desktop) {
 }
 
 int32_t desktop_shutdown(void* context) {
+    // Attempt to launch the app, and if failed offer to shutdown (simpler UI)
     Desktop* desktop = context;
     LoaderStatus result = loader_start(desktop->loader, "Power", "off", NULL);
     if(result != LoaderStatusOk) {

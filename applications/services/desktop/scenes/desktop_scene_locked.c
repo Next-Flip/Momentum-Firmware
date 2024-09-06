@@ -84,6 +84,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockedEventOpenPowerOff: {
             if(momentum_settings.lockscreen_poweroff) {
+                // Workaround for shutdown when app can't be opened
                 run_parallel(desktop_shutdown, desktop, 512);
             }
             consumed = true;
