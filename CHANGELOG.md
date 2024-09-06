@@ -1,5 +1,9 @@
 ### Added:
-- UL: Sub-GHz: Add new protocols: Marantec24 (static 24 bit) and GangQi (static 34 bit) (by @xMasterX)
+- Sub-GHz:
+  - UL: Add Marantec24 (static 24 bit) with add manually (by @xMasterX)
+  - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
+  - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
+  - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
 - OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)

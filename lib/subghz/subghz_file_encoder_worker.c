@@ -65,7 +65,7 @@ bool subghz_file_encoder_worker_data_parse(SubGhzFileEncoderWorker* instance, co
                 } else {
                     subghz_file_encoder_worker_add_level_duration(instance, (int32_t)-100);
                 }
-                //FURI_LOG_I("PARSE", "Number overflow - %d", atoi(str1));
+                //FURI_LOG_I("PARSE", "Number overflow - %d", duration);
             } else {
                 subghz_file_encoder_worker_add_level_duration(instance, duration);
             }
