@@ -12,9 +12,12 @@
   - Picopass: File loading improvements and fixes (by @bettse)
   - Quac!: Setting for external IR board support (by @daniilty), code improvements (by @rdefeo)
 - CLI: Print plugin name on load fail (by @Willy-JL)
-- OFW: Infrared: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
+- Infrared:
+  - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
+  - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
 - OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
 - OFW: CCID: App changes and improvements (by @kidbomb)
+- OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
 
 ### Fixed:
 - RFID:
@@ -22,7 +25,7 @@
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
 - Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
 - Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
-- Loader: Warn about missing SD card for main apps (by @Willy-JL)
+- OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
 - OFW: NFC: Fix crash on Ultralight unlock (by @Astrrra)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
