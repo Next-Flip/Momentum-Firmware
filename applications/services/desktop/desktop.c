@@ -440,6 +440,29 @@ void desktop_unlock(Desktop* desktop) {
     desktop->locked = false;
 }
 
+int32_t desktop_shutdown(void* context) {
+    Desktop* desktop = context;
+    LoaderStatus result = loader_start(desktop->loader, "Power", "off", NULL);
+    if(result != LoaderStatusOk) {
+        // Mimic applications/settings/power_settings_app/scenes/power_settings_scene_power_off.c
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_header(message, "Turn Off Device?", 64, 0, AlignCenter, AlignTop);
+        dialog_message_set_text(
+            message, "   I will be\nwaiting for\n you here...", 78, 14, AlignLeft, AlignTop);
+        dialog_message_set_icon(message, &I_dolph_cry_49x54, 14, 10);
+        dialog_message_set_buttons(message, "Cancel", NULL, "Power Off");
+        DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
+        furi_record_close(RECORD_DIALOGS);
+        dialog_message_free(message);
+        if(res == DialogMessageButtonRight) {
+            Power* power = furi_record_open(RECORD_POWER);
+            power_off(power);
+            furi_record_close(RECORD_POWER);
+        }
+    }
+    return 0;
+}
+
 void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     desktop->in_transition = true;
 

@@ -20,6 +20,7 @@
 - RFID:
   - OFW: Fix detection of GProx II cards and false detection of other cards (by @Astrrra)
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
+- Desktop: Poweroff fallback when app unavailable (by @Willy-JL)
 - Loader: Warn about missing SD card for main apps (by @Willy-JL)
 - OFW: NFC: Fix crash on Ultralight unlock (by @Astrrra)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)

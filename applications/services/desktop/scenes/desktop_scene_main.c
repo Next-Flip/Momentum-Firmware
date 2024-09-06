@@ -3,6 +3,7 @@
 #include <applications.h>
 #include <assets_icons.h>
 #include <loader/loader.h>
+#include <toolbox/run_parallel.h>
 
 #include "../desktop_i.h"
 #include "../views/desktop_events.h"
@@ -119,7 +120,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenPowerOff: {
-            loader_start_detached_with_gui_error(desktop->loader, "Power", "off");
+            run_parallel(desktop_shutdown, desktop, 512);
             consumed = true;
             break;
         }
