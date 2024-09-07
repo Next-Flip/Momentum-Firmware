@@ -1,21 +1,22 @@
-ID 1234:5678 Apple:Keyboard
-REM You can change these values to VID/PID of original Apple keyboard
-REM to bypass Keyboard Setup Assistant
+ID 1234:abcd Generic:USB Keyboard
+REM Declare ourselves as a generic usb keyboard
+REM You can override this to use something else
+REM Check the `lsusb` command to know your own devices IDs
 
-REM This is BadUSB demo script for macOS
+REM This is BadUSB demo script for Linux/Gnome
 
 REM Open terminal window
 DELAY 1000
-GUI SPACE
+ALT F2
 DELAY 500
-STRING terminal
+STRING gnome-terminal --maximize
 DELAY 500
 ENTER
 DELAY 750
 
-REM Copy-Paste previous string
-UP
-CTRL c
+REM Clear the screen in case some banner was displayed
+STRING clear
+ENTER
 
 REM Bigger shell script example
 STRING cat > /dev/null << EOF

@@ -11,6 +11,7 @@ typedef enum {
     DesktopSettingsAutoLockDelay,
     DesktopSettingsAutoLockPin,
     DesktopSettingsClockDisplay,
+    DesktopSettingsHappyMode,
 } DesktopSettingsEntry;
 
 #define AUTO_LOCK_DELAY_COUNT 9
@@ -104,13 +105,15 @@ void desktop_settings_scene_start_on_enter(void* context) {
         variable_item_list,
         "Show Clock",
         CLOCK_ENABLE_COUNT,
-        desktop_settings_scene_start_clock_enable_changed, //
+        desktop_settings_scene_start_clock_enable_changed,
         app);
 
     value_index =
         value_index_uint32(app->settings.display_clock, clock_enable_value, CLOCK_ENABLE_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, clock_enable_text[value_index]);
+
+    variable_item_list_add(variable_item_list, "Happy Mode", 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
@@ -140,6 +143,10 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent even
                 app->scene_manager, DesktopSettingsAppSceneKeybindsType, 0);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneKeybindsReset);
             consumed = true;
+            break;
+
+        case DesktopSettingsHappyMode:
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneHappyMode);
             break;
 
         default:
