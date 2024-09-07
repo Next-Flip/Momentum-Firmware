@@ -4,6 +4,10 @@
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
+- BadKB:
+  - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
+  - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
+- OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
 - OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
@@ -23,6 +27,7 @@
 - OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
+- OFW: Furi: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
 
 ### Fixed:
 - RFID:
