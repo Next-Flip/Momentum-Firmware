@@ -30,6 +30,7 @@
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
 - Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
 - Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+- About: Fix BLE stack version string (by @Willy-JL)
 - OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
 - OFW: NFC: Fix crash on Ultralight unlock (by @Astrrra)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
