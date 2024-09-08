@@ -4,8 +4,10 @@
 #include <furi.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include <string.h>
-#define MAX_TRIPS 10
-#define TAG       "SmartRider"
+#define MAX_TRIPS           10
+#define TAG                 "SmartRider"
+#define MAX_BLOCKS          64
+#define MAX_DATE_ITERATIONS 366
 
 static const uint8_t STANDARD_KEYS[3][6] = {
     {0x20, 0x31, 0xD1, 0xE5, 0x7A, 0x3B},
@@ -19,7 +21,7 @@ typedef struct {
     uint32_t cost;
     uint16_t transaction_number;
     uint16_t journey_number;
-    uint8_t block; // Added to store the block number
+    uint8_t block;
 } TripData;
 
 typedef struct {
@@ -180,6 +182,8 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
     bool parsed = false;
+    bool error_occurred = false;
+
     do {
         // Verify key
         const uint8_t verify_sector = 0; // We'll check sector 0 for SmartRider
@@ -187,12 +191,14 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
             mf_classic_get_sector_trailer_by_sector(data, verify_sector);
         if(sec_tr == NULL) {
             FURI_LOG_E(TAG, "Failed to get sector trailer for sector %d", verify_sector);
+            error_occurred = true;
             break;
         }
         const uint64_t key =
             bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
         if(key != bit_lib_bytes_to_num_be(STANDARD_KEYS[0], sizeof(STANDARD_KEYS[0]))) {
             FURI_LOG_E(TAG, "Key mismatch for sector 0");
+            error_occurred = true;
             break;
         }
 
@@ -206,48 +212,83 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
             offset_to_block(0x320),
             offset_to_block(0x06)};
         for(size_t i = 0; i < COUNT_OF(required_blocks); i++) {
-            if(!mf_classic_is_block_read(data, required_blocks[i])) {
-                FURI_LOG_E(TAG, "Required block %d is not read", required_blocks[i]);
+            if(required_blocks[i] >= MAX_BLOCKS ||
+               !mf_classic_is_block_read(data, required_blocks[i])) {
+                FURI_LOG_E(
+                    TAG, "Required block %d is not read or out of range", required_blocks[i]);
+                error_occurred = true;
                 break;
             }
         }
+        if(error_occurred) break;
 
         SmartRiderData sr_data = {0};
 
         // Parse balance
         const uint8_t balance_block = offset_to_block(0xe0);
-        const uint8_t* block_data = data->block[balance_block].data;
-        sr_data.balance = bit_lib_bytes_to_num_le(block_data + offset_in_block(0xe0) + 7, 2);
+        if(balance_block < MAX_BLOCKS) {
+            const uint8_t* block_data = data->block[balance_block].data;
+            sr_data.balance = bit_lib_bytes_to_num_le(block_data + offset_in_block(0xe0) + 7, 2);
+        } else {
+            FURI_LOG_E(TAG, "Balance block out of range");
+            error_occurred = true;
+            break;
+        }
 
         // Parse configuration data (Sector 1)
         const uint8_t config_block = offset_to_block(0x40);
-        block_data = data->block[config_block].data;
-        sr_data.issued_days = bit_lib_bytes_to_num_le(block_data + 16, 2);
-        sr_data.expiry_days = bit_lib_bytes_to_num_le(block_data + 18, 2);
-        sr_data.auto_load_threshold = bit_lib_bytes_to_num_le(block_data + 20, 2);
-        sr_data.auto_load_value = bit_lib_bytes_to_num_le(block_data + 22, 2);
+        if(config_block < MAX_BLOCKS) {
+            const uint8_t* block_data = data->block[config_block].data;
+            sr_data.issued_days = bit_lib_bytes_to_num_le(block_data + 16, 2);
+            sr_data.expiry_days = bit_lib_bytes_to_num_le(block_data + 18, 2);
+            sr_data.auto_load_threshold = bit_lib_bytes_to_num_le(block_data + 20, 2);
+            sr_data.auto_load_value = bit_lib_bytes_to_num_le(block_data + 22, 2);
+        } else {
+            FURI_LOG_E(TAG, "Config block out of range");
+            error_occurred = true;
+            break;
+        }
 
         // Parse current token
         const uint8_t token_block = offset_to_block(0x50);
-        block_data = data->block[token_block].data;
-        sr_data.token = block_data[8];
+        if(token_block < MAX_BLOCKS) {
+            const uint8_t* block_data = data->block[token_block].data;
+            sr_data.token = block_data[8];
+        } else {
+            FURI_LOG_E(TAG, "Token block out of range");
+            error_occurred = true;
+            break;
+        }
 
         // Parse card serial number
-        block_data = data->block[1].data;
-        snprintf(
-            sr_data.card_serial_number,
-            sizeof(sr_data.card_serial_number),
-            "%02X%02X%02X%02X%02X",
-            block_data[6],
-            block_data[7],
-            block_data[8],
-            block_data[9],
-            block_data[10]);
+        if(1 < MAX_BLOCKS) {
+            const uint8_t* block_data = data->block[1].data;
+            snprintf(
+                sr_data.card_serial_number,
+                sizeof(sr_data.card_serial_number),
+                "%02X%02X%02X%02X%02X",
+                block_data[6],
+                block_data[7],
+                block_data[8],
+                block_data[9],
+                block_data[10]);
+        } else {
+            FURI_LOG_E(TAG, "Serial number block out of range");
+            error_occurred = true;
+            break;
+        }
 
         // Parse purchase cost
         const uint8_t purchase_block = offset_to_block(0x06);
-        block_data = data->block[purchase_block].data;
-        sr_data.purchase_cost = bit_lib_bytes_to_num_le(block_data + offset_in_block(0x06) + 8, 2);
+        if(purchase_block < MAX_BLOCKS) {
+            const uint8_t* block_data = data->block[purchase_block].data;
+            sr_data.purchase_cost =
+                bit_lib_bytes_to_num_le(block_data + offset_in_block(0x06) + 8, 2);
+        } else {
+            FURI_LOG_E(TAG, "Purchase cost block out of range");
+            error_occurred = true;
+            break;
+        }
 
         // Parse trips
         sr_data.trip_count = 0;
@@ -256,8 +297,8 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
             if(block_number == 43 || block_number == 47 || block_number == 51) {
                 continue; // Skip these blocks as they contain incorrect data
             }
-            if(!mf_classic_is_block_read(data, block_number)) {
-                continue; // Skip unread blocks
+            if(block_number >= MAX_BLOCKS || !mf_classic_is_block_read(data, block_number)) {
+                continue; // Skip unread or out of range blocks
             }
             const MfClassicBlock* block_data = &data->block[block_number];
             if(parse_trip_data(block_data, &sr_data.trips[sr_data.trip_count], block_number)) {
@@ -309,7 +350,8 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
             uint32_t day = days_since_2000 % 365 + 1;
 
             // Simple date calculation (not accounting for leap years)
-            while(day > 28) {
+            int iterations = 0;
+            while(day > 28 && iterations++ < MAX_DATE_ITERATIONS) {
                 if(month == 2) {
                     day -= 28;
                     month++;
@@ -326,6 +368,11 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
                     month = 1;
                     year++;
                 }
+            }
+
+            if(iterations >= MAX_DATE_ITERATIONS) {
+                FURI_LOG_E(TAG, "Date calculation error for trip %d", i);
+                continue;
             }
 
             // Manually format the date string as dd/mm/yy
@@ -360,7 +407,8 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         parsed = true;
     } while(false);
-    return parsed;
+
+    return parsed && !error_occurred;
 }
 
 static const NfcSupportedCardsPlugin smartrider_plugin = {
