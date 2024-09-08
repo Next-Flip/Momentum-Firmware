@@ -70,45 +70,43 @@ static const char* get_concession_type(uint8_t token) {
     }
 }
 
-static bool authenticate_and_read(
+static inline uint8_t get_first_block_num_of_sector(uint8_t sector) {
+    return sector * 4;
+}
+
+__attribute__((always_inline)) static inline bool authenticate_and_read(
     Nfc* nfc,
     uint8_t sector,
     const uint8_t* key,
     MfClassicKeyType key_type,
     MfClassicBlock* block_data) {
-    MfClassicKey mf_key = {};
-    memcpy(mf_key.data, key, 6);
-    MfClassicError error = mf_classic_poller_sync_auth(
-        nfc, mf_classic_get_first_block_num_of_sector(sector), &mf_key, key_type, NULL);
-    if(error != MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Authentication failed for sector %d key type %d", sector, key_type);
+    MfClassicKey mf_key = {{0}};
+    __builtin_memcpy(mf_key.data, key, 6);
+
+    uint8_t block = get_first_block_num_of_sector(sector);
+
+    if(mf_classic_poller_sync_auth(nfc, block, &mf_key, key_type, NULL) != MfClassicErrorNone) {
         return false;
     }
-    error = mf_classic_poller_sync_read_block(
-        nfc, mf_classic_get_first_block_num_of_sector(sector), &mf_key, key_type, block_data);
-    if(error != MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Read failed for sector %d", sector);
-        return false;
-    }
-    return true;
+
+    return mf_classic_poller_sync_read_block(nfc, block, &mf_key, key_type, block_data) ==
+           MfClassicErrorNone;
 }
 
-static bool smartrider_verify(Nfc* nfc) {
+__attribute__((hot)) static bool smartrider_verify(Nfc* nfc) {
     furi_assert(nfc);
     MfClassicBlock block_data;
 
-    // Authenticate and read blocks for each standard key
-    for(int i = 0; i < 3; i++) {
-        if(!authenticate_and_read(
-               nfc,
-               i * 6,
-               STANDARD_KEYS[i],
-               i % 2 == 0 ? MfClassicKeyTypeA : MfClassicKeyTypeB,
-               &block_data)) {
+    static const uint8_t sectors[] = {0, 6, 12};
+    static const MfClassicKeyType key_types[] = {
+        MfClassicKeyTypeA, MfClassicKeyTypeB, MfClassicKeyTypeA};
+
+    for(uint_fast8_t i = 0; i < 3; i++) {
+        if(!authenticate_and_read(nfc, sectors[i], STANDARD_KEYS[i], key_types[i], &block_data)) {
             FURI_LOG_D(TAG, "Authentication or read failed for key %d", i);
             return false;
         }
-        if(memcmp(block_data.data, STANDARD_KEYS[i], 6) != 0) {
+        if(__builtin_memcmp(block_data.data, STANDARD_KEYS[i], 6) != 0) {
             FURI_LOG_D(TAG, "Key mismatch for key %d", i);
             return false;
         }
@@ -130,285 +128,203 @@ static bool
     trip->block = block_number;
     return true;
 }
+static inline void set_key(MfClassicKey* dst, const uint8_t* src) {
+    memcpy(dst->data, src, sizeof(dst->data));
+}
 
-static bool smartrider_read(Nfc* nfc, NfcDevice* device) {
+__attribute__((hot)) static bool smartrider_read(Nfc* nfc, NfcDevice* device) {
     furi_assert(nfc);
     furi_assert(device);
-    bool is_read = false;
+
     MfClassicData* data = mf_classic_alloc();
     nfc_device_copy_data(device, NfcProtocolMfClassic, data);
 
-    MfClassicType type = MfClassicTypeMini;
-    MfClassicError error = mf_classic_poller_sync_detect_type(nfc, &type);
-    if(error != MfClassicErrorNone) {
+    MfClassicType type;
+    if(mf_classic_poller_sync_detect_type(nfc, &type) != MfClassicErrorNone ||
+       type != MfClassicType1k) {
         mf_classic_free(data);
         return false;
     }
-
     data->type = type;
-    if(type != MfClassicType1k) {
-        mf_classic_free(data);
-        return false;
-    }
 
-    MfClassicDeviceKeys keys = {.key_a_mask = 0, .key_b_mask = 0};
+    MfClassicDeviceKeys keys = {0};
+    const size_t total_sectors = mf_classic_get_total_sectors_num(type);
 
-    // Pre-set all keys to the default for sectors beyond the first
-    for(size_t i = 1; i < mf_classic_get_total_sectors_num(data->type); i++) {
-        memcpy(keys.key_a[i].data, STANDARD_KEYS[1], sizeof(STANDARD_KEYS[1]));
-        memcpy(keys.key_b[i].data, STANDARD_KEYS[2], sizeof(STANDARD_KEYS[2]));
+    // Set keys for all sectors
+    for(size_t i = 0; i < total_sectors; i++) {
+        set_key(&keys.key_a[i], STANDARD_KEYS[i == 0 ? 0 : 1]);
+        if(i > 0) {
+            set_key(&keys.key_b[i], STANDARD_KEYS[2]);
+            FURI_BIT_SET(keys.key_b_mask, i);
+        }
         FURI_BIT_SET(keys.key_a_mask, i);
-        FURI_BIT_SET(keys.key_b_mask, i);
     }
 
-    // Set key for the first sector
-    memcpy(keys.key_a[0].data, STANDARD_KEYS[0], sizeof(STANDARD_KEYS[0]));
-    FURI_BIT_SET(keys.key_a_mask, 0);
+    MfClassicError error = mf_classic_poller_sync_read(nfc, &keys, data);
 
-    error = mf_classic_poller_sync_read(nfc, &keys, data);
-    if(error == MfClassicErrorNotPresent) {
-        FURI_LOG_W(TAG, "Failed to read data");
+    if(error != MfClassicErrorNone) {
+        if(error == MfClassicErrorNotPresent) {
+            FURI_LOG_W(TAG, "Failed to read data");
+        }
         mf_classic_free(data);
         return false;
     }
 
     nfc_device_set_data(device, NfcProtocolMfClassic, data);
-    is_read = (error == MfClassicErrorNone);
     mf_classic_free(data);
-    return is_read;
+    return true;
 }
 
-static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
+static inline uint16_t read_le16(const uint8_t* data) {
+    return (uint16_t)data[0] | ((uint16_t)data[1] << 8);
+}
+
+static inline void format_hex(char* dst, const uint8_t* src, size_t len) {
+    static const char hex_chars[] = "0123456789ABCDEF";
+    for(size_t i = 0; i < len; i++) {
+        dst[i * 2] = hex_chars[src[i] >> 4];
+        dst[i * 2 + 1] = hex_chars[src[i] & 0xF];
+    }
+}
+
+static inline uint8_t days_in_month(uint8_t month) {
+    static const uint8_t days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    return days[month - 1];
+}
+
+__attribute__((hot)) static bool
+    smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
-    bool parsed = false;
-    bool error_occurred = false;
 
-    do {
-        // Verify key
-        const uint8_t verify_sector = 0; // We'll check sector 0 for SmartRider
-        const MfClassicSectorTrailer* sec_tr =
-            mf_classic_get_sector_trailer_by_sector(data, verify_sector);
-        if(sec_tr == NULL) {
-            FURI_LOG_E(TAG, "Failed to get sector trailer for sector %d", verify_sector);
-            error_occurred = true;
-            break;
-        }
-        const uint64_t key =
-            bit_lib_bytes_to_num_be(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
-        if(key != bit_lib_bytes_to_num_be(STANDARD_KEYS[0], sizeof(STANDARD_KEYS[0]))) {
-            FURI_LOG_E(TAG, "Key mismatch for sector 0");
-            error_occurred = true;
-            break;
-        }
+    // Verify key
+    const MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 0);
+    if(!sec_tr || memcmp(sec_tr->key_a.data, STANDARD_KEYS[0], 6) != 0) {
+        FURI_LOG_E(TAG, "Key verification failed for sector 0");
+        return false;
+    }
 
-        // Check if required blocks are read
-        const uint8_t required_blocks[] = {
-            offset_to_block(0xe0),
-            offset_to_block(0x40),
-            offset_to_block(0x50),
-            1,
-            offset_to_block(0x340),
-            offset_to_block(0x320),
-            offset_to_block(0x06)};
-        for(size_t i = 0; i < COUNT_OF(required_blocks); i++) {
-            if(required_blocks[i] >= MAX_BLOCKS ||
-               !mf_classic_is_block_read(data, required_blocks[i])) {
-                FURI_LOG_E(
-                    TAG, "Required block %d is not read or out of range", required_blocks[i]);
-                error_occurred = true;
-                break;
+    // Check if required blocks are read
+    static const uint8_t required_blocks[] = {14, 4, 5, 1, 52, 50, 0};
+    for(uint_fast8_t i = 0; i < sizeof(required_blocks); i++) {
+        if(required_blocks[i] >= MAX_BLOCKS ||
+           !mf_classic_is_block_read(data, required_blocks[i])) {
+            FURI_LOG_E(TAG, "Required block %d is not read or out of range", required_blocks[i]);
+            return false;
+        }
+    }
+
+    SmartRiderData sr_data = {0};
+
+    // Parse balance and configuration data
+    const uint8_t* balance_data = data->block[14].data;
+    const uint8_t* config_data = data->block[4].data;
+    sr_data.balance = read_le16(balance_data + 7);
+    sr_data.issued_days = read_le16(config_data + 16);
+    sr_data.expiry_days = read_le16(config_data + 18);
+    sr_data.auto_load_threshold = read_le16(config_data + 20);
+    sr_data.auto_load_value = read_le16(config_data + 22);
+
+    // Parse current token and purchase cost
+    sr_data.token = data->block[5].data[8];
+    sr_data.purchase_cost = read_le16(data->block[0].data + 14);
+
+    // Parse card serial number
+    format_hex(sr_data.card_serial_number, data->block[1].data + 6, 5);
+    sr_data.card_serial_number[10] = '\0';
+
+    // Parse trips
+    for(uint_fast8_t block_number = 40; block_number <= 52 && sr_data.trip_count < MAX_TRIPS;
+        block_number++) {
+        if((block_number != 43 && block_number != 47 && block_number != 51) &&
+           mf_classic_is_block_read(data, block_number) &&
+           parse_trip_data(
+               &data->block[block_number], &sr_data.trips[sr_data.trip_count], block_number)) {
+            sr_data.trip_count++;
+        }
+    }
+
+    // Sort trips by timestamp (most recent first) using insertion sort
+    for(size_t i = 1; i < sr_data.trip_count; i++) {
+        TripData key = sr_data.trips[i];
+        int_fast8_t j = i - 1;
+        while(j >= 0 && sr_data.trips[j].timestamp < key.timestamp) {
+            sr_data.trips[j + 1] = sr_data.trips[j];
+            j--;
+        }
+        sr_data.trips[j + 1] = key;
+    }
+
+    // Format the parsed data
+    furi_string_printf(
+        parsed_data,
+        "\e#SmartRider\nBalance: $%u.%02u\nConcession: %s\nSerial: %s%s\n"
+        "Total Cost: $%u.%02u\nAuto-Load: $%u.%02u/$%u.%02u\n\e#Trip History\n",
+        sr_data.balance / 100,
+        sr_data.balance % 100,
+        get_concession_type(sr_data.token),
+        memcmp(sr_data.card_serial_number, "00", 2) == 0 ? "SR0" : "",
+        memcmp(sr_data.card_serial_number, "00", 2) == 0 ? sr_data.card_serial_number + 2 :
+                                                           sr_data.card_serial_number,
+        sr_data.purchase_cost / 100,
+        sr_data.purchase_cost % 100,
+        sr_data.auto_load_threshold / 100,
+        sr_data.auto_load_threshold % 100,
+        sr_data.auto_load_value / 100,
+        sr_data.auto_load_value % 100);
+
+    // Add trip history
+    char date_str[9];
+    for(size_t i = 0; i < sr_data.trip_count; i++) {
+        uint32_t seconds_since_2000 = sr_data.trips[i].timestamp;
+        uint32_t days_since_2000 = seconds_since_2000 / 86400;
+        uint16_t year = 2000 + days_since_2000 / 365;
+        uint8_t month = 1;
+        uint16_t day = days_since_2000 % 365 + 1;
+
+        // Simple date calculation (not accounting for leap years)
+        while(day > 28) {
+            uint8_t days_in_month = days_in_month(month);
+            if(day <= days_in_month) break;
+            day -= days_in_month;
+            if(++month > 12) {
+                month = 1;
+                year++;
             }
         }
-        if(error_occurred) break;
 
-        SmartRiderData sr_data = {0};
+        // Manually format the date string as dd/mm/yy
+        date_str[0] = '0' + (day / 10);
+        date_str[1] = '0' + (day % 10);
+        date_str[2] = '/';
+        date_str[3] = '0' + month / 10;
+        date_str[4] = '0' + month % 10;
+        date_str[5] = '/';
+        date_str[6] = '0' + (year % 100) / 10;
+        date_str[7] = '0' + (year % 100) % 10;
+        date_str[8] = '\0';
 
-        // Parse balance
-        const uint8_t balance_block = offset_to_block(0xe0);
-        if(balance_block < MAX_BLOCKS) {
-            const uint8_t* block_data = data->block[balance_block].data;
-            sr_data.balance = bit_lib_bytes_to_num_le(block_data + offset_in_block(0xe0) + 7, 2);
+        uint32_t cost = sr_data.trips[i].cost;
+        if(cost > 0) {
+            furi_string_cat_printf(
+                parsed_data,
+                "%s %c $%u.%02u %s\n",
+                date_str,
+                sr_data.trips[i].tap_on ? '+' : '-',
+                cost / 100,
+                cost % 100,
+                sr_data.trips[i].route);
         } else {
-            FURI_LOG_E(TAG, "Balance block out of range");
-            error_occurred = true;
-            break;
+            furi_string_cat_printf(
+                parsed_data,
+                "%s %c %s\n",
+                date_str,
+                sr_data.trips[i].tap_on ? '+' : '-',
+                sr_data.trips[i].route);
         }
+    }
 
-        // Parse configuration data (Sector 1)
-        const uint8_t config_block = offset_to_block(0x40);
-        if(config_block < MAX_BLOCKS) {
-            const uint8_t* block_data = data->block[config_block].data;
-            sr_data.issued_days = bit_lib_bytes_to_num_le(block_data + 16, 2);
-            sr_data.expiry_days = bit_lib_bytes_to_num_le(block_data + 18, 2);
-            sr_data.auto_load_threshold = bit_lib_bytes_to_num_le(block_data + 20, 2);
-            sr_data.auto_load_value = bit_lib_bytes_to_num_le(block_data + 22, 2);
-        } else {
-            FURI_LOG_E(TAG, "Config block out of range");
-            error_occurred = true;
-            break;
-        }
-
-        // Parse current token
-        const uint8_t token_block = offset_to_block(0x50);
-        if(token_block < MAX_BLOCKS) {
-            const uint8_t* block_data = data->block[token_block].data;
-            sr_data.token = block_data[8];
-        } else {
-            FURI_LOG_E(TAG, "Token block out of range");
-            error_occurred = true;
-            break;
-        }
-
-        // Parse card serial number
-        if(1 < MAX_BLOCKS) {
-            const uint8_t* block_data = data->block[1].data;
-            snprintf(
-                sr_data.card_serial_number,
-                sizeof(sr_data.card_serial_number),
-                "%02X%02X%02X%02X%02X",
-                block_data[6],
-                block_data[7],
-                block_data[8],
-                block_data[9],
-                block_data[10]);
-        } else {
-            FURI_LOG_E(TAG, "Serial number block out of range");
-            error_occurred = true;
-            break;
-        }
-
-        // Parse purchase cost
-        const uint8_t purchase_block = offset_to_block(0x06);
-        if(purchase_block < MAX_BLOCKS) {
-            const uint8_t* block_data = data->block[purchase_block].data;
-            sr_data.purchase_cost =
-                bit_lib_bytes_to_num_le(block_data + offset_in_block(0x06) + 8, 2);
-        } else {
-            FURI_LOG_E(TAG, "Purchase cost block out of range");
-            error_occurred = true;
-            break;
-        }
-
-        // Parse trips
-        sr_data.trip_count = 0;
-        for(uint8_t block_number = 40; block_number <= 52 && sr_data.trip_count < MAX_TRIPS;
-            block_number++) {
-            if(block_number == 43 || block_number == 47 || block_number == 51) {
-                continue; // Skip these blocks as they contain incorrect data
-            }
-            if(block_number >= MAX_BLOCKS || !mf_classic_is_block_read(data, block_number)) {
-                continue; // Skip unread or out of range blocks
-            }
-            const MfClassicBlock* block_data = &data->block[block_number];
-            if(parse_trip_data(block_data, &sr_data.trips[sr_data.trip_count], block_number)) {
-                sr_data.trip_count++;
-            }
-        }
-
-        // Sort trips by timestamp (most recent first)
-        for(size_t i = 0; i < sr_data.trip_count - 1; i++) {
-            for(size_t j = 0; j < sr_data.trip_count - i - 1; j++) {
-                if(sr_data.trips[j].timestamp < sr_data.trips[j + 1].timestamp) {
-                    TripData temp = sr_data.trips[j];
-                    sr_data.trips[j] = sr_data.trips[j + 1];
-                    sr_data.trips[j + 1] = temp;
-                }
-            }
-        }
-
-        // Format the parsed data
-        furi_string_printf(
-            parsed_data,
-            "\e#SmartRider\n"
-            "Balance: $%lu.%02lu\n"
-            "Concession: %s\n"
-            "Serial: %s%s\n"
-            "Total Cost: $%u.%02u\n"
-            "Auto-Load: $%u.%02u/$%u.%02u\n"
-            "\e#Trip History\n",
-            sr_data.balance / 100,
-            sr_data.balance % 100,
-            get_concession_type(sr_data.token),
-            strncmp(sr_data.card_serial_number, "00", 2) == 0 ? "SR0" : "",
-            strncmp(sr_data.card_serial_number, "00", 2) == 0 ? sr_data.card_serial_number + 2 :
-                                                                sr_data.card_serial_number,
-            sr_data.purchase_cost / 100,
-            sr_data.purchase_cost % 100,
-            sr_data.auto_load_threshold / 100,
-            sr_data.auto_load_threshold % 100,
-            sr_data.auto_load_value / 100,
-            sr_data.auto_load_value % 100);
-
-        // Add trip history
-        for(size_t i = 0; i < sr_data.trip_count; i++) {
-            char date_str[9]; // dd/mm/yy + null terminator
-            uint32_t seconds_since_2000 = sr_data.trips[i].timestamp;
-            uint32_t days_since_2000 = seconds_since_2000 / 86400;
-            uint32_t year = 2000 + days_since_2000 / 365;
-            uint32_t month = 1;
-            uint32_t day = days_since_2000 % 365 + 1;
-
-            // Simple date calculation (not accounting for leap years)
-            int iterations = 0;
-            while(day > 28 && iterations++ < MAX_DATE_ITERATIONS) {
-                if(month == 2) {
-                    day -= 28;
-                    month++;
-                } else if((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
-                    day -= 30;
-                    month++;
-                } else if(day > 31) {
-                    day -= 31;
-                    month++;
-                } else {
-                    break;
-                }
-                if(month > 12) {
-                    month = 1;
-                    year++;
-                }
-            }
-
-            if(iterations >= MAX_DATE_ITERATIONS) {
-                FURI_LOG_E(TAG, "Date calculation error for trip %d", i);
-                continue;
-            }
-
-            // Manually format the date string as dd/mm/yy
-            date_str[0] = '0' + (day / 10);
-            date_str[1] = '0' + (day % 10);
-            date_str[2] = '/';
-            date_str[3] = '0' + (month / 10);
-            date_str[4] = '0' + (month % 10);
-            date_str[5] = '/';
-            date_str[6] = '0' + ((year % 100) / 10);
-            date_str[7] = '0' + ((year % 100) % 10);
-            date_str[8] = '\0';
-
-            // Determine +/- symbol and whether to display cost
-            const char tag_symbol = sr_data.trips[i].tap_on ? '+' : '-';
-            uint32_t cost = sr_data.trips[i].cost;
-
-            if(cost > 0) {
-                furi_string_cat_printf(
-                    parsed_data,
-                    "%s %c $%lu.%02lu %s\n",
-                    date_str,
-                    tag_symbol,
-                    (unsigned long)(cost / 100),
-                    (unsigned long)(cost % 100),
-                    sr_data.trips[i].route);
-            } else {
-                furi_string_cat_printf(
-                    parsed_data, "%s %c %s\n", date_str, tag_symbol, sr_data.trips[i].route);
-            }
-        }
-
-        parsed = true;
-    } while(false);
-
-    return parsed && !error_occurred;
+    return true;
 }
 
 static const NfcSupportedCardsPlugin smartrider_plugin = {
