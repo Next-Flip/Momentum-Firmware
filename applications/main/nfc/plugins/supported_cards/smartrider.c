@@ -4,8 +4,8 @@
 #include <furi.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 #include <string.h>
-
-#define TAG "SmartRider"
+#define MAX_TRIPS 10
+#define TAG       "SmartRider"
 
 static const uint8_t STANDARD_KEYS[3][6] = {
     {0x20, 0x31, 0xD1, 0xE5, 0x7A, 0x3B},
@@ -19,6 +19,7 @@ typedef struct {
     uint32_t cost;
     uint16_t transaction_number;
     uint16_t journey_number;
+    uint8_t block; // Added to store the block number
 } TripData;
 
 typedef struct {
@@ -30,7 +31,8 @@ typedef struct {
     uint16_t purchase_cost;
     uint16_t auto_load_threshold;
     uint16_t auto_load_value;
-    TripData last_trips[2];
+    TripData trips[MAX_TRIPS];
+    size_t trip_count;
 } SmartRiderData;
 
 static int offset_to_block(int offset) {
@@ -114,14 +116,16 @@ static bool smartrider_verify(Nfc* nfc) {
     return true;
 }
 
-static bool parse_trip_data(const MfClassicBlock* block_data, TripData* trip, int trip_offset) {
-    trip->timestamp = bit_lib_bytes_to_num_le(block_data->data + trip_offset + 3, 4);
-    trip->tap_on = (block_data->data[trip_offset + 7] & 0x10) == 0x10;
-    memcpy(trip->route, block_data->data + trip_offset + 8, 4);
+static bool
+    parse_trip_data(const MfClassicBlock* block_data, TripData* trip, uint8_t block_number) {
+    trip->timestamp = bit_lib_bytes_to_num_le(block_data->data + 3, 4);
+    trip->tap_on = (block_data->data[7] & 0x10) == 0x10;
+    memcpy(trip->route, block_data->data + 8, 4);
     trip->route[4] = '\0';
-    trip->cost = bit_lib_bytes_to_num_le(block_data->data + trip_offset + 13, 2);
-    trip->transaction_number = bit_lib_bytes_to_num_le(block_data->data + trip_offset, 2);
-    trip->journey_number = bit_lib_bytes_to_num_le(block_data->data + trip_offset + 2, 2);
+    trip->cost = bit_lib_bytes_to_num_le(block_data->data + 13, 2);
+    trip->transaction_number = bit_lib_bytes_to_num_le(block_data->data, 2);
+    trip->journey_number = bit_lib_bytes_to_num_le(block_data->data + 2, 2);
+    trip->block = block_number;
     return true;
 }
 
@@ -245,20 +249,34 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
         block_data = data->block[purchase_block].data;
         sr_data.purchase_cost = bit_lib_bytes_to_num_le(block_data + offset_in_block(0x06) + 8, 2);
 
-        // Parse last two trips
-        const uint16_t trip_offsets[] = {0x340, 0x320};
-        for(int i = 0; i < 2; i++) {
-            const uint8_t trip_block = offset_to_block(trip_offsets[i]);
-            block_data = data->block[trip_block].data;
-            if(!parse_trip_data(
-                   &data->block[trip_block],
-                   &sr_data.last_trips[i],
-                   offset_in_block(trip_offsets[i]))) {
-                FURI_LOG_E(TAG, "Failed to parse trip data for offset 0x%03X", trip_offsets[i]);
-                break;
+        // Parse trips
+        sr_data.trip_count = 0;
+        for(uint8_t block_number = 40; block_number <= 52 && sr_data.trip_count < MAX_TRIPS;
+            block_number++) {
+            if(block_number == 43 || block_number == 47 || block_number == 51) {
+                continue; // Skip these blocks as they contain incorrect data
+            }
+            if(!mf_classic_is_block_read(data, block_number)) {
+                continue; // Skip unread blocks
+            }
+            const MfClassicBlock* block_data = &data->block[block_number];
+            if(parse_trip_data(block_data, &sr_data.trips[sr_data.trip_count], block_number)) {
+                sr_data.trip_count++;
             }
         }
 
+        // Sort trips by timestamp (most recent first)
+        for(size_t i = 0; i < sr_data.trip_count - 1; i++) {
+            for(size_t j = 0; j < sr_data.trip_count - i - 1; j++) {
+                if(sr_data.trips[j].timestamp < sr_data.trips[j + 1].timestamp) {
+                    TripData temp = sr_data.trips[j];
+                    sr_data.trips[j] = sr_data.trips[j + 1];
+                    sr_data.trips[j + 1] = temp;
+                }
+            }
+        }
+
+        // Format the parsed data
         furi_string_printf(
             parsed_data,
             "\e#SmartRider\n"
@@ -267,8 +285,7 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
             "Serial: %s%s\n"
             "Total Cost: $%u.%02u\n"
             "Auto-Load: $%u.%02u/$%u.%02u\n"
-            "Last Trip: %s $%lu.%02lu %s\n"
-            "Prev Trip: %s $%lu.%02lu %s",
+            "\e#Trip History\n",
             sr_data.balance / 100,
             sr_data.balance % 100,
             get_concession_type(sr_data.token),
@@ -280,15 +297,66 @@ static bool smartrider_parse(const NfcDevice* device, FuriString* parsed_data) {
             sr_data.auto_load_threshold / 100,
             sr_data.auto_load_threshold % 100,
             sr_data.auto_load_value / 100,
-            sr_data.auto_load_value % 100,
-            sr_data.last_trips[0].tap_on ? "Tag on" : "Tag off",
-            (unsigned long)(sr_data.last_trips[0].cost / 100),
-            (unsigned long)(sr_data.last_trips[0].cost % 100),
-            sr_data.last_trips[0].route,
-            sr_data.last_trips[1].tap_on ? "Tag on" : "Tag off",
-            (unsigned long)(sr_data.last_trips[1].cost / 100),
-            (unsigned long)(sr_data.last_trips[1].cost % 100),
-            sr_data.last_trips[1].route);
+            sr_data.auto_load_value % 100);
+
+        // Add trip history
+        for(size_t i = 0; i < sr_data.trip_count; i++) {
+            char date_str[9]; // dd/mm/yy + null terminator
+            uint32_t seconds_since_2000 = sr_data.trips[i].timestamp;
+            uint32_t days_since_2000 = seconds_since_2000 / 86400;
+            uint32_t year = 2000 + days_since_2000 / 365;
+            uint32_t month = 1;
+            uint32_t day = days_since_2000 % 365 + 1;
+
+            // Simple date calculation (not accounting for leap years)
+            while(day > 28) {
+                if(month == 2) {
+                    day -= 28;
+                    month++;
+                } else if((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
+                    day -= 30;
+                    month++;
+                } else if(day > 31) {
+                    day -= 31;
+                    month++;
+                } else {
+                    break;
+                }
+                if(month > 12) {
+                    month = 1;
+                    year++;
+                }
+            }
+
+            // Manually format the date string as dd/mm/yy
+            date_str[0] = '0' + (day / 10);
+            date_str[1] = '0' + (day % 10);
+            date_str[2] = '/';
+            date_str[3] = '0' + (month / 10);
+            date_str[4] = '0' + (month % 10);
+            date_str[5] = '/';
+            date_str[6] = '0' + ((year % 100) / 10);
+            date_str[7] = '0' + ((year % 100) % 10);
+            date_str[8] = '\0';
+
+            // Determine +/- symbol and whether to display cost
+            const char tag_symbol = sr_data.trips[i].tap_on ? '+' : '-';
+            uint32_t cost = sr_data.trips[i].cost;
+
+            if(cost > 0) {
+                furi_string_cat_printf(
+                    parsed_data,
+                    "%s %c $%lu.%02lu %s\n",
+                    date_str,
+                    tag_symbol,
+                    (unsigned long)(cost / 100),
+                    (unsigned long)(cost % 100),
+                    sr_data.trips[i].route);
+            } else {
+                furi_string_cat_printf(
+                    parsed_data, "%s %c %s\n", date_str, tag_symbol, sr_data.trips[i].route);
+            }
+        }
 
         parsed = true;
     } while(false);
@@ -311,3 +379,5 @@ static const FlipperAppPluginDescriptor smartrider_plugin_descriptor = {
 const FlipperAppPluginDescriptor* smartrider_plugin_ep(void) {
     return &smartrider_plugin_descriptor;
 }
+
+// made with love by jay candel <3
