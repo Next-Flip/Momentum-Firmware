@@ -39,7 +39,7 @@ void protocol_gproxii_free(ProtocolGProxII* protocol) {
 }
 
 uint8_t* protocol_gproxii_get_data(ProtocolGProxII* protocol) {
-    return protocol->decoded_data;
+    return protocol->data;
 }
 
 bool wiegand_check(uint64_t fc_and_card, bool even_parity, bool odd_parity, int card_len) {
@@ -77,6 +77,7 @@ bool wiegand_check(uint64_t fc_and_card, bool even_parity, bool odd_parity, int 
         if(odd_parity_sum % 2 != odd_parity) return false;
         break;
     default:
+        furi_crash();
     }
     return true;
 }
@@ -151,23 +152,22 @@ static bool protocol_gproxii_can_be_decoded(ProtocolGProxII* protocol) {
     // Check card length is either 26 or 36
     int card_len = bit_lib_get_bits(protocol->decoded_data, 8, 6);
 
-    if(card_len == 26 || card_len == 36) {
-        // wiegand parity
-        if(card_len == 26) {
-            uint64_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 24);
-            bool even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
-            bool odd_parity = bit_lib_get_bits(protocol->decoded_data, 57, 1);
-            if(!wiegand_check(fc_and_card, even_parity, odd_parity, card_len)) return false;
-        } else if(card_len == 36) {
-            uint64_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 34);
-            uint8_t even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
-            uint8_t odd_parity = bit_lib_get_bits(protocol->decoded_data, 67, 1);
-            if(!wiegand_check(fc_and_card, even_parity, odd_parity, card_len)) return false;
-        }
-        return true;
+    // wiegand parity
+    if(card_len == 26) {
+        uint64_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 24);
+        bool even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
+        bool odd_parity = bit_lib_get_bits(protocol->decoded_data, 57, 1);
+        if(!wiegand_check(fc_and_card, even_parity, odd_parity, card_len)) return false;
+    } else if(card_len == 36) {
+        uint64_t fc_and_card = bit_lib_get_bits_64(protocol->decoded_data, 33, 34);
+        uint8_t even_parity = bit_lib_get_bits(protocol->decoded_data, 32, 1);
+        uint8_t odd_parity = bit_lib_get_bits(protocol->decoded_data, 67, 1);
+        if(!wiegand_check(fc_and_card, even_parity, odd_parity, card_len)) return false;
     } else {
         return false; // If we don't get a 26 or 36 it's not a known card type
     }
+
+    return true;
 }
 
 bool protocol_gproxii_decoder_feed(ProtocolGProxII* protocol, bool level, uint32_t duration) {
@@ -235,6 +235,7 @@ LevelDuration protocol_gproxii_encoder_yield(ProtocolGProxII* protocol) {
 }
 
 void protocol_gproxii_render_data(ProtocolGProxII* protocol, FuriString* result) {
+    protocol_gproxii_can_be_decoded(protocol);
     int xor_code = bit_lib_get_bits(protocol->decoded_data, 0, 8);
     int card_len = bit_lib_get_bits(protocol->decoded_data, 8, 6);
     int crc_code = bit_lib_get_bits(protocol->decoded_data, 14, 2);

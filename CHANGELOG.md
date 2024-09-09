@@ -21,18 +21,24 @@
   - Quac!: Setting for external IR board support (by @daniilty), code improvements (by @rdefeo)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
 - CLI: Print plugin name on load fail (by @Willy-JL)
+- OFW: NFC: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
 - Infrared:
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
+  - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
 - OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
-- OFW: Furi: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
+- Furi:
+  - OFW: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
+  - OFW: Threading, Timers improvements (by @CookiePLMonster)
+  - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
 
 ### Fixed:
 - RFID:
   - OFW: Fix detection of GProx II cards and false detection of other cards (by @Astrrra)
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
+  - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
 - Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
 - Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
 - About: Fix BLE stack version string (by @Willy-JL)
