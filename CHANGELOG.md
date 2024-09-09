@@ -30,6 +30,7 @@
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
 - Furi:
+  - UL: Extra checks for OTG power enable/disable (by @xMasterX)
   - OFW: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
   - OFW: Threading, Timers improvements (by @CookiePLMonster)
   - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
