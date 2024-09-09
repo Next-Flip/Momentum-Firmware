@@ -43,7 +43,9 @@
 - Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
 - About: Fix BLE stack version string (by @Willy-JL)
 - OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
-- OFW: NFC: Fix crash on Ultralight unlock (by @Astrrra)
+- NFC:
+  - OFW: Fix crash on Ultralight unlock (by @Astrrra)
+  - OFW: FeliCa anti-collision fix (by @RebornedBrain)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
 - OFW: Furi: Clean up of LFS traces (by @hedger)
