@@ -33,7 +33,7 @@ typedef struct {
 
 static const uint8_t keyboard_origin_x = 7;
 static const uint8_t keyboard_origin_y = 31;
-static const uint8_t keyboard_row_count = 2;
+static const int8_t keyboard_row_count = 2;
 static const uint8_t enter_symbol = '\r';
 static const uint8_t backspace_symbol = '\b';
 static const uint8_t max_drawable_bytes = 8;
@@ -613,11 +613,11 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
         }
         canvas_set_font(canvas, FontKeyboard);
         // Draw keyboard
-        for(uint8_t row = 0; row < keyboard_row_count; row++) {
+        for(int8_t row = 0; row < keyboard_row_count; row++) {
             const uint8_t column_count = byte_input_get_row_size(row);
             const ByteInputKey* keys = byte_input_get_row(row);
 
-            for(size_t column = 0; column < column_count; column++) {
+            for(uint8_t column = 0; column < column_count; column++) {
                 bool selected = model->selected_row == row && model->selected_column == column;
                 const Icon* icon = NULL;
                 if(keys[column].value == enter_symbol) {

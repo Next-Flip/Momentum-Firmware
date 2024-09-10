@@ -1,30 +1,57 @@
-### Note:
-- This is a smaller release due to the bugfixes it contains, make sure to also read the changelog for [mntm-006](https://github.com/Next-Flip/Momentum-Firmware/releases/tag/mntm-006)
-
 ### Added:
 - Apps:
-  - Games: Laser Tag (by @RocketGod-git & @jamisonderek)
-- NFC: Added new Saflok parser (#196 #201 by @zinongli & @xtruan & @zacharyweiss & @evilmog & @Arkwin)
-- OFW: Desktop: New Procrastination dolphin animation (by @Astrrra)
+  - NFC: Cyborg Detector (by @RocketGod-git)
+- Sub-GHz:
+  - UL: Add Marantec24 (static 24 bit) with add manually (by @xMasterX)
+  - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
+  - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
+  - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
+- BadKB:
+  - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
+  - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
+- OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
+- OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
+- OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
+- OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
 
 ### Updated:
 - Apps:
-  - Picopass: CVE-2024-41566, When keys are unknown emulate with a dummy MAC and ignore reader MACs (by @nvx)
-  - Seader: Card parsing and saving UI and logic improvements (by @bettse)
-  - Authenticator: Confirm token export on Flipper (by @akopachov)
-  - NFC Playlist: Allow delay up to 12s (by @xtruan)
-  - BLE Spam: Fix delay help section (by @Willy-JL)
-  - WAV Player: Fix unresponsiveness (by @Willy-JL)
-- Sub-GHz:
-  - Show Weather Station icon for WS signals (by @Willy-JL)
-  - Update Oregon 2 and 3 weather info display to new design (by @Willy-JL)
-- API: Publishing T5577 page 1 block count macro (by @zinongli)
+  - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
+  - Laster Tag: External Infrared board support (by @RocketGod-git), RFID support for ammo reload (by @jamisonderek)
+  - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
+  - Picopass: File loading improvements and fixes (by @bettse)
+  - Quac!: Setting for external IR board support (by @daniilty), option to import all IR signals from file, code improvements (by @rdefeo)
+  - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
+  - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
+  - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
+- CLI: Print plugin name on load fail (by @Willy-JL)
+- OFW: NFC: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+- Infrared:
+  - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
+  - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
+  - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
+- OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
+- OFW: CCID: App changes and improvements (by @kidbomb)
+- OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
+- Furi:
+  - UL: Extra checks for OTG power enable/disable (by @xMasterX)
+  - OFW: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
+  - OFW: Threading, Timers improvements (by @CookiePLMonster)
+  - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
 
 ### Fixed:
-- Sub-GHz: Fix Acurite 986 temperature value conversion (by @Willy-JL)
-- Desktop:
-  - Fix disabling keybinds (by @Willy-JL)
-  - Sanity check PIN length for good measure (by @Willy-JL)
-  - Fix PIN locked with no PIN set edge case (by @Willy-JL)
-- Settings: Fix duplicates in Power Settings when opening submenus (by @Willy-JL)
-- RGB Backlight: Fix config migration (by @Willy-JL)
+- RFID:
+  - OFW: Fix detection of GProx II cards and false detection of other cards (by @Astrrra)
+  - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
+  - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
+- Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
+- Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+- About: Fix BLE stack version string (by @Willy-JL)
+- OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
+- NFC:
+  - OFW: Fix crash on Ultralight unlock (by @Astrrra)
+  - OFW: FeliCa anti-collision fix (by @RebornedBrain)
+- OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
+- OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
+- OFW: Furi: Clean up of LFS traces (by @hedger)
+- OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)

@@ -3,6 +3,7 @@
 #include <gui/scene_manager.h>
 #include <gui/view_stack.h>
 #include <stdint.h>
+#include <toolbox/run_parallel.h>
 
 #include "../desktop.h"
 #include "../desktop_i.h"
@@ -83,7 +84,8 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockedEventOpenPowerOff: {
             if(momentum_settings.lockscreen_poweroff) {
-                loader_start_detached_with_gui_error(desktop->loader, "Power", "off");
+                // Workaround for shutdown when app can't be opened
+                run_parallel(desktop_shutdown, desktop, 512);
             }
             consumed = true;
             break;
