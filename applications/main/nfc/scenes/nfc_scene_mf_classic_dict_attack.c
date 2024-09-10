@@ -296,6 +296,9 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     instance->nfc_dict_context.is_key_attack = false;
     instance->nfc_dict_context.key_attack_current_sector = 0;
     instance->nfc_dict_context.is_card_present = false;
+    instance->nfc_dict_context.nested_phase = MfClassicNestedPhaseNone;
+    instance->nfc_dict_context.prng_type = MfClassicPrngTypeUnknown;
+    instance->nfc_dict_context.backdoor = MfClassicBackdoorUnknown;
 
     nfc_blink_stop(instance);
 }
