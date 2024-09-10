@@ -18,8 +18,10 @@
   - Laster Tag: External Infrared board support (by @RocketGod-git), RFID support for ammo reload (by @jamisonderek)
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
   - Picopass: File loading improvements and fixes (by @bettse)
-  - Quac!: Setting for external IR board support (by @daniilty), code improvements (by @rdefeo)
+  - Quac!: Setting for external IR board support (by @daniilty), option to import all IR signals from file, code improvements (by @rdefeo)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
+  - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
+  - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - OFW: NFC: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
 - Infrared:
