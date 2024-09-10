@@ -1,4 +1,6 @@
 ### Added:
+- Apps:
+  - NFC: Cyborg Detector (by @RocketGod-git)
 - Sub-GHz:
   - UL: Add Marantec24 (static 24 bit) with add manually (by @xMasterX)
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
