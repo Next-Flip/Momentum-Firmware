@@ -6,6 +6,7 @@
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
+  - UL: Princeton custom buttons support (0x1, 0x2, 0x4, 0x8, 0xF) (by @xMasterX)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
@@ -13,6 +14,7 @@
 - OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
+- OFW: Furi: Put errno into TCB (by @portasynthinca3)
 
 ### Updated:
 - Apps:
@@ -52,6 +54,7 @@
   - OFW: Fix crash on Ultralight unlock (by @Astrrra)
   - OFW: FeliCa anti-collision fix (by @RebornedBrain)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
+- OFW: GPIO: Fix USB-UART bridge exit screen stopping the bridge prematurely (by @portasynthinca3)
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
 - OFW: Furi: Clean up of LFS traces (by @hedger)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
