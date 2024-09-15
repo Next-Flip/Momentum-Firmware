@@ -677,6 +677,13 @@ MU_TEST(subghz_decoder_solight_te44_test) {
         "Test decoder " WS_PROTOCOL_SOLIGHT_TE44_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_bresser_3ch_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/bresser_3ch_raw.sub"), WS_PROTOCOL_BRESSER_3CH_NAME),
+        "Test decoder " WS_PROTOCOL_BRESSER_3CH_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(

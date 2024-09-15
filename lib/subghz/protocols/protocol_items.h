@@ -67,6 +67,7 @@
 #include "emos_e601x.h"
 #include "acurite_5n1.h"
 #include "solight_te44.h"
+#include "bresser_3ch.h"
 #include "pocsag.h"
 #include "schrader_gg4.h"
 #include "bin_raw.h"
