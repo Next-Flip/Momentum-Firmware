@@ -1,12 +1,14 @@
 ### Added:
 - Apps:
   - NFC: Cyborg Detector (by @RocketGod-git)
+  - Sub-GHz: Radio Scanner (by @RocketGod-git)
 - Sub-GHz:
   - UL: Add Marantec24 (static 24 bit) with add manually (by @xMasterX)
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
   - UL: Princeton custom buttons support (0x1, 0x2, 0x4, 0x8, 0xF) (by @xMasterX)
+- NFC: Add API to enforce ISO15693 mode (by @aaronjamt)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
@@ -19,9 +21,9 @@
 ### Updated:
 - Apps:
   - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
-  - Laster Tag: External Infrared board support (by @RocketGod-git), RFID support for ammo reload (by @jamisonderek)
+  - Laser Tag: External Infrared board support, crash fixes (by @RocketGod-git), RFID support for ammo reload, thread leak fix (by @jamisonderek)
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
-  - Picopass: File loading improvements and fixes (by @bettse)
+  - Picopass: File loading improvements and fixes (by @bettse), force ISO15693 1OutOf4 mode (by @aaronjamt)
   - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
@@ -48,7 +50,9 @@
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
 - Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
-- Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+- Storage:
+  - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+  - OFW: Fix folder rename fails (by @portasynthinca3)
 - About: Fix BLE stack version string (by @Willy-JL)
 - OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
 - NFC:
@@ -59,3 +63,4 @@
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
 - OFW: Furi: Clean up of LFS traces (by @hedger)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
+- OFW: API: Fix kerel typo in documentation (by @EntranceJew)
