@@ -48,7 +48,9 @@
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
 - Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
-- Storage: Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+- Storage:
+  - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+  - OFW: Fix folder rename fails (by @portasynthinca3)
 - About: Fix BLE stack version string (by @Willy-JL)
 - OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
 - NFC:
@@ -59,3 +61,4 @@
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
 - OFW: Furi: Clean up of LFS traces (by @hedger)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
+- OFW: API: Fix kerel typo in documentation (by @EntranceJew)
