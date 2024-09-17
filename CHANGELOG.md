@@ -19,11 +19,12 @@
 ### Updated:
 - Apps:
   - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
-  - Laster Tag: External Infrared board support (by @RocketGod-git), RFID support for ammo reload (by @jamisonderek)
+  - Laser Tag: External Infrared board support, crash fixes (by @RocketGod-git), RFID support for ammo reload, thread leak fix (by @jamisonderek)
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
   - Picopass: File loading improvements and fixes (by @bettse)
   - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
+  - Pokemon Trading: Update gblink library with printer support (by @kbembedded)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
