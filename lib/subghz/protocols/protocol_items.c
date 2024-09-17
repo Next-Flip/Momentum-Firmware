@@ -51,6 +51,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &ws_protocol_acurite_606tx,
     &ws_protocol_acurite_609txc,
     &ws_protocol_acurite_986,
+    &ws_protocol_bresser_3ch, // Should be before lacrosse
     &ws_protocol_lacrosse_tx,
     &ws_protocol_lacrosse_tx141thbv2,
     &ws_protocol_oregon2,
