@@ -412,7 +412,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
                 AlignBottom,
                 furi_string_get_cstr(model->history_stat_str));
             if(model->show_sats) {
-                canvas_draw_icon(canvas, 116, 53, &I_sats_10px);
+                canvas_draw_icon(canvas, 118, 54, &I_Sats_6x9);
             } else {
                 canvas_draw_icon(canvas, 116, 53, &I_sub1_10px);
             }
@@ -461,7 +461,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
                 AlignBottom,
                 furi_string_get_cstr(model->history_stat_str));
             if(model->show_sats) {
-                canvas_draw_icon(canvas, 116, 53, &I_sats_10px);
+                canvas_draw_icon(canvas, 118, 54, &I_Sats_6x9);
             } else {
                 canvas_draw_icon(canvas, 116, 53, &I_sub1_10px);
             }
