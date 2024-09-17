@@ -3,6 +3,7 @@
   - NFC: Cyborg Detector (by @RocketGod-git)
   - Sub-GHz: Radio Scanner (by @RocketGod-git)
 - Sub-GHz:
+  - Show satellites count with an icon (#215 by @m7i-org)
   - Add Bresser 3CH weather station protocol (#217 by @m7i-org)
   - UL: Add Marantec24 protocol (static 24 bit) with add manually (by @xMasterX)
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
