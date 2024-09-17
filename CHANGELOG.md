@@ -30,7 +30,9 @@
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
 - CLI: Print plugin name on load fail (by @Willy-JL)
-- OFW: NFC: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+- NFC:
+  - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
+  - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
 - Infrared:
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
