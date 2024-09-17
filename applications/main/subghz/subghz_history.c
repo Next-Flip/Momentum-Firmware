@@ -193,8 +193,9 @@ FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx
 bool subghz_history_get_text_space_left(
     SubGhzHistory* instance,
     FuriString* output,
-    uint8_t sats,
-    bool ignore_full) {
+    bool ignore_full,
+    bool show_sats,
+    uint8_t sats) {
     furi_assert(instance);
     if(!ignore_full) {
         if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) {
@@ -207,14 +208,10 @@ bool subghz_history_get_text_space_left(
         }
     }
     if(output != NULL) {
-        if(sats == 0) {
-            furi_string_printf(output, "%02u", instance->last_index_write);
+        if(show_sats) {
+            furi_string_printf(output, "%d", sats);
         } else {
-            if(furi_hal_rtc_get_timestamp() % 2) {
-                furi_string_printf(output, "%02u", instance->last_index_write);
-            } else {
-                furi_string_printf(output, "%d sats", sats);
-            }
+            furi_string_printf(output, "%02u", instance->last_index_write);
         }
     }
     return false;
