@@ -25,7 +25,6 @@
   - Picopass: File loading improvements and fixes (by @bettse)
   - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
-  - Pokemon Trading: Update gblink library with printer support (by @kbembedded)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
