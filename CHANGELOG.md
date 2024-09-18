@@ -10,7 +10,9 @@
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
   - UL: Princeton custom buttons support (0x1, 0x2, 0x4, 0x8, 0xF) (by @xMasterX)
-- NFC: Add API to enforce ISO15693 mode (#225 by @aaronjamt)
+- NFC:
+  - Add SmartRider Parser (#203 by @jaylikesbunda)
+  - Add API to enforce ISO15693 mode (#225 by @aaronjamt)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
