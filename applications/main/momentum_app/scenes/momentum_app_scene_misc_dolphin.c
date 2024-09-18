@@ -114,6 +114,8 @@ void momentum_app_scene_misc_dolphin_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
     uint8_t value_index;
+    DolphinSettings settings;
+    dolphin_get_settings(app->dolphin, &settings);
 
     uint8_t level = dolphin_get_level(app->dolphin_xp);
     char level_str[4];
@@ -150,6 +152,13 @@ void momentum_app_scene_misc_dolphin_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, app->dolphin_angry);
     variable_item_set_current_value_text(item, angry_str);
+    variable_item_set_locked(
+        item,
+        settings.happy_mode,
+        "Settings >\n"
+        "Desktop >\n"
+        "Happy Mode\n"
+        "is enabled!");
 
     item = variable_item_list_add(
         var_item_list,
@@ -161,6 +170,13 @@ void momentum_app_scene_misc_dolphin_on_enter(void* context) {
         momentum_settings.butthurt_timer, butthurt_timer_values, COUNT_OF(butthurt_timer_values));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, butthurt_timer_names[value_index]);
+    variable_item_set_locked(
+        item,
+        settings.happy_mode,
+        "Settings >\n"
+        "Desktop >\n"
+        "Happy Mode\n"
+        "is enabled!");
 
     variable_item_list_set_enter_callback(
         var_item_list, momentum_app_scene_misc_dolphin_var_item_list_callback, app);

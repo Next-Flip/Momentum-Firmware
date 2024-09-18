@@ -1,14 +1,70 @@
 ### Added:
-- UL: Sub-GHz: Add new protocols: Marantec24 (static 24 bit) and GangQi (static 34 bit) (by @xMasterX)
+- Apps:
+  - NFC: Cyborg Detector (by @RocketGod-git)
+  - Sub-GHz: Radio Scanner (by @RocketGod-git)
+- Sub-GHz:
+  - Show satellites count with an icon (#215 by @m7i-org)
+  - Add Bresser 3CH weather station protocol (#217 by @m7i-org)
+  - UL: Add Marantec24 protocol (static 24 bit) with add manually (by @xMasterX)
+  - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
+  - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
+  - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
+  - UL: Princeton custom buttons support (0x1, 0x2, 0x4, 0x8, 0xF) (by @xMasterX)
+- NFC: Add API to enforce ISO15693 mode (#225 by @aaronjamt)
+- BadKB:
+  - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
+  - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
+- OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
+- OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
+- OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
+- OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
+- OFW: Furi: Put errno into TCB (by @portasynthinca3)
 
 ### Updated:
 - Apps:
   - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
-  - Laster Tag: External Infrared board support (by @RocketGod-git), RFID support for ammo reload (by @jamisonderek)
+  - Laser Tag: External Infrared board support, crash fixes (by @RocketGod-git), RFID support for ammo reload, thread leak fix (by @jamisonderek)
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
+  - Picopass: File loading improvements and fixes (by @bettse), force ISO15693 1OutOf4 mode (by @aaronjamt)
+  - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
+  - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
+  - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
+  - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
+  - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
+- CLI: Print plugin name on load fail (by @Willy-JL)
+- NFC:
+  - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
+  - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+- Infrared:
+  - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
+  - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
+  - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
+- OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
+- OFW: CCID: App changes and improvements (by @kidbomb)
+- OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
+- Furi:
+  - UL: Extra checks for OTG power enable/disable (by @xMasterX)
+  - OFW: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
+  - OFW: Threading, Timers improvements (by @CookiePLMonster)
+  - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
 
 ### Fixed:
 - RFID:
   - OFW: Fix detection of GProx II cards and false detection of other cards (by @Astrrra)
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
-- OFW: NFC: Fix crash on Ultralight unlock (by @Astrrra)
+  - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
+- Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
+- Storage:
+  - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
+  - OFW: Fix folder rename fails (by @portasynthinca3)
+- About: Fix BLE stack version string (by @Willy-JL)
+- OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
+- NFC:
+  - OFW: Fix crash on Ultralight unlock (by @Astrrra)
+  - OFW: FeliCa anti-collision fix (by @RebornedBrain)
+- OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
+- OFW: GPIO: Fix USB-UART bridge exit screen stopping the bridge prematurely (by @portasynthinca3)
+- OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
+- OFW: Furi: Clean up of LFS traces (by @hedger)
+- OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
+- OFW: API: Fix kerel typo in documentation (by @EntranceJew)

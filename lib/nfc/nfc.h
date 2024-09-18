@@ -361,6 +361,7 @@ NfcError nfc_iso14443a_listener_set_col_res_data(
  * @param[in] idm_len IDm length in bytes.
  * @param[in] pmm pointer to a byte array containing the PMm.
  * @param[in] pmm_len PMm length in bytes.
+ * @param[in] sys_code System code from SYS_C block
  * @returns NfcErrorNone on success, any other error code on failure.
 */
 NfcError nfc_felica_listener_set_sensf_res_data(
@@ -368,7 +369,8 @@ NfcError nfc_felica_listener_set_sensf_res_data(
     const uint8_t* idm,
     const uint8_t idm_len,
     const uint8_t* pmm,
-    const uint8_t pmm_len);
+    const uint8_t pmm_len,
+    const uint16_t sys_code);
 
 /**
  * @brief Send ISO15693 Start of Frame pattern in listener mode
@@ -377,6 +379,30 @@ NfcError nfc_felica_listener_set_sensf_res_data(
  * @returns NfcErrorNone on success, any other error code on failure.
  */
 NfcError nfc_iso15693_listener_tx_sof(Nfc* instance);
+
+/** 
+ * @brief Set ISO15693 parser mode to autodetect
+ *
+* @param[in,out] instance pointer to the instance to be configured.
+ * @returns NfcErrorNone on success, any other error code on failure.
+*/
+NfcError nfc_iso15693_detect_mode(Nfc* instance);
+
+/** 
+ * @brief Set ISO15693 parser mode to 1OutOf4, disables autodetection
+ *
+ * @param[in,out] instance pointer to the instance to be configured.
+ * @return NfcErrorNone on success, any other error code on failure.
+*/
+NfcError nfc_iso15693_force_1outof4(Nfc* instance);
+
+/** 
+ * @brief Set ISO15693 parser mode to 1OutOf256, disables autodetection
+ *
+ * @param[in,out] instance pointer to the instance to be configured.
+ * @return NfcErrorNone on success, any other error code on failure.
+*/
+NfcError nfc_iso15693_force_1outof256(Nfc* instance);
 
 #ifdef __cplusplus
 }

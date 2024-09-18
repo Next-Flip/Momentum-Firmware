@@ -4,9 +4,11 @@
 #include <gui/modules/submenu.h>
 #include <assets_icons.h>
 #include <applications.h>
+#include <toolbox/run_parallel.h>
 
 #include "loader.h"
 #include "loader_menu.h"
+#include "loader_menu_storage_i.h"
 
 #include <flipper_application/flipper_application.h>
 #include <toolbox/stream/file_stream.h>
@@ -171,6 +173,21 @@ static void loader_menu_applications_callback(void* context, uint32_t index) {
 static void loader_menu_settings_menu_callback(void* context, uint32_t index) {
     UNUSED(context);
     const char* name = FLIPPER_SETTINGS_APPS[index].name;
+
+    // Workaround for SD format when app can't be opened
+    if(!strcmp(name, "Storage")) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        FS_Error status = storage_sd_status(storage);
+        furi_record_close(RECORD_STORAGE);
+        // If SD card not ready, cannot be formatted, so we want loader to give
+        // normal error message, with function below
+        if(status != FSE_NOT_READY) {
+            // Attempt to launch the app, and if failed offer to format SD card
+            run_parallel(loader_menu_storage_settings, storage, 512);
+            return;
+        }
+    }
+
     loader_menu_start(name);
 }
 
