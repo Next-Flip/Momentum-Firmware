@@ -30,6 +30,15 @@ App(
 )
 
 App(
+    appid="smartrider_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="smartrider_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/smartrider.c"],
+)
+
+App(
     appid="microel_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="microel_plugin_ep",
