@@ -2,6 +2,7 @@
 - Apps:
   - NFC: Cyborg Detector (by @RocketGod-git)
   - Sub-GHz: Radio Scanner (by @RocketGod-git)
+  - Games: Umpire Indicator (by @RocketGod-git)
 - Sub-GHz:
   - Show satellites count with an icon (#215 by @m7i-org)
   - Add Bresser 3CH weather station protocol (#217 by @m7i-org)
@@ -30,14 +31,21 @@
   - Picopass: File loading improvements and fixes (by @bettse), force ISO15693 1OutOf4 mode (by @aaronjamt)
   - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
-  - NFC Playlist: Add playlist already exists error, general improvements (by @acegoal07)
-  - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX)
+  - NFC Playlist: Error screens for playlist already exists and item already in playlist, general improvements (by @acegoal07)
+  - CLI-GUI Bridge: Fixes and improvements (by @ranchordo)
+  - Seader: Enable T=1 (by @bettse)
+  - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - NFC:
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+- Sub-GHz:
+  - UL: Frequency analyzer fixes and improvements (by @xMasterX):
+    - Enforce int module (like in OFW) usage due to lack of required hardware on external boards (PathIsolate (+rf switch for multiple paths)) and incorrect usage and/or understanding the purpose of frequency analyzer app by users, it should be used only to get frequency of the remote placed around 1-10cm around flipper's left corner
+    - Fix possible GSM mobile towers signal interference by limiting upper frequency to 920mhz max
+    - Fix duplicated frequency lists and use user config for nearest frequency selector too
 - Infrared:
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
@@ -56,7 +64,9 @@
   - OFW: Fix detection of GProx II cards and false detection of other cards (by @Astrrra)
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
-- Desktop: Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
+- Desktop:
+  - Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
+  - OFW: Autolock fixes (by @portasynthinca3)
 - Storage:
   - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
   - OFW: Fix folder rename fails (by @portasynthinca3)
