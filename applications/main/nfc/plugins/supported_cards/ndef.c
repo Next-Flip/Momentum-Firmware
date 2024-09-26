@@ -366,7 +366,8 @@ static bool ndef_parse(const NfcDevice* device, FuriString* parsed_data) {
         // Check card type can contain NDEF
         if(data->type != MfUltralightTypeNTAG203 && data->type != MfUltralightTypeNTAG213 &&
            data->type != MfUltralightTypeNTAG215 && data->type != MfUltralightTypeNTAG216 &&
-           data->type != MfUltralightTypeNTAGI2C1K && data->type != MfUltralightTypeNTAGI2C2K) {
+           data->type != MfUltralightTypeNTAGI2C1K && data->type != MfUltralightTypeNTAGI2C2K &&
+           data->type != MfUltralightTypeNTAGI2CPlus1K && data->type != MfUltralightTypeNTAGI2CPlus2K) {
             break;
         }
 
