@@ -39,6 +39,7 @@
   - NFC Playlist: Error screens for playlist already exists and item already in playlist, general improvements (by @acegoal07)
   - CLI-GUI Bridge: Fixes and improvements (by @ranchordo)
   - Seader: Enable T=1 (by @bettse)
+  - BLE Spam: Fix menu index callback (by @Willy-JL)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
