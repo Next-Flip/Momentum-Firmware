@@ -40,6 +40,7 @@
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - NFC:
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
+  - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
   - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
 - Sub-GHz:
   - UL: Frequency analyzer fixes and improvements (by @xMasterX):
