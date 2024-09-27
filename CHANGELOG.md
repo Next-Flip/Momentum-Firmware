@@ -87,3 +87,7 @@
 - OFW: Furi: Clean up of LFS traces (by @hedger)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
 - OFW: API: Fix kerel typo in documentation (by @EntranceJew)
+
+### Removed:
+- Apps:
+  - Mifare Nested: Superseded by NFC app after OFW PR 3822 (MIFARE Classic Key Recovery Improvements)
