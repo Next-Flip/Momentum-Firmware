@@ -27,7 +27,7 @@
 - Apps:
   - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
   - Laser Tag: External Infrared board support, crash fixes (by @RocketGod-git), RFID support for ammo reload, thread leak fix (by @jamisonderek)
-  - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13)
+  - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13), support more board types (by @xMasterX)
   - Picopass: File loading improvements and fixes (by @bettse), force ISO15693 1OutOf4 mode (by @aaronjamt)
   - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
