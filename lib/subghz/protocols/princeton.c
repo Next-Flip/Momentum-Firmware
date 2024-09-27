@@ -138,9 +138,21 @@ static uint8_t subghz_protocol_princeton_get_btn_code(void) {
         case 0xF:
             btn = 0x2;
             break;
+        // Second encoding type
+        case 0x30:
+            btn = 0xC0;
+            break;
+        case 0xC0:
+            btn = 0x30;
+            break;
+        case 0x03:
+            btn = 0xC0;
+            break;
+        case 0x0C:
+            btn = 0xC0;
+            break;
 
         default:
-            btn = 0x2;
             break;
         }
     } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_DOWN) {
@@ -160,9 +172,21 @@ static uint8_t subghz_protocol_princeton_get_btn_code(void) {
         case 0xF:
             btn = 0x1;
             break;
+        // Second encoding type
+        case 0x30:
+            btn = 0x03;
+            break;
+        case 0xC0:
+            btn = 0x03;
+            break;
+        case 0x03:
+            btn = 0x30;
+            break;
+        case 0x0C:
+            btn = 0x03;
+            break;
 
         default:
-            btn = 0x1;
             break;
         }
     } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_LEFT) {
@@ -182,9 +206,21 @@ static uint8_t subghz_protocol_princeton_get_btn_code(void) {
         case 0xF:
             btn = 0x4;
             break;
+        // Second encoding type
+        case 0x30:
+            btn = 0x0C;
+            break;
+        case 0xC0:
+            btn = 0x0C;
+            break;
+        case 0x03:
+            btn = 0x0C;
+            break;
+        case 0x0C:
+            btn = 0x30;
+            break;
 
         default:
-            btn = 0x4;
             break;
         }
     } else if(custom_btn_id == SUBGHZ_CUSTOM_BTN_RIGHT) {
@@ -206,7 +242,6 @@ static uint8_t subghz_protocol_princeton_get_btn_code(void) {
             break;
 
         default:
-            btn = 0x8;
             break;
         }
     }
@@ -227,8 +262,15 @@ static bool
     instance->generic.btn = subghz_protocol_princeton_get_btn_code();
 
     // Reconstruction of the data
-    instance->generic.data =
-        ((uint64_t)instance->generic.serial << 4 | (uint64_t)instance->generic.btn);
+    // If we have 8bit button code move serial to left by 8 bits (and 4 if 4 bits)
+    if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
+       instance->generic.btn == 0x03 || instance->generic.btn == 0x0C) {
+        instance->generic.data =
+            ((uint64_t)instance->generic.serial << 8 | (uint64_t)instance->generic.btn);
+    } else {
+        instance->generic.data =
+            ((uint64_t)instance->generic.serial << 4 | (uint64_t)instance->generic.btn);
+    }
 
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
@@ -268,8 +310,17 @@ static bool
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
 static void subghz_protocol_princeton_check_remote_controller(SubGhzBlockGeneric* instance) {
-    instance->serial = instance->data >> 4;
-    instance->btn = instance->data & 0xF;
+    // Parse button modes for second encoding type (and serial is smaller)
+    // Button code is 8bit and has fixed values of one of these
+    // Exclude button code for each type from serial number before parsing
+    if((instance->data & 0xFF) == 0x30 || (instance->data & 0xFF) == 0xC0 ||
+       (instance->data & 0xFF) == 0x03 || (instance->data & 0xFF) == 0x0C) {
+        instance->serial = instance->data >> 8;
+        instance->btn = instance->data & 0xFF;
+    } else {
+        instance->serial = instance->data >> 4;
+        instance->btn = instance->data & 0xF;
+    }
 
     // Save original button for later use
     if(subghz_custom_btn_get_original() == 0) {
@@ -537,19 +588,38 @@ void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* out
     uint32_t data_rev = subghz_protocol_blocks_reverse_key(
         instance->generic.data, instance->generic.data_count_bit);
 
-    furi_string_cat_printf(
-        output,
-        "%s %dbit\r\n"
-        "Key:0x%08lX\r\n"
-        "Yek:0x%08lX\r\n"
-        "Sn:0x%05lX Btn:%01X\r\n"
-        "Te:%luus  GT:Te*%lu\r\n",
-        instance->generic.protocol_name,
-        instance->generic.data_count_bit,
-        (uint32_t)(instance->generic.data & 0xFFFFFF),
-        data_rev,
-        instance->generic.serial,
-        instance->generic.btn,
-        instance->te,
-        instance->guard_time);
+    if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
+       instance->generic.btn == 0x03 || instance->generic.btn == 0x0C) {
+        furi_string_cat_printf(
+            output,
+            "%s %dbit\r\n"
+            "Key:0x%08lX\r\n"
+            "Yek:0x%08lX\r\n"
+            "Sn:0x%05lX Btn:%02X (8b)\r\n"
+            "Te:%luus  GT:Te*%lu\r\n",
+            instance->generic.protocol_name,
+            instance->generic.data_count_bit,
+            (uint32_t)(instance->generic.data & 0xFFFFFF),
+            data_rev,
+            instance->generic.serial,
+            instance->generic.btn,
+            instance->te,
+            instance->guard_time);
+    } else {
+        furi_string_cat_printf(
+            output,
+            "%s %dbit\r\n"
+            "Key:0x%08lX\r\n"
+            "Yek:0x%08lX\r\n"
+            "Sn:0x%05lX Btn:%01X (4b)\r\n"
+            "Te:%luus  GT:Te*%lu\r\n",
+            instance->generic.protocol_name,
+            instance->generic.data_count_bit,
+            (uint32_t)(instance->generic.data & 0xFFFFFF),
+            data_rev,
+            instance->generic.serial,
+            instance->generic.btn,
+            instance->te,
+            instance->guard_time);
+    }
 }
