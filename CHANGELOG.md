@@ -12,6 +12,10 @@
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
   - UL: Princeton custom buttons support (by @xMasterX)
 - NFC:
+  - OFW: MIFARE Classic Key Recovery Improvements (PR 3822 by @noproto)
+    - Accelerated dictionary attack: dictionary attacks reduced to several seconds - checks ~3500 keys per second
+    - Nested attack support: collects nested nonces to be cracked by MFKey, no longer requiring Flipper Nested app
+    - Static encrypted backdoor support: collects static encrypted nonces to be cracked by MFKey using NXP/Fudan backdoor, allowing key recovery of all non-hardened MIFARE Classic tags on-device
   - Add SmartRider Parser (#203 by @jaylikesbunda)
   - Add API to enforce ISO15693 mode (#225 by @aaronjamt)
 - BadKB:
@@ -25,6 +29,7 @@
 
 ### Updated:
 - Apps:
+  - MFKey: Added Static Encrypted Nested key recovery, Added NFC app support, Dropped FlipperNested support (by @noproto)
   - WAV Player: Better fix for unresponsiveness, handle thread exit signal (by @CookiePLMonster)
   - Laser Tag: External Infrared board support, crash fixes (by @RocketGod-git), RFID support for ammo reload, thread leak fix (by @jamisonderek)
   - ESP Flasher: Update blackmagic bin with WiFi Logs (by @DrZlo13), support more board types (by @xMasterX)
