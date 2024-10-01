@@ -54,6 +54,7 @@
     - Fix possible GSM mobile towers signal interference by limiting upper frequency to 920mhz max
     - Fix duplicated frequency lists and use user config for nearest frequency selector too
 - Infrared:
+  - UL: Update universal remote assets (by @amec0e)
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
   - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
