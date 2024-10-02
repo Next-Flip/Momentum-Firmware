@@ -75,7 +75,7 @@ protocol: NEC
 address: 00 00 00 00
 command: 10 00 00 00
 #
-## Model: Aorus FV43U
+# Model: Aorus FV43U
 #
 name: POWER
 type: parsed
