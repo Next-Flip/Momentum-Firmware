@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <radialGradient id="lightGradient">
+      <stop offset="0%" stop-color="white" stop-opacity="1"/>
+      <stop offset="50%" stop-color="#006699" stop-opacity="0.5"/>
+      <stop offset="75%" stop-color="#006699" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <mask id="textMask">
+      <rect width="100%" height="100%" fill="black"/>
+      <text x="50%" y="55%" font-family="Arial Black, sans-serif" font-size="72" font-stretch="expanded" font-weight="900" fill="white" text-anchor="middle">XERO</text>
+      <text x="50%" y="85%" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" fill="white" text-anchor="middle">FIRMWARE</text>
+    </mask>
+    <mask id="strokeMask">
+      <rect width="100%" height="100%" fill="white"/>
+      <text x="50%" y="55%" font-family="Arial Black, sans-serif" font-size="72" font-stretch="expanded" font-weight="900" fill="black" text-anchor="middle">XERO</text>
+      <text x="50%" y="85%" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" fill="black" text-anchor="middle">FIRMWARE</text>
+    </mask>
+  </defs>
+  
+  <g filter="url(#glow)">
+    <rect width="100%" height="100%" fill="rgba(0,0,0,0.5)" mask="url(#textMask)" />
+    <g mask="url(#textMask)">
+      <circle cx="200" cy="60" r="100" fill="url(#lightGradient)" opacity="0.7">
+        <animateMotion dur="12s" repeatCount="indefinite" path="M0,0 C40,-30 -40,-30 0,0 C40,30 -40,30 0,0" />
+      </circle>
+      <circle cx="200" cy="60" r="30" fill="url(#lightGradient)" opacity="0.8">
+        <animateMotion dur="11s" repeatCount="indefinite" path="M0,0 Q50,-40 100,0 T0,0 Q-50,40 -100,0 T0,0" />
+      </circle>
+      <circle cx="200" cy="60" r="20" fill="url(#lightGradient)" opacity="0.9">
+        <animateMotion dur="14s" repeatCount="indefinite" path="M0,0 Q-30,50 -60,0 T0,-60 T60,0 T0,60 T-60,0 T0,0" />
+      </circle>
+      <circle cx="200" cy="60" r="15" fill="url(#lightGradient)" opacity="0.9">
+        <animateMotion dur="14s" repeatCount="indefinite" path="M0,0 Q40,20 80,20 T0,-40 T-80,0 T0,40 T80,0 T0,0" />
+      </circle>
+      <circle cx="200" cy="60" r="25" fill="url(#lightGradient)" opacity="0.8">
+        <animateMotion dur="12s" repeatCount="indefinite" path="M0,0 Q-20,-40 0,-80 T0,0 Q20,40 0,80 T0,0" />
+      </circle>
+    </g>
+  </g>
+  
+  <!-- White outline text with glow -->
+  <g filter="url(#glow)">
+    <g mask="url(#strokeMask)">
+      <text x="50%" y="55%" font-family="Arial Black, sans-serif" font-size="72" font-stretch="expanded" font-weight="900" fill="none" stroke="white" stroke-width="4" text-anchor="middle">XERO</text>
+      <text x="50%" y="85%" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" fill="none" stroke="white" stroke-width="2" text-anchor="middle">FIRMWARE</text>
+    </g>
+  </g>
+</svg>
