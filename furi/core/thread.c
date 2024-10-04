@@ -8,13 +8,13 @@
 #include "common_defines.h"
 #include "string.h"
 
-#include <timers.h>
 #include "log.h"
 #include <furi_hal_rtc.h>
 
 #include <FreeRTOS.h>
 #include <stdint.h>
 #include <task.h>
+#include <timers.h>
 
 #include <task_control_block.h>
 
