@@ -21,6 +21,7 @@
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
+  - OFW: New layout for es-LA (by @IRecabarren)
 - OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
 - OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
@@ -58,6 +59,7 @@
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
   - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
+  - OFW: Universal remote additions (by @jaylikesbunda)
 - OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
@@ -66,6 +68,7 @@
   - OFW: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
   - OFW: Threading, Timers improvements (by @CookiePLMonster)
   - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
+- OFW: Docs: Improve bit_buffer.h docs (by @Astrrra)
 
 ### Fixed:
 - RFID:
@@ -85,7 +88,9 @@
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
 - OFW: GPIO: Fix USB-UART bridge exit screen stopping the bridge prematurely (by @portasynthinca3)
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
-- OFW: Furi: Clean up of LFS traces (by @hedger)
+- Furi:
+  - OFW: Clean up of LFS traces (by @hedger)
+  - OFW: Prevent idle priority threads from potentially starving the FreeRTOS idle task (by @CookiePLMonster)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
 - OFW: API: Fix kerel typo in documentation (by @EntranceJew)
 

@@ -5,7 +5,7 @@ type: parsed
 protocol: NECext
 address: 60 30 00 00
 command: 02 FD 00 00
-# 
+#
 name: SOURCE
 type: parsed
 protocol: NECext
@@ -29,37 +29,37 @@ type: parsed
 protocol: NECext
 address: 42 BF 00 00
 command: 12 ED 00 00
-# 
+#
 name: SOURCE
 type: parsed
 protocol: NECext
 address: 42 BF 00 00
 command: 1C E3 00 00
-# 
+#
 name: MENU
 type: parsed
 protocol: NECext
 address: 42 BF 00 00
 command: 08 F7 00 00
-# 
+#
 name: EXIT
 type: parsed
 protocol: NECext
 address: 42 BF 00 00
 command: 17 E8 00 00
-# 
+#
 name: POWER
 type: parsed
 protocol: NEC
 address: 00 00 00 00
 command: 00 00 00 00
-# 
+#
 name: SOURCE
 type: parsed
 protocol: NEC
 address: 00 00 00 00
 command: 01 00 00 00
-# 
+#
 name: Menu
 type: parsed
 protocol: NEC
@@ -71,4 +71,3 @@ type: parsed
 protocol: NEC
 address: 00 00 00 00
 command: 10 00 00 00
-# 
