@@ -1,0 +1,16 @@
+Filetype: Flipper SubGhz Key File
+Version: 1
+Frequency: 433920000
+Preset: FuriHalSubGhzPresetOok270Async
+Latitute: nan
+Longitude: nan
+Protocol: Bresser-3CH
+Id: 117
+Bit: 36
+Data: 00 00 00 07 58 05 9F 46
+Batt: 0
+Hum: 70
+Ts: 1728202096
+Ch: 1
+Btn: 0
+Temp: 8.900000
