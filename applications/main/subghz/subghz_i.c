@@ -156,9 +156,9 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
             }
         }
 
-        //Load latitute and longitude if present, strict mode to avoid reading the whole file twice
+        //Load latitude and longitude if present, strict mode to avoid reading the whole file twice
         flipper_format_set_strict_mode(fff_data_file, true);
-        if(!flipper_format_read_float(fff_data_file, "Latitute", (float*)&temp_lat, 1) ||
+        if(!flipper_format_read_float(fff_data_file, "Latitude", (float*)&temp_lat, 1) ||
            !flipper_format_read_float(fff_data_file, "Longitude", (float*)&temp_lon, 1)) {
             FURI_LOG_W(TAG, "Missing Latitude and Longitude (optional)");
             flipper_format_rewind(fff_data_file);
