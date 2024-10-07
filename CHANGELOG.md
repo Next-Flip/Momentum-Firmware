@@ -1,3 +1,9 @@
+### Breaking Changes:
+- OFW: Battery: Rework gauge driver initialization routine (by @skotopes)
+  - Reworks how communication with battery guage is done, improves reliability and fixes issues with battery percentage not showing
+  - After installing firmware with this change, downgrading to old firmware will cause battery percentage to be blank
+  - If you must downgrade firmware, use the [Guage Tool app](https://github.com/skotopes/flipperzero_gauge_tool) to unseal the guage
+
 ### Added:
 - Apps:
   - NFC: Cyborg Detector (by @RocketGod-git)
@@ -50,6 +56,8 @@
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
   - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+  - OFW: Plantain parser improvements (by @assasinfil)
+  - OFW: Moscow social card parser (by @assasinfil)
 - Sub-GHz:
   - UL: Frequency analyzer fixes and improvements (by @xMasterX):
     - Enforce int module (like in OFW) usage due to lack of required hardware on external boards (PathIsolate (+rf switch for multiple paths)) and incorrect usage and/or understanding the purpose of frequency analyzer app by users, it should be used only to get frequency of the remote placed around 1-10cm around flipper's left corner
@@ -87,12 +95,14 @@
 - NFC:
   - OFW: Fix crash on Ultralight unlock (by @Astrrra)
   - OFW: FeliCa anti-collision fix (by @RebornedBrain)
+  - OFW: Emulation freeze fixed when pressing OK repeatedly (by @RebornedBrain)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
 - OFW: GPIO: Fix USB-UART bridge exit screen stopping the bridge prematurely (by @portasynthinca3)
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
 - Furi:
   - OFW: Clean up of LFS traces (by @hedger)
   - OFW: Prevent idle priority threads from potentially starving the FreeRTOS idle task (by @CookiePLMonster)
+  - OFW: Wait for RNG ready state and no errors before sampling (by @n1kolasM)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
 - OFW: API: Fix kerel typo in documentation (by @EntranceJew)
 
