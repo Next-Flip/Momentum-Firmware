@@ -9,6 +9,8 @@ typedef enum {
     SubmenuIndexUniversalMonitor,
     SubmenuIndexUniversalDigitalSign,
     SubmenuIndexUniversalLED,
+    SubmenuIndexUniversalBluray,
+
 } SubmenuIndex;
 
 static void infrared_scene_universal_submenu_callback(void* context, uint32_t index) {
@@ -76,6 +78,13 @@ void infrared_scene_universal_on_enter(void* context) {
         infrared_scene_universal_submenu_callback,
         context);
 
+    submenu_add_item(
+        submenu,
+        "Blu-ray/DVDs",
+        SubmenuIndexUniversalBluray,
+        infrared_scene_universal_submenu_callback,
+        context);
+
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(infrared->scene_manager, InfraredSceneUniversal));
 
@@ -111,6 +120,9 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalLED) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalLED);
+            consumed = true;
+        } else if(event.event == SubmenuIndexUniversalBluray) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalBluray);
             consumed = true;
         }
         scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, event.event);
