@@ -86,7 +86,9 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     SubGhzLoadKeyState load_key_state = SubGhzLoadKeyStateParseErr;
     FuriString* temp_str = furi_string_alloc();
     uint32_t temp_data32;
-    float temp_lat = NAN; // NAN or 0.0?? because 0.0 is valid value
+
+    //Using NAN in order to avoid the null island problem
+    float temp_lat = NAN;
     float temp_lon = NAN;
     SubGhzTx can_tx = SubGhzTxUnsupported;
 
@@ -158,12 +160,22 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
 
         //Load latitude and longitude if present, strict mode to avoid reading the whole file twice
         flipper_format_set_strict_mode(fff_data_file, true);
-        if(!flipper_format_read_float(fff_data_file, "Latitude", (float*)&temp_lat, 1) ||
-           !flipper_format_read_float(fff_data_file, "Longitude", (float*)&temp_lon, 1)) {
-            FURI_LOG_W(TAG, "Missing Latitude and Longitude (optional)");
-            flipper_format_rewind(fff_data_file);
+        if(!flipper_format_read_float(fff_data_file, "Lat", (float*)&temp_lat, 1) ||
+           !flipper_format_read_float(fff_data_file, "Lon", (float*)&temp_lon, 1)) {
+            //Fallback to older keys "Latitute", "Longitude"
+            if(!flipper_format_read_float(fff_data_file, "Latitute", (float*)&temp_lat, 1) ||
+               !flipper_format_read_float(fff_data_file, "Longitude", (float*)&temp_lon, 1)) {
+                FURI_LOG_W(TAG, "Missing Lat and Lon (optional)");
+                flipper_format_rewind(fff_data_file);
+            }
         }
         flipper_format_set_strict_mode(fff_data_file, false);
+
+        //Avoid null island when reading
+        if(temp_lat == 0.0 && temp_lon == 0.0) {
+            temp_lat = NAN;
+            temp_lon = NAN;
+        }
 
         size_t preset_index =
             subghz_setting_get_inx_preset_by_name(setting, furi_string_get_cstr(temp_str));
