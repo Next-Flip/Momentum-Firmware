@@ -14,8 +14,8 @@ const uint32_t radio_device_value[RADIO_DEVICE_COUNT] = {
     SubGhzRadioDeviceTypeExternalCC1101,
 };
 
-#define TIMESTAMP_NAMES_COUNT 2
-const char* const timestamp_names_text[TIMESTAMP_NAMES_COUNT] = {
+#define ON_OFF_COUNT 2
+const char* const on_off_text[ON_OFF_COUNT] = {
     "OFF",
     "ON",
 };
@@ -139,7 +139,7 @@ static void subghz_scene_receiver_config_set_protocol_file_names(VariableItem* i
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, timestamp_names_text[index]);
+    variable_item_set_current_value_text(item, on_off_text[index]);
 
     subghz->last_settings->protocol_file_names = (index == 1);
     subghz_last_settings_save(subghz->last_settings);
@@ -183,12 +183,12 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     item = variable_item_list_add(
         variable_item_list,
         "Protocol Names",
-        TIMESTAMP_NAMES_COUNT,
+        ON_OFF_COUNT,
         subghz_scene_receiver_config_set_protocol_file_names,
         subghz);
     value_index = subghz->last_settings->protocol_file_names;
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, timestamp_names_text[value_index]);
+    variable_item_set_current_value_text(item, on_off_text[value_index]);
 
     item = variable_item_list_add(
         variable_item_list,

@@ -29,7 +29,9 @@
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
   - OFW: New layout for es-LA (by @IRecabarren)
 - OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
-- OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
+- GUI:
+  - OFW: Add up and down button drawing functions to GUI elements (by @DerSkythe)
+  - OFW: Added one new function for drawing mirrored xbm bitmaps (by @RebornedBrain)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
 - OFW: Furi: Put errno into TCB (by @portasynthinca3)
@@ -55,9 +57,10 @@
 - NFC:
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
-  - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+  - OFW/UL: Rename 'Detect Reader' to 'Extract MFC Keys' (by @bettse & @xMasterX)
   - OFW: Plantain parser improvements (by @assasinfil)
   - OFW: Moscow social card parser (by @assasinfil)
+  - OFW: Fixes and improvements to iso14443_4a listener and poller (by @RebornedBrain)
 - Sub-GHz:
   - UL: Frequency analyzer fixes and improvements (by @xMasterX):
     - Enforce int module (like in OFW) usage due to lack of required hardware on external boards (PathIsolate (+rf switch for multiple paths)) and incorrect usage and/or understanding the purpose of frequency analyzer app by users, it should be used only to get frequency of the remote placed around 1-10cm around flipper's left corner
