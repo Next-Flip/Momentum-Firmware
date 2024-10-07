@@ -124,8 +124,8 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
     button_panel_add_item(
         button_panel,
         i,
-        1,  // Right column
-        3,  // Bottom row
+        1, // Right column
+        3, // Bottom row
         39, // X coordinate (same as original Eject button)
         101, // Y coordinate (same as the Stop button in the bottom left)
         &I_subtitle_19x20,
@@ -143,22 +143,26 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
 }
 
 bool infrared_scene_universal_bluray_on_event(void* context, SceneManagerEvent event) {
-    FURI_LOG_D(TAG, "Universal Blu-ray/DVD scene event: type=%d, event=%ld", event.type, event.event);
-    
+    FURI_LOG_D(
+        TAG, "Universal Blu-ray/DVD scene event: type=%d, event=%ld", event.type, event.event);
+
     bool result = infrared_scene_universal_common_on_event(context, event);
-    
+
     FURI_LOG_D(TAG, "infrared_scene_universal_common_on_event result: %d", result);
-    
+
     return result;
 }
 
 void infrared_scene_universal_bluray_on_exit(void* context) {
     FURI_LOG_D(TAG, "Exiting Universal Blu-ray/DVD scene");
-    
+
     InfraredApp* infrared = context;
-    FURI_LOG_D(TAG, "Brute force state before exit: started=%d", infrared_brute_force_is_started(infrared->brute_force));
-    
+    FURI_LOG_D(
+        TAG,
+        "Brute force state before exit: started=%d",
+        infrared_brute_force_is_started(infrared->brute_force));
+
     infrared_scene_universal_common_on_exit(context);
-    
+
     FURI_LOG_D(TAG, "Finished exiting Universal Blu-ray/DVD scene");
 }
