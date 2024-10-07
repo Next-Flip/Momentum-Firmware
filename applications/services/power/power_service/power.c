@@ -336,11 +336,6 @@ static void power_auto_shutdown_timer_callback(void* context) {
     furi_assert(context);
     Power* power = context;
 
-    // retreive shutdown delay from settings (in ms)
-    PowerSettings settings; 
-    power_settings_load(&settings); 
-    uint32_t shutdown_delay = settings.shutdown_idle_delay_ms; 
-
     // suppress shutdown on idle while charging to avoid the battery from not charging fully. Then restart timer back to original timeout.
     if (power->state == PowerStateCharging) { 
         furi_timer_restart(power->auto_shutdown_timer, shutdown_delay);
