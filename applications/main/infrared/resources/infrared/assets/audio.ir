@@ -1,7 +1,7 @@
 Filetype: IR library file
 Version: 1
-# Last Updated 27th Sept, 2024
-# Last Checked 27th Sept, 2024
+# Last Updated 5th Oct, 2024
+# Last Checked 5th Oct, 2024
 #
 name: Power
 type: parsed
@@ -5103,7 +5103,6 @@ protocol: NECext
 address: 78 0E 00 00
 command: 02 FD 00 00
 #
-# Model: Dutch Originals Sound Bar
 name: Prev
 type: parsed
 protocol: NEC
