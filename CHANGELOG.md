@@ -50,6 +50,7 @@
   - Seader: Enable T=1 (by @bettse)
   - BLE Spam: Fix menu index callback (by @Willy-JL)
   - Solitaire: App rewrite, Added quick solve, New effects and sounds, Removed hacky canvas manipulation (by @doofy-dev)
+  - CLI-GUI Bridge: Add more symbols to keyboard (#222 by @Willy-JL)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
@@ -91,6 +92,8 @@
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
 - Desktop:
   - Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
+- Sub-GHz: Fix GPS "Latitute" typo, switch to "Lat" and "Lon" in .sub files (#246 by @m7i-org)
+- Power: Suppress Shutdown on Idle While Charging / Plugged In (#244 by @luu176)
 - Storage:
   - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
   - OFW: Fix folder rename fails (by @portasynthinca3)
