@@ -8,8 +8,6 @@
 #include <update_util/update_operation.h>
 #include <notification/notification_messages.h>
 
-#include "../power_settings.h"
-
 #define TAG "Power"
 
 #define POWER_OFF_TIMEOUT_S  (90U)
@@ -336,8 +334,8 @@ static void power_auto_shutdown_timer_callback(void* context) {
     furi_assert(context);
     Power* power = context;
 
-    // suppress shutdown on idle while charging to avoid the battery from not charging fully. Then restart timer back to original timeout.
-    if (power->state == PowerStateCharging) { 
+    // Suppress shutdown on idle while charging to avoid the battery from not charging fully. Then restart timer back to original timeout.
+    if(power->state == PowerStateCharging) {
         power_auto_shutdown_arm(power);
     } else {
         power_auto_shutdown_inhibit(power);
