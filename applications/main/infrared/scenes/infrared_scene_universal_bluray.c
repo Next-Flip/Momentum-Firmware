@@ -114,12 +114,12 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
         3,
         6,
         101,
-        &I_stop_19x20,
-        &I_stop_hover_19x20,
+        &I_ok_19x20,
+        &I_ok_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
-    button_panel_add_icon(button_panel, 6, 123, &I_stop_text_19x5);
-    infrared_brute_force_add_record(brute_force, i++, "Stop");
+    button_panel_add_icon(button_panel, 6, 123, &I_ok_text_19x5);
+    infrared_brute_force_add_record(brute_force, i++, "Ok");
 
     button_panel_add_item(
         button_panel,
