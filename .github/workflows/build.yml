@@ -63,9 +63,6 @@ jobs:
           fi
 
       - name: "Check API version for consistency with OFW release-candidate"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')) }}
         run: |
           set -e
           symbols="targets/$TARGET/api_symbols.csv"
@@ -125,7 +122,7 @@ jobs:
               ${FILES[@]} \
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
-      - name: 'Find previous comment'
+      - name: "Find previous comment"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
@@ -133,10 +130,10 @@ jobs:
         id: find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: 'Compiled ${{ matrix.target }} firmware for commit'
+          comment-author: "github-actions[bot]"
+          body-includes: "Compiled ${{ matrix.target }} firmware for commit"
 
-      - name: 'Create or update comment'
+      - name: "Create or update comment"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
         if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
