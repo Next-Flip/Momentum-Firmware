@@ -76,7 +76,7 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
     button_panel_add_icon(button_panel, 37, 64, &I_pause_text_23x5);
     infrared_brute_force_add_record(brute_force, i++, "Pause");
 
-    // Stop button
+    // Fast Backward
     button_panel_add_item(
         button_panel,
         i,
@@ -84,11 +84,11 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
         2,
         6,
         71,
-        &I_prev_19x20,
-        &I_prev_hover_19x20,
+        &I_fast_backward_19x20,
+        &I_fast_backward_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
-    button_panel_add_icon(button_panel, 4, 93, &I_prev_text_19x5);
+    button_panel_add_icon(button_panel, 4, 93, &I_fast_backward_text_19x6);
     infrared_brute_force_add_record(brute_force, i++, "Fast_ba");
 
     // Fast Forward button
@@ -99,14 +99,14 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
         2,
         39,
         71,
-        &I_next_19x20,
-        &I_next_hover_19x20,
+        &I_fast_f_19x20,
+        &I_fast_f__hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
-    button_panel_add_icon(button_panel, 39, 93, &I_next_text_19x6);
+    button_panel_add_icon(button_panel, 39, 93, &I_fast_f__text_19x6);
     infrared_brute_force_add_record(brute_force, i++, "Fast_fo");
 
-    // Fast Backward button
+    // OK/Select Button
     button_panel_add_item(
         button_panel,
         i,
@@ -121,13 +121,14 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
     button_panel_add_icon(button_panel, 6, 123, &I_ok_text_19x5);
     infrared_brute_force_add_record(brute_force, i++, "Ok");
 
+    // Subtitle/CC Button
     button_panel_add_item(
         button_panel,
         i,
-        1, // Right column
-        3, // Bottom row
-        39, // X coordinate (same as original Eject button)
-        101, // Y coordinate (same as the Stop button in the bottom left)
+        1,
+        3,
+        39,
+        101, 
         &I_subtitle_19x20,
         &I_subtitle_hover_19x20,
         infrared_scene_universal_common_item_callback,
