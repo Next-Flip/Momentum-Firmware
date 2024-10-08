@@ -1,3 +1,9 @@
+### Breaking Changes:
+- OFW: Battery: Rework gauge driver initialization routine (by @skotopes)
+  - Reworks how communication with battery guage is done, improves reliability and fixes issues with battery percentage not showing
+  - After installing firmware with this change, downgrading to old firmware will cause battery percentage to be blank
+  - If you must downgrade firmware, use the [Guage Tool app](https://github.com/skotopes/flipperzero_gauge_tool) to unseal the guage
+
 ### Added:
 - Apps:
   - NFC: Cyborg Detector (by @RocketGod-git)
@@ -5,7 +11,7 @@
   - Games: Umpire Indicator (by @RocketGod-git)
 - Sub-GHz:
   - Show satellites count with an icon (#215 by @m7i-org)
-  - Add Bresser 3CH weather station protocol (#217 by @m7i-org)
+  - Add Bresser 3CH weather station protocol (#217 #245 by @m7i-org)
   - UL: Add Marantec24 protocol (static 24 bit) with add manually (by @xMasterX)
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
@@ -23,7 +29,9 @@
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
   - OFW: New layout for es-LA (by @IRecabarren)
 - OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
-- OFW: GUI: Add up and down button drawing functions to GUI elements (by @DerSkythe)
+- GUI:
+  - OFW: Add up and down button drawing functions to GUI elements (by @DerSkythe)
+  - OFW: Added one new function for drawing mirrored xbm bitmaps (by @RebornedBrain)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
 - OFW: Furi: Put errno into TCB (by @portasynthinca3)
@@ -42,6 +50,7 @@
   - Seader: Enable T=1 (by @bettse)
   - BLE Spam: Fix menu index callback (by @Willy-JL)
   - Solitaire: App rewrite, Added quick solve, New effects and sounds, Removed hacky canvas manipulation (by @doofy-dev)
+  - CLI-GUI Bridge: Add more symbols to keyboard (#222 by @Willy-JL)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
@@ -49,7 +58,10 @@
 - NFC:
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
-  - OFW: Rename 'Detect Reader' to 'Extract MF Keys' (by @bettse)
+  - OFW/UL: Rename 'Detect Reader' to 'Extract MFC Keys' (by @bettse & @xMasterX)
+  - OFW: Plantain parser improvements (by @assasinfil)
+  - OFW: Moscow social card parser (by @assasinfil)
+  - OFW: Fixes and improvements to iso14443_4a listener and poller (by @RebornedBrain)
 - Sub-GHz:
   - UL: Frequency analyzer fixes and improvements (by @xMasterX):
     - Enforce int module (like in OFW) usage due to lack of required hardware on external boards (PathIsolate (+rf switch for multiple paths)) and incorrect usage and/or understanding the purpose of frequency analyzer app by users, it should be used only to get frequency of the remote placed around 1-10cm around flipper's left corner
@@ -57,6 +69,7 @@
     - Fix duplicated frequency lists and use user config for nearest frequency selector too
 - Infrared:
   - Additions to MNTM specific LED, Digital Sign, Monitor universal remotes from IRDB (#240 by @jaylikesbunda)
+  - UL: Replace LEDs universal remote with new one by Unleashed team, includes color options (by @amec0e & @xMasterX)
   - UL: Update universal remote assets (by @amec0e)
   - OFW: IR button operation fails now shows more informative messages (by @RebornedBrain)
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
@@ -87,12 +100,14 @@
 - NFC:
   - OFW: Fix crash on Ultralight unlock (by @Astrrra)
   - OFW: FeliCa anti-collision fix (by @RebornedBrain)
+  - OFW: Emulation freeze fixed when pressing OK repeatedly (by @RebornedBrain)
 - OFW: RPC: Broken file interaction fixes (by @RebornedBrain)
 - OFW: GPIO: Fix USB-UART bridge exit screen stopping the bridge prematurely (by @portasynthinca3)
 - OFW: GUI: Fix dialog_ex NULL ptr crash (by @Willy-JL)
 - Furi:
   - OFW: Clean up of LFS traces (by @hedger)
   - OFW: Prevent idle priority threads from potentially starving the FreeRTOS idle task (by @CookiePLMonster)
+  - OFW: Wait for RNG ready state and no errors before sampling (by @n1kolasM)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
 - OFW: API: Fix kerel typo in documentation (by @EntranceJew)
 
