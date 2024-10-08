@@ -335,7 +335,8 @@ static void power_auto_shutdown_timer_callback(void* context) {
     Power* power = context;
 
     // Suppress shutdown on idle while charging to avoid the battery from not charging fully. Then restart timer back to original timeout.
-    if(power->state == PowerStateCharging) {
+    if(power->state != PowerStateNotCharging) {
+        FURI_LOG_D(TAG, "Plugged in, reset idle timer");
         power_auto_shutdown_arm(power);
     } else {
         power_auto_shutdown_inhibit(power);
