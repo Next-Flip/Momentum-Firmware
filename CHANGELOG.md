@@ -92,6 +92,7 @@
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
 - Desktop:
   - Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
+- Sub-GHz: Fix GPS "Latitute" typo, switch to "Lat" and "Lon" in .sub files (#246 by @m7i-org)
 - Storage:
   - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
   - OFW: Fix folder rename fails (by @portasynthinca3)
