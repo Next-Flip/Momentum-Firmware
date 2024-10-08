@@ -100,10 +100,10 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
         39,
         71,
         &I_fast_f_19x20,
-        &I_fast_f__hover_19x20,
+        &I_fast_f_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
-    button_panel_add_icon(button_panel, 39, 93, &I_fast_f__text_19x6);
+    button_panel_add_icon(button_panel, 39, 93, &I_fast_f_text_19x6);
     infrared_brute_force_add_record(brute_force, i++, "Fast_fo");
 
     // OK/Select Button
@@ -128,7 +128,7 @@ void infrared_scene_universal_bluray_on_enter(void* context) {
         1,
         3,
         39,
-        101, 
+        101,
         &I_subtitle_19x20,
         &I_subtitle_hover_19x20,
         infrared_scene_universal_common_item_callback,
