@@ -16,6 +16,10 @@ def tar_sanitizer_filter(tarinfo: tarfile.TarInfo):
     tarinfo.gid = tarinfo.uid = 0
     tarinfo.mtime = 0
     tarinfo.uname = tarinfo.gname = "furippa"
+    if tarinfo.type == tarfile.DIRTYPE:
+        tarinfo.mode = 0o40755  # drwxr-xr-x
+    else:
+        tarinfo.mode = 0o644  # ?rw-r--r--
     return tarinfo
 
 

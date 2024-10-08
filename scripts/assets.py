@@ -155,7 +155,7 @@ class Main(App):
                 self.logger.debug("Folder contains animation")
                 icon_name = "A_" + os.path.split(dirpath)[1].replace("-", "_")
                 if not is_main_assets and api_has_icon(icon_name):
-                    self.logger.warning(
+                    self.logger.info(
                         f"{self.args.filename}: ignoring duplicate icon {icon_name}"
                     )
                     continue
@@ -205,7 +205,7 @@ class Main(App):
                         "-", "_"
                     )
                     if not is_main_assets and api_has_icon(icon_name):
-                        self.logger.warning(
+                        self.logger.info(
                             f"{self.args.filename}: ignoring duplicate icon {icon_name}"
                         )
                         continue
