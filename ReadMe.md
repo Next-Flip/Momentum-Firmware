@@ -14,29 +14,29 @@ Flipper Zero resources:
 
 Coming from the **Official Firmware** (OFW), you'll get:
 
-* Newly supported cards and protocols
-* Fixes and performance improvements for existing cards and protocols
-* Reduced memory usage of core applications
-* A curated list of community applications with a focus on utility
+- Newly supported cards and protocols
+- Fixes and performance improvements for existing cards and protocols
+- Reduced memory usage of core applications
+- A curated list of community applications with a focus on utility
 
 Coming from other custom firmware, you'll get:
 
-* All of the above
-* General stability improvements
-* Reduced memory usage
-* Minimal theming
+- All of the above
+- General stability improvements
+- Reduced memory usage
+- Minimal theming
 
 # Xero features
 
-* **MIFARE Classic Key recovery improvements**
-  * *MIFARE Classic Accelerated dictionary attack*: dictionary attacks reduced to several seconds - checks ~3500 keys per second
-  * *MIFARE Classic Nested attack support*: collects nested nonces to be cracked by MFKey
-  * *MIFARE Classic Static encrypted backdoor support*: collects static encrypted nonces to be cracked by MFKey using NXP/Fudan backdoor
-* **MFKey 3.0**: Mfkey32, Static Nested, and Static Encrypted attacks all on your Flipper Zero (coming soon!)
-* **MIFARE Ultralight C Dictionary attack** (coming soon!)
-* **MIFARE Ultralight C Emulation** (coming soon!)
-* **NFC app memory improvements** (coming soon!)
-* **Minimal theme** (coming soon!)
+- **MIFARE Classic Key recovery improvements**
+  - *MIFARE Classic Accelerated dictionary attack*: dictionary attacks reduced to several seconds - checks ~3500 keys per second
+  - *MIFARE Classic Nested attack support*: collects nested nonces to be cracked by MFKey
+  - *MIFARE Classic Static encrypted backdoor support*: collects static encrypted nonces to be cracked by MFKey using NXP/Fudan backdoor
+- **MFKey 3.0**: Mfkey32, Static Nested, and Static Encrypted attacks all on your Flipper Zero
+- **MIFARE Ultralight C Dictionary attack** (coming soon!)
+- **MIFARE Ultralight C Emulation** (coming soon!)
+- **NFC app memory improvements** (coming soon!)
+- **Minimal theme** (coming soon!)
 
 # Contributing
 
