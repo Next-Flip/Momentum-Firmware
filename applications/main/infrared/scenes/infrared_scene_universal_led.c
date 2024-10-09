@@ -8,7 +8,6 @@ void infrared_scene_universal_led_on_enter(void* context) {
     InfraredBruteForce* brute_force = infrared->brute_force;
 
     infrared_brute_force_set_db_filename(brute_force, EXT_PATH("infrared/assets/led.ir"));
-
     button_panel_reserve(button_panel, 2, 2);
     uint32_t i = 0;
     button_panel_add_item(

@@ -81,9 +81,9 @@ bool infrared_progress_view_input_callback(InputEvent* event, void* context) {
         if(instance->back_callback) {
             instance->back_callback(instance->context);
         }
+        return true;
     }
-
-    return true;
+    return false;
 }
 
 InfraredProgressView* infrared_progress_view_alloc(void) {
