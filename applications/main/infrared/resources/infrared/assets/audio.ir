@@ -5124,3 +5124,689 @@ type: parsed
 protocol: RC5
 address: 14 00 00 00
 command: 36 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 49 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 4B 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC42
+address: 6E 00 00 00
+command: 41 00 00 00
+#
+name: Prev
+type: parsed
+protocol: Kaseikyo
+address: 51 54 32 01
+command: 0F 00 00 00
+#
+name: Pause
+type: parsed
+protocol: Kaseikyo
+address: 51 54 32 01
+command: 3F 00 00 00
+#
+name: Pause
+type: parsed
+protocol: Samsung32
+address: A2 00 00 00
+command: 1B 00 00 00
+#
+# Model: GPX cd_radio
+#
+name: Pause
+type: parsed
+protocol: Samsung32
+address: 81 00 00 00
+command: 09 00 00 00
+#
+name: Next
+type: parsed
+protocol: Samsung32
+address: 81 00 00 00
+command: 11 00 00 00
+#
+# Model: GPX HC221B
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 04 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 01 00 00 00
+#
+name: Pause
+type: parsed
+protocol: Samsung32
+address: 10 00 00 00
+command: 05 00 00 00
+#
+name: Next
+type: parsed
+protocol: RC5
+address: 1A 00 00 00
+command: 34 00 00 00
+#
+name: Pause
+type: parsed
+protocol: RC5
+address: 1A 00 00 00
+command: 36 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: D2 2C 00 00
+command: 1C E3 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: D2 2C 00 00
+command: 01 FE 00 00
+#
+# Model: Panasonic SC-HC58
+#
+name: Pause
+type: parsed
+protocol: Kaseikyo
+address: AC 02 20 00
+command: 01 00 00 00
+#
+# Model: Philips CD_Player_723
+#
+name: Prev
+type: parsed
+protocol: RC5
+address: 14 00 00 00
+command: 32 00 00 00
+#
+name: Pause
+type: parsed
+protocol: SIRC15
+address: 64 00 00 00
+command: 38 00 00 00
+#
+name: Prev
+type: parsed
+protocol: SIRC15
+address: 64 00 00 00
+command: 3A 00 00 00
+#
+name: Pause
+type: parsed
+protocol: SIRC
+address: 0F 00 00 00
+command: 28 00 00 00
+#
+name: Prev
+type: parsed
+protocol: SIRC
+address: 0F 00 00 00
+command: 20 00 00 00
+#
+name: Prev
+type: parsed
+protocol: SIRC
+address: 0F 00 00 00
+command: 2B 00 00 00
+#
+name: Pause
+type: parsed
+protocol: SIRC
+address: 11 00 00 00
+command: 38 00 00 00
+#
+name: Next
+type: parsed
+protocol: SIRC
+address: 11 00 00 00
+command: 34 00 00 00
+#
+name: Pause
+type: parsed
+protocol: SIRC20
+address: 5A 19 00 00
+command: 28 00 00 00
+#
+name: Next
+type: parsed
+protocol: SIRC20
+address: 5A 19 00 00
+command: 2C 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 86 61 00 00
+command: 09 F6 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 86 61 00 00
+command: 0D F2 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: 86 61 00 00
+command: 0C F3 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 17 E8 00 00
+#
+# Model: Winnes KC809
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 16 E9 00 00
+#
+name: Prev
+type: parsed
+protocol: Kaseikyo
+address: 41 54 32 00
+command: 22 00 00 00
+#
+# Model: Grundig CMS_5000
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 30 FC 00 00
+command: 05 FA 00 00
+#
+# Model: DTR-7
+#
+name: Power
+type: parsed
+protocol: NECext
+address: D2 6D 00 00
+command: 04 FB 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 87 7C 00 00
+command: 02 FD 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: D2 6C 00 00
+command: 54 AB 00 00
+#
+name: Power
+type: parsed
+protocol: NECext
+address: D2 04 00 00
+command: 47 B8 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: D2 03 00 00
+command: 1C E3 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: D2 03 00 00
+command: 8B 74 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: D2 03 00 00
+command: 8A 75 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: D2 03 00 00
+command: 1E E1 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: D2 02 00 00
+command: 80 7F 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: D2 02 00 00
+command: 8E 71 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: D2 14 00 00
+command: 81 7E 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: D2 14 00 00
+command: 80 7F 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: D2 14 00 00
+command: 8E 71 00 00
+#
+# Model: Panasonic N2QAYB000210
+#
+name: Pause
+type: parsed
+protocol: Kaseikyo
+address: A2 02 20 00
+command: 02 00 00 00
+#
+name: Play
+type: parsed
+protocol: Kaseikyo
+address: AC 02 20 02
+command: B1 02 00 00
+#
+name: Pause
+type: parsed
+protocol: RC6
+address: 04 00 00 00
+command: 31 00 00 00
+#
+name: Prev
+type: parsed
+protocol: RC6
+address: 04 00 00 00
+command: 83 00 00 00
+#
+name: Pause
+type: parsed
+protocol: Pioneer
+address: AA 00 00 00
+command: 5B 00 00 00
+#
+# Model: Portta Toslink_Audio_Switcher
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 17 00 00 00
+#
+# Model: Rega IO
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 6E 00 00 00
+command: 08 00 00 00
+#
+# Model: Sony RMT-AA320U_AV
+#
+name: Pause
+type: parsed
+protocol: SIRC20
+address: 10 01 00 00
+command: 38 00 00 00
+#
+name: Prev
+type: parsed
+protocol: SIRC20
+address: 10 01 00 00
+command: 7D 00 00 00
+#
+# Model: Sony STR-DH590
+#
+name: Prev
+type: parsed
+protocol: SIRC20
+address: 10 01 00 00
+command: 33 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: BA A0 00 00
+command: 1A E5 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: BA 4B 00 00
+command: 57 A8 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: 00 FB 00 00
+command: 0D F2 00 00
+#
+name: Next
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 1F 00 00 00
+#
+# Model: Hisense HS215
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 20 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 34 00 00 00
+#
+name: Play
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 34 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 21 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 22 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 23 00 00 00
+#
+# Model: Hitachi HSB40B16
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 5B 00 00 00
+command: 80 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 5B 00 00 00
+command: 88 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 5B 00 00 00
+command: 82 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 5B 00 00 00
+command: 83 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 41 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 45 00 00 00
+#
+# Model: JVC THBY370A
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 00 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 08 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 09 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 01 00 00 00
+#
+name: Pause
+type: parsed
+protocol: Samsung32
+address: 2C 00 00 00
+command: 05 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: C8 91 00 00
+command: 26 D9 00 00
+#
+# Model: RCA RTS7110B2
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 8A 00 00 00
+command: 5C 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 8A 00 00 00
+command: 45 00 00 00
+#
+name: Play
+type: parsed
+protocol: NEC
+address: 8A 00 00 00
+command: 45 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 8A 00 00 00
+command: 4E 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 8A 00 00 00
+command: 55 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 8A 00 00 00
+command: 59 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 80 00 00 00
+command: 0A 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: D9 14 00 00
+command: 50 AF 00 00
+#
+# Model: Toshiba SBX4250
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 45 BD 00 00
+command: 12 ED 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 45 BD 00 00
+command: 1F E0 00 00
+#
+name: Play
+type: parsed
+protocol: NECext
+address: 45 BD 00 00
+command: 1F E0 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 45 BD 00 00
+command: BD 42 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 45 BD 00 00
+command: 60 9F 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 45 BD 00 00
+command: 61 9E 00 00
+#
+# Model: Como audio
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 77 00 00 00
+command: F1 00 00 00
+#
+# Model: Edifier R1280DB
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 10 E7 00 00
+command: 06 F9 00 00
+#
+# Model: Edifier R1700BTs
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 10 E7 00 00
+command: 44 BB 00 00
+#
+# Model: Quacker LED_Speaker
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 0D F2 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 0D 00 00 00
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 11 00 00 00
+#
+name: Next
+type: parsed
+protocol: RC5
+address: 15 00 00 00
+command: 20 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 2D D3 00 00
+command: 03 FC 00 00
+#
+name: Pause
+type: parsed
+protocol: Kaseikyo
+address: AA 02 20 00
+command: 00 00 00 00
+#
+name: Pause
+type: parsed
+protocol: RC5X
+address: 0A 00 00 00
+command: 2C 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 7A 00 00 00
+command: 59 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 78 00 00 00
+command: 04 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NEC
+address: 78 00 00 00
+command: 01 00 00 00
+#
+# Model: Yamaha ZP45780
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 7F 01 00 00
+command: 6A 95 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 7F 01 00 00
+command: 69 96 00 00

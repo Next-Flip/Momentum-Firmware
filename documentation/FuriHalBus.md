@@ -8,8 +8,8 @@ Some crucial peripherals are enabled right away by the system, others must be ex
 
 > [!NOTE]
 >
-> Here and afterwards the word `system` refers to any code belonging to the operating system, 
-> hardware drivers or built-in applications.
+> Here and afterwards, the word `system` refers to any code belonging to the operating system, 
+> hardware drivers or built-in apps.
 
 To **ENABLE** a peripheral, call `furi_hal_bus_enable()`. At the time of the call, the peripheral in question **MUST** be disabled; 
 otherwise a crash will occur to indicate improper use. This means that any given peripheral cannot be enabled twice or more without disabling it first.
@@ -32,7 +32,7 @@ Below is the list of peripherals that are enabled by the system. The user code m
 
 If a corresponding API is provided, the user code must employ it in order to access the peripheral.
 
-*Table 1* - Peripherals enabled by the system
+*Table 1* — Peripherals enabled by the system
 
 |  Peripheral   |         Enabled at          |
 |:-------------:|:---------------------------:|
@@ -57,7 +57,7 @@ Below is the list of peripherals that are enabled and disabled by the system. Th
 
 When not using the API, these peripherals MUST be enabled by the user code and then disabled when not needed anymore.
 
-*Table 2* - Peripherals enabled and disabled by the system
+*Table 2* — Peripherals enabled and disabled by the system
 
 |   Peripheral   |     API header file      |
 |:--------------:|:------------------------:|
@@ -78,7 +78,7 @@ Note that some of these peripherals may also be used by the system to implement 
 
 The system will take over any given peripheral only when the respective feature is in use.
 
-*Table 3* - Peripherals enabled and disabled by user
+*Table 3* — Peripherals enabled and disabled by user
 
 | Peripheral | System | Purpose                                 |
 |:----------:|:------:|:----------------------------------------|
@@ -102,7 +102,7 @@ Some channels may be in use by the system.
 
 Below is the list of DMA channels and their usage by the system.
 
-*Table 4* - DMA channels
+*Table 4* — DMA channels
 
 |  DMA   | Channel | System | Purpose                      |
 |:------:|:-------:|:------:|:-----------------------------|
