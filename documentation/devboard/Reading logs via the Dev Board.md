@@ -9,7 +9,7 @@ The Developer Board allows you to read Flipper Zero logs via UART. Unlike readin
 
 ## Setting the log level
 
-Depending on your needs, you can set the log level by going to `Main Menu -> Settings -> Log Level`. To learn more about logging levels, visit [Settings](https://docs.flipperzero.one/basics/settings#d5TAt).
+Depending on your needs, you can set the log level by going to `Main Menu → Settings → Log Level`. To learn more about logging levels, visit [Settings](https://docs.flipperzero.one/basics/settings#d5TAt).
 
 ![You can manually set the preferred log level](https://github.com/user-attachments/assets/b1317d01-8b9b-4544-8720-303c87b85324)
 
@@ -117,7 +117,7 @@ On Windows, do the following:
 2. Cold-plug the Developer Board into your Flipper Zero by turning off the Flipper Zero, connecting the developer board, and then turning it back on.
 3. Connect the developer board to your computer using a USB Type-C cable.
     ![Connect the developer board with a USB-C cable](https://github.com/user-attachments/assets/0f469a31-2dd1-4559-918a-ff3ca3309531)
-4. Find the serial port that the developer board is connected to by going to `Device Manager -> Ports (COM & LPT)` and looking for a new port that appears when you connect the Wi-Fi developer board.
+4. Find the serial port that the developer board is connected to by going to `Device Manager → Ports (COM & LPT)` and looking for a new port that appears when you connect the Wi-Fi developer board.
     ![Find the serial port in your Device Manager](https://github.com/user-attachments/assets/aa542fe6-4781-45dc-86f6-e98ab34952b0)
 6. Run the `PuTTY` application and select `Serial` as the connection type.
 7. Enter the port number you found in the previous step into the `Serial line` field.
