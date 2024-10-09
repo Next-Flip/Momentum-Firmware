@@ -3695,3 +3695,55 @@ type: parsed
 protocol: NECext
 address: EA C7 00 00
 command: 33 CC 00 00
+#
+# Model: Panasonic N2QAYB000752_Full
+#
+name: Ch_prev
+type: parsed
+protocol: Kaseikyo
+address: B0 02 20 00
+command: 50 03 00 00
+#
+name: Ch_next
+type: parsed
+protocol: Kaseikyo
+address: B0 02 20 00
+command: 40 03 00 00
+#
+# Model: Soniq QSP500TV6
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 10 EF 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 11 EE 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 58 A7 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 5B A4 00 00
+#
+name: Ch_next
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 5E A1 00 00
+#
+name: Ch_prev
+type: parsed
+protocol: NECext
+address: 72 DD 00 00
+command: 56 A9 00 00

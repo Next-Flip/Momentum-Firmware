@@ -45,7 +45,7 @@
   - Picopass: File loading improvements and fixes (by @bettse), force ISO15693 1OutOf4 mode (by @aaronjamt)
   - Quac!: External IR board support (by @daniilty), import all IR from file, iButton support, code improvements (by @rdefeo)
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
-  - NFC Playlist: Error screens for playlist already exists and item already in playlist, general improvements (by @acegoal07)
+  - NFC Playlist: Error screens for playlist already exists and item already in playlist, general improvements (by @acegoal07), refactor rename/new scene without thread (by @Willy-JL)
   - CLI-GUI Bridge: Fixes and improvements (by @ranchordo)
   - Seader: Enable T=1 (by @bettse)
   - BLE Spam: Fix menu index callback (by @Willy-JL)
@@ -75,6 +75,7 @@
   - OFW: Add Airwell AW-HKD012-N91 to univeral AC remote (by @valeraOlexienko)
   - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
   - OFW: Universal remote additions (by @jaylikesbunda)
+  - OFW: Heavily Expand Universal Remotes (by @jaylikesbunda)
 - OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
@@ -83,7 +84,10 @@
   - OFW: Replace all calls to strncpy with strlcpy, use strdup more, expose strlcat (by @CookiePLMonster)
   - OFW: Threading, Timers improvements (by @CookiePLMonster)
   - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
-- OFW: Docs: Improve bit_buffer.h docs (by @Astrrra)
+  - OFW: Improve FuriThread state callbacks (by @CookiePLMonster)
+- Documentation:
+  - OFW: Update and cleanup (by @rnadyrshin)
+  - OFW: Improve bit_buffer.h docs (by @Astrrra)
 
 ### Fixed:
 - RFID:
