@@ -7,6 +7,7 @@ typedef enum {
     SubmenuIndexUniversalAirConditioner,
     SubmenuIndexUniversalLEDs,
     SubmenuIndexUniversalFan,
+    SubmenuIndexUniversalBluray,
     SubmenuIndexUniversalMonitor,
     SubmenuIndexUniversalDigitalSign,
 } SubmenuIndex;
@@ -64,6 +65,13 @@ void infrared_scene_universal_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
+        "Blu-ray/DVDs",
+        SubmenuIndexUniversalBluray,
+        infrared_scene_universal_submenu_callback,
+        context);
+
+    submenu_add_item(
+        submenu,
         "Monitors",
         SubmenuIndexUniversalMonitor,
         infrared_scene_universal_submenu_callback,
@@ -105,6 +113,9 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalFan) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalFan);
+            consumed = true;
+        } else if(event.event == SubmenuIndexUniversalBluray) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalBluray);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalMonitor) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalMonitor);
