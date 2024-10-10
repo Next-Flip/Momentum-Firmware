@@ -10,7 +10,6 @@ typedef enum {
     SubmenuIndexUniversalBluray,
     SubmenuIndexUniversalMonitor,
     SubmenuIndexUniversalDigitalSign,
-    SubmenuIndexUniversalLED,
     SubmenuIndexUniversalMoreDevices,
 } SubmenuIndex;
 
