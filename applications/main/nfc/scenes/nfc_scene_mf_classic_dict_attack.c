@@ -141,14 +141,14 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
     uint32_t state =
         scene_manager_get_scene_state(instance->scene_manager, NfcSceneMfClassicDictAttack);
     if(state == DictAttackStateCUIDDictInProgress) {
-        do {
-            size_t cuid_len = 0;
-            const uint8_t* cuid = nfc_device_get_uid(instance->nfc_device, &cuid_len);
-            FuriString* cuid_dict_path = furi_string_alloc_printf(
-                "%s/mf_classic_dict_%08lx.nfc",
-                EXT_PATH("nfc/assets"),
-                (uint32_t)bit_lib_bytes_to_num_be(cuid + (cuid_len - 4), 4));
+        size_t cuid_len = 0;
+        const uint8_t* cuid = nfc_device_get_uid(instance->nfc_device, &cuid_len);
+        FuriString* cuid_dict_path = furi_string_alloc_printf(
+            "%s/mf_classic_dict_%08lx.nfc",
+            EXT_PATH("nfc/assets"),
+            (uint32_t)bit_lib_bytes_to_num_be(cuid + (cuid_len - 4), 4));
 
+        do {
             if(!keys_dict_check_presence(furi_string_get_cstr(cuid_dict_path))) {
                 state = DictAttackStateUserDictInProgress;
                 break;
@@ -158,6 +158,7 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
                 furi_string_get_cstr(cuid_dict_path),
                 KeysDictModeOpenExisting,
                 sizeof(MfClassicKey));
+
             if(keys_dict_get_total_keys(instance->nfc_dict_context.dict) == 0) {
                 keys_dict_free(instance->nfc_dict_context.dict);
                 state = DictAttackStateUserDictInProgress;
@@ -166,25 +167,32 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
 
             dict_attack_set_header(instance->dict_attack, "MF Classic CUID Dictionary");
         } while(false);
+
+        furi_string_free(cuid_dict_path);
     }
     if(state == DictAttackStateUserDictInProgress) {
         do {
             instance->nfc_dict_context.enhanced_dict = true;
 
-            // TODO: Check for errors
-            storage_common_remove(instance->storage, NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH);
-            storage_common_copy(
-                instance->storage,
-                NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH,
-                NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH);
+            if(keys_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH)) {
+                storage_common_remove(
+                    instance->storage, NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH);
+            }
+            if(keys_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH)) {
+                storage_common_copy(
+                    instance->storage,
+                    NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH,
+                    NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH);
+            }
 
             if(!keys_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_USER_PATH)) {
                 state = DictAttackStateSystemDictInProgress;
                 break;
             }
 
-            // TODO: Check for errors
-            storage_common_remove(instance->storage, NFC_APP_MF_CLASSIC_DICT_USER_NESTED_PATH);
+            if(keys_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_USER_NESTED_PATH)) {
+                storage_common_remove(instance->storage, NFC_APP_MF_CLASSIC_DICT_USER_NESTED_PATH);
+            }
             storage_common_copy(
                 instance->storage,
                 NFC_APP_MF_CLASSIC_DICT_USER_PATH,
@@ -374,6 +382,14 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     instance->nfc_dict_context.nested_target_key = 0;
     instance->nfc_dict_context.msb_count = 0;
     instance->nfc_dict_context.enhanced_dict = false;
+
+    // Clean up temporary files used for nested dictionary attack
+    if(keys_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_USER_NESTED_PATH)) {
+        storage_common_remove(instance->storage, NFC_APP_MF_CLASSIC_DICT_USER_NESTED_PATH);
+    }
+    if(keys_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH)) {
+        storage_common_remove(instance->storage, NFC_APP_MF_CLASSIC_DICT_SYSTEM_NESTED_PATH);
+    }
 
     nfc_blink_stop(instance);
 }

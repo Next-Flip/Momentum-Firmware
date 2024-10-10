@@ -5,7 +5,9 @@ typedef enum {
     SubmenuIndexUniversalProjector,
     SubmenuIndexUniversalAudio,
     SubmenuIndexUniversalAirConditioner,
+    SubmenuIndexUniversalLEDs,
     SubmenuIndexUniversalFan,
+    SubmenuIndexUniversalBluray,
     SubmenuIndexUniversalMonitor,
     SubmenuIndexUniversalDigitalSign,
     SubmenuIndexUniversalLED,
@@ -51,8 +53,22 @@ void infrared_scene_universal_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
+        "LEDs",
+        SubmenuIndexUniversalLEDs,
+        infrared_scene_universal_submenu_callback,
+        context);
+
+    submenu_add_item(
+        submenu,
         "Fans",
         SubmenuIndexUniversalFan,
+        infrared_scene_universal_submenu_callback,
+        context);
+
+    submenu_add_item(
+        submenu,
+        "Blu-ray/DVDs",
+        SubmenuIndexUniversalBluray,
         infrared_scene_universal_submenu_callback,
         context);
 
@@ -77,7 +93,7 @@ void infrared_scene_universal_on_enter(void* context) {
         infrared_scene_universal_submenu_callback,
         context);
 
-    submenu_add_item(
+        submenu_add_item(
         submenu,
         "More Devices",
         SubmenuIndexUniversalMoreDevices,
@@ -108,8 +124,14 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexUniversalAirConditioner) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalAC);
             consumed = true;
+        } else if(event.event == SubmenuIndexUniversalLEDs) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalLEDs);
+            consumed = true;
         } else if(event.event == SubmenuIndexUniversalFan) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalFan);
+            consumed = true;
+        } else if(event.event == SubmenuIndexUniversalBluray) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalBluray);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalMonitor) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalMonitor);
@@ -118,7 +140,7 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalDigitalSign);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalLED) {
-            scene_manager_next_scene(scene_manager, InfraredSceneUniversalLED);
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalLEDs);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalMoreDevices) {
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
