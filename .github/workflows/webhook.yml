@@ -2,21 +2,21 @@ name: "Webhook"
 
 on:
   push:
-  workflow_run:
-    workflows:
-      - "Build"
-      - "Lint"
-      - "Release"
-    types:
-      - "completed"
-  issues:
-    types:
-      - "opened"
-      - "closed"
-      - "reopened"
-  issue_comment:
-    types:
-      - "created"
+  # workflow_run:
+  #   workflows:
+  #     - "Build"
+  #     - "Lint"
+  #     - "Release"
+  #   types:
+  #     - "completed"
+  # issues:
+  #   types:
+  #     - "opened"
+  #     - "closed"
+  #     - "reopened"
+  # issue_comment:
+  #   types:
+  #     - "created"
 
 jobs:
   webhook:
