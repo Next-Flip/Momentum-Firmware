@@ -55,7 +55,7 @@ However, for ease of integration with IDEs, the latest built variant's directory
 
 Additionally, `compile_commands.json` is generated in that folder (it is used for code completion support in IDEs).
  
-`build/latest` symlink & compilation database are only updated upon *firmware build targets* — that is, when you're re-building the firmware itself. 
+`build/latest` symlink & compilation database are only updated upon *firmware build targets* — that is, when you're re-building the firmware itself. Running other tasks, like firmware flashing or building update bundles *for a different debug/release configuration or hardware target*, does not update `built/latest` dir to point to that configuration.
 
 Running other tasks, like firmware flashing or building update bundles *for a different debug/release configuration or hardware target*, does not update `built/latest` dir to point to that configuration.
 
@@ -149,12 +149,7 @@ You can find out available options with `./fbt -h`.
 
 ### Firmware application set
 
-You can create customized firmware builds by modifying the list of apps to be included in the build. 
-
-App presets are configured with the `FIRMWARE_APPS` option, which is a `map(configuration_name:str → application_list:tuple(str))`. 
-
-To specify an app set to use in the build, set `FIRMWARE_APP_SET` to its name.
-
+You can create customized firmware builds by modifying the list of apps to be included in the build. App presets are configured with the `FIRMWARE_APPS` option, which is a `map(configuration_name:str → application_list:tuple(str))`. To specify an app set to use in the build, set `FIRMWARE_APP_SET` to its name.
 For example, to build a firmware image with unit tests, run `./fbt FIRMWARE_APP_SET=unit_tests`.
 
 Check out `fbt_options.py` for details.

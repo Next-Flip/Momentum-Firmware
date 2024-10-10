@@ -16,18 +16,18 @@ Only two parameters are mandatory: **appid** and **apptype**. Others are optiona
 
 - **apptype**: member of FlipperAppType.\* enumeration. Valid values are:
 
-| Enum member     | Firmware component type                                                                          |
-|:----------------|--------------------------------------------------------------------------------------------------|
-| SERVICE         | System service, created at early startup                                                         |
-| SYSTEM          | App is not being shown in any menus. It can be started by other apps or from CLI         |
-| APP             | Regular app for the main menu                                                            |
-| PLUGIN          | App to be built as a part of the firmware and to be placed in the Plugins menu           |
-| DEBUG           | App only visible in Debug menu with debug mode enabled                                   |
-| ARCHIVE         | One and only Archive app                                                                         |
-| SETTINGS        | App to be placed in the system settings menu                                             |
-| STARTUP         | Callback function to run at system startup. Does not define a separate app                       |
-| EXTERNAL        | App to be built as `.fap` plugin                                                         |
-| METAPACKAGE     | Does not define any code to be run, used for declaring dependencies and app bundles      |
+| Enum member | Firmware component type                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| SERVICE     | System service, created at early startup                                                    |
+| SYSTEM      | App is not being shown in any menus. It can be started by other apps or from CLI    |
+| APP         | Regular app for the main menu                                                       |
+| PLUGIN      | App to be built as a part of the firmware and to be placed in the Plugins menu      |
+| DEBUG       | App only visible in Debug menu with debug mode enabled                              |
+| ARCHIVE     | One and only Archive app                                                                    |
+| SETTINGS    | App to be placed in the system settings menu                                        |
+| STARTUP     | Callback function to run at system startup. Does not define a separate app                  |
+| EXTERNAL    | App to be built as `.fap` plugin                                                    |
+| METAPACKAGE | Does not define any code to be run, used for declaring dependencies and app bundles |
 
 - **name**: name displayed in menus.
 - **entry_point**: C function to be used as the app's entry point. Note that C++ function names are mangled, so you need to wrap them in `extern "C"` to use them as entry points.
@@ -43,7 +43,7 @@ Only two parameters are mandatory: **appid** and **apptype**. Others are optiona
 - **targets**: list of strings and target names with which this app is compatible. If not specified, the app is built for all targets. The default value is `["all"]`.
 - **resources**: name of a folder within the app's source folder to be used for packacking SD card resources for this app. They will only be used if app is included in build configuration. The default value is `""`, meaning no resources are packaged.
 
-### Parameters for external apps
+#### Parameters for external apps
 
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
@@ -59,10 +59,7 @@ The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 - **fap_extbuild**: provides support for parts of app sources to be built by external tools. Contains a list of `ExtFile(path="file name", command="shell command")` definitions. `fbt` will run the specified command for each file in the list.
 - **fal_embedded**: boolean, default `False`. Applies only to PLUGIN type. If `True`, the plugin will be embedded into host app's .fap file as a resource and extracted to `apps_assets/APPID` folder on its start. This allows plugins to be distributed as a part of the host app.
 
-> [!NOTE] 
-> These commands are executed at the firmware root folder, and all intermediate files must be placed in an app's temporary build folder. 
-> For that, you can use pattern expansion by `fbt`: `${FAP_WORK_DIR}` will be replaced with the path to the app's temporary build folder, 
-> and `${FAP_SRC_DIR}` will be replaced with the path to the app's source folder. You can also use other variables defined internally by `fbt`.
+Note that commands are executed at the firmware root folder, and all intermediate files must be placed in an app's temporary build folder. For that, you can use pattern expansion by `fbt`: `${FAP_WORK_DIR}` will be replaced with the path to the app's temporary build folder, and `${FAP_SRC_DIR}` will be replaced with the path to the app's source folder. You can also use other variables defined internally by `fbt`.
 
 Example for building an app from Rust sources:
 

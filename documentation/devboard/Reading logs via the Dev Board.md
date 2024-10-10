@@ -9,7 +9,7 @@ The Developer Board allows you to read Flipper Zero logs via UART. Unlike readin
 
 ## Setting the log level
 
-Depending on your needs, you can set the log level by going to `Main Menu → Settings → Log Level`. To learn more about logging levels, visit [Settings](https://docs.flipperzero.one/basics/settings#d5TAt).
+Depending on your needs, you can set the log level by going to **Main Menu → Settings → Log Level**. To learn more about logging levels, visit [Settings](https://docs.flipperzero.one/basics/settings#d5TAt).
 
 ![You can manually set the preferred log level](https://github.com/user-attachments/assets/b1317d01-8b9b-4544-8720-303c87b85324)
 
