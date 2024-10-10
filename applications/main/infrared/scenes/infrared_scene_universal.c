@@ -85,7 +85,7 @@ void infrared_scene_universal_on_enter(void* context) {
         infrared_scene_universal_submenu_callback,
         context);
 
-        submenu_add_item(
+    submenu_add_item(
         submenu,
         "More Devices",
         SubmenuIndexUniversalMoreDevices,

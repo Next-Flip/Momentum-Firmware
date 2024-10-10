@@ -3,7 +3,6 @@
 #include <furi.h>
 #include <dolphin/dolphin.h>
 
-
 static void
     infrared_scene_universal_more_devices_callback(void* context, int32_t index, InputType type) {
     UNUSED(type);
@@ -53,7 +52,7 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
     // reason:
     // 1. there's a funny policy in infrared_brute_force_calculate_messages func, that it'll check if name in it, if yes, it will increase the num and add, if yes, it will make a new field.
     // it's probablt a work around to satisfying other places, but since momentum is not a distro, i really don't want to edit that func to make it's hard to merge upstream changes.
-    // why it's harmless: 
+    // why it's harmless:
     // 1. do it twice can make it cover the first custom item.
     // 2. only the count (which controls the for loop to go through the next item by name field) x2, not index, so signal index not impacted.
     InfraredApp* infrared = context;
@@ -105,7 +104,8 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
         view_stack_add_view(infrared->view_stack, button_menu_get_view(infrared->button_menu));
 
         // Load universal remote data in background
-        infrared_blocking_task_start(infrared, infrared_scene_universal_more_devices_task_callback);
+        infrared_blocking_task_start(
+            infrared, infrared_scene_universal_more_devices_task_callback);
         view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
     } else {
         scene_manager_previous_scene(infrared->scene_manager);

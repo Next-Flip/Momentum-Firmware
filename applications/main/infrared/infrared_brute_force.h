@@ -128,4 +128,5 @@ size_t infrared_brute_force_get_db_size(const InfraredBruteForce* brute_force);
  * @param[in] index index of the button name to retrieve.
  * @return const char* button name, or NULL if index is out of range.
  */
-const char* infrared_brute_force_get_button_name(const InfraredBruteForce* brute_force, size_t index);
+const char*
+    infrared_brute_force_get_button_name(const InfraredBruteForce* brute_force, size_t index);
