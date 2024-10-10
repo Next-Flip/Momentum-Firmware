@@ -64,6 +64,7 @@
   - OFW: Plantain parser improvements (by @assasinfil)
   - OFW: Moscow social card parser (by @assasinfil)
   - OFW: Fixes and improvements to iso14443_4a listener and poller (by @RebornedBrain)
+  - OFW: Update BART station codes in Clipper plugin (by @ted-logan)
 - Sub-GHz:
   - UL: Frequency analyzer fixes and improvements (by @xMasterX):
     - Enforce int module (like in OFW) usage due to lack of required hardware on external boards (PathIsolate (+rf switch for multiple paths)) and incorrect usage and/or understanding the purpose of frequency analyzer app by users, it should be used only to get frequency of the remote placed around 1-10cm around flipper's left corner
