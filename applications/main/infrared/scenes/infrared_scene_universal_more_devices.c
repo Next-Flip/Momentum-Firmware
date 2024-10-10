@@ -47,6 +47,15 @@ static int32_t infrared_scene_universal_more_devices_task_callback(void* context
 }
 
 void infrared_scene_universal_more_devices_on_enter(void* context) {
+    // in this func, note that it's actually loaded the db twice, here's what i did and why it's harmless:
+    // 1. load db previously cuz need to use the db to add btns in runtime
+    // 2. load db again with blocking task
+    // reason:
+    // 1. there's a funny policy in infrared_brute_force_calculate_messages func, that it'll check if name in it, if yes, it will increase the num and add, if yes, it will make a new field.
+    // it's probablt a work around to satisfying other places, but since momentum is not a distro, i really don't want to edit that func to make it's hard to merge upstream changes.
+    // why it's harmless: 
+    // 1. do it twice can make it cover the first custom item.
+    // 2. only the count (which controls the for loop to go through the next item by name field) x2, not index, so signal index not impacted.
     InfraredApp* infrared = context;
     ButtonMenu* button_menu = infrared->button_menu;
     InfraredBruteForce* brute_force = infrared->brute_force;
