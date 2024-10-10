@@ -86,13 +86,6 @@ void infrared_scene_universal_on_enter(void* context) {
         infrared_scene_universal_submenu_callback,
         context);
 
-    submenu_add_item(
-        submenu,
-        "LEDs",
-        SubmenuIndexUniversalLED,
-        infrared_scene_universal_submenu_callback,
-        context);
-
         submenu_add_item(
         submenu,
         "More Devices",
@@ -138,9 +131,6 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalDigitalSign) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalDigitalSign);
-            consumed = true;
-        } else if(event.event == SubmenuIndexUniversalLED) {
-            scene_manager_next_scene(scene_manager, InfraredSceneUniversalLEDs);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalMoreDevices) {
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
