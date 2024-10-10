@@ -51,16 +51,6 @@ void infrared_scene_universal_common_on_enter(void* context) {
     infrared_blocking_task_start(infrared, infrared_scene_universal_common_task_callback);
 }
 
-void infrared_scene_universal_common_on_enter_more_devices(void* context) {
-    InfraredApp* infrared = context;
-    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
-    view_stack_add_view(infrared->view_stack, button_menu_get_view(infrared->button_menu));
-
-    // Load universal remote data in background
-    infrared_blocking_task_start(infrared, infrared_scene_universal_common_task_callback);
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
-}
-
 bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent event) {
     InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
