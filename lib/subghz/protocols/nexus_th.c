@@ -101,11 +101,30 @@ void ws_protocol_decoder_nexus_th_reset(void* context) {
 static bool ws_protocol_nexus_th_check(WSProtocolDecoderNexus_TH* instance) {
     uint8_t type = (instance->decoder.decode_data >> 8) & 0x0F;
 
-    if((type == NEXUS_TH_CONST_DATA) && ((instance->decoder.decode_data >> 4) != 0xffffffff)) {
-        return true;
-    } else {
-        return false;
-    }
+    if(type != NEXUS_TH_CONST_DATA) return false;
+    if((instance->decoder.decode_data >> 4) == 0xffffffff) return false;
+
+    if(!((instance->decoder.decode_data >> 23) & 1) &&
+       ((instance->decoder.decode_data >> 12) & 0x07FF) > 1000)
+        return false; // temp>100C
+    if(((instance->decoder.decode_data >> 23) & 1) &&
+       (~(instance->decoder.decode_data >> 12) & 0x07FF) > 500)
+        return false; // temp<-50C
+    if((instance->decoder.decode_data & 0xFF) > 100) return false; // hum>100
+
+    // The nexus protocol will trigger on rubicson data, so calculate the rubicson crc and make sure
+    // it doesn't match. By guesstimate it should generate a correct crc 1/255% of the times.
+    // So less then 0.5% which should be acceptable.
+    uint8_t msg_rubicson_crc[] = {
+        instance->decoder.decode_data >> 28,
+        instance->decoder.decode_data >> 20,
+        instance->decoder.decode_data >> 12,
+        0xf0,
+        (instance->decoder.decode_data & 0xf0) | (instance->decoder.decode_data & 0x0f)};
+
+    if(subghz_protocol_blocks_crc8(msg_rubicson_crc, 5, 0x31, 0x6c) == 0)
+        return false; // rubicson match, probably not a Nexus
+
     return true;
 }
 
@@ -214,6 +233,8 @@ static void ws_protocol_nexus_th_remote_controller(WSBlockGeneric* instance) {
     instance->humidity = instance->data & 0xFF;
     if(instance->humidity > 95)
         instance->humidity = 95;
+    else if(instance->humidity == 0)
+        instance->humidity = WS_NO_HUMIDITY;
     else if(instance->humidity < 20)
         instance->humidity = 20;
 }
