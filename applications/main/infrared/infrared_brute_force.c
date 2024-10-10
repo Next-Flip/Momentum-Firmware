@@ -6,8 +6,6 @@
 
 #include "infrared_signal.h"
 
-#include <furi.h>
-
 typedef struct {
     uint32_t index;
     uint32_t count;
