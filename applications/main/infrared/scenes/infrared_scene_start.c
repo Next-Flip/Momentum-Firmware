@@ -85,6 +85,10 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
         const uint32_t submenu_index = event.event;
         scene_manager_set_scene_state(scene_manager, InfraredSceneStart, submenu_index);
         if(submenu_index == SubmenuIndexUniversalRemotes) {
+            // Set file_path only once here so repeated usages of
+            // "Load from Library File" have file browser focused on
+            // last selected file, feels more intuitive
+            furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
         } else if(
             submenu_index == SubmenuIndexLearnNewRemote ||

@@ -46,7 +46,6 @@ void infrared_scene_universal_from_file_on_enter(void* context) {
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, INFRARED_APP_EXTENSION, &I_ir_10px);
-    furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
     browser_options.base_path = INFRARED_APP_FOLDER;
     browser_options.skip_assets = false;
     if(!dialog_file_browser_show(
