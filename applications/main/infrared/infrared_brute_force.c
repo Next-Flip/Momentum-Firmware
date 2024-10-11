@@ -74,12 +74,10 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
                 InfraredBruteForceRecordDict_get(brute_force->records, signal_name);
             if(record) { //-V547
                 ++(record->count);
-
             } else {
                 infrared_brute_force_add_record(
-                    brute_force, button_index, furi_string_get_cstr(signal_name));
+                    brute_force, button_index++, furi_string_get_cstr(signal_name));
             }
-            button_index++;
         }
     }
 
