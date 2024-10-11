@@ -70,6 +70,7 @@
     - Enforce int module (like in OFW) usage due to lack of required hardware on external boards (PathIsolate (+rf switch for multiple paths)) and incorrect usage and/or understanding the purpose of frequency analyzer app by users, it should be used only to get frequency of the remote placed around 1-10cm around flipper's left corner
     - Fix possible GSM mobile towers signal interference by limiting upper frequency to 920mhz max
     - Fix duplicated frequency lists and use user config for nearest frequency selector too
+  - Nexus-TH weather station protocol improvements on detection (#256 by @m7i-org)
 - Infrared:
   - Additions to MNTM specific LED, Digital Sign, Monitor universal remotes from IRDB (#240 by @jaylikesbunda)
   - UL: Replace LEDs universal remote with new one by Unleashed team, includes color options (by @amec0e & @xMasterX)
