@@ -2,10 +2,6 @@
 
 #include "common/infrared_scene_universal_common.h"
 
-#include <storage/storage.h>
-#include <furi.h>
-#include <dolphin/dolphin.h>
-
 static void infrared_scene_universal_more_devices_item_callback(
     void* context,
     int32_t index,
