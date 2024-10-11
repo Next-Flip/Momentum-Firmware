@@ -170,14 +170,14 @@ void infrared_brute_force_reset(InfraredBruteForce* brute_force) {
     InfraredBruteForceRecordDict_reset(brute_force->records);
 }
 
-size_t infrared_brute_force_get_db_size(const InfraredBruteForce* brute_force) {
+size_t infrared_brute_force_get_button_count(const InfraredBruteForce* brute_force) {
     size_t size = InfraredBruteForceRecordDict_size(brute_force->records);
     return size;
 }
 
 const char*
     infrared_brute_force_get_button_name(const InfraredBruteForce* brute_force, size_t index) {
-    if(index >= infrared_brute_force_get_db_size(brute_force)) {
+    if(index >= infrared_brute_force_get_button_count(brute_force)) {
         return NULL;
     }
 

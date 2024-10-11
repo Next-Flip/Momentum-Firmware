@@ -80,7 +80,7 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
         }
 
         // add btns
-        for(size_t i = 0; i < infrared_brute_force_get_db_size(brute_force); ++i) {
+        for(size_t i = 0; i < infrared_brute_force_get_button_count(brute_force); ++i) {
             const char* button_name = infrared_brute_force_get_button_name(brute_force, i);
             button_menu_add_item(
                 button_menu,

@@ -119,7 +119,7 @@ void infrared_brute_force_reset(InfraredBruteForce* brute_force);
  * @param[in] brute_force pointer to the InfraredBruteForce instance.
  * @return size_t number of unique button names.
  */
-size_t infrared_brute_force_get_db_size(const InfraredBruteForce* brute_force);
+size_t infrared_brute_force_get_button_count(const InfraredBruteForce* brute_force);
 
 /**
  * @brief Get the button name at the specified index.
