@@ -2,10 +2,8 @@
 
 #include "common/infrared_scene_universal_common.h"
 
-static void infrared_scene_universal_more_devices_item_callback(
-    void* context,
-    int32_t index,
-    InputType type) {
+static void
+    infrared_scene_universal_from_file_item_callback(void* context, int32_t index, InputType type) {
     if(type == InputTypeRelease) {
         InfraredApp* infrared = context;
         uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
@@ -13,7 +11,7 @@ static void infrared_scene_universal_more_devices_item_callback(
     }
 }
 
-static int32_t infrared_scene_universal_more_devices_task_callback(void* context) {
+static int32_t infrared_scene_universal_from_file_task_callback(void* context) {
     InfraredApp* infrared = context;
     ButtonMenu* button_menu = infrared->button_menu;
     InfraredBruteForce* brute_force = infrared->brute_force;
@@ -28,7 +26,7 @@ static int32_t infrared_scene_universal_more_devices_task_callback(void* context
                 button_menu,
                 button_name,
                 i,
-                infrared_scene_universal_more_devices_item_callback,
+                infrared_scene_universal_from_file_item_callback,
                 ButtonMenuItemTypeCommon,
                 infrared);
         }
@@ -41,7 +39,7 @@ static int32_t infrared_scene_universal_more_devices_task_callback(void* context
     return error;
 }
 
-void infrared_scene_universal_more_devices_on_enter(void* context) {
+void infrared_scene_universal_from_file_on_enter(void* context) {
     InfraredApp* infrared = context;
     ButtonMenu* button_menu = infrared->button_menu;
     InfraredBruteForce* brute_force = infrared->brute_force;
@@ -74,10 +72,10 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
     view_stack_add_view(infrared->view_stack, button_menu_get_view(infrared->button_menu));
 
     // Load universal remote data in background
-    infrared_blocking_task_start(infrared, infrared_scene_universal_more_devices_task_callback);
+    infrared_blocking_task_start(infrared, infrared_scene_universal_from_file_task_callback);
 }
 
-bool infrared_scene_universal_more_devices_on_event(void* context, SceneManagerEvent event) {
+bool infrared_scene_universal_from_file_on_event(void* context, SceneManagerEvent event) {
     InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
     InfraredBruteForce* brute_force = infrared->brute_force;
@@ -110,7 +108,7 @@ bool infrared_scene_universal_more_devices_on_event(void* context, SceneManagerE
     return infrared_scene_universal_common_on_event(context, event);
 }
 
-void infrared_scene_universal_more_devices_on_exit(void* context) {
+void infrared_scene_universal_from_file_on_exit(void* context) {
     // Can't use infrared_scene_universal_common_on_exit() since we use ButtonMenu not ButtonPanel
     InfraredApp* infrared = context;
     ButtonMenu* button_menu = infrared->button_menu;

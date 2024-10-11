@@ -10,7 +10,7 @@ typedef enum {
     SubmenuIndexUniversalBluray,
     SubmenuIndexUniversalMonitor,
     SubmenuIndexUniversalDigitalSign,
-    SubmenuIndexUniversalMoreDevices,
+    SubmenuIndexUniversalFromFile,
 } SubmenuIndex;
 
 static void infrared_scene_universal_submenu_callback(void* context, uint32_t index) {
@@ -87,8 +87,8 @@ void infrared_scene_universal_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Load Custom DB",
-        SubmenuIndexUniversalMoreDevices,
+        "Load from Library File",
+        SubmenuIndexUniversalFromFile,
         infrared_scene_universal_submenu_callback,
         context);
 
@@ -131,9 +131,9 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexUniversalDigitalSign) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalDigitalSign);
             consumed = true;
-        } else if(event.event == SubmenuIndexUniversalMoreDevices) {
+        } else if(event.event == SubmenuIndexUniversalFromFile) {
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
-            scene_manager_next_scene(scene_manager, InfraredSceneUniversalMoreDevices);
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalFromFile);
             consumed = true;
         }
         scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, event.event);
