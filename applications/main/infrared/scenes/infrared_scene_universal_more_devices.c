@@ -6,10 +6,11 @@ static void infrared_scene_universal_more_devices_item_callback(
     void* context,
     int32_t index,
     InputType type) {
-    UNUSED(type);
-    InfraredApp* infrared = context;
-    uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
-    view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
+    if(type == InputTypeRelease) {
+        InfraredApp* infrared = context;
+        uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
+        view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
+    }
 }
 
 static int32_t infrared_scene_universal_more_devices_task_callback(void* context) {
