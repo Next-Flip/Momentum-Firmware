@@ -87,7 +87,7 @@ void infrared_scene_universal_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "More Devices",
+        "Load Custom DB",
         SubmenuIndexUniversalMoreDevices,
         infrared_scene_universal_submenu_callback,
         context);
