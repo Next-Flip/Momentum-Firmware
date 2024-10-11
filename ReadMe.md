@@ -37,6 +37,7 @@ Coming from other custom firmware, you'll get:
 - **MIFARE Ultralight C Emulation** (coming soon!)
 - **NFC app memory improvements** (coming soon!)
 - **Minimal theme** (coming soon!)
+- *Future*: MIFARE DESFire Dictionary attack, Tesla credential enrollment
 
 # Contributing
 
@@ -101,4 +102,5 @@ Make sure your Flipper is on, and your firmware is functioning. Connect your Fli
 
 # Links
 
+- Xero Discord: [Discord](https://discord.gg/qQNgCrQkkj)
 - Official Discord: [flipp.dev/discord](https://flipp.dev/discord)
