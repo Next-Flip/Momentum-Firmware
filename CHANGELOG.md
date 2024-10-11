@@ -24,7 +24,9 @@
     - Static encrypted backdoor support: collects static encrypted nonces to be cracked by MFKey using NXP/Fudan backdoor, allowing key recovery of all non-hardened MIFARE Classic tags on-device
   - Add SmartRider Parser (#203 by @jaylikesbunda)
   - Add API to enforce ISO15693 mode (#225 by @aaronjamt)
-- Infrared: Bluray/DVD Universal Remote (#250 by @jaylikesbunda)
+- Infrared:
+  - Bluray/DVD Universal Remote (#250 by @jaylikesbunda)
+  - Option to "Load from Library File" for Universal Remotes (#255 by @zxkmm)
 - Updater: New Yappy themed icon while updating (#253 by @the1anonlypr3 & @Kuronons & @nescap)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
