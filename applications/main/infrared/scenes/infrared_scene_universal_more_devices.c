@@ -43,6 +43,7 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, INFRARED_APP_EXTENSION, &I_ir_10px);
     browser_options.base_path = INFRARED_APP_FOLDER;
+    browser_options.skip_assets = false;
     if(!dialog_file_browser_show(
            infrared->dialogs, infrared->file_path, infrared->file_path, &browser_options)) {
         scene_manager_previous_scene(infrared->scene_manager);
