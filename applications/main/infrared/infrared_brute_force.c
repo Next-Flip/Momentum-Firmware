@@ -63,7 +63,7 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
     if(!flipper_format_buffered_file_open_existing(ff, brute_force->db_filename)) {
         error = InfraredErrorCodeFileOperationFailed;
     } else {
-        uint32_t total_signals = 0;
+        uint32_t button_index = 0;
         while(infrared_signal_read_name(ff, signal_name) == InfraredErrorCodeNone) {
             error = infrared_signal_read_body(signal, ff);
             if(INFRARED_ERROR_PRESENT(error) || !infrared_signal_is_valid(signal)) {
@@ -77,9 +77,9 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
 
             } else {
                 infrared_brute_force_add_record(
-                    brute_force, total_signals, furi_string_get_cstr(signal_name));
+                    brute_force, button_index, furi_string_get_cstr(signal_name));
             }
-            total_signals++;
+            button_index++;
         }
     }
 
@@ -182,18 +182,17 @@ const char*
     }
 
     InfraredBruteForceRecordDict_it_t it;
-    size_t current_index = 0;
-
     for(InfraredBruteForceRecordDict_it(it, brute_force->records);
         !InfraredBruteForceRecordDict_end_p(it);
         InfraredBruteForceRecordDict_next(it)) {
-        if(current_index == index) {
-            const char* button_name =
-                furi_string_get_cstr(InfraredBruteForceRecordDict_cref(it)->key);
-
+        // Dict elements are unordered, they may be shuffled while adding elements, so the
+        // index used in add_record() may differ when iterating here, so we have to check
+        // the stored index not "position" index
+        const InfraredBruteForceRecordDict_itref_t* pair = InfraredBruteForceRecordDict_cref(it);
+        if(pair->value.index == index) {
+            const char* button_name = furi_string_get_cstr(pair->key);
             return button_name;
         }
-        current_index++;
     }
 
     return NULL; //just as fallback
