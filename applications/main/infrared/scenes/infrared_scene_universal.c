@@ -132,7 +132,6 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalDigitalSign);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalFromFile) {
-            furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalFromFile);
             consumed = true;
         }
