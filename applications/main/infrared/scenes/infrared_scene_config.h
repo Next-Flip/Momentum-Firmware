@@ -25,7 +25,6 @@ ADD_SCENE(infrared, universal_bluray, UniversalBluray)
 ADD_SCENE(infrared, universal_monitor, UniversalMonitor)
 ADD_SCENE(infrared, universal_digital_sign, UniversalDigitalSign)
 ADD_SCENE(infrared, universal_more_devices, UniversalMoreDevices)
-
 ADD_SCENE(infrared, gpio_settings, GpioSettings)
 ADD_SCENE(infrared, debug, Debug)
 ADD_SCENE(infrared, error_databases, ErrorDatabases)

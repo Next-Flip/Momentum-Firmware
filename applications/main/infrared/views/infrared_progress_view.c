@@ -83,6 +83,7 @@ bool infrared_progress_view_input_callback(InputEvent* event, void* context) {
         }
         return true;
     }
+
     return false;
 }
 

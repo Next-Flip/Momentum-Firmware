@@ -85,9 +85,9 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
 
     infrared_signal_free(signal);
     furi_string_free(signal_name);
+
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
-
     return error;
 }
 
@@ -96,12 +96,10 @@ bool infrared_brute_force_start(
     uint32_t index,
     uint32_t* record_count) {
     furi_assert(!brute_force->is_started);
-
     bool success = false;
     *record_count = 0;
 
     InfraredBruteForceRecordDict_it_t it;
-
     for(InfraredBruteForceRecordDict_it(it, brute_force->records);
         !InfraredBruteForceRecordDict_end_p(it);
         InfraredBruteForceRecordDict_next(it)) {
@@ -118,17 +116,12 @@ bool infrared_brute_force_start(
     if(*record_count) {
         Storage* storage = furi_record_open(RECORD_STORAGE);
         brute_force->ff = flipper_format_buffered_file_alloc(storage);
-
         brute_force->current_signal = infrared_signal_alloc();
-
         brute_force->is_started = true;
-
         success =
             flipper_format_buffered_file_open_existing(brute_force->ff, brute_force->db_filename);
-
         if(!success) infrared_brute_force_stop(brute_force);
     }
-
     return success;
 }
 
@@ -160,6 +153,7 @@ bool infrared_brute_force_send_next(InfraredBruteForce* brute_force) {
     }
     return success;
 }
+
 void infrared_brute_force_add_record(
     InfraredBruteForce* brute_force,
     uint32_t index,
@@ -168,7 +162,6 @@ void infrared_brute_force_add_record(
     FuriString* key;
     key = furi_string_alloc_set(name);
     InfraredBruteForceRecordDict_set_at(brute_force->records, key, value);
-
     furi_string_free(key);
 }
 
