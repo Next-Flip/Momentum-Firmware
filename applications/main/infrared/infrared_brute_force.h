@@ -47,9 +47,12 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
  * a infrared_brute_force_set_db_filename() call.
  *
  * @param[in,out] brute_force pointer to the instance to be updated.
+ * @param[in] auto_detect_buttons bool whether to automatically register newly discovered buttons.
  * @returns InfraredErrorCodeNone on success, otherwise error code.
  */
-InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force);
+InfraredErrorCode infrared_brute_force_calculate_messages(
+    InfraredBruteForce* brute_force,
+    bool auto_detect_buttons);
 
 /**
  * @brief Start transmitting signals from a category stored in an InfraredBruteForce's instance dictionary.

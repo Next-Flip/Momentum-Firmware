@@ -50,7 +50,9 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
     brute_force->db_filename = db_filename;
 }
 
-InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force) {
+InfraredErrorCode infrared_brute_force_calculate_messages(
+    InfraredBruteForce* brute_force,
+    bool auto_detect_buttons) {
     furi_assert(!brute_force->is_started);
     furi_assert(brute_force->db_filename);
     InfraredErrorCode error = InfraredErrorCodeNone;
@@ -63,7 +65,7 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
     if(!flipper_format_buffered_file_open_existing(ff, brute_force->db_filename)) {
         error = InfraredErrorCodeFileOperationFailed;
     } else {
-        uint32_t button_index = 0;
+        uint32_t auto_detect_button_index = 0;
         while(infrared_signal_read_name(ff, signal_name) == InfraredErrorCodeNone) {
             error = infrared_signal_read_body(signal, ff);
             if(INFRARED_ERROR_PRESENT(error) || !infrared_signal_is_valid(signal)) {
@@ -72,11 +74,13 @@ InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* br
 
             InfraredBruteForceRecord* record =
                 InfraredBruteForceRecordDict_get(brute_force->records, signal_name);
+            if(!record && auto_detect_buttons) {
+                infrared_brute_force_add_record(
+                    brute_force, auto_detect_button_index++, furi_string_get_cstr(signal_name));
+                record = InfraredBruteForceRecordDict_get(brute_force->records, signal_name);
+            }
             if(record) { //-V547
                 ++(record->count);
-            } else {
-                infrared_brute_force_add_record(
-                    brute_force, button_index++, furi_string_get_cstr(signal_name));
             }
         }
     }
