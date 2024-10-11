@@ -18,7 +18,24 @@ static void infrared_scene_universal_more_devices_item_callback(
 
 static int32_t infrared_scene_universal_more_devices_task_callback(void* context) {
     InfraredApp* infrared = context;
+    ButtonMenu* button_menu = infrared->button_menu;
+    InfraredBruteForce* brute_force = infrared->brute_force;
     const InfraredErrorCode error = infrared_brute_force_calculate_messages(infrared->brute_force);
+
+    if(!INFRARED_ERROR_PRESENT(error)) {
+        // add btns
+        for(size_t i = 0; i < infrared_brute_force_get_button_count(brute_force); ++i) {
+            const char* button_name = infrared_brute_force_get_button_name(brute_force, i);
+            button_menu_add_item(
+                button_menu,
+                button_name,
+                i,
+                infrared_scene_universal_more_devices_item_callback,
+                ButtonMenuItemTypeCommon,
+                infrared);
+        }
+    }
+
     view_dispatcher_send_custom_event(
         infrared->view_dispatcher,
         infrared_custom_event_pack(InfraredCustomEventTypeTaskFinished, 0));
@@ -27,15 +44,6 @@ static int32_t infrared_scene_universal_more_devices_task_callback(void* context
 }
 
 void infrared_scene_universal_more_devices_on_enter(void* context) {
-    // in this func, note that it's actually loaded the db twice, here's what i did and why it's harmless:
-    // 1. load db previously cuz need to use the db to add btns in runtime
-    // 2. load db again with blocking task
-    // reason:
-    // 1. there's a funny policy in infrared_brute_force_calculate_messages func, that it'll check if name in it, if yes, it will increase the num and add, if yes, it will make a new field.
-    // it's probablt a work around to satisfying other places, but since momentum is not a distro, i really don't want to edit that func to make it's hard to merge upstream changes.
-    // why it's harmless:
-    // 1. do it twice can make it cover the first custom item.
-    // 2. only the count (which controls the for loop to go through the next item by name field) x2, not index, so signal index not impacted.
     InfraredApp* infrared = context;
     ButtonMenu* button_menu = infrared->button_menu;
     InfraredBruteForce* brute_force = infrared->brute_force;
@@ -52,28 +60,9 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
 
     infrared_brute_force_set_db_filename(brute_force, furi_string_get_cstr(infrared->file_path));
 
-    // load db previously cuz need to use the db to add btns in runtime
-    InfraredErrorCode error = infrared_brute_force_calculate_messages(brute_force);
-
-    if(INFRARED_ERROR_PRESENT(error)) {
-        infrared_show_error_message(infrared, "Failed to load database");
-        scene_manager_previous_scene(infrared->scene_manager);
-        return;
-    }
-
-    // add btns
-    for(size_t i = 0; i < infrared_brute_force_get_button_count(brute_force); ++i) {
-        const char* button_name = infrared_brute_force_get_button_name(brute_force, i);
-        button_menu_add_item(
-            button_menu,
-            button_name,
-            i,
-            infrared_scene_universal_more_devices_item_callback,
-            ButtonMenuItemTypeCommon,
-            infrared);
-    }
-
-    ///header name handler
+    // File name in header
+    // Using c-string functions on FuriString is a bad idea but file_path is not modified
+    // for the lifetime of this scene so it should be fine
     const char* file_name = strrchr(furi_string_get_cstr(infrared->file_path), '/');
     if(file_name) {
         file_name++; // skip dir seperator
@@ -82,12 +71,12 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
     }
     button_menu_set_header(button_menu, file_name);
 
+    // Can't use infrared_scene_universal_common_on_enter() since we use ButtonMenu not ButtonPanel
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_stack_add_view(infrared->view_stack, button_menu_get_view(infrared->button_menu));
 
     // Load universal remote data in background
     infrared_blocking_task_start(infrared, infrared_scene_universal_more_devices_task_callback);
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 }
 
 bool infrared_scene_universal_more_devices_on_event(void* context, SceneManagerEvent event) {
@@ -95,7 +84,7 @@ bool infrared_scene_universal_more_devices_on_event(void* context, SceneManagerE
 }
 
 void infrared_scene_universal_more_devices_on_exit(void* context) {
-    // Common function won't work since we use ButtonMenu not ButtonPanel
+    // Can't use infrared_scene_universal_common_on_exit() since we use ButtonMenu not ButtonPanel
     InfraredApp* infrared = context;
     ButtonMenu* button_menu = infrared->button_menu;
     view_stack_remove_view(infrared->view_stack, button_menu_get_view(button_menu));
