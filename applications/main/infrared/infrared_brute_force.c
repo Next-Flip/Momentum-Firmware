@@ -6,6 +6,12 @@
 
 #include "infrared_signal.h"
 
+#define TAG "InfraredBruteforce"
+
+#define INFRARED_FILE_HEADER     "IR signals file"
+#define INFRARED_LIBRARY_HEADER  "IR library file"
+#define INFRARED_LIBRARY_VERSION (1)
+
 typedef struct {
     uint32_t index;
     uint32_t count;
@@ -62,15 +68,43 @@ InfraredErrorCode infrared_brute_force_calculate_messages(
     FuriString* signal_name = furi_string_alloc();
     InfraredSignal* signal = infrared_signal_alloc();
 
-    if(!flipper_format_buffered_file_open_existing(ff, brute_force->db_filename)) {
-        error = InfraredErrorCodeFileOperationFailed;
-    } else {
+    do {
+        if(!flipper_format_buffered_file_open_existing(ff, brute_force->db_filename)) {
+            error = InfraredErrorCodeFileOperationFailed;
+            break;
+        }
+
+        uint32_t version;
+        // Temporarily use signal_name to get header info
+        if(!flipper_format_read_header(ff, signal_name, &version)) {
+            error = InfraredErrorCodeFileOperationFailed;
+            break;
+        }
+
+        if(furi_string_equal(signal_name, INFRARED_FILE_HEADER)) {
+            FURI_LOG_E(TAG, "Remote file can't be loaded in this context");
+            error = InfraredErrorCodeWrongFileType;
+            break;
+        }
+
+        if(!furi_string_equal(signal_name, INFRARED_LIBRARY_HEADER)) {
+            error = InfraredErrorCodeWrongFileType;
+            FURI_LOG_E(TAG, "Filetype unknown");
+            break;
+        }
+
+        if(version != INFRARED_LIBRARY_VERSION) {
+            error = InfraredErrorCodeWrongFileVersion;
+            FURI_LOG_E(TAG, "Wrong file version");
+            break;
+        }
+
+        bool signals_valid = false;
         uint32_t auto_detect_button_index = 0;
         while(infrared_signal_read_name(ff, signal_name) == InfraredErrorCodeNone) {
             error = infrared_signal_read_body(signal, ff);
-            if(INFRARED_ERROR_PRESENT(error) || !infrared_signal_is_valid(signal)) {
-                break;
-            }
+            signals_valid = (!INFRARED_ERROR_PRESENT(error)) && infrared_signal_is_valid(signal);
+            if(!signals_valid) break;
 
             InfraredBruteForceRecord* record =
                 InfraredBruteForceRecordDict_get(brute_force->records, signal_name);
@@ -83,7 +117,8 @@ InfraredErrorCode infrared_brute_force_calculate_messages(
                 ++(record->count);
             }
         }
-    }
+        if(!signals_valid) break;
+    } while(false);
 
     infrared_signal_free(signal);
     furi_string_free(signal_name);

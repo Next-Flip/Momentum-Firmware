@@ -81,6 +81,35 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
 }
 
 bool infrared_scene_universal_more_devices_on_event(void* context, SceneManagerEvent event) {
+    InfraredApp* infrared = context;
+    SceneManager* scene_manager = infrared->scene_manager;
+    InfraredBruteForce* brute_force = infrared->brute_force;
+
+    // Only override InfraredCustomEventTypeTaskFinished on error condition
+    if(!infrared_brute_force_is_started(brute_force) &&
+       event.type == SceneManagerEventTypeCustom) {
+        uint16_t event_type;
+        int16_t event_value;
+        infrared_custom_event_unpack(event.event, &event_type, &event_value);
+        if(event_type == InfraredCustomEventTypeTaskFinished) {
+            const InfraredErrorCode task_error = infrared_blocking_task_finalize(infrared);
+
+            if(INFRARED_ERROR_PRESENT(task_error)) {
+                bool wrong_file_type =
+                    INFRARED_ERROR_CHECK(task_error, InfraredErrorCodeWrongFileType);
+                const char* format = wrong_file_type ?
+                                         "Remote file\n\"%s\" can't be openned as a library" :
+                                         "Failed to load\n\"%s\"";
+
+                infrared_show_error_message(
+                    infrared, format, furi_string_get_cstr(infrared->file_path));
+                scene_manager_previous_scene(scene_manager);
+                return true;
+            }
+        }
+    }
+
+    // Use common function for all other functionality
     return infrared_scene_universal_common_on_event(context, event);
 }
 
