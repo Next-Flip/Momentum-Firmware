@@ -6,8 +6,10 @@
 #include <furi.h>
 #include <dolphin/dolphin.h>
 
-static void
-    infrared_scene_universal_more_devices_callback(void* context, int32_t index, InputType type) {
+static void infrared_scene_universal_more_devices_item_callback(
+    void* context,
+    int32_t index,
+    InputType type) {
     UNUSED(type);
     InfraredApp* infrared = context;
     uint32_t event = infrared_custom_event_pack(InfraredCustomEventTypeButtonSelected, index);
@@ -41,54 +43,50 @@ void infrared_scene_universal_more_devices_on_enter(void* context) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, INFRARED_APP_EXTENSION, &I_ir_10px);
     browser_options.base_path = INFRARED_APP_FOLDER;
-
-    bool file_selected = dialog_file_browser_show(
-        infrared->dialogs, infrared->file_path, infrared->file_path, &browser_options);
-
-    if(file_selected) {
-        infrared_brute_force_set_db_filename(
-            brute_force, furi_string_get_cstr(infrared->file_path));
-
-        // load db previously cuz need to use the db to add btns in runtime
-        InfraredErrorCode error = infrared_brute_force_calculate_messages(brute_force);
-
-        if(INFRARED_ERROR_PRESENT(error)) {
-            infrared_show_error_message(infrared, "Failed to load database");
-            scene_manager_previous_scene(infrared->scene_manager);
-            return;
-        }
-
-        // add btns
-        for(size_t i = 0; i < infrared_brute_force_get_button_count(brute_force); ++i) {
-            const char* button_name = infrared_brute_force_get_button_name(brute_force, i);
-            button_menu_add_item(
-                button_menu,
-                button_name,
-                i,
-                infrared_scene_universal_more_devices_callback,
-                ButtonMenuItemTypeCommon,
-                infrared);
-        }
-
-        ///header name handler
-        const char* file_name = strrchr(furi_string_get_cstr(infrared->file_path), '/');
-        if(file_name) {
-            file_name++; // skip dir seperator
-        } else {
-            file_name = furi_string_get_cstr(infrared->file_path); // fallback
-        }
-        button_menu_set_header(button_menu, file_name);
-
-        view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
-        view_stack_add_view(infrared->view_stack, button_menu_get_view(infrared->button_menu));
-
-        // Load universal remote data in background
-        infrared_blocking_task_start(
-            infrared, infrared_scene_universal_more_devices_task_callback);
-        view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
-    } else {
+    if(!dialog_file_browser_show(
+           infrared->dialogs, infrared->file_path, infrared->file_path, &browser_options)) {
         scene_manager_previous_scene(infrared->scene_manager);
+        return;
     }
+
+    infrared_brute_force_set_db_filename(brute_force, furi_string_get_cstr(infrared->file_path));
+
+    // load db previously cuz need to use the db to add btns in runtime
+    InfraredErrorCode error = infrared_brute_force_calculate_messages(brute_force);
+
+    if(INFRARED_ERROR_PRESENT(error)) {
+        infrared_show_error_message(infrared, "Failed to load database");
+        scene_manager_previous_scene(infrared->scene_manager);
+        return;
+    }
+
+    // add btns
+    for(size_t i = 0; i < infrared_brute_force_get_button_count(brute_force); ++i) {
+        const char* button_name = infrared_brute_force_get_button_name(brute_force, i);
+        button_menu_add_item(
+            button_menu,
+            button_name,
+            i,
+            infrared_scene_universal_more_devices_item_callback,
+            ButtonMenuItemTypeCommon,
+            infrared);
+    }
+
+    ///header name handler
+    const char* file_name = strrchr(furi_string_get_cstr(infrared->file_path), '/');
+    if(file_name) {
+        file_name++; // skip dir seperator
+    } else {
+        file_name = furi_string_get_cstr(infrared->file_path); // fallback
+    }
+    button_menu_set_header(button_menu, file_name);
+
+    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
+    view_stack_add_view(infrared->view_stack, button_menu_get_view(infrared->button_menu));
+
+    // Load universal remote data in background
+    infrared_blocking_task_start(infrared, infrared_scene_universal_more_devices_task_callback);
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 }
 
 bool infrared_scene_universal_more_devices_on_event(void* context, SceneManagerEvent event) {
