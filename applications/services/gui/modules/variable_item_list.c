@@ -30,6 +30,14 @@ struct VariableItemList {
 };
 
 typedef struct {
+    VariableItem* item;
+    uint8_t current_page;
+    uint8_t selected_option_index;
+    uint8_t total_options;
+    uint8_t total_pages;
+} ZapperMenu;
+
+typedef struct {
     VariableItemArray_t items;
     uint8_t position;
     uint8_t window_position;
@@ -37,20 +45,13 @@ typedef struct {
     FuriString* header;
     size_t scroll_counter;
     bool locked_message_visible;
+
+    /// option menu
+    bool is_zapper_menu_active;
+    ZapperMenu zapper_menu;
 } VariableItemListModel;
 
-typedef struct {
-    VariableItemList* variable_item_list;
-    VariableItem* item;
-    uint8_t current_page;
-    uint8_t option_1_index;
-    uint8_t option_2_index;
-    uint8_t option_3_index;
-    uint8_t option_4_index;
-    uint8_t selected_option_index;
-    uint8_t total_options;
-    uint8_t total_pages;
-} OptionMenu;
+static const char* allow_zapper_field[] = {"Frequency", "Modulation"};
 
 static void variable_item_list_process_up(VariableItemList* variable_item_list);
 static void variable_item_list_process_down(VariableItemList* variable_item_list);
@@ -64,8 +65,82 @@ static size_t variable_item_list_items_on_screen(VariableItemListModel* model) {
     return (furi_string_empty(model->header)) ? res : res - 1;
 }
 
+static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
+    // TODO: ugly now
+    ZapperMenu* zapper_menu = &model->zapper_menu;
+    VariableItem* item = zapper_menu->item;
+
+    const uint8_t item_height = 16;
+    uint8_t item_width = canvas_width(canvas) - 5;
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontSecondary);
+
+    uint8_t start_option = zapper_menu->current_page * 4;
+    uint8_t end_option = start_option + 4;
+    if(end_option > zapper_menu->total_options) {
+        end_option = zapper_menu->total_options;
+    }
+
+    uint8_t original_index = item->current_value_index;
+
+    for(uint8_t i = start_option; i < end_option; i++) {
+        uint8_t item_position = i - start_option;
+        uint8_t item_y = item_position * item_height;
+        uint8_t item_text_y = item_y + item_height - 4;
+
+        // TODO: maybe not need highlight since we choose by ^ v < >
+        if(item_position == zapper_menu->selected_option_index) {
+            canvas_set_color(canvas, ColorBlack);
+            elements_slightly_rounded_box(canvas, 0, item_y + 1, item_width, item_height - 2);
+            canvas_set_color(canvas, ColorWhite);
+        } else {
+            canvas_set_color(canvas, ColorBlack);
+        }
+
+        // temp set current_value_index to use change_callback to get option text (TODO: find a better way, or maybe this is hardless as long as it only tune freq when back to receive page in subghz (need check))
+        item->current_value_index = i;
+        if(item->change_callback) {
+            item->change_callback(item);
+        }
+        const char* option_text = furi_string_get_cstr(item->current_value_text);
+
+        // paint
+        canvas_draw_str(canvas, 6, item_text_y, option_text);
+    }
+
+    // reset current_value_index
+    item->current_value_index = original_index;
+    if(item->change_callback) {
+        item->change_callback(item);
+    }
+
+    // pager : TODO POSITION
+    char page_info[16];
+    snprintf(
+        page_info,
+        sizeof(page_info),
+        "Page %d/%d",
+        zapper_menu->current_page + 1,
+        zapper_menu->total_pages);
+    canvas_draw_str_aligned(
+        canvas,
+        canvas_width(canvas) / 2,
+        canvas_height(canvas) - 10,
+        AlignCenter,
+        AlignBottom,
+        page_info);
+}
+
 static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
     VariableItemListModel* model = _model;
+    canvas_clear(canvas);
+
+    if(model->is_zapper_menu_active) {
+        // paint
+        zapper_menu_draw(canvas, model);
+        return;
+    }
 
     const uint8_t item_height = 16;
     uint8_t item_width = canvas_width(canvas) - 5;
@@ -234,6 +309,64 @@ void variable_item_list_set_header(VariableItemList* variable_item_list, const c
         true);
 }
 
+static bool zapper_menu_input_handler(InputEvent* event, void* context) {
+    VariableItemList* variable_item_list = context;
+    bool consumed = true;
+
+    with_view_model(
+        variable_item_list->view,
+        VariableItemListModel * model,
+        {
+            ZapperMenu* zapper_menu = &model->zapper_menu;
+            VariableItem* item = zapper_menu->item;
+
+            if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
+                uint8_t selected_option = 0xFF; // 初始化为无效值
+                switch(event->key) {
+                case InputKeyUp:
+                    selected_option = zapper_menu->current_page * 4 + 0;
+                    break;
+                case InputKeyLeft:
+                    selected_option = zapper_menu->current_page * 4 + 1;
+                    break;
+                case InputKeyRight:
+                    selected_option = zapper_menu->current_page * 4 + 2;
+                    break;
+                case InputKeyDown:
+                    selected_option = zapper_menu->current_page * 4 + 3;
+                    break;
+                case InputKeyOk:
+                    // paging
+                    zapper_menu->current_page =
+                        (zapper_menu->current_page + 1) % zapper_menu->total_pages;
+                    // reset sel-ed one
+                    zapper_menu->selected_option_index = 0;
+                    break;
+                case InputKeyBack:
+                    // exit
+                    model->is_zapper_menu_active = false;
+                    break;
+                default:
+                    break;
+                }
+
+                // check valid
+                if(selected_option != 0xFF && selected_option < zapper_menu->total_options) { //0xFF use as nullptr
+                    // update anf callback
+                    item->current_value_index = selected_option;
+                    if(item->change_callback) {
+                        item->change_callback(item);
+                    }
+                    // exit
+                    model->is_zapper_menu_active = false;
+                }
+            }
+        },
+        true);
+
+    return consumed;
+}
+
 static bool variable_item_list_input_callback(InputEvent* event, void* context) {
     VariableItemList* variable_item_list = context;
     furi_assert(variable_item_list);
@@ -243,7 +376,13 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
     with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
-        { locked_message_visible = model->locked_message_visible; },
+        {
+            if(model->is_zapper_menu_active) {
+                consumed = zapper_menu_input_handler(event, context);
+            } else {
+                locked_message_visible = model->locked_message_visible;
+            }
+        },
         false);
 
     if((event->type != InputTypePress && event->type != InputTypeRelease) &&
@@ -302,8 +441,29 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
     } else if(event->type == InputTypeLong) {
         switch(event->key) {
         case InputKeyOk:
-            variable_item_list_process_ok_long(variable_item_list);
-            break;
+            with_view_model(
+                variable_item_list->view,
+                VariableItemListModel * model,
+                {
+                    VariableItem* item = VariableItemArray_get(model->items, model->position);
+                    const char* label = furi_string_get_cstr(item->label);
+
+                    bool allowed = false;
+                    for(size_t i = 0; i < sizeof(allow_zapper_field) / sizeof(char*); i++) {
+                        if(strcmp(label, allow_zapper_field[i]) == 0) {
+                            allowed = true;
+                            break;
+                        }
+                    }
+
+                    if(!allowed) {
+                        return false;
+                    }
+                },
+                false); //TODO: wrong logic here, allowed should pass back
+                variable_item_list_process_ok_long(variable_item_list);
+                //fallthrough
+
         default:
             break;
         }
@@ -436,7 +596,6 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_process_ok_long(VariableItemList* variable_item_list) {
-    FURI_LOG_I("variable_item_list", "variable_item_list_process_ok_long call");
     furi_check(variable_item_list);
 
     with_view_model(
@@ -444,36 +603,19 @@ void variable_item_list_process_ok_long(VariableItemList* variable_item_list) {
         VariableItemListModel * model,
         {
             VariableItem* item = variable_item_list_get_selected_item(model);
-            FURI_LOG_I("variable_item_list", "hight-field: %s", furi_string_get_cstr(item->label));
-            FURI_LOG_I("variable_item_list", "sel-d: %d", item->current_value_index);
-            FURI_LOG_I(
-                "variable_item_list", "sel-t: %s", furi_string_get_cstr(item->current_value_text));
-            FURI_LOG_I("variable_item_list", "in-tot: %d", item->values_count);
 
-            FURI_LOG_I("variable_item_list", "all:");
-            uint8_t original_index = item->current_value_index;
-            FURI_LOG_I("variable_item_list", "org-i: %d", original_index);
-            for(uint8_t i = 0; i < item->values_count; i++) {
-                item->current_value_index = i;
-                if(item->change_callback) {
-                    item->change_callback(item);
-                }
-                FURI_LOG_I(
-                    "variable_item_list",
-                    "  op- %d: %s",
-                    i,
-                    furi_string_get_cstr(item->current_value_text));
-            }
-            // // reset
-            // item->current_value_index = original_index;
-            // if(item->change_callback) {
-            //     item->change_callback(item);
-            // }
-            //test assign to 0
-            item->current_value_index = 0;
-            if(item->change_callback) {
-                item->change_callback(item);
-            }
+            // ini
+            model->is_zapper_menu_active = true;
+            ZapperMenu* zapper_menu = &model->zapper_menu;
+
+            zapper_menu->item = item;
+            zapper_menu->current_page = 0;
+            zapper_menu->selected_option_index = 0;
+            zapper_menu->total_options = item->values_count;
+            zapper_menu->total_pages = (zapper_menu->total_options + 3) / 4;
+
+            // update
+            model->scroll_counter = 0;
         },
         true);
 }
