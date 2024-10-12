@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "infrared_error_code.h"
 
 /**
@@ -46,9 +47,12 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
  * a infrared_brute_force_set_db_filename() call.
  *
  * @param[in,out] brute_force pointer to the instance to be updated.
+ * @param[in] auto_detect_buttons bool whether to automatically register newly discovered buttons.
  * @returns InfraredErrorCodeNone on success, otherwise error code.
  */
-InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force);
+InfraredErrorCode infrared_brute_force_calculate_messages(
+    InfraredBruteForce* brute_force,
+    bool auto_detect_buttons);
 
 /**
  * @brief Start transmitting signals from a category stored in an InfraredBruteForce's instance dictionary.
@@ -109,3 +113,23 @@ void infrared_brute_force_add_record(
  * @param[in,out] brute_force pointer to the instance to be reset.
  */
 void infrared_brute_force_reset(InfraredBruteForce* brute_force);
+
+/**
+ * @brief Get the total number of unique button names in the database, for example, 
+ *        if a button name is "Power" and it appears 3 times in the db, then the 
+ *        db_size is 1, instead of 3.
+ *
+ * @param[in] brute_force pointer to the InfraredBruteForce instance.
+ * @return size_t number of unique button names.
+ */
+size_t infrared_brute_force_get_button_count(const InfraredBruteForce* brute_force);
+
+/**
+ * @brief Get the button name at the specified index.
+ *
+ * @param[in] brute_force pointer to the InfraredBruteForce instance.
+ * @param[in] index index of the button name to retrieve.
+ * @return const char* button name, or NULL if index is out of range.
+ */
+const char*
+    infrared_brute_force_get_button_name(const InfraredBruteForce* brute_force, size_t index);
