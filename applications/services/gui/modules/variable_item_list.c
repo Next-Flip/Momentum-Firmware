@@ -340,7 +340,7 @@ static bool zapper_menu_input_handler(InputEvent* event, void* context) {
             VariableItem* item = zapper_menu->item;
 
             if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
-                uint8_t selected_option = 0xFF; // 初始化为无效值
+                uint8_t selected_option = 0xFF; // as nullptr
                 switch(event->key) {
                 case InputKeyUp:
                     selected_option = zapper_menu->current_page * 4 + 0;
