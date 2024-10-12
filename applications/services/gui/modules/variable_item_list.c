@@ -285,6 +285,9 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
         default:
             break;
         }
+    } else if(event->type == InputTypeLong) {
+        variable_item_list_process_ok_long(variable_item_list);
+        consumed = true;
     }
 
     return consumed;
@@ -411,6 +414,11 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
             }
         },
         true);
+}
+
+void variable_item_list_process_ok_long(VariableItemList* variable_item_list) {
+    UNUSED(variable_item_list);
+    FURI_LOG_I("variable_item_list", "variable_item_list_process_ok_long call");
 }
 
 static void variable_item_list_scroll_timer_callback(void* context) {
