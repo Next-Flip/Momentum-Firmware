@@ -155,3 +155,11 @@ App(
     requires=["js_app"],
     sources=["modules/js_vgm/*.c", "modules/js_vgm/ICM42688P/*.c"],
 )
+
+App(
+    appid="js_i2c",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_i2c_ep",
+    requires=["js_app"],
+    sources=["modules/js_i2c.c"],
+)
