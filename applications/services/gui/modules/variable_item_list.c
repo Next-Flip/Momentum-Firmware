@@ -616,7 +616,7 @@ void variable_item_list_process_ok_long(VariableItemList* variable_item_list) {
             }
 
             if(is_allowed) {
-                // ini
+                // init
                 model->is_zapper_menu_active = true;
                 ZapperMenu* zapper_menu = &model->zapper_menu;
 
