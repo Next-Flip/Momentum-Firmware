@@ -39,11 +39,25 @@ typedef struct {
     bool locked_message_visible;
 } VariableItemListModel;
 
+typedef struct {
+    VariableItemList* variable_item_list;
+    VariableItem* item;
+    uint8_t current_page;
+    uint8_t option_1_index;
+    uint8_t option_2_index;
+    uint8_t option_3_index;
+    uint8_t option_4_index;
+    uint8_t selected_option_index;
+    uint8_t total_options;
+    uint8_t total_pages;
+} OptionMenu;
+
 static void variable_item_list_process_up(VariableItemList* variable_item_list);
 static void variable_item_list_process_down(VariableItemList* variable_item_list);
 static void variable_item_list_process_left(VariableItemList* variable_item_list);
 static void variable_item_list_process_right(VariableItemList* variable_item_list);
 static void variable_item_list_process_ok(VariableItemList* variable_item_list);
+static void variable_item_list_process_ok_long(VariableItemList* variable_item_list);
 
 static size_t variable_item_list_items_on_screen(VariableItemListModel* model) {
     size_t res = 4;
@@ -286,8 +300,13 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
             break;
         }
     } else if(event->type == InputTypeLong) {
-        variable_item_list_process_ok_long(variable_item_list);
-        consumed = true;
+        switch(event->key) {
+        case InputKeyOk:
+            variable_item_list_process_ok_long(variable_item_list);
+            break;
+        default:
+            break;
+        }
     }
 
     return consumed;
@@ -417,8 +436,46 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
 }
 
 void variable_item_list_process_ok_long(VariableItemList* variable_item_list) {
-    UNUSED(variable_item_list);
     FURI_LOG_I("variable_item_list", "variable_item_list_process_ok_long call");
+    furi_check(variable_item_list);
+
+    with_view_model(
+        variable_item_list->view,
+        VariableItemListModel * model,
+        {
+            VariableItem* item = variable_item_list_get_selected_item(model);
+            FURI_LOG_I("variable_item_list", "hight-field: %s", furi_string_get_cstr(item->label));
+            FURI_LOG_I("variable_item_list", "sel-d: %d", item->current_value_index);
+            FURI_LOG_I(
+                "variable_item_list", "sel-t: %s", furi_string_get_cstr(item->current_value_text));
+            FURI_LOG_I("variable_item_list", "in-tot: %d", item->values_count);
+
+            FURI_LOG_I("variable_item_list", "all:");
+            uint8_t original_index = item->current_value_index;
+            FURI_LOG_I("variable_item_list", "org-i: %d", original_index);
+            for(uint8_t i = 0; i < item->values_count; i++) {
+                item->current_value_index = i;
+                if(item->change_callback) {
+                    item->change_callback(item);
+                }
+                FURI_LOG_I(
+                    "variable_item_list",
+                    "  op- %d: %s",
+                    i,
+                    furi_string_get_cstr(item->current_value_text));
+            }
+            // // reset
+            // item->current_value_index = original_index;
+            // if(item->change_callback) {
+            //     item->change_callback(item);
+            // }
+            //test assign to 0
+            item->current_value_index = 0;
+            if(item->change_callback) {
+                item->change_callback(item);
+            }
+        },
+        true);
 }
 
 static void variable_item_list_scroll_timer_callback(void* context) {
