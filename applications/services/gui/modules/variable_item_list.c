@@ -148,12 +148,7 @@ static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
 
     // v
     canvas_draw_triangle(
-        canvas,
-        arrow_x,
-        16 * 3 + 6,
-        arrow_size,
-        arrow_size,
-        CanvasDirectionTopToBottom);
+        canvas, arrow_x, 16 * 3 + 6, arrow_size, arrow_size, CanvasDirectionTopToBottom);
 }
 
 static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
@@ -468,7 +463,7 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
     } else if(event->type == InputTypeLong) {
         switch(event->key) {
         case InputKeyOk:
-        consumed = true;
+            consumed = true;
             variable_item_list_process_ok_long(variable_item_list);
             break;
         default:
