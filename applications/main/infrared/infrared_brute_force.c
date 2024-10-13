@@ -118,6 +118,18 @@ InfraredErrorCode infrared_brute_force_calculate_messages(
             }
         }
         if(!signals_valid) break;
+
+        // workaround to fix count value always - 1 if call this directly
+        if(auto_detect_buttons) {
+            InfraredBruteForceRecordDict_it_t it;
+            for(InfraredBruteForceRecordDict_it(it, brute_force->records);
+                !InfraredBruteForceRecordDict_end_p(it);
+                InfraredBruteForceRecordDict_next(it)) {
+                InfraredBruteForceRecordDict_itref_t* r_ = InfraredBruteForceRecordDict_ref(it);
+                InfraredBruteForceRecord* record = &r_->value;
+                record->count++;
+            }
+        }
     } while(false);
 
     infrared_signal_free(signal);
