@@ -339,7 +339,7 @@ static bool zapper_menu_input_handler(InputEvent* event, void* context) {
             ZapperMenu* zapper_menu = &model->zapper_menu;
             VariableItem* item = zapper_menu->item;
 
-            if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
+            if(event->type == InputTypeShort) {
                 uint8_t selected_option = 0xFF; // as nullptr
                 switch(event->key) {
                 case InputKeyUp:
@@ -380,6 +380,16 @@ static bool zapper_menu_input_handler(InputEvent* event, void* context) {
                     // exit
                     model->is_zapper_menu_active = false;
                 }
+            } else if(event->type == InputTypeRepeat) {
+                if(event->key == InputKeyLeft || event->key == InputKeyRight ||
+                   event->key == InputKeyUp || event->key == InputKeyDown) {
+                    zapper_menu->current_page =
+                        (zapper_menu->current_page + 1) % zapper_menu->total_pages;
+                }else if (event->key == InputKeyBack){
+                    model->is_zapper_menu_active = false;
+                }
+            }else if (event->type == InputTypeLong && event->key == InputKeyBack){
+                model->is_zapper_menu_active = false;
             }
         },
         true);
