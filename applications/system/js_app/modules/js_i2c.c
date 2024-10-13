@@ -20,7 +20,7 @@ static bool check_arg_count_range(struct mjs* mjs, size_t min_count, size_t max_
 }
 
 static void js_i2c_is_device_ready(struct mjs* mjs) {
-    if(!check_arg_count_range(mjs, 1,2)) return;
+    if(!check_arg_count_range(mjs, 1, 2)) return;
 
     mjs_val_t addr_arg = mjs_arg(mjs, 0);
     if(!mjs_is_number(addr_arg)) {
@@ -30,7 +30,7 @@ static void js_i2c_is_device_ready(struct mjs* mjs) {
     uint32_t addr = mjs_get_int32(mjs, addr_arg);
 
     uint32_t timeout = 1;
-    if (mjs_nargs(mjs) > 1) { // Timeout is optional argument
+    if(mjs_nargs(mjs) > 1) { // Timeout is optional argument
         mjs_val_t timeout_arg = mjs_arg(mjs, 1);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
@@ -78,7 +78,7 @@ static void js_i2c_write(struct mjs* mjs) {
     }
 
     uint32_t timeout = 1;
-    if (mjs_nargs(mjs) > 2) { // Timeout is optional argument
+    if(mjs_nargs(mjs) > 2) { // Timeout is optional argument
         mjs_val_t timeout_arg = mjs_arg(mjs, 2);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
@@ -121,7 +121,7 @@ static void js_i2c_read(struct mjs* mjs) {
     memset(mem_addr, 0, len);
 
     uint32_t timeout = 1;
-    if (mjs_nargs(mjs) > 2) { // Timeout is optional argument
+    if(mjs_nargs(mjs) > 2) { // Timeout is optional argument
         mjs_val_t timeout_arg = mjs_arg(mjs, 2);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
@@ -137,7 +137,7 @@ static void js_i2c_read(struct mjs* mjs) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
     mjs_val_t ret = mjs_mk_array(mjs);
-    if (result) {
+    if(result) {
         for(size_t i = 0; i < len; i++) {
             mjs_array_push(mjs, ret, mjs_mk_number(mjs, mem_addr[i]));
         }
@@ -192,7 +192,7 @@ static void js_i2c_write_read(struct mjs* mjs) {
     }
 
     uint32_t timeout = 1;
-    if (mjs_nargs(mjs) > 3) { // Timeout is optional argument
+    if(mjs_nargs(mjs) > 3) { // Timeout is optional argument
         mjs_val_t timeout_arg = mjs_arg(mjs, 3);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
@@ -205,11 +205,12 @@ static void js_i2c_write_read(struct mjs* mjs) {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     uint8_t* mem_addr = malloc(len);
     memset(mem_addr, 0, len);
-    bool result = furi_hal_i2c_trx(&furi_hal_i2c_handle_external, addr, data, data_len, mem_addr, len, timeout);
+    bool result = furi_hal_i2c_trx(
+        &furi_hal_i2c_handle_external, addr, data, data_len, mem_addr, len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
     mjs_val_t ret = mjs_mk_array(mjs);
-    if (result) {
+    if(result) {
         for(size_t i = 0; i < len; i++) {
             mjs_array_push(mjs, ret, mjs_mk_number(mjs, mem_addr[i]));
         }
