@@ -331,6 +331,12 @@ void variable_item_list_set_header(VariableItemList* variable_item_list, const c
 static bool zapper_menu_input_handler(InputEvent* event, void* context) {
     VariableItemList* variable_item_list = context;
     bool consumed = true;
+    // this ok_ever_released var is for: prevent to trigger shuffing when first enter, because without that, would make muscle memory press not possible,
+    // because it would start shuffle when long pressed OK and entered zapper menu if user didn't release OK in time (consumed system seems didn't consider this kind of edge case).
+    // the static usage is because make it keeps life among func calls,
+    // otherwise it would be reseted to false each time enter this func, but each calls would make it false.
+    // it now seted back to false when exit zapper menu.
+    static bool ok_ever_released = false;
 
     with_view_model(
         variable_item_list->view,
@@ -339,7 +345,9 @@ static bool zapper_menu_input_handler(InputEvent* event, void* context) {
             ZapperMenu* zapper_menu = &model->zapper_menu;
             VariableItem* item = zapper_menu->item;
 
-            if(event->type == InputTypeShort) {
+            if(event->type == InputTypeRelease && event->key == InputKeyOk) {
+                ok_ever_released = true;
+            } else if(event->type == InputTypeShort) {
                 uint8_t selected_option = 0xFF; // as nullptr
                 switch(event->key) {
                 case InputKeyUp:
@@ -363,6 +371,7 @@ static bool zapper_menu_input_handler(InputEvent* event, void* context) {
                     break;
                 case InputKeyBack:
                     // exit
+                    ok_ever_released = false;
                     model->is_zapper_menu_active = false;
                     break;
                 default:
@@ -378,17 +387,19 @@ static bool zapper_menu_input_handler(InputEvent* event, void* context) {
                         item->change_callback(item);
                     }
                     // exit
+                    ok_ever_released = false;
                     model->is_zapper_menu_active = false;
                 }
             } else if(event->type == InputTypeRepeat) {
-                if(event->key == InputKeyLeft || event->key == InputKeyRight ||
-                   event->key == InputKeyUp || event->key == InputKeyDown) {
+                if(event->key == InputKeyOk && ok_ever_released) {
                     zapper_menu->current_page =
                         (zapper_menu->current_page + 1) % zapper_menu->total_pages;
-                }else if (event->key == InputKeyBack){
+                } else if(event->key == InputKeyBack) {
+                    ok_ever_released = false;
                     model->is_zapper_menu_active = false;
                 }
-            }else if (event->type == InputTypeLong && event->key == InputKeyBack){
+            } else if(event->type == InputTypeLong && event->key == InputKeyBack) {
+                ok_ever_released = false;
                 model->is_zapper_menu_active = false;
             }
         },
