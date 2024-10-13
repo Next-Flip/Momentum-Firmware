@@ -10,6 +10,8 @@
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
 
+#include <momentum/asset_packs.h>
+
 #define TAG "Loader"
 
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -418,6 +420,12 @@ static void loader_start_internal_app(
     LoaderEvent event;
     event.type = LoaderEventTypeApplicationBeforeLoad;
     furi_pubsub_publish(loader->pubsub, &event);
+    if(app->flags & FlipperApplicationFlagUnloadAssetPacks) {
+        loader->app.unloaded_asset_packs = true;
+        asset_packs_free();
+    } else {
+        loader->app.unloaded_asset_packs = false;
+    }
 
     // store args
     furi_assert(loader->app.args == NULL);
@@ -516,13 +524,18 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
         FURI_LOG_I(TAG, "Loading %s", path);
 
         // Calling preload will load whole FAP file, so need to preload manifest first to
-        // get flags value, then preload whole FAP
+        // get flags value, unload asset packs if requested by flags, then preload whole FAP
         FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
         FlipperApplicationPreloadStatus preload_res =
             flipper_application_preload_manifest(loader->app.fap, path);
+        loader->app.unloaded_asset_packs = false;
         if(preload_res != FlipperApplicationPreloadStatusInvalidFile &&
            preload_res != FlipperApplicationPreloadStatusInvalidManifest) {
             flags = flipper_application_get_manifest(loader->app.fap)->flags;
+            if(flags & FlipperApplicationFlagUnloadAssetPacks) {
+                loader->app.unloaded_asset_packs = true;
+                asset_packs_free();
+            }
             preload_res = flipper_application_preload(loader->app.fap, path);
         }
 
@@ -617,6 +630,9 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
         loader->app.fap = NULL;
         event.type = LoaderEventTypeApplicationLoadFailed;
         furi_pubsub_publish(loader->pubsub, &event);
+        if(loader->app.unloaded_asset_packs) {
+            asset_packs_init();
+        }
     }
 
     return result;
@@ -775,6 +791,9 @@ static void loader_do_app_closed(Loader* loader) {
     LoaderEvent event;
     event.type = LoaderEventTypeApplicationStopped;
     furi_pubsub_publish(loader->pubsub, &event);
+    if(loader->app.unloaded_asset_packs) {
+        asset_packs_init();
+    }
 }
 
 static bool loader_is_application_running(Loader* loader) {

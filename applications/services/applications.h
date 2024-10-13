@@ -6,6 +6,8 @@
 typedef enum FURI_PACKED {
     FlipperApplicationFlagDefault = 0,
     FlipperApplicationFlagInsomniaSafe = (1 << 0),
+
+    FlipperApplicationFlagUnloadAssetPacks = (1 << 7),
 } FlipperApplicationFlag;
 
 typedef struct {

@@ -14,6 +14,8 @@ class ElfManifestFlag(IntFlag):
     Default = 0
     InsomniaSafe = 1 << 0
 
+    UnloadAssetPacks = 1 << 7
+
 
 @dataclass
 class ElfManifestBaseHeader:
