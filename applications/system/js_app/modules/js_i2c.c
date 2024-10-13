@@ -138,9 +138,7 @@ static void js_i2c_read(struct mjs* mjs) {
         ret_bad_args(mjs, "Length must not zero");
         return;
     }
-
     uint8_t* mem_addr = malloc(len);
-    memset(mem_addr, 0, len);
 
     uint32_t timeout = 1;
     if(mjs_nargs(mjs) > 2) { // Timeout is optional argument
@@ -154,18 +152,14 @@ static void js_i2c_read(struct mjs* mjs) {
     }
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    uint8_t* read_buffer = malloc(3);
     bool result = furi_hal_i2c_rx(&furi_hal_i2c_handle_external, addr, mem_addr, len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
-    mjs_val_t ret = mjs_mk_array(mjs);
+    mjs_val_t ret = MJS_UNDEFINED;
     if(result) {
-        for(size_t i = 0; i < len; i++) {
-            mjs_array_push(mjs, ret, mjs_mk_number(mjs, mem_addr[i]));
-        }
+        ret = mjs_mk_array_buf(mjs, (char*)mem_addr, len);
     }
     free(mem_addr);
-    free(read_buffer);
     mjs_return(mjs, ret);
 }
 
@@ -247,16 +241,13 @@ static void js_i2c_write_read(struct mjs* mjs) {
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     uint8_t* mem_addr = malloc(len);
-    memset(mem_addr, 0, len);
     bool result = furi_hal_i2c_trx(
         &furi_hal_i2c_handle_external, addr, data, data_len, mem_addr, len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
-    mjs_val_t ret = mjs_mk_array(mjs);
+    mjs_val_t ret = MJS_UNDEFINED;
     if(result) {
-        for(size_t i = 0; i < len; i++) {
-            mjs_array_push(mjs, ret, mjs_mk_number(mjs, mem_addr[i]));
-        }
+        ret = mjs_mk_array_buf(mjs, (char*)mem_addr, len);
     }
     if(data_was_allocated) {
         free(data);

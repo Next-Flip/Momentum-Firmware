@@ -31,14 +31,16 @@ if (addr === -1) {
 
     // write the address to read from (we start at address 0x0001)
     // read 3 bytes - 0x42, 0x43, 0x44
-    let data = i2c.writeRead(addr, [0x00, 0x01], 3, 100);
+    let data_buf = i2c.writeRead(addr, [0x00, 0x01], 3, 100);
+    let data = Uint8Array(data_buf);
     print("Read bytes: " + to_string(data.length));
     for (let i = 0; i < data.length; i++) {
         print("data[" + to_string(i) + "] = " + to_hex_string(data[i]));
     }
 
     // read two more bytes (0x45, 0x46) from current address
-    data = i2c.read(addr, 2);
+    data_buf = i2c.read(addr, 2);
+    data = Uint8Array(data_buf);
     print("Read bytes: " + to_string(data.length));
     for (let i = 0; i < data.length; i++) {
         print("data[" + to_string(i) + "] = " + to_hex_string(data[i]));
