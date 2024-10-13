@@ -1,0 +1,16 @@
+Filetype: Flipper SubGhz Key File
+Version: 1
+Frequency: 433920000
+Preset: FuriHalSubGhzPresetOok270Async
+Lat: 0.000000
+Lon: 0.000000
+Protocol: Vauno-EN8822C
+Id: 64
+Bit: 42
+Data: 00 00 01 00 02 16 88 1D
+Batt: 0
+Hum: 81
+Ts: 1728836876
+Ch: 0
+Btn: 255
+Temp: 13.300000
