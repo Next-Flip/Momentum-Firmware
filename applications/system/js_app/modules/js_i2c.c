@@ -57,24 +57,44 @@ static void js_i2c_write(struct mjs* mjs) {
     uint32_t addr = mjs_get_int32(mjs, addr_arg);
 
     mjs_val_t data_arg = mjs_arg(mjs, 1);
-    if(!mjs_is_array(data_arg)) {
-        ret_bad_args(mjs, "Data must be an array");
-        return;
-    }
-    size_t data_len = mjs_array_length(mjs, data_arg);
-    if(data_len == 0) {
-        ret_bad_args(mjs, "Data array must not be empty");
-        return;
-    }
-    uint8_t* data = malloc(data_len);
-    for(size_t i = 0; i < data_len; i++) {
-        mjs_val_t val = mjs_array_get(mjs, data_arg, i);
-        if(!mjs_is_number(val)) {
-            ret_bad_args(mjs, "Data array must contain only numbers");
-            free(data);
+    bool data_was_allocated = false;
+    uint8_t* data = NULL;
+    size_t data_len = 0;
+    if(mjs_is_array(data_arg)) {
+        data_len = mjs_array_length(mjs, data_arg);
+        if(data_len == 0) {
+            ret_bad_args(mjs, "Data array must not be empty");
             return;
         }
-        data[i] = mjs_get_int32(mjs, val);
+        data = malloc(data_len);
+        for(size_t i = 0; i < data_len; i++) {
+            mjs_val_t val = mjs_array_get(mjs, data_arg, i);
+            if(!mjs_is_number(val)) {
+                ret_bad_args(mjs, "Data array must contain only numbers");
+                free(data);
+                return;
+            }
+            uint32_t byte_val = mjs_get_int32(mjs, val);
+            if(byte_val > 0xFF) {
+                ret_bad_args(mjs, "Data array values must be 0-255");
+                free(data);
+                return;
+            }
+            data[i] = byte_val;
+        }
+    } else if(mjs_is_typed_array(data_arg)) {
+        mjs_val_t array_buf = data_arg;
+        if(mjs_is_data_view(data_arg)) {
+            array_buf = mjs_dataview_get_buf(mjs, data_arg);
+        }
+        data = (uint8_t*)mjs_array_buf_get_ptr(mjs, array_buf, &data_len);
+        if(data_len == 0) {
+            ret_bad_args(mjs, "Data array must not be empty");
+            return;
+        }
+    } else {
+        ret_bad_args(mjs, "Data must be an array, arraybuf or dataview");
+        return;
     }
 
     uint32_t timeout = 1;
@@ -92,7 +112,9 @@ static void js_i2c_write(struct mjs* mjs) {
     bool result = furi_hal_i2c_tx(&furi_hal_i2c_handle_external, addr, data, data_len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
-    free(data);
+    if(data_was_allocated) {
+        free(data);
+    }
     mjs_return(mjs, mjs_mk_boolean(mjs, result));
 }
 
@@ -158,24 +180,45 @@ static void js_i2c_write_read(struct mjs* mjs) {
     uint32_t addr = mjs_get_int32(mjs, addr_arg);
 
     mjs_val_t data_arg = mjs_arg(mjs, 1);
-    if(!mjs_is_array(data_arg)) {
-        ret_bad_args(mjs, "Data must be an array");
-        return;
-    }
-    size_t data_len = mjs_array_length(mjs, data_arg);
-    if(data_len == 0) {
-        ret_bad_args(mjs, "Data array must not be empty");
-        return;
-    }
-    uint8_t* data = malloc(data_len);
-    for(size_t i = 0; i < data_len; i++) {
-        mjs_val_t val = mjs_array_get(mjs, data_arg, i);
-        if(!mjs_is_number(val)) {
-            ret_bad_args(mjs, "Data array must contain only numbers");
-            free(data);
+    bool data_was_allocated = false;
+    uint8_t* data = NULL;
+    size_t data_len = 0;
+    if(mjs_is_array(data_arg)) {
+        data_len = mjs_array_length(mjs, data_arg);
+        if(data_len == 0) {
+            ret_bad_args(mjs, "Data array must not be empty");
             return;
         }
-        data[i] = mjs_get_int32(mjs, val);
+        data = malloc(data_len);
+        data_was_allocated = true;
+        for(size_t i = 0; i < data_len; i++) {
+            mjs_val_t val = mjs_array_get(mjs, data_arg, i);
+            if(!mjs_is_number(val)) {
+                ret_bad_args(mjs, "Data array must contain only numbers");
+                free(data);
+                return;
+            }
+            uint32_t byte_val = mjs_get_int32(mjs, val);
+            if(byte_val > 0xFF) {
+                ret_bad_args(mjs, "Data array values must be 0-255");
+                free(data);
+                return;
+            }
+            data[i] = byte_val;
+        }
+    } else if(mjs_is_typed_array(data_arg)) {
+        mjs_val_t array_buf = data_arg;
+        if(mjs_is_data_view(data_arg)) {
+            array_buf = mjs_dataview_get_buf(mjs, data_arg);
+        }
+        data = (uint8_t*)mjs_array_buf_get_ptr(mjs, array_buf, &data_len);
+        if(data_len == 0) {
+            ret_bad_args(mjs, "Data array must not be empty");
+            return;
+        }
+    } else {
+        ret_bad_args(mjs, "Data must be an array, arraybuf or dataview");
+        return;
     }
 
     mjs_val_t length_arg = mjs_arg(mjs, 2);
@@ -215,7 +258,9 @@ static void js_i2c_write_read(struct mjs* mjs) {
             mjs_array_push(mjs, ret, mjs_mk_number(mjs, mem_addr[i]));
         }
     }
-    free(data);
+    if(data_was_allocated) {
+        free(data);
+    }
     free(mem_addr);
     mjs_return(mjs, ret);
 }
