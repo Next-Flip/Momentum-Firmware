@@ -1,10 +1,6 @@
 #include "../js_modules.h"
 #include <furi_hal_i2c.h>
 
-typedef struct {
-    uint32_t addr;
-} JsI2cInst;
-
 static void ret_bad_args(struct mjs* mjs, const char* error) {
     mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "%s", error);
     mjs_return(mjs, MJS_UNDEFINED);
@@ -255,26 +251,20 @@ static void js_i2c_write_read(struct mjs* mjs) {
 }
 
 static void* js_i2c_create(struct mjs* mjs, mjs_val_t* object) {
-    JsI2cInst* i2c = malloc(sizeof(JsI2cInst));
     mjs_val_t i2c_obj = mjs_mk_object(mjs);
-    mjs_set(mjs, i2c_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, i2c));
     mjs_set(mjs, i2c_obj, "isDeviceReady", ~0, MJS_MK_FN(js_i2c_is_device_ready));
     mjs_set(mjs, i2c_obj, "write", ~0, MJS_MK_FN(js_i2c_write));
     mjs_set(mjs, i2c_obj, "read", ~0, MJS_MK_FN(js_i2c_read));
     mjs_set(mjs, i2c_obj, "writeRead", ~0, MJS_MK_FN(js_i2c_write_read));
     *object = i2c_obj;
-    return i2c;
-}
 
-static void js_i2c_destroy(void* inst) {
-    JsI2cInst* i2c = inst;
-    free(i2c);
+    return (void*)1;
 }
 
 static const JsModuleDescriptor js_i2c_desc = {
     "i2c",
     js_i2c_create,
-    js_i2c_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor i2c_plugin_descriptor = {
