@@ -56,39 +56,40 @@ static void js_i2c_write(struct mjs* mjs) {
     }
     uint32_t addr = mjs_get_int32(mjs, addr_arg);
 
-    mjs_val_t data_arg = mjs_arg(mjs, 1);
-    bool data_was_allocated = false;
-    uint8_t* data = NULL;
-    size_t data_len = 0;
-    if(mjs_is_array(data_arg)) {
-        data_len = mjs_array_length(mjs, data_arg);
-        if(data_len == 0) {
+    mjs_val_t tx_buf_arg = mjs_arg(mjs, 1);
+    bool tx_buf_was_allocated = false;
+    uint8_t* tx_buf = NULL;
+    size_t tx_len = 0;
+    if(mjs_is_array(tx_buf_arg)) {
+        tx_len = mjs_array_length(mjs, tx_buf_arg);
+        if(tx_len == 0) {
             ret_bad_args(mjs, "Data array must not be empty");
             return;
         }
-        data = malloc(data_len);
-        for(size_t i = 0; i < data_len; i++) {
-            mjs_val_t val = mjs_array_get(mjs, data_arg, i);
+        tx_buf = malloc(tx_len);
+        tx_buf_was_allocated = true;
+        for(size_t i = 0; i < tx_len; i++) {
+            mjs_val_t val = mjs_array_get(mjs, tx_buf_arg, i);
             if(!mjs_is_number(val)) {
                 ret_bad_args(mjs, "Data array must contain only numbers");
-                free(data);
+                free(tx_buf);
                 return;
             }
             uint32_t byte_val = mjs_get_int32(mjs, val);
             if(byte_val > 0xFF) {
                 ret_bad_args(mjs, "Data array values must be 0-255");
-                free(data);
+                free(tx_buf);
                 return;
             }
-            data[i] = byte_val;
+            tx_buf[i] = byte_val;
         }
-    } else if(mjs_is_typed_array(data_arg)) {
-        mjs_val_t array_buf = data_arg;
-        if(mjs_is_data_view(data_arg)) {
-            array_buf = mjs_dataview_get_buf(mjs, data_arg);
+    } else if(mjs_is_typed_array(tx_buf_arg)) {
+        mjs_val_t array_buf = tx_buf_arg;
+        if(mjs_is_data_view(tx_buf_arg)) {
+            array_buf = mjs_dataview_get_buf(mjs, tx_buf_arg);
         }
-        data = (uint8_t*)mjs_array_buf_get_ptr(mjs, array_buf, &data_len);
-        if(data_len == 0) {
+        tx_buf = (uint8_t*)mjs_array_buf_get_ptr(mjs, array_buf, &tx_len);
+        if(tx_len == 0) {
             ret_bad_args(mjs, "Data array must not be empty");
             return;
         }
@@ -102,19 +103,17 @@ static void js_i2c_write(struct mjs* mjs) {
         mjs_val_t timeout_arg = mjs_arg(mjs, 2);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
-            free(data);
+            if(tx_buf_was_allocated) free(tx_buf);
             return;
         }
         timeout = mjs_get_int32(mjs, timeout_arg);
     }
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    bool result = furi_hal_i2c_tx(&furi_hal_i2c_handle_external, addr, data, data_len, timeout);
+    bool result = furi_hal_i2c_tx(&furi_hal_i2c_handle_external, addr, tx_buf, tx_len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
-    if(data_was_allocated) {
-        free(data);
-    }
+    if(tx_buf_was_allocated) free(tx_buf);
     mjs_return(mjs, mjs_mk_boolean(mjs, result));
 }
 
@@ -128,38 +127,38 @@ static void js_i2c_read(struct mjs* mjs) {
     }
     uint32_t addr = mjs_get_int32(mjs, addr_arg);
 
-    mjs_val_t length_arg = mjs_arg(mjs, 1);
-    if(!mjs_is_number(length_arg)) {
+    mjs_val_t rx_len_arg = mjs_arg(mjs, 1);
+    if(!mjs_is_number(rx_len_arg)) {
         ret_bad_args(mjs, "Length must be a number");
         return;
     }
-    size_t len = mjs_get_int32(mjs, length_arg);
-    if(len == 0) {
+    size_t rx_len = mjs_get_int32(mjs, rx_len_arg);
+    if(rx_len == 0) {
         ret_bad_args(mjs, "Length must not zero");
         return;
     }
-    uint8_t* mem_addr = malloc(len);
+    uint8_t* rx_buf = malloc(rx_len);
 
     uint32_t timeout = 1;
     if(mjs_nargs(mjs) > 2) { // Timeout is optional argument
         mjs_val_t timeout_arg = mjs_arg(mjs, 2);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
-            free(mem_addr);
+            free(rx_buf);
             return;
         }
         timeout = mjs_get_int32(mjs, timeout_arg);
     }
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    bool result = furi_hal_i2c_rx(&furi_hal_i2c_handle_external, addr, mem_addr, len, timeout);
+    bool result = furi_hal_i2c_rx(&furi_hal_i2c_handle_external, addr, rx_buf, rx_len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
     mjs_val_t ret = MJS_UNDEFINED;
     if(result) {
-        ret = mjs_mk_array_buf(mjs, (char*)mem_addr, len);
+        ret = mjs_mk_array_buf(mjs, (char*)rx_buf, rx_len);
     }
-    free(mem_addr);
+    free(rx_buf);
     mjs_return(mjs, ret);
 }
 
@@ -173,40 +172,40 @@ static void js_i2c_write_read(struct mjs* mjs) {
     }
     uint32_t addr = mjs_get_int32(mjs, addr_arg);
 
-    mjs_val_t data_arg = mjs_arg(mjs, 1);
-    bool data_was_allocated = false;
-    uint8_t* data = NULL;
-    size_t data_len = 0;
-    if(mjs_is_array(data_arg)) {
-        data_len = mjs_array_length(mjs, data_arg);
-        if(data_len == 0) {
+    mjs_val_t tx_buf_arg = mjs_arg(mjs, 1);
+    bool tx_buf_was_allocated = false;
+    uint8_t* tx_buf = NULL;
+    size_t tx_len = 0;
+    if(mjs_is_array(tx_buf_arg)) {
+        tx_len = mjs_array_length(mjs, tx_buf_arg);
+        if(tx_len == 0) {
             ret_bad_args(mjs, "Data array must not be empty");
             return;
         }
-        data = malloc(data_len);
-        data_was_allocated = true;
-        for(size_t i = 0; i < data_len; i++) {
-            mjs_val_t val = mjs_array_get(mjs, data_arg, i);
+        tx_buf = malloc(tx_len);
+        tx_buf_was_allocated = true;
+        for(size_t i = 0; i < tx_len; i++) {
+            mjs_val_t val = mjs_array_get(mjs, tx_buf_arg, i);
             if(!mjs_is_number(val)) {
                 ret_bad_args(mjs, "Data array must contain only numbers");
-                free(data);
+                free(tx_buf);
                 return;
             }
             uint32_t byte_val = mjs_get_int32(mjs, val);
             if(byte_val > 0xFF) {
                 ret_bad_args(mjs, "Data array values must be 0-255");
-                free(data);
+                free(tx_buf);
                 return;
             }
-            data[i] = byte_val;
+            tx_buf[i] = byte_val;
         }
-    } else if(mjs_is_typed_array(data_arg)) {
-        mjs_val_t array_buf = data_arg;
-        if(mjs_is_data_view(data_arg)) {
-            array_buf = mjs_dataview_get_buf(mjs, data_arg);
+    } else if(mjs_is_typed_array(tx_buf_arg)) {
+        mjs_val_t array_buf = tx_buf_arg;
+        if(mjs_is_data_view(tx_buf_arg)) {
+            array_buf = mjs_dataview_get_buf(mjs, tx_buf_arg);
         }
-        data = (uint8_t*)mjs_array_buf_get_ptr(mjs, array_buf, &data_len);
-        if(data_len == 0) {
+        tx_buf = (uint8_t*)mjs_array_buf_get_ptr(mjs, array_buf, &tx_len);
+        if(tx_len == 0) {
             ret_bad_args(mjs, "Data array must not be empty");
             return;
         }
@@ -215,44 +214,43 @@ static void js_i2c_write_read(struct mjs* mjs) {
         return;
     }
 
-    mjs_val_t length_arg = mjs_arg(mjs, 2);
-    if(!mjs_is_number(length_arg)) {
+    mjs_val_t rx_len_arg = mjs_arg(mjs, 2);
+    if(!mjs_is_number(rx_len_arg)) {
         ret_bad_args(mjs, "Length must be a number");
-        free(data);
+        if(tx_buf_was_allocated) free(tx_buf);
         return;
     }
-    size_t len = mjs_get_int32(mjs, length_arg);
-    if(len == 0) {
+    size_t rx_len = mjs_get_int32(mjs, rx_len_arg);
+    if(rx_len == 0) {
         ret_bad_args(mjs, "Length must not zero");
-        free(data);
+        if(tx_buf_was_allocated) free(tx_buf);
         return;
     }
+    uint8_t* rx_buf = malloc(rx_len);
 
     uint32_t timeout = 1;
     if(mjs_nargs(mjs) > 3) { // Timeout is optional argument
         mjs_val_t timeout_arg = mjs_arg(mjs, 3);
         if(!mjs_is_number(timeout_arg)) {
             ret_bad_args(mjs, "Timeout must be a number");
-            free(data);
+            if(tx_buf_was_allocated) free(tx_buf);
+            free(rx_buf);
             return;
         }
         timeout = mjs_get_int32(mjs, timeout_arg);
     }
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    uint8_t* mem_addr = malloc(len);
     bool result = furi_hal_i2c_trx(
-        &furi_hal_i2c_handle_external, addr, data, data_len, mem_addr, len, timeout);
+        &furi_hal_i2c_handle_external, addr, tx_buf, tx_len, rx_buf, rx_len, timeout);
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
     mjs_val_t ret = MJS_UNDEFINED;
     if(result) {
-        ret = mjs_mk_array_buf(mjs, (char*)mem_addr, len);
+        ret = mjs_mk_array_buf(mjs, (char*)rx_buf, rx_len);
     }
-    if(data_was_allocated) {
-        free(data);
-    }
-    free(mem_addr);
+    if(tx_buf_was_allocated) free(tx_buf);
+    free(rx_buf);
     mjs_return(mjs, ret);
 }
 
