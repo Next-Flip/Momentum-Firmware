@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <gui/icon.h>
 
-typedef enum {
+typedef enum FURI_PACKED {
     FlipperApplicationFlagDefault = 0,
     FlipperApplicationFlagInsomniaSafe = (1 << 0),
 } FlipperApplicationFlag;
@@ -21,7 +21,6 @@ typedef struct {
     const char* name;
     const Icon* icon;
     const char* path;
-    const FlipperApplicationFlag flags;
 } FlipperExternalApplication;
 
 typedef void (*FlipperInternalOnStartHook)(void);
