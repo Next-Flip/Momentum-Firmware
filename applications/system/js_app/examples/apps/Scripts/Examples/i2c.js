@@ -23,6 +23,7 @@ if (addr === -1) {
 
     // first two bytes are the start address (0x0000)
     // the remaining bytes are the data to store.
+    // can also use Uint8Array([0x00, 0x00, ...]) as write parameter
     i2c.write(addr, [0x00, 0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47]);
     while (i2c.isDeviceReady(addr, 9) === false) {
         print("Waiting for device to be ready...");
