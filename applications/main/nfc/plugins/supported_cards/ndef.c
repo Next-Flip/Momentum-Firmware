@@ -3,15 +3,87 @@
 // Parsed types: URI (+ Phone, Mail), Text, BT MAC, Contact, WiFi, Empty
 // Documentation and sources indicated where relevant
 // Made by @Willy-JL
+// Mifare Classic support added by @luu176
 
 #include "nfc_supported_card_plugin.h"
 #include <flipper_application.h>
 
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
+#include <nfc/protocols/mf_classic/mf_classic.h>
 
 #include <bit_lib.h>
 
 #define TAG "NDEF"
+
+void find_ndef_sectors_num(uint8_t block_num, size_t byte_position, int* sec) {
+    if(block_num == 1) {
+        if(byte_position == 3 || byte_position == 4) {
+            *sec = 1;
+        } else if(byte_position == 5 || byte_position == 6) {
+            *sec = 2;
+        } else if(byte_position == 7 || byte_position == 8) {
+            *sec = 3;
+        } else if(byte_position == 9 || byte_position == 10) {
+            *sec = 4;
+        } else if(byte_position == 11 || byte_position == 12) {
+            *sec = 5;
+        } else if(byte_position == 13 || byte_position == 14) {
+            *sec = 6;
+        } else {
+            *sec = -1;
+        }
+    } else if(block_num == 2) {
+        if(byte_position == 1 || byte_position == 2) {
+            *sec = 7;
+        } else if(byte_position == 3 || byte_position == 4) {
+            *sec = 8;
+        } else if(byte_position == 5 || byte_position == 6) {
+            *sec = 9;
+        } else if(byte_position == 7 || byte_position == 8) {
+            *sec = 10;
+        } else if(byte_position == 9 || byte_position == 10) {
+            *sec = 11;
+        } else if(byte_position == 11 || byte_position == 12) {
+            *sec = 12;
+        } else if(byte_position == 13 || byte_position == 14) {
+            *sec = 13;
+        } else if(byte_position == 15 || byte_position == 16) {
+            *sec = 14;
+        } else {
+            *sec = -1;
+        }
+    }
+}
+
+int* find_ndef_locations(const MfClassicData* data, size_t* result_count) {
+    *result_count = 0;
+    int* results = (int*)malloc(16 * sizeof(int));
+    bool found_ndef_aid = false;
+
+    for(uint8_t block_num = 1; block_num <= 2; block_num++) {
+        const uint8_t* block_data = data->block[block_num].data;
+
+        for(size_t i = 0; i < 16; i++) {
+            if(block_data[i] == 0xE1 && i > 0 && block_data[i - 1] == 0x03) {
+                int sec = -1;
+                find_ndef_sectors_num(block_num, i, &sec);
+
+                if(sec >= 0) {
+                    results[*result_count] = sec;
+                    (*result_count)++;
+                    found_ndef_aid = true;
+                }
+            }
+        }
+    }
+
+    if(!found_ndef_aid) {
+        free(results);
+        return NULL;
+    }
+
+    return results;
+}
 
 static bool is_text(const uint8_t* buf, size_t len) {
     for(size_t i = 0; i < len; i++) {
@@ -351,7 +423,7 @@ static const uint8_t* parse_ndef_message(
     return cur;
 }
 
-static bool ndef_parse(const NfcDevice* device, FuriString* parsed_data) {
+static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     furi_assert(parsed_data);
 
@@ -463,22 +535,168 @@ static bool ndef_parse(const NfcDevice* device, FuriString* parsed_data) {
     return parsed;
 }
 
+static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
+    furi_assert(parsed_data);
+
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+
+    bool parsed = false;
+    if(data->type != MfClassicType1k && data->type != MfClassicType4k &&
+       data->type != MfClassicTypeMini) {
+        return false;
+    }
+
+    size_t result_count;
+    int* results = find_ndef_locations(data, &result_count);
+    if(!results) {
+        return false;
+    }
+
+    // number of valid ndef apps
+    size_t ndef_sectors_num_to_check = 0;
+    for(size_t i = 0; i < result_count; i++) {
+        const uint8_t ndef_start_block_num = results[i] * 4;
+        const uint8_t* block_data = &data->block[ndef_start_block_num].data[0];
+        for(size_t j = 0; j < MF_CLASSIC_BLOCK_SIZE; j++) {
+            if(block_data[j] == 0x03) {
+                ndef_sectors_num_to_check++;
+                break;
+            }
+        }
+    }
+    if(ndef_sectors_num_to_check > 0) {
+        furi_string_printf(
+            parsed_data,
+            "\e#NDEF Format Data\nCard type: %s\n",
+            mf_classic_get_device_name(data, NfcDeviceNameTypeFull));
+    }
+    size_t cur_sector = 0;
+    for(size_t i = 0; i < result_count; i++) {
+        const uint8_t ndef_start_block_num = results[i] * 4;
+        const uint8_t* block_data = &data->block[ndef_start_block_num].data[0];
+        const uint8_t* tlv_pos = NULL;
+        for(size_t j = 0; j < MF_CLASSIC_BLOCK_SIZE; j++) {
+            if(block_data[j] == 0x03) {
+                tlv_pos = &block_data[j];
+                break;
+            }
+        }
+        if(tlv_pos) {
+            cur_sector++;
+            const uint8_t* data_area_size_ptr = tlv_pos + 4;
+            uint8_t data_area_size = *data_area_size_ptr;
+            const uint8_t* cur = tlv_pos;
+            size_t ndef_length = data_area_size * MF_CLASSIC_BLOCK_SIZE;
+            const uint8_t* end = cur + ndef_length;
+            size_t max_size = mf_classic_get_total_block_num(data->type) * MF_CLASSIC_BLOCK_SIZE;
+            end = MIN(end, &data->block[0].data[0] + max_size);
+
+            while(cur < end) {
+                switch(*cur++) {
+                case 0x03: { // NDEF message
+                    if(cur >= end) break;
+                    uint16_t len;
+                    if(*cur < 0xFF) { // 1 byte length
+                        len = *cur++;
+                    } else { // 3 byte length (0xFF marker + 2 byte integer)
+                        if(cur + 2 >= end) {
+                            cur = end;
+                            break;
+                        }
+                        len = bit_lib_bytes_to_num_be(++cur, 2);
+                        cur += 2;
+                    }
+                    if(cur + len >= end) {
+                        cur = end;
+                        break;
+                    }
+
+                    const uint8_t* message_end = cur + len;
+                    cur = parse_ndef_message(parsed_data, cur_sector, cur, message_end);
+                    if(cur != message_end) cur = end;
+                    ndef_sectors_num_to_check--; // substract by 1 when finished parsing sector x
+                    break;
+                }
+
+                case 0xFE: // TLV end
+                    cur = end;
+                    if(ndef_sectors_num_to_check == 1) parsed = true;
+                    break;
+
+                case 0x00: // Padding, has no length, skip
+                    break;
+
+                case 0x01: // Lock control
+                case 0x02: // Memory control
+                case 0xFD: // Proprietary
+                    // We don't care, skip this TLV block
+                    if(cur >= end) break;
+                    if(*cur < 0xFF) { // 1 byte length
+                        cur += *cur + 1; // Shift by TLV length
+                    } else { // 3 byte length (0xFF marker + 2 byte integer)
+                        if(cur + 2 >= end) {
+                            cur = end;
+                            break;
+                        }
+                        cur += bit_lib_bytes_to_num_be(cur + 1, 2) + 3; // Shift by TLV length
+                    }
+                    break;
+
+                default: // Unknown, bail to avoid problems
+                    cur = end;
+                    break;
+                }
+            }
+            if(parsed) {
+                furi_string_trim(parsed_data, "\n");
+                furi_string_cat(parsed_data, "\n");
+            } else {
+                furi_string_reset(parsed_data);
+            }
+        }
+    }
+
+    free(results); // Free the memory allocated for results
+    return parsed;
+}
+
 /* Actual implementation of app<>plugin interface */
-static const NfcSupportedCardsPlugin ndef_plugin = {
+static const NfcSupportedCardsPlugin ndef_ul_plugin = {
     .protocol = NfcProtocolMfUltralight,
     .verify = NULL,
     .read = NULL,
-    .parse = ndef_parse,
+    .parse = ndef_ul_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
-static const FlipperAppPluginDescriptor ndef_plugin_descriptor = {
+static const FlipperAppPluginDescriptor ndef_ul_plugin_descriptor = {
     .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
     .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
-    .entry_point = &ndef_plugin,
+    .entry_point = &ndef_ul_plugin,
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* ndef_plugin_ep(void) {
-    return &ndef_plugin_descriptor;
+const FlipperAppPluginDescriptor* ndef_ul_plugin_ep(void) {
+    return &ndef_ul_plugin_descriptor;
+}
+
+/* Actual implementation of app<>plugin interface */
+static const NfcSupportedCardsPlugin ndef_mfc_plugin = {
+    .protocol = NfcProtocolMfClassic,
+    .verify = NULL,
+    .read = NULL,
+    .parse = ndef_mfc_parse,
+};
+
+/* Plugin descriptor to comply with basic plugin specification */
+static const FlipperAppPluginDescriptor ndef_mfc_plugin_descriptor = {
+    .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
+    .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
+    .entry_point = &ndef_mfc_plugin,
+};
+
+/* Plugin entry point - must return a pointer to const descriptor  */
+const FlipperAppPluginDescriptor* ndef_mfc_plugin_ep(void) {
+    return &ndef_mfc_plugin_descriptor;
 }
