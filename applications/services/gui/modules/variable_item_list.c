@@ -66,12 +66,8 @@ static size_t variable_item_list_items_on_screen(VariableItemListModel* model) {
 }
 
 static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
-    // TODO: ugly now
     ZapperMenu* zapper_menu = &model->zapper_menu;
     VariableItem* item = zapper_menu->item;
-
-    const uint8_t item_height = 16;
-    // uint8_t item_width = canvas_width(canvas) - 5;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
@@ -86,27 +82,15 @@ static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
 
     for(uint8_t i = start_option; i < end_option; i++) {
         uint8_t item_position = i - start_option;
-        uint8_t item_y = item_position * item_height;
-        uint8_t item_text_y = item_y + item_height - 4;
-
-        // TODO: maybe not need highlight since we choose by ^ v < >
-        // if(item_position == zapper_menu->selected_option_index) {
-        //     canvas_set_color(canvas, ColorBlack);
-        //     elements_slightly_rounded_box(canvas, 0, item_y + 1, item_width, item_height - 2);
-        //     canvas_set_color(canvas, ColorWhite);
-        // } else {
-        canvas_set_color(canvas, ColorBlack);
-        // }
-
-        // temp set current_value_index to use change_callback to get option text (TODO: find a better way, or maybe this is hardless as long as it only tune freq when back to receive page in subghz (need check))
+        
         item->current_value_index = i;
         if(item->change_callback) {
             item->change_callback(item);
         }
         const char* option_text = furi_string_get_cstr(item->current_value_text);
 
-        // paint
-        canvas_draw_str(canvas, 6, item_text_y, option_text);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_str(canvas, 4, item_position * 14 + 9 + (item_position + 1) * 1, option_text);
     }
 
     // reset current_value_index
@@ -115,40 +99,35 @@ static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
         item->change_callback(item);
     }
 
-    // // pager : TODO find a better place to put this widget, disable for now
-    // char page_info[16];
-    // snprintf(
-    //     page_info,
-    //     sizeof(page_info),
-    //     "Page %d/%d",
-    //     zapper_menu->current_page + 1,
-    //     zapper_menu->total_pages);
-    // canvas_draw_str_aligned(
-    //     canvas,
-    //     canvas_width(canvas) / 2,
-    //     canvas_height(canvas) - 10,
-    //     AlignCenter,
-    //     AlignBottom,
-    //     page_info);
+    //scroll bar
+    #define SCROLL_BAR_HEIGHT 0
+    const uint8_t scroll_bar_y = canvas_height(canvas) - SCROLL_BAR_HEIGHT;
+    elements_scrollbar_horizontal(canvas, 0, scroll_bar_y, canvas_width(canvas), zapper_menu->current_page ,zapper_menu->total_pages);
 
-    const uint8_t arrow_size = 9;
+
+    //frame
+    #define GAP_SIZE_PX  1
+    #define FRAME_HEIGHT  14
+    for(int i = 0; i < 4; i++) {
+        uint8_t y = i * (FRAME_HEIGHT + GAP_SIZE_PX);
+        canvas_draw_rframe(canvas, 0, y, canvas_width(canvas), FRAME_HEIGHT, 3);
+    }
+
+    //arrow
+    #define ARROR_SIZE 8
     const uint8_t arrow_x = canvas_width(canvas) - 9;
-
     // ^
     canvas_draw_triangle(
-        canvas, arrow_x, 16 - (16 - 9) / 2, arrow_size, arrow_size, CanvasDirectionBottomToTop);
-
+        canvas, arrow_x, 16 - (16 - 9) / 2 - 3, ARROR_SIZE, ARROR_SIZE, CanvasDirectionBottomToTop);
     // <
     canvas_draw_triangle(
-        canvas, arrow_x + 9 / 2, 24, arrow_size, arrow_size, CanvasDirectionRightToLeft);
-
+        canvas, arrow_x + 9 / 2, 24 - 2, ARROR_SIZE, ARROR_SIZE, CanvasDirectionRightToLeft);
     // >
     canvas_draw_triangle(
-        canvas, arrow_x - 9 / 2, 40, arrow_size, arrow_size, CanvasDirectionLeftToRight);
-
+        canvas, arrow_x - 9 / 2 + 2, 40 - 4, ARROR_SIZE, ARROR_SIZE, CanvasDirectionLeftToRight);
     // v
     canvas_draw_triangle(
-        canvas, arrow_x, 16 * 3 + 6, arrow_size, arrow_size, CanvasDirectionTopToBottom);
+        canvas, arrow_x, 16 * 3 + 6 - 6, ARROR_SIZE, ARROR_SIZE, CanvasDirectionTopToBottom);
 }
 
 static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
