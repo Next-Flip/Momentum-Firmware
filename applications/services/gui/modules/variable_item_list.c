@@ -82,7 +82,7 @@ static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
 
     for(uint8_t i = start_option; i < end_option; i++) {
         uint8_t item_position = i - start_option;
-        
+
         item->current_value_index = i;
         if(item->change_callback) {
             item->change_callback(item);
@@ -99,22 +99,27 @@ static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
         item->change_callback(item);
     }
 
-    //scroll bar
-    #define SCROLL_BAR_HEIGHT 0
+//scroll bar
+#define SCROLL_BAR_HEIGHT 0
     const uint8_t scroll_bar_y = canvas_height(canvas) - SCROLL_BAR_HEIGHT;
-    elements_scrollbar_horizontal(canvas, 0, scroll_bar_y, canvas_width(canvas), zapper_menu->current_page ,zapper_menu->total_pages);
+    elements_scrollbar_horizontal(
+        canvas,
+        0,
+        scroll_bar_y,
+        canvas_width(canvas),
+        zapper_menu->current_page,
+        zapper_menu->total_pages);
 
-
-    //frame
-    #define GAP_SIZE_PX  1
-    #define FRAME_HEIGHT  14
+//frame
+#define GAP_SIZE_PX  1
+#define FRAME_HEIGHT 14
     for(int i = 0; i < 4; i++) {
         uint8_t y = i * (FRAME_HEIGHT + GAP_SIZE_PX);
         canvas_draw_rframe(canvas, 0, y, canvas_width(canvas), FRAME_HEIGHT, 3);
     }
 
-    //arrow
-    #define ARROR_SIZE 8
+//arrow
+#define ARROR_SIZE 8
     const uint8_t arrow_x = canvas_width(canvas) - 9;
     // ^
     canvas_draw_triangle(
