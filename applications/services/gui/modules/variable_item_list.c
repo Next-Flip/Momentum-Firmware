@@ -30,6 +30,14 @@ struct VariableItemList {
 };
 
 typedef struct {
+    VariableItem* item;
+    uint8_t current_page;
+    uint8_t selected_option_index;
+    uint8_t total_options;
+    uint8_t total_pages;
+} ZapperMenu;
+
+typedef struct {
     VariableItemArray_t items;
     uint8_t position;
     uint8_t window_position;
@@ -37,21 +45,105 @@ typedef struct {
     FuriString* header;
     size_t scroll_counter;
     bool locked_message_visible;
+
+    /// zapper menu
+    bool is_zapper_menu_active;
+    ZapperMenu zapper_menu;
 } VariableItemListModel;
+
+static const char* allow_zapper_field[] = {"Frequency", "Modulation"};
 
 static void variable_item_list_process_up(VariableItemList* variable_item_list);
 static void variable_item_list_process_down(VariableItemList* variable_item_list);
 static void variable_item_list_process_left(VariableItemList* variable_item_list);
 static void variable_item_list_process_right(VariableItemList* variable_item_list);
 static void variable_item_list_process_ok(VariableItemList* variable_item_list);
+static void variable_item_list_process_ok_long(VariableItemList* variable_item_list);
 
 static size_t variable_item_list_items_on_screen(VariableItemListModel* model) {
     size_t res = 4;
     return (furi_string_empty(model->header)) ? res : res - 1;
 }
 
+static void zapper_menu_draw(Canvas* canvas, VariableItemListModel* model) {
+    ZapperMenu* zapper_menu = &model->zapper_menu;
+    VariableItem* item = zapper_menu->item;
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontSecondary);
+
+    uint8_t start_option = zapper_menu->current_page * 4;
+    uint8_t end_option = start_option + 4;
+    if(end_option > zapper_menu->total_options) {
+        end_option = zapper_menu->total_options;
+    }
+
+    uint8_t original_index = item->current_value_index;
+
+    for(uint8_t i = start_option; i < end_option; i++) {
+        uint8_t item_position = i - start_option;
+
+        item->current_value_index = i;
+        if(item->change_callback) {
+            item->change_callback(item);
+        }
+        const char* option_text = furi_string_get_cstr(item->current_value_text);
+
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_str(canvas, 4, item_position * 14 + 9 + (item_position + 1) * 1, option_text);
+    }
+
+    // reset current_value_index
+    item->current_value_index = original_index;
+    if(item->change_callback) {
+        item->change_callback(item);
+    }
+
+//scroll bar
+#define SCROLL_BAR_HEIGHT 0
+    const uint8_t scroll_bar_y = canvas_height(canvas) - SCROLL_BAR_HEIGHT;
+    elements_scrollbar_horizontal(
+        canvas,
+        0,
+        scroll_bar_y,
+        canvas_width(canvas),
+        zapper_menu->current_page,
+        zapper_menu->total_pages);
+
+//frame
+#define GAP_SIZE_PX  1
+#define FRAME_HEIGHT 14
+    for(int i = 0; i < 4; i++) {
+        uint8_t y = i * (FRAME_HEIGHT + GAP_SIZE_PX);
+        canvas_draw_rframe(canvas, 0, y, canvas_width(canvas), FRAME_HEIGHT, 3);
+    }
+
+//arrow
+#define ARROR_SIZE 8
+    const uint8_t arrow_x = canvas_width(canvas) - 9;
+    // ^
+    canvas_draw_triangle(
+        canvas, arrow_x, 16 - (16 - 9) / 2 - 3, ARROR_SIZE, ARROR_SIZE, CanvasDirectionBottomToTop);
+    // <
+    canvas_draw_triangle(
+        canvas, arrow_x + 9 / 2, 24 - 2, ARROR_SIZE, ARROR_SIZE, CanvasDirectionRightToLeft);
+    // >
+    canvas_draw_triangle(
+        canvas, arrow_x - 9 / 2 + 2, 40 - 4, ARROR_SIZE, ARROR_SIZE, CanvasDirectionLeftToRight);
+    // v
+    canvas_draw_triangle(
+        canvas, arrow_x, 16 * 3 + 6 - 6, ARROR_SIZE, ARROR_SIZE, CanvasDirectionTopToBottom);
+}
+
 static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
     VariableItemListModel* model = _model;
+    canvas_clear(canvas);
+
+    if(model->is_zapper_menu_active) {
+        // paint
+        zapper_menu_draw(canvas, model);
+        return;
+    }
 
     const uint8_t item_height = 16;
     uint8_t item_width = canvas_width(canvas) - 5;
@@ -220,6 +312,86 @@ void variable_item_list_set_header(VariableItemList* variable_item_list, const c
         true);
 }
 
+static bool zapper_menu_input_handler(InputEvent* event, void* context) {
+    VariableItemList* variable_item_list = context;
+    bool consumed = true;
+    // this ok_ever_released var is for: prevent to trigger shuffing when first enter, because without that, would make muscle memory press not possible,
+    // because it would start shuffle when long pressed OK and entered zapper menu if user didn't release OK in time (consumed system seems didn't consider this kind of edge case).
+    // the static usage is because make it keeps life among func calls,
+    // otherwise it would be reseted to false each time enter this func, but each calls would make it false.
+    // it now seted back to false when exit zapper menu.
+    static bool ok_ever_released = false;
+
+    with_view_model(
+        variable_item_list->view,
+        VariableItemListModel * model,
+        {
+            ZapperMenu* zapper_menu = &model->zapper_menu;
+            VariableItem* item = zapper_menu->item;
+
+            if(event->type == InputTypeRelease && event->key == InputKeyOk) {
+                ok_ever_released = true;
+            } else if(event->type == InputTypeShort) {
+                uint8_t selected_option = 0xFF; // as nullptr
+                switch(event->key) {
+                case InputKeyUp:
+                    selected_option = zapper_menu->current_page * 4 + 0;
+                    break;
+                case InputKeyLeft:
+                    selected_option = zapper_menu->current_page * 4 + 1;
+                    break;
+                case InputKeyRight:
+                    selected_option = zapper_menu->current_page * 4 + 2;
+                    break;
+                case InputKeyDown:
+                    selected_option = zapper_menu->current_page * 4 + 3;
+                    break;
+                case InputKeyOk:
+                    // paging
+                    zapper_menu->current_page =
+                        (zapper_menu->current_page + 1) % zapper_menu->total_pages;
+                    // reset sel-ed one
+                    zapper_menu->selected_option_index = 0;
+                    break;
+                case InputKeyBack:
+                    // exit
+                    ok_ever_released = false;
+                    model->is_zapper_menu_active = false;
+                    break;
+                default:
+                    break;
+                }
+
+                // check valid
+                if(selected_option != 0xFF &&
+                   selected_option < zapper_menu->total_options) { //0xFF use as nullptr
+                    // update anf callback
+                    item->current_value_index = selected_option;
+                    if(item->change_callback) {
+                        item->change_callback(item);
+                    }
+                    // exit
+                    ok_ever_released = false;
+                    model->is_zapper_menu_active = false;
+                }
+            } else if(event->type == InputTypeRepeat) {
+                if(event->key == InputKeyOk && ok_ever_released) {
+                    zapper_menu->current_page =
+                        (zapper_menu->current_page + 1) % zapper_menu->total_pages;
+                } else if(event->key == InputKeyBack) {
+                    ok_ever_released = false;
+                    model->is_zapper_menu_active = false;
+                }
+            } else if(event->type == InputTypeLong && event->key == InputKeyBack) {
+                ok_ever_released = false;
+                model->is_zapper_menu_active = false;
+            }
+        },
+        true);
+
+    return consumed;
+}
+
 static bool variable_item_list_input_callback(InputEvent* event, void* context) {
     VariableItemList* variable_item_list = context;
     furi_assert(variable_item_list);
@@ -229,8 +401,16 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
     with_view_model(
         variable_item_list->view,
         VariableItemListModel * model,
-        { locked_message_visible = model->locked_message_visible; },
+        {
+            if(model->is_zapper_menu_active) {
+                consumed = zapper_menu_input_handler(event, context);
+            } else {
+                locked_message_visible = model->locked_message_visible;
+            }
+        },
         false);
+
+    if(consumed) return true;
 
     if((event->type != InputTypePress && event->type != InputTypeRelease) &&
        locked_message_visible) {
@@ -281,6 +461,15 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
         case InputKeyRight:
             consumed = true;
             variable_item_list_process_right(variable_item_list);
+            break;
+        default:
+            break;
+        }
+    } else if(event->type == InputTypeLong) {
+        switch(event->key) {
+        case InputKeyOk:
+            consumed = true;
+            variable_item_list_process_ok_long(variable_item_list);
             break;
         default:
             break;
@@ -408,6 +597,42 @@ void variable_item_list_process_ok(VariableItemList* variable_item_list) {
                     variable_item_list->locked_timer, furi_kernel_get_tick_frequency() * 3);
             } else if(variable_item_list->callback) {
                 variable_item_list->callback(variable_item_list->context, model->position);
+            }
+        },
+        true);
+}
+
+void variable_item_list_process_ok_long(VariableItemList* variable_item_list) {
+    furi_check(variable_item_list);
+
+    with_view_model(
+        variable_item_list->view,
+        VariableItemListModel * model,
+        {
+            VariableItem* item = variable_item_list_get_selected_item(model);
+
+            bool is_allowed = false;
+            for(size_t i = 0; i < sizeof(allow_zapper_field) / sizeof(allow_zapper_field[0]);
+                i++) {
+                if(strcmp(furi_string_get_cstr(item->label), allow_zapper_field[i]) == 0) {
+                    is_allowed = true;
+                    break;
+                }
+            }
+
+            if(is_allowed) {
+                // init
+                model->is_zapper_menu_active = true;
+                ZapperMenu* zapper_menu = &model->zapper_menu;
+
+                zapper_menu->item = item;
+                zapper_menu->current_page = 0;
+                zapper_menu->selected_option_index = 0;
+                zapper_menu->total_options = item->values_count;
+                zapper_menu->total_pages = (zapper_menu->total_options + 3) / 4;
+
+                // update
+                model->scroll_counter = 0;
             }
         },
         true);
