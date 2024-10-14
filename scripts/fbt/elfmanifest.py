@@ -1,5 +1,6 @@
 import os
 import struct
+from enum import IntFlag
 from dataclasses import dataclass, field
 
 from flipper.assets.icon import file2image
@@ -7,6 +8,13 @@ from flipper.assets.icon import file2image
 from .appmanifest import FlipperApplication
 
 _MANIFEST_MAGIC = 0x52474448
+
+
+class ElfManifestFlag(IntFlag):
+    Default = 0
+    InsomniaSafe = 1 << 0
+
+    UnloadAssetPacks = 1 << 7
 
 
 @dataclass
@@ -45,6 +53,26 @@ class ElfManifestV1:
         )
 
 
+@dataclass
+class ElfManifestV1Ext:
+    stack_size: int
+    app_version: int
+    name: str = ""
+    icon: bytes = field(default=b"")
+    flags: int = ElfManifestFlag.Default
+
+    def as_bytes(self):
+        return struct.pack(
+            "<hI32s?32sB",
+            self.stack_size,
+            self.app_version,
+            bytes(self.name.encode("ascii")),
+            bool(self.icon),
+            self.icon,
+            self.flags,
+        )
+
+
 def assemble_manifest_data(
     app_manifest: FlipperApplication,
     hardware_target: int,
@@ -67,16 +95,21 @@ def assemble_manifest_data(
         app_manifest.fap_version[1] & 0xFFFF
     )
 
+    flags_as_int = ElfManifestFlag.Default
+    for flag in app_manifest.flags:
+        flags_as_int |= ElfManifestFlag[flag]
+
     data = ElfManifestBaseHeader(
         manifest_version=1,
         api_version=sdk_version,
         hardware_target_id=hardware_target,
     ).as_bytes()
-    data += ElfManifestV1(
+    data += ElfManifestV1Ext(
         stack_size=app_manifest.stack_size,
         app_version=app_version_as_int,
         name=app_manifest.name,
         icon=image_data,
+        flags=flags_as_int,
     ).as_bytes()
 
     return data

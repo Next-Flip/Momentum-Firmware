@@ -15,6 +15,8 @@ struct FlipperApplication {
     ELFFile* elf;
     FuriThread* thread;
     void* ep_thread_args;
+
+    bool preloaded_manifest;
 };
 
 /********************** Debugger access to loader state **********************/
@@ -127,7 +129,9 @@ static bool flipper_application_process_manifest_section(
     void* context) {
     FlipperApplicationManifest* manifest = context;
 
-    if(size < sizeof(FlipperApplicationManifest)) {
+    // Support both OFW manifest and extended manifest with flags
+    if(size < sizeof(FlipperApplicationManifestOfw) ||
+       size > sizeof(FlipperApplicationManifestEx)) {
         return false;
     }
 
@@ -135,8 +139,15 @@ static bool flipper_application_process_manifest_section(
         return true;
     }
 
-    return storage_file_seek(file, offset, true) &&
-           storage_file_read(file, manifest, size) == size;
+    bool result = storage_file_seek(file, offset, true) &&
+                  storage_file_read(file, manifest, size) == size;
+
+    // Default flags when loading OFW manifests that don't include flags
+    if(result && size == sizeof(FlipperApplicationManifestOfw)) {
+        manifest->flags = FlipperApplicationFlagDefault;
+    }
+
+    return result;
 }
 
 // we can't use const char* as context because we will lose the const qualifier
@@ -155,7 +166,7 @@ static bool flipper_application_process_assets_section(
 
 static FlipperApplicationPreloadStatus
     flipper_application_load(FlipperApplication* app, const char* path, bool load_full) {
-    if(!elf_file_open(app->elf, path)) {
+    if(!app->preloaded_manifest && !elf_file_open(app->elf, path)) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
 
@@ -181,10 +192,16 @@ static FlipperApplicationPreloadStatus
     }
 
     // load manifest section
-    if(elf_process_section(
+    if(!app->preloaded_manifest &&
+       elf_process_section(
            app->elf, ".fapmeta", flipper_application_process_manifest_section, &app->manifest) !=
-       ElfProcessSectionResultSuccess) {
+           ElfProcessSectionResultSuccess) {
         return FlipperApplicationPreloadStatusInvalidFile;
+    }
+
+    // Avoid preloading manifest twice, when user calls both preload_manifest() and preload()
+    if(!load_full) {
+        app->preloaded_manifest = true;
     }
 
     return flipper_application_validate_manifest(app);

@@ -10,24 +10,23 @@
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
 
+#include <momentum/asset_packs.h>
+
 #define TAG "Loader"
 
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
 
 // helpers
 
-static const char*
-    loader_find_external_application_by_name(const char* app_name, FlipperApplicationFlag* flags) {
+static const char* loader_find_external_application_by_name(const char* app_name) {
     for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            if(flags) *flags = FLIPPER_EXTERNAL_APPS[i].flags;
             return FLIPPER_EXTERNAL_APPS[i].path;
         }
     }
 
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         if(strcmp(FLIPPER_SETTINGS_APPS[i].name, app_name) == 0) {
-            if(flags) *flags = FLIPPER_SETTINGS_APPS[i].flags;
             return FLIPPER_SETTINGS_APPS[i].path;
         }
     }
@@ -101,7 +100,7 @@ static void loader_show_gui_error(
     DialogMessage* message = dialog_message_alloc();
 
     if(status.value == LoaderStatusErrorUnknownApp &&
-       loader_find_external_application_by_name(name, NULL) != NULL) {
+       loader_find_external_application_by_name(name) != NULL) {
         // Special case for external apps
         const char* header = NULL;
         const char* text = NULL;
@@ -421,6 +420,12 @@ static void loader_start_internal_app(
     LoaderEvent event;
     event.type = LoaderEventTypeApplicationBeforeLoad;
     furi_pubsub_publish(loader->pubsub, &event);
+    if(app->flags & FlipperApplicationFlagUnloadAssetPacks) {
+        loader->app.unloaded_asset_packs = true;
+        asset_packs_free();
+    } else {
+        loader->app.unloaded_asset_packs = false;
+    }
 
     // store args
     furi_assert(loader->app.args == NULL);
@@ -503,8 +508,7 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
     Storage* storage,
     const char* path,
     const char* args,
-    FuriString* error_message,
-    FlipperApplicationFlag flags) {
+    FuriString* error_message) {
     LoaderMessageLoaderStatusResult result;
     result.value = loader_make_success_status(error_message);
     result.error = LoaderStatusErrorUnknown;
@@ -519,8 +523,22 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
 
         FURI_LOG_I(TAG, "Loading %s", path);
 
+        // Calling preload will load whole FAP file, so need to preload manifest first to
+        // get flags value, unload asset packs if requested by flags, then preload whole FAP
+        FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
         FlipperApplicationPreloadStatus preload_res =
-            flipper_application_preload(loader->app.fap, path);
+            flipper_application_preload_manifest(loader->app.fap, path);
+        loader->app.unloaded_asset_packs = false;
+        if(preload_res != FlipperApplicationPreloadStatusInvalidFile &&
+           preload_res != FlipperApplicationPreloadStatusInvalidManifest) {
+            flags = flipper_application_get_manifest(loader->app.fap)->flags;
+            if(flags & FlipperApplicationFlagUnloadAssetPacks) {
+                loader->app.unloaded_asset_packs = true;
+                asset_packs_free();
+            }
+            preload_res = flipper_application_preload(loader->app.fap, path);
+        }
+
         bool api_mismatch = false;
         if(preload_res == FlipperApplicationPreloadStatusApiTooOld ||
            preload_res == FlipperApplicationPreloadStatusApiTooNew) {
@@ -612,6 +630,9 @@ static LoaderMessageLoaderStatusResult loader_start_external_app(
         loader->app.fap = NULL;
         event.type = LoaderEventTypeApplicationLoadFailed;
         furi_pubsub_publish(loader->pubsub, &event);
+        if(loader->app.unloaded_asset_packs) {
+            asset_packs_init();
+        }
     }
 
     return result;
@@ -702,9 +723,8 @@ static LoaderMessageLoaderStatusResult loader_do_start_by_name(
         }
 
         // check External Applications
-        FlipperApplicationFlag flags = FlipperApplicationFlagDefault;
         {
-            const char* path = loader_find_external_application_by_name(name, &flags);
+            const char* path = loader_find_external_application_by_name(name);
             if(path) {
                 name = path;
             }
@@ -714,8 +734,7 @@ static LoaderMessageLoaderStatusResult loader_do_start_by_name(
         {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {
-                status =
-                    loader_start_external_app(loader, storage, name, args, error_message, flags);
+                status = loader_start_external_app(loader, storage, name, args, error_message);
                 furi_record_close(RECORD_STORAGE);
                 break;
             }
@@ -772,6 +791,9 @@ static void loader_do_app_closed(Loader* loader) {
     LoaderEvent event;
     event.type = LoaderEventTypeApplicationStopped;
     furi_pubsub_publish(loader->pubsub, &event);
+    if(loader->app.unloaded_asset_packs) {
+        asset_packs_init();
+    }
 }
 
 static bool loader_is_application_running(Loader* loader) {
