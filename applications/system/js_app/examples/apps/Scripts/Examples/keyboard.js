@@ -17,7 +17,7 @@ if (result !== undefined) {
     result = "0x";
     for (let i = 0; i < data.byteLength; i++) {
         if (data[i] < 0x10) result += "0";
-        result += to_hex_string(data[i]);
+        result += toString(data[i], 16);
     }
 }
 print("Got data:", result);

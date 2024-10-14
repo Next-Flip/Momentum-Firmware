@@ -24,12 +24,24 @@ const char* furi_timer_get_current_name(void) {
     return current_timer_name;
 }
 
-static void TimerCallback(TimerHandle_t hTimer) {
+static void furi_timer_callback(TimerHandle_t hTimer) {
     FuriTimer* instance = pvTimerGetTimerID(hTimer);
     furi_check(instance);
     current_timer_name = pcTimerGetName(hTimer);
     instance->cb_func(instance->cb_context);
     current_timer_name = NULL;
+}
+
+static void furi_timer_flush_epilogue(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+
+    EventGroupHandle_t hEvent = context;
+
+    // See https://github.com/FreeRTOS/FreeRTOS-Kernel/issues/1142
+    vTaskSuspendAll();
+    xEventGroupSetBits(hEvent, TIMER_DELETED_EVENT);
+    (void)xTaskResumeAll();
 }
 
 FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* context) {
@@ -45,21 +57,11 @@ FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* co
 
     const UBaseType_t reload = (type == FuriTimerTypeOnce ? pdFALSE : pdTRUE);
     const TimerHandle_t hTimer = xTimerCreateStatic(
-        name, portMAX_DELAY, reload, instance, TimerCallback, &instance->container);
+        name, portMAX_DELAY, reload, instance, furi_timer_callback, &instance->container);
 
     furi_check(hTimer == (TimerHandle_t)instance);
 
     return instance;
-}
-
-static void furi_timer_epilogue(void* context, uint32_t arg) {
-    furi_assert(context);
-    UNUSED(arg);
-
-    EventGroupHandle_t hEvent = context;
-    vTaskSuspendAll();
-    xEventGroupSetBits(hEvent, TIMER_DELETED_EVENT);
-    (void)xTaskResumeAll();
 }
 
 void furi_timer_free(FuriTimer* instance) {
@@ -69,16 +71,21 @@ void furi_timer_free(FuriTimer* instance) {
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     furi_check(xTimerDelete(hTimer, portMAX_DELAY) == pdPASS);
 
+    furi_timer_flush();
+
+    free(instance);
+}
+
+void furi_timer_flush(void) {
     StaticEventGroup_t event_container = {};
     EventGroupHandle_t hEvent = xEventGroupCreateStatic(&event_container);
-    furi_check(xTimerPendFunctionCall(furi_timer_epilogue, hEvent, 0, portMAX_DELAY) == pdPASS);
+    furi_check(
+        xTimerPendFunctionCall(furi_timer_flush_epilogue, hEvent, 0, portMAX_DELAY) == pdPASS);
 
     furi_check(
         xEventGroupWaitBits(hEvent, TIMER_DELETED_EVENT, pdFALSE, pdTRUE, portMAX_DELAY) ==
         TIMER_DELETED_EVENT);
     vEventGroupDelete(hEvent);
-
-    free(instance);
 }
 
 FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
@@ -123,6 +130,8 @@ FuriStatus furi_timer_stop(FuriTimer* instance) {
     TimerHandle_t hTimer = (TimerHandle_t)instance;
 
     furi_check(xTimerStop(hTimer, portMAX_DELAY) == pdPASS);
+
+    furi_timer_flush();
 
     return FuriStatusOk;
 }

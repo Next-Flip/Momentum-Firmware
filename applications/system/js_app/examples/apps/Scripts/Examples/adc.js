@@ -17,7 +17,7 @@ while (true) {
     let pa7_value = gpio.readAnalog("PA7");
     let pa6_value = gpio.readAnalog("PA6");
     let pa4_value = gpio.readAnalog("PA4");
-    print("A7: " + to_string(pa7_value) + " A6: " + to_string(pa6_value) + " A4: " + to_string(pa4_value));
+    print("A7: " + toString(pa7_value) + " A6: " + toString(pa6_value) + " A4: " + toString(pa4_value));
     delay(100);
     if (pa7_value === pa6_value * 2) {
         break;
