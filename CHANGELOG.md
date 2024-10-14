@@ -36,6 +36,7 @@
 - GUI:
   - OFW: Add up and down button drawing functions to GUI elements (by @DerSkythe)
   - OFW: Added one new function for drawing mirrored xbm bitmaps (by @RebornedBrain)
+  - Added a long press to quick select "Zapper" functionality for variable menu (#258 by @zxkmm)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
 - OFW: Furi: Put errno into TCB (by @portasynthinca3)
