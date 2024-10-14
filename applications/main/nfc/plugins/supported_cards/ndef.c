@@ -40,6 +40,18 @@ static void
     furi_string_cat(str, "\n");
 }
 
+static char decode_char(const char* str) {
+    int high = (str[1] >= 'A' && str[1] <= 'F') ? (str[1] - 'A' + 10) :
+               (str[1] >= 'a' && str[1] <= 'f') ? (str[1] - 'a' + 10) :
+               (str[1] >= '0' && str[1] <= '9') ? (str[1] - '0') :
+                                                  0;
+    int low = (str[2] >= 'A' && str[2] <= 'F') ? (str[2] - 'A' + 10) :
+              (str[2] >= 'a' && str[2] <= 'f') ? (str[2] - 'a' + 10) :
+              (str[2] >= '0' && str[2] <= '9') ? (str[2] - '0') :
+                                                 0;
+    return (high << 4) | low;
+}
+
 static void parse_ndef_uri(FuriString* str, const uint8_t* payload, uint32_t payload_len) {
     // https://learn.adafruit.com/adafruit-pn532-rfid-nfc/ndef#uri-records-0x55-slash-u-607763
     const char* prepends[] = {
@@ -86,29 +98,56 @@ static void parse_ndef_uri(FuriString* str, const uint8_t* payload, uint32_t pay
         prepend = prepends[prepend_type];
     }
     size_t prepend_len = strlen(prepend);
-
     size_t uri_len = prepend_len + (payload_len - 1);
-    char* const uri_buf = malloc(uri_len);
+
+    char* uri_buf = malloc(uri_len + 1);
+    if(!uri_buf) {
+        furi_string_cat_printf(str, "Memory allocation failed\n");
+        return;
+    }
+
     memcpy(uri_buf, prepend, prepend_len);
     memcpy(uri_buf + prepend_len, payload + 1, payload_len - 1);
-    char* uri = uri_buf;
+    uri_buf[uri_len] = '\0';
+
+    char* decoded_uri =
+        malloc(uri_len * 2 + 1); // Worst case scenario: every character is percent-encoded
+    if(!decoded_uri) {
+        furi_string_cat_printf(str, "Memory allocation failed\n");
+        free(uri_buf);
+        return;
+    }
+
+    size_t decoded_len = 0;
+    for(size_t i = 0; i < uri_len; i++) {
+        if(uri_buf[i] == '%' && i + 2 < uri_len) {
+            decoded_uri[decoded_len++] = decode_char(&uri_buf[i]);
+            i += 2;
+        } else {
+            decoded_uri[decoded_len++] = uri_buf[i];
+        }
+    }
+    decoded_uri[decoded_len] = '\0';
 
     const char* type = "URI";
-    if(strncmp(uri, "http", strlen("http")) == 0) {
+    const char* uri_content = decoded_uri;
+    if(strncmp(decoded_uri, "http", 4) == 0) {
         type = "URL";
-    } else if(strncmp(uri, "tel:", strlen("tel:")) == 0) {
+    } else if(strncmp(decoded_uri, "tel:", 4) == 0) {
         type = "Phone";
-        uri += strlen("tel:");
-        uri_len -= strlen("tel:");
-    } else if(strncmp(uri, "mailto:", strlen("mailto:")) == 0) {
+        uri_content += 4;
+        decoded_len -= 4;
+    } else if(strncmp(decoded_uri, "mailto:", 7) == 0) {
         type = "Mail";
-        uri += strlen("mailto:");
-        uri_len -= strlen("mailto:");
+        uri_content += 7;
+        decoded_len -= 7;
     }
 
     furi_string_cat_printf(str, "%s\n", type);
-    print_data(str, NULL, (uint8_t*)uri, uri_len, false);
+    print_data(str, NULL, (uint8_t*)uri_content, decoded_len, false);
+
     free(uri_buf);
+    free(decoded_uri);
 }
 
 static void parse_ndef_text(FuriString* str, const uint8_t* payload, uint32_t payload_len) {
