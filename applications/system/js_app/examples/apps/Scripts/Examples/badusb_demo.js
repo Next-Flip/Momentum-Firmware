@@ -59,6 +59,9 @@ eventLoop.subscribe(views.dialog.input, function (_sub, button, eventLoop, gui) 
         notify.error();
     }
 
+    // Optional, but allows to interchange with usbdisk
+    badusb.quit();
+
     eventLoop.stop();
 }, eventLoop, gui);
 
@@ -68,6 +71,3 @@ eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _item, eventL
 
 gui.viewDispatcher.switchTo(views.dialog);
 eventLoop.run();
-
-// Optional, but allows to interchange with usbdisk
-badusb.quit();
