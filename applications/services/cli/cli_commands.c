@@ -674,14 +674,14 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
     cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_add_command(cli, "source", CliCommandFlagParallelSafe, cli_command_src, NULL);
+    cli_add_command(cli, "src", CliCommandFlagParallelSafe, cli_command_src, NULL);
     cli_add_command(
         cli,
         "neofetch",
         CliCommandFlagParallelSafe | CliCommandFlagHidden,
         cli_command_neofetch,
         NULL);
-    cli_add_command(cli, "src", CliCommandFlagParallelSafe, cli_command_src, NULL);
-    cli_add_command(cli, "source", CliCommandFlagParallelSafe, cli_command_src, NULL);
 
     cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
     cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);

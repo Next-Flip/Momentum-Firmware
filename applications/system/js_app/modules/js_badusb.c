@@ -221,7 +221,7 @@ static void js_badusb_is_connected(struct mjs* mjs) {
 
 uint16_t get_keycode_by_name(JsBadusbInst* badusb, const char* key_name, size_t name_len) {
     if(name_len == 1) { // Single char
-        return ASCII_TO_KEY(badusb->layout, key_name[0]);
+        return (ASCII_TO_KEY(badusb->layout, key_name[0]));
     }
 
     for(size_t i = 0; i < COUNT_OF(key_codes); i++) {
