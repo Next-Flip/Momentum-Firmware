@@ -38,7 +38,7 @@
   - OFW: JS modules (by @portasynthinca3)
   - TODO: list differences, move to breaking changes
 - OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
-- OFW: CLI: Improvements part I, `neofetch` command, some output coloring (by @portasynthinca3)
+- OFW: CLI: Improvements part I, `neofetch` command (by @portasynthinca3), fix for lab.flipper.net (by @xMasterX)
 - GUI:
   - OFW: Add up and down button drawing functions to GUI elements (by @DerSkythe)
   - OFW: Extended icon draw function in Canvas (by @RebornedBrain)
@@ -113,7 +113,9 @@
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
 - Desktop:
   - Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
-- Sub-GHz: Fix GPS "Latitute" typo, switch to "Lat" and "Lon" in .sub files (#246 by @m7i-org)
+- Sub-GHz:
+  - Fix GPS "Latitute" typo, switch to "Lat" and "Lon" in .sub files (#246 by @m7i-org)
+  - UL: Fix zero issues in Princeton (by @xMasterX)
 - Power: Suppress Shutdown on Idle While Charging / Plugged In (#244 by @luu176)
 - Storage:
   - Fallback SD format prompt when storage settings is unavailable (by @Willy-JL)
@@ -121,6 +123,7 @@
 - About: Fix BLE stack version string (by @Willy-JL)
 - OFW: Loader: Warn about missing SD card for main apps (by @Willy-JL)
 - NFC:
+  - UL: Read Ultralight block by block (by @mishamyte)
   - OFW: Fix crash on Ultralight unlock (by @Astrrra)
   - OFW: FeliCa anti-collision fix (by @RebornedBrain)
   - OFW: Emulation freeze fixed when pressing OK repeatedly (by @RebornedBrain)
