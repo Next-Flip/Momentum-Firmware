@@ -235,3 +235,22 @@ export declare function arePathsEqual(path1: string, path2: string): boolean;
  * @param childPath The child path
  */
 export declare function isSubpathOf(parentPath: string, childPath: string): boolean;
+
+// virtual mount api for mounting disk images formatted as FatFs (exFAT, FAT32, FAT16...)
+
+/**
+ * Initialize virtual mount api with disk image at given path.
+ * Errors on failure.
+ * @param parentPath Path to disk image file
+ */
+export declare function virtualInit(path: string): void;
+/**
+ * Mount selected disk image at /mnt path.
+ * Errors on failure.
+ */
+export declare function virtualMount(): void;
+/**
+ * Deinitialize virtual mount api.
+ * Errors on failure.
+ */
+export declare function virtualQuit(): void;

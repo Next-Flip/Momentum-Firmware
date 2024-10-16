@@ -322,6 +322,85 @@ static void js_storage_is_subpath_of(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_boolean(mjs, storage_common_is_subdir(storage, parent, child)));
 }
 
+// ---=== virtual mount api ===---
+
+#define VIRTUAL_PROP_NAME "_v"
+
+static void js_storage_virtual_init(struct mjs* mjs) {
+    const char* path;
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&path));
+    Storage* storage = JS_GET_CONTEXT(mjs);
+
+    mjs_val_t this = mjs_get_this(mjs);
+    mjs_val_t virtual = mjs_get(mjs, this, VIRTUAL_PROP_NAME, ~0);
+    if(virtual != MJS_UNDEFINED) {
+        JS_ERROR_AND_RETURN(mjs, MJS_INTERNAL_ERROR, "Virtual already setup");
+    }
+
+    File* file = storage_file_alloc(storage);
+    if(!storage_file_open(file, path, FSAM_READ | FSAM_WRITE, FSOM_OPEN_EXISTING)) {
+        storage_file_free(file);
+        JS_ERROR_AND_RETURN(mjs, MJS_INTERNAL_ERROR, "Open file failed");
+    }
+
+    bool success = storage_virtual_init(storage, file) == FSE_OK;
+    if(!success) {
+        if(storage_virtual_quit(storage) == FSE_OK) {
+            success = storage_virtual_init(storage, file) == FSE_OK;
+        }
+    }
+    if(!success) {
+        storage_file_free(file);
+        JS_ERROR_AND_RETURN(mjs, MJS_INTERNAL_ERROR, "Virtual init failed");
+    }
+
+    mjs_set(mjs, this, VIRTUAL_PROP_NAME, ~0, mjs_mk_foreign(mjs, file));
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+static void js_storage_virtual_mount(struct mjs* mjs) {
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY); // 0 args
+    Storage* storage = JS_GET_CONTEXT(mjs);
+
+    if(storage_virtual_mount(storage) != FSE_OK) {
+        JS_ERROR_AND_RETURN(mjs, MJS_INTERNAL_ERROR, "Virtual mount failed");
+    }
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+static void js_storage_virtual_quit(struct mjs* mjs) {
+    JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY); // 0 args
+    Storage* storage = JS_GET_CONTEXT(mjs);
+
+    if(storage_virtual_quit(storage) != FSE_OK) {
+        JS_ERROR_AND_RETURN(mjs, MJS_INTERNAL_ERROR, "Virtual quit failed");
+    }
+
+    mjs_val_t this = mjs_get_this(mjs);
+    mjs_val_t virtual = mjs_get(mjs, this, VIRTUAL_PROP_NAME, ~0);
+    if(virtual != MJS_UNDEFINED) {
+        File* file = mjs_get_ptr(mjs, virtual);
+        storage_file_free(file);
+        mjs_del(mjs, this, VIRTUAL_PROP_NAME, ~0);
+    }
+
+    mjs_return(mjs, MJS_UNDEFINED);
+}
+
+// mjs struct not passed in module destroy(), and not using Inst struct
+// to keep similar code to OFW so we use destructor
+static void js_storage_destructor(struct mjs* mjs, mjs_val_t obj) {
+    Storage* storage = JS_GET_INST(mjs, obj);
+    mjs_val_t virtual = mjs_get(mjs, obj, VIRTUAL_PROP_NAME, ~0);
+    if(virtual != MJS_UNDEFINED) {
+        File* file = mjs_get_ptr(mjs, virtual);
+        storage_virtual_quit(storage);
+        storage_file_free(file);
+        mjs_del(mjs, obj, VIRTUAL_PROP_NAME, ~0);
+    }
+}
+
 // ---=== module ctor & dtor ===---
 
 static void* js_storage_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
@@ -331,6 +410,7 @@ static void* js_storage_create(struct mjs* mjs, mjs_val_t* object, JsModules* mo
     *object = mjs_mk_object(mjs);
     JS_ASSIGN_MULTI(mjs, *object) {
         JS_FIELD(INST_PROP_NAME, mjs_mk_foreign(mjs, storage));
+        JS_FIELD(MJS_DESTRUCTOR_PROP_NAME, MJS_MK_FN(js_storage_destructor));
 
         // top-level file ops
         JS_FIELD("openFile", MJS_MK_FN(js_storage_open_file));
@@ -354,6 +434,11 @@ static void* js_storage_create(struct mjs* mjs, mjs_val_t* object, JsModules* mo
         // path ops
         JS_FIELD("arePathsEqual", MJS_MK_FN(js_storage_are_paths_equal));
         JS_FIELD("isSubpathOf", MJS_MK_FN(js_storage_is_subpath_of));
+
+        // virtual mount api
+        JS_FIELD("virtualInit", MJS_MK_FN(js_storage_virtual_init));
+        JS_FIELD("virtualMount", MJS_MK_FN(js_storage_virtual_mount));
+        JS_FIELD("virtualQuit", MJS_MK_FN(js_storage_virtual_quit));
     }
     return NULL;
 }
