@@ -25,6 +25,7 @@
   - Add SmartRider Parser (#203 by @jaylikesbunda)
   - Add API to enforce ISO15693 mode (#225 by @aaronjamt)
   - OFW: H World Hotel Chain Room Key Parser and MFC keys (by @zinongli)
+  - OFW: Parser for Tianjin Railway Transit (by @zinongli)
 - Infrared:
   - Bluray/DVD Universal Remote (#250 by @jaylikesbunda)
   - Option to "Load from Library File" for Universal Remotes (#255 by @zxkmm)
