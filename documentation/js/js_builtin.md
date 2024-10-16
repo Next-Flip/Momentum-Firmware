@@ -48,3 +48,43 @@ Convert a number to string with an optional base.
 toString(123) // "123"
 toString(123, 16) // "0x7b"
 ```
+
+## parseInt
+Converts a string to a number.
+
+### Examples:
+```js
+parseInt("123") // 123
+```
+
+## toUpperCase
+Transforms a string to upper case.
+
+### Examples:
+```js
+toUpperCase("Example") // "EXAMPLE"
+```
+
+## toLowerCase
+Transforms a string to lower case.
+
+### Examples:
+```js
+toLowerCase("Example") // "example"
+```
+
+## __dirpath
+Path to the directory containing the current script.
+
+### Examples:
+```js
+print(__dirpath); // /ext/apps/Scripts/Examples
+```
+
+## __filepath
+Path to the current script file.
+
+### Examples:
+```js
+print(__filepath); // /ext/apps/Scripts/Examples/path.js
+```

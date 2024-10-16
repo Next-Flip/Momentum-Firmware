@@ -36,6 +36,16 @@ Single line of text that appears above the keyboard
 
 Type: `string`
 
+## `defaultText`
+Text to show in keyboard by default
+
+Type: `string`
+
+## `defaultTextClear`
+Whether to clear the default text when user inuts another key
+
+Type: `boolean`
+
 # View events
 ## `input`
 Fires when the user selects the "save" button and the text matches the length
