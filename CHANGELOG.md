@@ -24,6 +24,7 @@
     - Static encrypted backdoor support: collects static encrypted nonces to be cracked by MFKey using NXP/Fudan backdoor, allowing key recovery of all non-hardened MIFARE Classic tags on-device
   - Add SmartRider Parser (#203 by @jaylikesbunda)
   - Add API to enforce ISO15693 mode (#225 by @aaronjamt)
+  - OFW: H World Hotel Chain Room Key Parser and MFC keys (by @zinongli)
 - Infrared:
   - Bluray/DVD Universal Remote (#250 by @jaylikesbunda)
   - Option to "Load from Library File" for Universal Remotes (#255 by @zxkmm)
@@ -32,10 +33,14 @@
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
   - OFW: New layout for es-LA (by @IRecabarren)
+- JS:
+  - OFW: JS modules (by @portasynthinca3)
+  - TODO: list differences, move to breaking changes
 - OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
+- OFW: CLI: Improvements part I, `neofetch` command, some output coloring (by @portasynthinca3)
 - GUI:
   - OFW: Add up and down button drawing functions to GUI elements (by @DerSkythe)
-  - OFW: Added one new function for drawing mirrored xbm bitmaps (by @RebornedBrain)
+  - OFW: Extended icon draw function in Canvas (by @RebornedBrain)
 - OFW: RPC: Support 5V on GPIO control for ext. modules (by @gsurkov)
 - OFW: Toolbox: Proper integer parsing library `strint` (by @portasynthinca3)
 - OFW: Furi: Put errno into TCB (by @portasynthinca3)
@@ -58,10 +63,12 @@
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
+  - OFW: USB/BT Remote: Mouse clicker option to click as fast as possible (by @sumukhj1219)
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - NFC:
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
+  - UL: Add iq aparts hotel key (by @xMasterX)
   - OFW/UL: Rename 'Detect Reader' to 'Extract MFC Keys' (by @bettse & @xMasterX)
   - OFW: Plantain parser improvements (by @assasinfil)
   - OFW: Moscow social card parser (by @assasinfil)
@@ -82,6 +89,7 @@
   - OFW: Add TCL 75S451 to TV universal remote (by @christhetech131)
   - OFW: Universal remote additions (by @jaylikesbunda)
   - OFW: Heavily Expand Universal Remotes (by @jaylikesbunda)
+- OFW: BadKB: Improve ChromeOS and GNOME demo scripts (by @kowalski7cc)
 - OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
@@ -91,9 +99,11 @@
   - OFW: Threading, Timers improvements (by @CookiePLMonster)
   - OFW: FuriTimer uses an event instead of a volatile bool to wait for deletion (by @CookiePLMonster)
   - OFW: Improve FuriThread state callbacks (by @CookiePLMonster)
+  - OFW: Increased heap size (by @hedger)
 - Documentation:
   - OFW: Update and cleanup (by @rnadyrshin)
   - OFW: Improve bit_buffer.h docs (by @Astrrra)
+  - OFW: Wi-Fi Devboard documentation rework (by @rnadyrshin)
 
 ### Fixed:
 - RFID:
@@ -120,6 +130,7 @@
   - OFW: Clean up of LFS traces (by @hedger)
   - OFW: Prevent idle priority threads from potentially starving the FreeRTOS idle task (by @CookiePLMonster)
   - OFW: Wait for RNG ready state and no errors before sampling (by @n1kolasM)
+  - OFW: A Lot of Fixes (by @skotopes)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
 - OFW: API: Fix kerel typo in documentation (by @EntranceJew)
 
