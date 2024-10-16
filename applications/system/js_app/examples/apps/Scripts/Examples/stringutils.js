@@ -12,8 +12,8 @@ let searchStr = "World";
 let result2 = toString(sampleText.indexOf(searchStr));
 print(result2);
 
-let upperCaseText = "Text in upper case: " + to_upper_case(sampleText);
+let upperCaseText = "Text in upper case: " + toUpperCase(sampleText);
 print(upperCaseText);
 
-let lowerCaseText = "Text in lower case: " + to_lower_case(sampleText);
+let lowerCaseText = "Text in lower case: " + toLowerCase(sampleText);
 print(lowerCaseText);

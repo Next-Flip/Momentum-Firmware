@@ -40,11 +40,11 @@ print("string1", "string2", 123);
 ## console.debug
 Same as `print`, but output to serial console only, with corresponding log level.
 
-## to_string
+## toString
 Convert a number to string with an optional base.
 
 ### Examples:
 ```js
-to_string(123) // "123"
-to_string(123, 16) // "0x7b"
+toString(123) // "123"
+toString(123, 16) // "0x7b"
 ```

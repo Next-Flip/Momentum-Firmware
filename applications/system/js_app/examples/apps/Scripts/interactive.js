@@ -12,14 +12,14 @@ while (dialog.message("Interactive Console", result)) {
     let input = keyboard.text(256);
     if (!input) break;
 
-    let path = tmp_template + to_string(tmp_number++);
+    let path = tmp_template + toString(tmp_number++);
     storage.write(path, "({run:function(){return " + input + ";},})");
     result = load(path).run();
     storage.remove(path);
 
     // Must convert to string explicitly
     if (typeof result === "number") {
-        result = to_string(result);
+        result = toString(result);
     } else if (typeof result === "undefined") {
         result = "undefined";
     } else if (typeof result === "boolean") {
