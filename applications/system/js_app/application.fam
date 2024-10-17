@@ -149,6 +149,14 @@ App(
 )
 
 App(
+    appid="js_spi",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_spi_ep",
+    requires=["js_app"],
+    sources=["modules/js_spi.c"],
+)
+
+App(
     appid="js_vgm",
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_vgm_ep",
