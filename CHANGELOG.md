@@ -3,6 +3,40 @@
   - Reworks how communication with battery guage is done, improves reliability and fixes issues with battery percentage not showing
   - After installing firmware with this change, downgrading to old firmware will cause battery percentage to be blank
   - If you must downgrade firmware, use the [Guage Tool app](https://github.com/skotopes/flipperzero_gauge_tool) to unseal the guage
+- OFW: JS: Modules backport & overhaul (by @portasynthinca3), backport of backport (by @Willy-JL & @xMasterX)
+  - OFW backported some modules we had, added lots of new stuff, and overhauled many other things
+  - Non-exhaustive list of changes to help you fix your scripts:
+    - `badusb`:
+      - `setup()`: `mfr_name`, `prod_name`, `layout_path` parameters renamed to `mfrName`, `prodName`, `layoutPath`
+      - existing scripts using badusb will need to simply rename these
+    - `dialog`:
+      - removed, now replaced by `gui/dialog` and `gui/file_picker` (see below)
+    - `event_loop`:
+      - new module, allows timer functionality, callbacks and event-driven programming, used heavily alongside gpio and gui modules
+    - `gpio`:
+      - fully overhauled, now you `get()` pin instances and perform actions on them like `.init()`
+      - existing scripts using gpio will need some reworking
+    - `gui`:
+      - new module, fully overhauled, replaces dialog, keyboard, submenu, textbox modules
+      - higher barrier to entry than older modules (requires usage of `event_loop` and `gui.viewDispatcher`), but much more flexible, powerful and easier to extend
+      - includes all previously available js gui functionality (except `widget`), and also adds `gui/loading` and `gui/empty_screen` views
+      - existing scripts using gui in any way will need a huge amount of reworking
+    - `keyboard`:
+      - removed, now replaced by `gui/text_input` and `gui/byte_input` (see above)
+    - `storage`:
+      - fully overhauled, now you `openFile()`s and perform actions on them like `.read()`
+      - now supports many more operations including different open modes, directories and much more
+      - `virtualInit()`, `virtualMount()`, `virtualQuit()` still work the same
+      - existing scripts using storage will need some reworking
+    - `submenu`:
+      - removed, now replaced by `gui/submenu` (see above)
+    - `textbox`:
+      - removed, now replace by `gui/text_box` (see above)
+    - `widget`:
+      - only gui functionality not ported to new gui module, remains unchanged for now but likely to be ported later on
+  - Added type definitions (typescript files for type checking in IDE, Flipper does not run typescript, and you code in javascript)
+  - Documentation is incomplete and deprecated, from now on you should refer to type definitions (`applications/system/js_app/types`), those will always be correct
+  - Type definitions for extra modules we have that OFW doesn't will come later
 
 ### Added:
 - Apps:
@@ -34,9 +68,6 @@
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
   - OFW: New layout for es-LA (by @IRecabarren)
-- JS:
-  - OFW: JS modules (by @portasynthinca3)
-  - TODO: list differences, move to breaking changes
 - OFW: Dolphin: Happy mode in Desktop settings (by @portasynthinca3)
 - OFW: CLI: Improvements part I, `neofetch` command (by @portasynthinca3), fix for lab.flipper.net (by @xMasterX)
 - GUI:
