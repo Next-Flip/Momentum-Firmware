@@ -80,6 +80,7 @@ eventLoop.subscribe(views.demos.chosen, function (_sub, index, gui, eventLoop, v
 
 // say hi after keyboard input
 eventLoop.subscribe(views.keyboard.input, function (_sub, name, gui, views) {
+    views.keyboard.set("defaultText", name); // Remember for next usage
     views.helloDialog.set("text", "Hi " + name + "! :)");
     views.helloDialog.set("center", "Hi Flipper! :)");
     gui.viewDispatcher.switchTo(views.helloDialog);
