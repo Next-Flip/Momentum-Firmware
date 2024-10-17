@@ -79,7 +79,7 @@ jobs:
       - name: "Build the firmware and apps"
         id: build-fw
         run: |
-          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE updater_package
+          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE copro_dist updater_package fap_dist
           echo "firmware_api=$(./fbt TARGET_HW=$TARGET_HW get_apiversion)" >> $GITHUB_OUTPUT
 
       - name: "Check for uncommitted changes"
@@ -101,13 +101,23 @@ jobs:
           set -e
           rm -rf artifacts || true
           mkdir artifacts
-          cp dist/${TARGET}-*/flipper-z-${TARGET}-{update,sdk}-* artifacts/
+          cp dist/${TARGET}-*/flipper-z-${TARGET}-{update-*.tgz,sdk-*.zip,full-*.dfu} artifacts/
+          tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
+            -C build/latest resources
           cd dist/${TARGET}-*/${TARGET}-update-*/
           ARTIFACT_TAG=flipper-z-"$(basename "$(realpath .)")"
           7z a ../../../artifacts/${ARTIFACT_TAG}.zip .
           echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
           VERSION_TAG="$(basename "$(realpath .)" | cut -d- -f3-)"
           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+
+      - name: "Copy universal artifacts"
+        env:
+          INDEXER_URL: ${{ secrets.INDEXER_URL }}
+        if: ${{ env.INDEXER_URL != '' && (github.event.pull_request || (github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')))) }}
+        run: |
+          tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
+          cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
       - name: "Upload artifacts to update server"
         env:

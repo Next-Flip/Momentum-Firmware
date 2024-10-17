@@ -40,17 +40,51 @@ print("string1", "string2", 123);
 ## console.debug
 Same as `print`, but output to serial console only, with corresponding log level.
 
-## to_string
-Convert a number to string.
+## toString
+Convert a number to string with an optional base.
 
 ### Examples:
 ```js
-to_string(123)
+toString(123) // "123"
+toString(123, 16) // "0x7b"
 ```
-## to_hex_string
-Convert a number to string(hex format).
+
+## parseInt
+Converts a string to a number.
 
 ### Examples:
 ```js
-to_hex_string(0xFF)
+parseInt("123") // 123
+```
+
+## toUpperCase
+Transforms a string to upper case.
+
+### Examples:
+```js
+toUpperCase("Example") // "EXAMPLE"
+```
+
+## toLowerCase
+Transforms a string to lower case.
+
+### Examples:
+```js
+toLowerCase("Example") // "example"
+```
+
+## __dirpath
+Path to the directory containing the current script.
+
+### Examples:
+```js
+print(__dirpath); // /ext/apps/Scripts/Examples
+```
+
+## __filepath
+Path to the current script file.
+
+### Examples:
+```js
+print(__filepath); // /ext/apps/Scripts/Examples/path.js
 ```

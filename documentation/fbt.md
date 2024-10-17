@@ -57,15 +57,9 @@ Additionally, `compile_commands.json` is generated in that folder (it is used fo
  
 `build/latest` symlink & compilation database are only updated upon *firmware build targets* — that is, when you're re-building the firmware itself. Running other tasks, like firmware flashing or building update bundles *for a different debug/release configuration or hardware target*, does not update `built/latest` dir to point to that configuration.
 
-Running other tasks, like firmware flashing or building update bundles *for a different debug/release configuration or hardware target*, does not update `built/latest` dir to point to that configuration.
-
 ## VSCode integration
 
-`fbt` includes basic development environment configuration for VSCode. Run `./fbt vscode_dist` to deploy it. 
-
-That will copy the initial environment configuration to the `.vscode` folder. 
-
-After that, you can use that configuration by starting VSCode and choosing the firmware root folder in the <kbd>File > Open Folder</kbd> menu.
+`fbt` includes basic development environment configuration for VS Code. Run `./fbt vscode_dist` to deploy it. That will copy the initial environment configuration to the `.vscode` folder. After that, you can use that configuration by starting VS Code and choosing the firmware root folder in the "File > Open Folder" menu.
 
 To use language servers other than the default VS Code C/C++ language server, use `./fbt vscode_dist LANG_SERVER=<language-server>` instead. 
 

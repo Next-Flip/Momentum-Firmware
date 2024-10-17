@@ -196,17 +196,11 @@ static void js_require(struct mjs* mjs) {
 }
 
 static void js_global_to_string(struct mjs* mjs) {
+    int base = 10;
+    if(mjs_nargs(mjs) > 1) base = mjs_get_int(mjs, mjs_arg(mjs, 1));
     double num = mjs_get_double(mjs, mjs_arg(mjs, 0));
     char tmp_str[] = "-2147483648";
-    itoa(num, tmp_str, 10);
-    mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
-    mjs_return(mjs, ret);
-}
-
-static void js_global_to_hex_string(struct mjs* mjs) {
-    double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
-    char tmp_str[] = "-FFFFFFFF";
-    itoa(num, tmp_str, 16);
+    itoa(num, tmp_str, base);
     mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
     mjs_return(mjs, ret);
 }
@@ -340,13 +334,12 @@ static int32_t js_thread(void* arg) {
     }
     mjs_set(mjs, global, "print", ~0, MJS_MK_FN(js_print));
     mjs_set(mjs, global, "delay", ~0, MJS_MK_FN(js_delay));
-    mjs_set(mjs, global, "to_string", ~0, MJS_MK_FN(js_global_to_string));
-    mjs_set(mjs, global, "to_hex_string", ~0, MJS_MK_FN(js_global_to_hex_string));
+    mjs_set(mjs, global, "toString", ~0, MJS_MK_FN(js_global_to_string));
     mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
     mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
-    mjs_set(mjs, global, "parse_int", ~0, MJS_MK_FN(js_parse_int));
-    mjs_set(mjs, global, "to_upper_case", ~0, MJS_MK_FN(js_to_upper_case));
-    mjs_set(mjs, global, "to_lower_case", ~0, MJS_MK_FN(js_to_lower_case));
+    mjs_set(mjs, global, "parseInt", ~0, MJS_MK_FN(js_parse_int));
+    mjs_set(mjs, global, "toUpperCase", ~0, MJS_MK_FN(js_to_upper_case));
+    mjs_set(mjs, global, "toLowerCase", ~0, MJS_MK_FN(js_to_lower_case));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
     mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
@@ -400,8 +393,8 @@ static int32_t js_thread(void* arg) {
         }
     }
 
-    js_modules_destroy(worker->modules);
     mjs_destroy(mjs);
+    js_modules_destroy(worker->modules);
 
     composite_api_resolver_free(worker->resolver);
 
