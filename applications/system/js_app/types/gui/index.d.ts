@@ -3,7 +3,17 @@ import type { Contract } from "../event_loop";
 type Properties = { [K: string]: any };
 
 export declare class View<Props extends Properties> {
+    /**
+     * Assign value to property by name
+     * @param property Name of the property
+     * @param value Value to assign
+     */
     set<P extends keyof Props>(property: P, value: Props[P]): void;
+    /**
+     * Check if property is available
+     * @param name Name of the property
+     */
+    hasProperty(name: string): boolean;
 }
 
 export declare class ViewFactory<Props extends Properties, V extends View<Props>> {
