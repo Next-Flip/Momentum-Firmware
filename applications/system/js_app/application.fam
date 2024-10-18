@@ -3,6 +3,8 @@ App(
     name="JS Runner",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="js_app",
+    cdefines=["JS_RUNNER_FAP"],
+    # Sources separation breaks linking when internal, comment as needed
     sources=[
         "*.c*",
         "!modules",
