@@ -7,12 +7,14 @@ let badusb = require("badusb");
 # Methods
 ## setup
 Start USB HID with optional parameters. Should be called before all other methods.
+Automatically unlocks USB profile, so qFlipper connection will be interrupted.
 
 ### Parameters
 Configuration object (optional):
 - vid, pid (number): VID and PID values, both are mandatory
-- mfr_name (string): Manufacturer name (32  ASCII characters max), optional
-- prod_name (string): Product name (32  ASCII characters max), optional
+- mfrName (string): Manufacturer name (32  ASCII characters max), optional
+- prodName (string): Product name (32  ASCII characters max), optional
+- layoutPath (string): Path to keyboard layout file, optional
 
 ### Examples:
 ```js
@@ -105,6 +107,40 @@ Same as `print` but ended with "ENTER" press.
 badusb.println("Hello, world!");  // print "Hello, world!" and press "ENTER"
 ```
 
+## altPrint
+Prints a string by Alt+Numpad method - works only on Windows!
+
+### Parameters
+- A string to print
+- (optional) delay between key presses
+
+### Examples:
+```js
+badusb.altPrint("Hello, world!"); // print "Hello, world!"
+badusb.altPrint("Hello, world!", 100); // Add 100ms delay between key presses
+```
+
+## altPrintln
+Same as `altPrint` but ended with "ENTER" press.
+
+### Parameters
+- A string to print
+- (optional) delay between key presses
+
+### Examples:
+```js
+badusb.altPrintln("Hello, world!");  // print "Hello, world!" and press "ENTER"
+```
+
+## quit
+Releases usb, optional, but allows to interchange with usbdisk.
+
+### Examples:
+```js
+badusb.quit();
+usbdisk.start(...)
+```
+
 # Key names list
 
 ## Modifier keys
@@ -142,3 +178,4 @@ badusb.println("Hello, world!");  // print "Hello, world!" and press "ENTER"
 | TAB                |                  |
 | MENU               | Context menu key |
 | Fx                 | F1-F24 keys      |
+| NUMx               | NUM0-NUM9 keys   |

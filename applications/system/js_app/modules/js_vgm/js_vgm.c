@@ -119,7 +119,8 @@ static void js_vgm_delta_yaw(struct mjs* mjs) {
     mjs_return(mjs, mjs_mk_number(mjs, 0));
 }
 
-static void* js_vgm_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_vgm_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsVgmInst* vgm = malloc(sizeof(JsVgmInst));
     vgm->imu = imu_alloc();
     vgm->present = imu_present(vgm->imu);
@@ -143,9 +144,10 @@ static void js_vgm_destroy(void* inst) {
 }
 
 static const JsModuleDescriptor js_vgm_desc = {
-    name: "vgm",
-    create: js_vgm_create,
-    destroy: js_vgm_destroy,
+    "vgm",
+    js_vgm_create,
+    js_vgm_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor plugin_descriptor = {
