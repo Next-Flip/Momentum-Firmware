@@ -17,41 +17,19 @@
 
 void find_ndef_sectors_num(uint8_t block_num, size_t byte_position, int* sec) {
     if(block_num == 1) {
-        if(byte_position == 3 || byte_position == 4) {
-            *sec = 1;
-        } else if(byte_position == 5 || byte_position == 6) {
-            *sec = 2;
-        } else if(byte_position == 7 || byte_position == 8) {
-            *sec = 3;
-        } else if(byte_position == 9 || byte_position == 10) {
-            *sec = 4;
-        } else if(byte_position == 11 || byte_position == 12) {
-            *sec = 5;
-        } else if(byte_position == 13 || byte_position == 14) {
-            *sec = 6;
+        if(byte_position >= 3 && byte_position <= 14) {
+            *sec = (byte_position - 3) / 2 + 1;
         } else {
             *sec = -1;
         }
     } else if(block_num == 2) {
-        if(byte_position == 1 || byte_position == 2) {
-            *sec = 7;
-        } else if(byte_position == 3 || byte_position == 4) {
-            *sec = 8;
-        } else if(byte_position == 5 || byte_position == 6) {
-            *sec = 9;
-        } else if(byte_position == 7 || byte_position == 8) {
-            *sec = 10;
-        } else if(byte_position == 9 || byte_position == 10) {
-            *sec = 11;
-        } else if(byte_position == 11 || byte_position == 12) {
-            *sec = 12;
-        } else if(byte_position == 13 || byte_position == 14) {
-            *sec = 13;
-        } else if(byte_position == 15 || byte_position == 16) {
-            *sec = 14;
+        if(byte_position >= 1 && byte_position <= 16) {
+            *sec = (byte_position - 1) / 2 + 7;
         } else {
             *sec = -1;
         }
+    } else {
+        *sec = -1;
     }
 }
 
@@ -591,7 +569,6 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
             const uint8_t* end = cur + ndef_length;
             size_t max_size = mf_classic_get_total_block_num(data->type) * MF_CLASSIC_BLOCK_SIZE;
             end = MIN(end, &data->block[0].data[0] + max_size);
-
             while(cur < end) {
                 switch(*cur++) {
                 case 0x03: { // NDEF message
@@ -621,7 +598,8 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
 
                 case 0xFE: // TLV end
                     cur = end;
-                     if(ndef_sectors_num_to_check == 1 || ndef_sectors_num_to_check == 0) parsed = true;
+                    if(ndef_sectors_num_to_check == 1 || ndef_sectors_num_to_check == 0)
+                        parsed = true;
                     break;
 
                 case 0x00: // Padding, has no length, skip
