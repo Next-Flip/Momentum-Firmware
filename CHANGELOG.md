@@ -97,7 +97,7 @@
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
   - NFC Playlist: Error screens for playlist already exists and item already in playlist, general improvements (by @acegoal07), refactor rename/new scene without thread (by @Willy-JL)
   - CLI-GUI Bridge: Fixes and improvements (by @ranchordo)
-  - Seader: Enable T=1 (by @bettse)
+  - Seader: Enable T=1, show error for timeout, fix wrong LRC logging (by @bettse)
   - BLE Spam: Fix menu index callback (by @Willy-JL)
   - Solitaire: App rewrite, Added quick solve, New effects and sounds, Removed hacky canvas manipulation (by @doofy-dev)
   - CLI-GUI Bridge: Add more symbols to keyboard (#222 by @Willy-JL)
