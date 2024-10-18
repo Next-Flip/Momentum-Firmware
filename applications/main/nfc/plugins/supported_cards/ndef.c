@@ -621,7 +621,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
 
                 case 0xFE: // TLV end
                     cur = end;
-                    if(ndef_sectors_num_to_check == 1) parsed = true;
+                     if(ndef_sectors_num_to_check == 1 || ndef_sectors_num_to_check == 0) parsed = true;
                     break;
 
                 case 0x00: // Padding, has no length, skip
