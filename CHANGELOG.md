@@ -175,6 +175,7 @@
   - OFW: Prevent idle priority threads from potentially starving the FreeRTOS idle task (by @CookiePLMonster)
   - OFW: Wait for RNG ready state and no errors before sampling (by @n1kolasM)
   - OFW: A Lot of Fixes (by @skotopes)
+- OFW: CLI: Add warning about stealth mode in vibro command (by @ivanbarsukov)
 - OFW: Debug: Use proper hook for handle_exit in flipperapps (by @skotopes)
 - OFW: API: Fix kerel typo in documentation (by @EntranceJew)
 
