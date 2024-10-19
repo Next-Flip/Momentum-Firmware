@@ -39,11 +39,11 @@
     - globals:
       - `__filepath` and `__dirpath` renamed to `__filename` and `__dirname` like in nodejs
       - `to_string()` renamed and moved to number class as `n.toString()`, now supports optional base parameter
-      - `to_hex_string()` removed, now use `toString(num, 16)`
+      - `to_hex_string()` removed, now use `n.toString(16)`
       - `parse_int()` renamed to `parseInt()`, now supports optional base parameter
       - `to_upper_case()` and `to_lower_case()` renamed and moved to string class as `s.toUpperCase()` and `s.toLowerCase()`
       - effort required to update old scripts using these: minimal
-  - Added type definitions (typescript files for type checking in IDE, Flipper does not run typescript, and you code in javascript)
+  - Added type definitions (typescript files for type checking in IDE, Flipper does not run typescript)
   - Documentation is incomplete and deprecated, from now on you should refer to type definitions (`applications/system/js_app/types`), those will always be correct
   - Type definitions for extra modules we have that OFW doesn't will come later
 
