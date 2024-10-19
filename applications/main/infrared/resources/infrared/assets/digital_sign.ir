@@ -76,30 +76,6 @@ address: 80 02 20 00
 command: 70 00 00 00
 #
 name: POWER
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 0C 00 00 00
-#
-name: SOURCE
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 38 00 00 00
-#
-name: PLAY
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 2C 00 00 00
-#
-name: STOP
-type: parsed
-protocol: RC6
-address: 00 00 00 00
-command: 31 00 00 00
-#
-name: POWER
 type: raw
 frequency: 38000
 duty_cycle: 0.330000
