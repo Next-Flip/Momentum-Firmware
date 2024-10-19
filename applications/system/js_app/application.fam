@@ -3,6 +3,8 @@ App(
     name="JS Runner",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="js_app",
+    cdefines=["JS_RUNNER_FAP"],
+    # Sources separation breaks linking when internal, comment as needed
     sources=[
         "*.c*",
         "!modules",
@@ -37,11 +39,86 @@ App(
 )
 
 App(
-    appid="js_dialog",
+    appid="js_event_loop",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_dialog_ep",
+    entry_point="js_event_loop_ep",
     requires=["js_app"],
-    sources=["modules/js_dialog.c"],
+    sources=[
+        "modules/js_event_loop/js_event_loop.c",
+        "modules/js_event_loop/js_event_loop_api_table.cpp",
+    ],
+)
+
+App(
+    appid="js_gui",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_gui_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/js_gui.c", "modules/js_gui/js_gui_api_table.cpp"],
+)
+
+App(
+    appid="js_gui__loading",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_loading_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/loading.c"],
+)
+
+App(
+    appid="js_gui__empty_screen",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_empty_screen_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/empty_screen.c"],
+)
+
+App(
+    appid="js_gui__submenu",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_submenu_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/submenu.c"],
+)
+
+App(
+    appid="js_gui__text_input",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_text_input_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/text_input.c"],
+)
+
+App(
+    appid="js_gui__byte_input",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_byte_input_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/byte_input.c"],
+)
+
+App(
+    appid="js_gui__text_box",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_text_box_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/text_box.c"],
+)
+
+App(
+    appid="js_gui__dialog",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_dialog_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/dialog.c"],
+)
+
+App(
+    appid="js_gui__file_picker",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_gui_file_picker_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/file_picker.c"],
 )
 
 App(
@@ -69,35 +146,11 @@ App(
 )
 
 App(
-    appid="js_storage",
+    appid="js_gpio",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_storage_ep",
+    entry_point="js_gpio_ep",
     requires=["js_app"],
-    sources=["modules/js_storage.c"],
-)
-
-App(
-    appid="js_usbdisk",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_usbdisk_ep",
-    requires=["js_app"],
-    sources=["modules/js_usbdisk/*.c"],
-)
-
-App(
-    appid="js_submenu",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_submenu_ep",
-    requires=["js_app"],
-    sources=["modules/js_submenu.c"],
-)
-
-App(
-    appid="js_blebeacon",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_blebeacon_ep",
-    requires=["js_app"],
-    sources=["modules/js_blebeacon.c"],
+    sources=["modules/js_gpio.c"],
 )
 
 App(
@@ -109,35 +162,11 @@ App(
 )
 
 App(
-    appid="js_keyboard",
+    appid="js_storage",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_keyboard_ep",
+    entry_point="js_storage_ep",
     requires=["js_app"],
-    sources=["modules/js_keyboard.c"],
-)
-
-App(
-    appid="js_subghz",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_subghz_ep",
-    requires=["js_app"],
-    sources=["modules/js_subghz/*.c"],
-)
-
-App(
-    appid="js_gpio",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_gpio_ep",
-    requires=["js_app"],
-    sources=["modules/js_gpio.c"],
-)
-
-App(
-    appid="js_textbox",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_textbox_ep",
-    requires=["js_app"],
-    sources=["modules/js_textbox.c"],
+    sources=["modules/js_storage.c"],
 )
 
 App(
@@ -162,4 +191,28 @@ App(
     entry_point="js_vgm_ep",
     requires=["js_app"],
     sources=["modules/js_vgm/*.c", "modules/js_vgm/ICM42688P/*.c"],
+)
+
+App(
+    appid="js_subghz",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_subghz_ep",
+    requires=["js_app"],
+    sources=["modules/js_subghz/*.c"],
+)
+
+App(
+    appid="js_blebeacon",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_blebeacon_ep",
+    requires=["js_app"],
+    sources=["modules/js_blebeacon.c"],
+)
+
+App(
+    appid="js_usbdisk",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_usbdisk_ep",
+    requires=["js_app"],
+    sources=["modules/js_usbdisk/*.c"],
 )

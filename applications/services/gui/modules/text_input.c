@@ -24,6 +24,7 @@ typedef struct {
     const char* header;
     char* text_buffer;
     size_t text_buffer_size;
+    size_t minimum_length;
     bool clear_default_text;
 
     TextInputCallback callback;
@@ -37,7 +38,6 @@ typedef struct {
     FuriString* validator_text;
     bool validator_message_visible;
 
-    size_t minimum_length;
     char extra_symbols[9];
     bool cursor_select;
     size_t cursor_pos;
