@@ -21,7 +21,7 @@
       - new module, fully overhauled, replaces dialog, keyboard, submenu, textbox modules
       - higher barrier to entry than older modules (requires usage of `event_loop` and `gui.viewDispatcher`), but much more flexible, powerful and easier to extend
       - includes all previously available js gui functionality (except `widget`), and also adds `gui/loading` and `gui/empty_screen` views
-      - existing scripts using gui in any way will need a huge amount of reworking
+      - currently `gui/file_picker` works different than other new view objects, it is a simple `.pickFile()` synchronous function, but this [may change later](https://github.com/flipperdevices/flipperzero-firmware/pull/3961#discussion_r1805579153)
       - effort required to update old scripts using gui: extensive
     - `keyboard`:
       - removed, now replaced by `gui/text_input` and `gui/byte_input` (see above)
@@ -38,10 +38,10 @@
       - only gui functionality not ported to new gui module, remains unchanged for now but likely to be ported later on
     - globals:
       - `__filepath` and `__dirpath` renamed to `__filename` and `__dirname` like in nodejs
-      - `to_string()` renamed to `toString()`, now supports optional base parameter
+      - `to_string()` renamed and moved to number class as `n.toString()`, now supports optional base parameter
       - `to_hex_string()` removed, now use `toString(num, 16)`
       - `parse_int()` renamed to `parseInt()`, now supports optional base parameter
-      - `to_upper_case()` and `to_lower_case()` renamed and moved to string class as `"".toUpperCase()` and `"".toLowerCase()`
+      - `to_upper_case()` and `to_lower_case()` renamed and moved to string class as `s.toUpperCase()` and `s.toLowerCase()`
       - effort required to update old scripts using these: minimal
   - Added type definitions (typescript files for type checking in IDE, Flipper does not run typescript, and you code in javascript)
   - Documentation is incomplete and deprecated, from now on you should refer to type definitions (`applications/system/js_app/types`), those will always be correct
