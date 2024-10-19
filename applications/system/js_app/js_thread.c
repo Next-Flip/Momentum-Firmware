@@ -1,6 +1,7 @@
 #include <common/cs_dbg.h>
 #include <toolbox/path.h>
 #include <toolbox/stream/file_stream.h>
+#include <toolbox/strint.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
 #include <flipper_application/plugins/composite_resolver.h>
@@ -195,102 +196,19 @@ static void js_require(struct mjs* mjs) {
     mjs_return(mjs, req_object);
 }
 
-static void js_global_to_string(struct mjs* mjs) {
-    double num = mjs_get_double(mjs, mjs_arg(mjs, 0));
-    char tmp_str[] = "-2147483648";
-    itoa(num, tmp_str, 10);
-    mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
-    mjs_return(mjs, ret);
-}
-
-static void js_global_to_hex_string(struct mjs* mjs) {
-    double num = mjs_get_int(mjs, mjs_arg(mjs, 0));
-    char tmp_str[] = "-FFFFFFFF";
-    itoa(num, tmp_str, 16);
-    mjs_val_t ret = mjs_mk_string(mjs, tmp_str, ~0, true);
-    mjs_return(mjs, ret);
-}
-
 static void js_parse_int(struct mjs* mjs) {
-    mjs_val_t arg = mjs_arg(mjs, 0);
-    if(!mjs_is_string(arg)) {
-        mjs_return(mjs, mjs_mk_number(mjs, 0));
-        return;
+    const char* str;
+    int32_t base = 10;
+    if(mjs_nargs(mjs) == 1) {
+        JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&str));
+    } else {
+        JS_FETCH_ARGS_OR_RETURN(mjs, JS_EXACTLY, JS_ARG_STR(&str), JS_ARG_INT32(&base));
     }
-    size_t str_len = 0;
-    const char* str = mjs_get_string(mjs, &arg, &str_len);
-    if((str_len == 0) || (str == NULL)) {
-        mjs_return(mjs, mjs_mk_number(mjs, 0));
-        return;
+    int32_t num;
+    if(strint_to_int32(str, NULL, &num, base) != StrintParseNoError) {
+        num = 0;
     }
-
-    int32_t num = 0;
-    int32_t sign = 1;
-    size_t i = 0;
-
-    if(str[0] == '-') {
-        sign = -1;
-        i = 1;
-    } else if(str[0] == '+') {
-        i = 1;
-    }
-
-    for(; i < str_len; i++) {
-        if(str[i] >= '0' && str[i] <= '9') {
-            num = num * 10 + (str[i] - '0');
-        } else {
-            break;
-        }
-    }
-    num *= sign;
-
     mjs_return(mjs, mjs_mk_number(mjs, num));
-}
-
-static void js_to_upper_case(struct mjs* mjs) {
-    mjs_val_t arg0 = mjs_arg(mjs, 0);
-
-    size_t str_len;
-    const char* str = NULL;
-    if(mjs_is_string(arg0)) {
-        str = mjs_get_string(mjs, &arg0, &str_len);
-    }
-    if(!str) {
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    char* upperStr = strdup(str);
-    for(size_t i = 0; i < str_len; i++) {
-        upperStr[i] = toupper(upperStr[i]);
-    }
-
-    mjs_val_t resultStr = mjs_mk_string(mjs, upperStr, ~0, true);
-    free(upperStr);
-    mjs_return(mjs, resultStr);
-}
-
-static void js_to_lower_case(struct mjs* mjs) {
-    mjs_val_t arg0 = mjs_arg(mjs, 0);
-
-    size_t str_len;
-    const char* str = NULL;
-    if(mjs_is_string(arg0)) {
-        str = mjs_get_string(mjs, &arg0, &str_len);
-    }
-    if(!str) {
-        mjs_return(mjs, MJS_UNDEFINED);
-        return;
-    }
-
-    char* lowerStr = strdup(str);
-    for(size_t i = 0; i < str_len; i++) {
-        lowerStr[i] = tolower(lowerStr[i]);
-    }
-
-    mjs_val_t resultStr = mjs_mk_string(mjs, lowerStr, ~0, true);
-    free(lowerStr);
-    mjs_return(mjs, resultStr);
 }
 
 #ifdef JS_DEBUG
@@ -326,27 +244,23 @@ static int32_t js_thread(void* arg) {
         mjs_set(
             mjs,
             global,
-            "__filepath",
+            "__filename",
             ~0,
             mjs_mk_string(
                 mjs, furi_string_get_cstr(worker->path), furi_string_size(worker->path), true));
         mjs_set(
             mjs,
             global,
-            "__dirpath",
+            "__dirname",
             ~0,
             mjs_mk_string(mjs, furi_string_get_cstr(dirpath), furi_string_size(dirpath), true));
         furi_string_free(dirpath);
     }
     mjs_set(mjs, global, "print", ~0, MJS_MK_FN(js_print));
     mjs_set(mjs, global, "delay", ~0, MJS_MK_FN(js_delay));
-    mjs_set(mjs, global, "to_string", ~0, MJS_MK_FN(js_global_to_string));
-    mjs_set(mjs, global, "to_hex_string", ~0, MJS_MK_FN(js_global_to_hex_string));
     mjs_set(mjs, global, "ffi_address", ~0, MJS_MK_FN(js_ffi_address));
     mjs_set(mjs, global, "require", ~0, MJS_MK_FN(js_require));
-    mjs_set(mjs, global, "parse_int", ~0, MJS_MK_FN(js_parse_int));
-    mjs_set(mjs, global, "to_upper_case", ~0, MJS_MK_FN(js_to_upper_case));
-    mjs_set(mjs, global, "to_lower_case", ~0, MJS_MK_FN(js_to_lower_case));
+    mjs_set(mjs, global, "parseInt", ~0, MJS_MK_FN(js_parse_int));
 
     mjs_val_t console_obj = mjs_mk_object(mjs);
     mjs_set(mjs, console_obj, "log", ~0, MJS_MK_FN(js_console_log));
@@ -400,8 +314,8 @@ static int32_t js_thread(void* arg) {
         }
     }
 
-    js_modules_destroy(worker->modules);
     mjs_destroy(mjs);
+    js_modules_destroy(worker->modules);
 
     composite_api_resolver_free(worker->resolver);
 
