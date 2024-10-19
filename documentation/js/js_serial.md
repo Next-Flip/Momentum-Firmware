@@ -8,6 +8,7 @@ let serial = require("serial");
 
 ## setup
 Configure serial port. Should be called before all other methods.
+Automatically disables Expansion module service to prevent interference.
 
 ### Parameters
 - Serial port name (usart, lpuart)
@@ -67,6 +68,21 @@ serial.readln(); // Read without timeout
 serial.readln(5000); // Read with 5s timeout
 ```
 
+## readAny
+Read any available amount of data from serial port, can help avoid starving your loop with small reads
+
+### Parameters
+(optional) Timeout value in ms
+
+### Returns
+A sting of received characters or undefined if nothing was received before timeout.
+
+### Examples:
+```js
+serial.readAny(); // Read without timeout
+serial.readAny(5000); // Read with 5s timeout
+```
+
 ## readBytes
 Read from serial port until line break character
 
@@ -104,4 +120,14 @@ serial.expect("# ", 1000);
 
 // Infinitely wait for one of two strings, should return 0 if the first string got matched, 1 if the second one
 serial.expect([": not found", "Usage: "]);
+```
+
+## end
+Deinitializes serial port, allowing multiple initializations per script run.
+
+### Examples:
+```js
+serial.end();
+// Configure LPUART port with baudrate = 115200
+serial.setup("lpuart", 115200);
 ```
