@@ -1,6 +1,6 @@
 let sampleText = "Hello, World!";
 
-let lengthOfText = "Length of text: " + to_string(sampleText.length);
+let lengthOfText = "Length of text: " + sampleText.length.toString();
 print(lengthOfText);
 
 let start = 7;
@@ -9,11 +9,11 @@ let substringResult = sampleText.slice(start, end);
 print(substringResult);
 
 let searchStr = "World";
-let result2 = to_string(sampleText.indexOf(searchStr));
+let result2 = sampleText.indexOf(searchStr).toString();
 print(result2);
 
-let upperCaseText = "Text in upper case: " + to_upper_case(sampleText);
+let upperCaseText = "Text in upper case: " + sampleText.toUpperCase();
 print(upperCaseText);
 
-let lowerCaseText = "Text in lower case: " + to_lower_case(sampleText);
+let lowerCaseText = "Text in lower case: " + sampleText.toLowerCase();
 print(lowerCaseText);
