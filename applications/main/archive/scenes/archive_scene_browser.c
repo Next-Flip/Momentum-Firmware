@@ -42,7 +42,11 @@ const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
     case ArchiveFileTypeDiskImage:
         return EXT_PATH("apps/USB/mass_storage.fap");
     case ArchiveFileTypeJS:
+#ifdef JS_RUNNER_FAP
         return EXT_PATH("apps/assets/js_app.fap");
+#else
+        return "JS Runner";
+#endif
     default:
         return NULL;
     }
