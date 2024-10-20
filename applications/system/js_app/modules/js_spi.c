@@ -247,8 +247,8 @@ static void* js_spi_create(struct mjs* mjs, mjs_val_t* object, JsModules* module
     mjs_set(mjs, spi_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, spi));
     mjs_set(mjs, spi_obj, "acquire", ~0, MJS_MK_FN(js_spi_acquire));
     mjs_set(mjs, spi_obj, "release", ~0, MJS_MK_FN(js_spi_release));
-    mjs_set(mjs, spi_obj, "read", ~0, MJS_MK_FN(js_spi_read));
     mjs_set(mjs, spi_obj, "write", ~0, MJS_MK_FN(js_spi_write));
+    mjs_set(mjs, spi_obj, "read", ~0, MJS_MK_FN(js_spi_read));
     mjs_set(mjs, spi_obj, "writeRead", ~0, MJS_MK_FN(js_spi_write_read));
     *object = spi_obj;
 
