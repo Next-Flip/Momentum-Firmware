@@ -27,11 +27,7 @@ static void
     print_data(FuriString* str, const char* prefix, const uint8_t* buf, size_t len, bool force_hex) {
     if(prefix) furi_string_cat_printf(str, "%s: ", prefix);
     if(!force_hex && is_text(buf, len)) {
-        char* tmp = malloc(len + 1);
-        memcpy(tmp, buf, len);
-        tmp[len] = '\0';
-        furi_string_cat_printf(str, "%s", tmp);
-        free(tmp);
+        furi_string_cat_printf(str, "%.*s", len, buf);
     } else {
         for(uint8_t i = 0; i < len; i++) {
             furi_string_cat_printf(str, "%02X ", buf[i]);
