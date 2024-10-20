@@ -3,10 +3,21 @@
 let spi = require("spi");
 
 // Display textbox so user can scroll to see all output.
-let textbox = require("textbox");
-textbox.setConfig("end", "text");
-textbox.addText("SPI demo\n");
-textbox.show();
+let eventLoop = require("event_loop");
+let gui = require("gui");
+let text = "SPI demo\n";
+let textBox = require("gui/text_box").makeWith({
+    focus: "end",
+    font: "text",
+    text: text,
+});
+
+function addText(add) {
+    text += add;
+    textBox.set("text", text);
+}
+
+gui.viewDispatcher.switchTo(textBox);
 
 // writeRead returns a buffer the same length as the input buffer.
 // We send 6 bytes of data, starting with 0x90, which is the command to read the manufacturer ID.
@@ -16,20 +27,20 @@ let data_buf = spi.writeRead([0x90, 0x0, 0x0, 0x0, 0x0, 0x0], 100);
 let data = Uint8Array(data_buf);
 if (data.length === 6) {
     if (data[4] === 0xEF) {
-        textbox.addText("Found Winbond device\n");
+        addText("Found Winbond device\n");
         if (data[5] === 0x15) {
-            textbox.addText("Device ID: W25Q32\n");
+            addText("Device ID: W25Q32\n");
         } else {
-            textbox.addText("Unknown device ID: " + to_hex_string(data[5]) + "\n");
+            addText("Unknown device ID: " + data[5].toString(16) + "\n");
         }
     } else if (data[4] === 0x0) {
-        textbox.addText("Be sure Winbond W25Q32 is connected to Flipper Zero SPI pins.\n");
+        addText("Be sure Winbond W25Q32 is connected to Flipper Zero SPI pins.\n");
     } else {
-        textbox.addText("Unknown device. Manufacturer ID: " + to_hex_string(data[4]) + "\n");
+        addText("Unknown device. Manufacturer ID: " + data[4].toString(16) + "\n");
     }
 }
 
-textbox.addText("\nReading JEDEC ID\n");
+addText("\nReading JEDEC ID\n");
 
 // Acquire the SPI bus. Multiple calls will happen with Chip Select (CS) held low.
 spi.acquire();
@@ -47,25 +58,31 @@ data_buf = spi.read(3);
 spi.release();
 
 data = Uint8Array(data_buf);
-textbox.addText("JEDEC MF ID: " + to_hex_string(data[0]) + "\n");
-textbox.addText("JEDEC Memory Type: " + to_hex_string(data[1]) + "\n");
-textbox.addText("JEDEC Capacity ID: " + to_hex_string(data[2]) + "\n");
+addText("JEDEC MF ID: " + data[0].toString(16) + "\n");
+addText("JEDEC Memory Type: " + data[1].toString(16) + "\n");
+addText("JEDEC Capacity ID: " + data[2].toString(16) + "\n");
 
 if (data[0] === 0xEF) {
-    textbox.addText("Found Winbond device\n");
+    addText("Found Winbond device\n");
 }
 let capacity = data[1] << 8 | data[2];
 if (capacity === 0x4016) {
-    textbox.addText("Device: W25Q32\n");
+    addText("Device: W25Q32\n");
 } else if (capacity === 0x4015) {
-    textbox.addText("Device: W25Q16\n");
+    addText("Device: W25Q16\n");
 } else if (capacity === 0x4014) {
-    textbox.addText("Device: W25Q80\n");
+    addText("Device: W25Q80\n");
 } else {
-    textbox.addText("Unknown device\n");
+    addText("Unknown device\n");
 }
 
 // Wait for user to close the app
-while (textbox.isOpen()) {
-    delay(250);
-}
+eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _, eventLoop) {
+    eventLoop.stop();
+}, eventLoop);
+
+// This script has no interaction, only textbox, so event loop doesn't need to be running all the time
+// We run it at the end to accept input for the back button press to quit
+// But before that, user sees a textbox and pressing back has no effect
+// This is fine because it allows simpler logic and the code above takes no time at all to run
+eventLoop.run();
