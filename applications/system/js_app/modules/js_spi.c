@@ -239,7 +239,8 @@ static void js_spi_write_read(struct mjs* mjs) {
     mjs_return(mjs, ret);
 }
 
-static void* js_spi_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_spi_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     JsSpiInst* spi = (JsSpiInst*)malloc(sizeof(JsSpiInst));
     spi->acquired_bus = false;
     mjs_val_t spi_obj = mjs_mk_object(mjs);
@@ -268,6 +269,7 @@ static const JsModuleDescriptor js_spi_desc = {
     "spi",
     js_spi_create,
     js_spi_destroy,
+    NULL,
 };
 
 static const FlipperAppPluginDescriptor spi_plugin_descriptor = {
