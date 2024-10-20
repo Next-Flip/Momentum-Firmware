@@ -70,7 +70,7 @@
   - OFW: H World Hotel Chain Room Key Parser and MFC keys (by @zinongli)
   - OFW: Parser for Tianjin Railway Transit (by @zinongli)
 - Infrared:
-  - Bluray/DVD Universal Remote (#250 by @jaylikesbunda)
+  - Bluray/DVD Universal Remote (#250 #264 by @jaylikesbunda)
   - Option to "Load from Library File" for Universal Remotes (#255 by @zxkmm)
 - Updater: New Yappy themed icon while updating (#253 by @the1anonlypr3 & @Kuronons & @nescap)
 - BadKB:
