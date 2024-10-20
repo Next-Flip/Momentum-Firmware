@@ -109,6 +109,7 @@
 - NFC:
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
+  - NDEF parser decodes URL-encoded URI characters (#267 by @jaylikesbunda)
   - UL: Add iq aparts hotel key (by @xMasterX)
   - OFW/UL: Rename 'Detect Reader' to 'Extract MFC Keys' (by @bettse & @xMasterX)
   - OFW: Plantain parser improvements (by @assasinfil)
