@@ -250,7 +250,8 @@ static void js_i2c_write_read(struct mjs* mjs) {
     mjs_return(mjs, ret);
 }
 
-static void* js_i2c_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_i2c_create(struct mjs* mjs, mjs_val_t* object, JsModules* modules) {
+    UNUSED(modules);
     mjs_val_t i2c_obj = mjs_mk_object(mjs);
     mjs_set(mjs, i2c_obj, "isDeviceReady", ~0, MJS_MK_FN(js_i2c_is_device_ready));
     mjs_set(mjs, i2c_obj, "write", ~0, MJS_MK_FN(js_i2c_write));
@@ -264,6 +265,7 @@ static void* js_i2c_create(struct mjs* mjs, mjs_val_t* object) {
 static const JsModuleDescriptor js_i2c_desc = {
     "i2c",
     js_i2c_create,
+    NULL,
     NULL,
 };
 
