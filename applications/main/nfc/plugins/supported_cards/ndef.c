@@ -24,7 +24,7 @@ void find_ndef_sectors_num(uint8_t block_num, size_t byte_position, int* sec) {
         }
     } else if(block_num == 2) {
         if(byte_position >= 1 && byte_position <= 16) {
-            *sec = (byte_position - 1) / 2 + 7;
+            *sec = (byte_position - 1) / 2 + 8;
         } else {
             *sec = -1;
         }
