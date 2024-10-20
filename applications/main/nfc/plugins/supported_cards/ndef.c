@@ -94,56 +94,42 @@ static void parse_ndef_uri(FuriString* str, const uint8_t* payload, uint32_t pay
         prepend = prepends[prepend_type];
     }
     size_t prepend_len = strlen(prepend);
+
     size_t uri_len = prepend_len + (payload_len - 1);
-
-    char* uri_buf = malloc(uri_len + 1);
-    if(!uri_buf) {
-        furi_string_cat_printf(str, "Memory allocation failed\n");
-        return;
-    }
-
+    char* const uri_buf = malloc(uri_len); // const to keep the original pointer to free later
     memcpy(uri_buf, prepend, prepend_len);
     memcpy(uri_buf + prepend_len, payload + 1, payload_len - 1);
-    uri_buf[uri_len] = '\0';
+    char* uri = uri_buf; // cursor we can iterate and shift freely
 
-    char* decoded_uri =
-        malloc(uri_len * 2 + 1); // Worst case scenario: every character is percent-encoded
-    if(!decoded_uri) {
-        furi_string_cat_printf(str, "Memory allocation failed\n");
-        free(uri_buf);
-        return;
-    }
-
+    // Encoded chars take 3 bytes (%AB), decoded chars take 1 byte
+    // We can decode by iterating and overwriting the same buffer
     size_t decoded_len = 0;
-    for(size_t i = 0; i < uri_len; i++) {
-        if(uri_buf[i] == '%' && i + 2 < uri_len) {
-            decoded_uri[decoded_len++] = decode_char(&uri_buf[i]);
-            i += 2;
+    for(size_t encoded_idx = 0; encoded_idx < uri_len; encoded_idx++) {
+        if(uri[encoded_idx] == '%' && encoded_idx + 2 < uri_len) {
+            uri[decoded_len++] = decode_char(&uri[encoded_idx]);
+            encoded_idx += 2;
         } else {
-            decoded_uri[decoded_len++] = uri_buf[i];
+            uri[decoded_len++] = uri[encoded_idx];
         }
     }
-    decoded_uri[decoded_len] = '\0';
 
     const char* type = "URI";
-    const char* uri_content = decoded_uri;
-    if(strncmp(decoded_uri, "http", 4) == 0) {
+    if(strncmp(uri, "http", 4) == 0) {
         type = "URL";
-    } else if(strncmp(decoded_uri, "tel:", 4) == 0) {
+    } else if(strncmp(uri, "tel:", 4) == 0) {
         type = "Phone";
-        uri_content += 4;
+        uri += 4;
         decoded_len -= 4;
-    } else if(strncmp(decoded_uri, "mailto:", 7) == 0) {
+    } else if(strncmp(uri, "mailto:", 7) == 0) {
         type = "Mail";
-        uri_content += 7;
+        uri += 7;
         decoded_len -= 7;
     }
 
     furi_string_cat_printf(str, "%s\n", type);
-    print_data(str, NULL, (uint8_t*)uri_content, decoded_len, false);
+    print_data(str, NULL, (uint8_t*)uri, decoded_len, false);
 
     free(uri_buf);
-    free(decoded_uri);
 }
 
 static void parse_ndef_text(FuriString* str, const uint8_t* payload, uint32_t payload_len) {
