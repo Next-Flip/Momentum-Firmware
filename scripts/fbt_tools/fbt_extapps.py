@@ -314,8 +314,9 @@ def _validate_app_imports(target, source, env):
                 "totp_",
                 "token_info_",
                 "memset_s",
-                # troika
+                # social_moscow, troika
                 "mosgortrans_parse_transport_block",
+                "render_section_header",
             )
         )
         and any(
@@ -324,6 +325,7 @@ def _validate_app_imports(target, source, env):
                 "advanced_plugin",
                 "gallagher",
                 "js_",  # js_app and all js_ modules
+                "social_moscow",
                 "test_js",
                 "totp_",
                 "troika",
