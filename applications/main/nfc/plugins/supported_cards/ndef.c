@@ -36,16 +36,15 @@ static void
     furi_string_cat(str, "\n");
 }
 
+static inline uint8_t hex_to_int(char c) {
+    if(c >= '0' && c <= '9') return c - '0';
+    if(c >= 'A' && c <= 'F') return c - 'A' + 10;
+    if(c >= 'a' && c <= 'f') return c - 'a' + 10;
+    return 0;
+}
+
 static char decode_char(const char* str) {
-    uint8_t high = (str[1] >= 'A' && str[1] <= 'F') ? (str[1] - 'A' + 10) :
-                   (str[1] >= 'a' && str[1] <= 'f') ? (str[1] - 'a' + 10) :
-                   (str[1] >= '0' && str[1] <= '9') ? (str[1] - '0') :
-                                                      0;
-    uint8_t low = (str[2] >= 'A' && str[2] <= 'F') ? (str[2] - 'A' + 10) :
-                  (str[2] >= 'a' && str[2] <= 'f') ? (str[2] - 'a' + 10) :
-                  (str[2] >= '0' && str[2] <= '9') ? (str[2] - '0') :
-                                                     0;
-    return (high << 4) | low;
+    return (hex_to_int(str[1]) << 4) | hex_to_int(str[2]);
 }
 
 static void parse_ndef_uri(FuriString* str, const uint8_t* payload, uint32_t payload_len) {
