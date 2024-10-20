@@ -37,14 +37,14 @@ static void
 }
 
 static char decode_char(const char* str) {
-    int high = (str[1] >= 'A' && str[1] <= 'F') ? (str[1] - 'A' + 10) :
-               (str[1] >= 'a' && str[1] <= 'f') ? (str[1] - 'a' + 10) :
-               (str[1] >= '0' && str[1] <= '9') ? (str[1] - '0') :
-                                                  0;
-    int low = (str[2] >= 'A' && str[2] <= 'F') ? (str[2] - 'A' + 10) :
-              (str[2] >= 'a' && str[2] <= 'f') ? (str[2] - 'a' + 10) :
-              (str[2] >= '0' && str[2] <= '9') ? (str[2] - '0') :
-                                                 0;
+    uint8_t high = (str[1] >= 'A' && str[1] <= 'F') ? (str[1] - 'A' + 10) :
+                   (str[1] >= 'a' && str[1] <= 'f') ? (str[1] - 'a' + 10) :
+                   (str[1] >= '0' && str[1] <= '9') ? (str[1] - '0') :
+                                                      0;
+    uint8_t low = (str[2] >= 'A' && str[2] <= 'F') ? (str[2] - 'A' + 10) :
+                  (str[2] >= 'a' && str[2] <= 'f') ? (str[2] - 'a' + 10) :
+                  (str[2] >= '0' && str[2] <= '9') ? (str[2] - '0') :
+                                                     0;
     return (high << 4) | low;
 }
 
@@ -106,11 +106,16 @@ static void parse_ndef_uri(FuriString* str, const uint8_t* payload, uint32_t pay
     size_t decoded_len = 0;
     for(size_t encoded_idx = 0; encoded_idx < uri_len; encoded_idx++) {
         if(uri[encoded_idx] == '%' && encoded_idx + 2 < uri_len) {
-            uri[decoded_len++] = decode_char(&uri[encoded_idx]);
-            encoded_idx += 2;
-        } else {
-            uri[decoded_len++] = uri[encoded_idx];
+            char hi = toupper(uri[encoded_idx + 1]);
+            char lo = toupper(uri[encoded_idx + 2]);
+            if(((hi >= 'A' && hi <= 'F') || (hi >= '0' && hi <= '9')) &&
+               ((lo >= 'A' && lo <= 'F') || (lo >= '0' && lo <= '9'))) {
+                uri[decoded_len++] = decode_char(&uri[encoded_idx]);
+                encoded_idx += 2;
+                continue;
+            }
         }
+        uri[decoded_len++] = uri[encoded_idx];
     }
 
     const char* type = "URI";
