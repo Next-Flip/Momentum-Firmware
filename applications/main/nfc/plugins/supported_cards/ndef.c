@@ -22,15 +22,17 @@ void find_ndef_sectors_num(uint8_t block_num, size_t byte_position, int* sec) {
         } else {
             *sec = -1;
         }
-    } else if(block_num == 2) {
+        return;
+    }
+    if(block_num == 2) {
         if(byte_position >= 1 && byte_position <= 16) {
             *sec = (byte_position - 1) / 2 + 8;
         } else {
             *sec = -1;
         }
-    } else {
-        *sec = -1;
+        return;
     }
+    *sec = -1;
 }
 
 int* find_ndef_locations(const MfClassicData* data, size_t* result_count) {
@@ -61,6 +63,29 @@ int* find_ndef_locations(const MfClassicData* data, size_t* result_count) {
     }
 
     return results;
+}
+
+uint8_t* clone_buffer_without_trailer(const MfClassicData* data) {
+    const uint8_t blocks_per_sector = 4;
+    uint8_t* new_buffer = malloc(
+        blocks_per_sector * (mf_classic_get_total_block_num(data->type) / 4) *
+        MF_CLASSIC_BLOCK_SIZE); // allocate new buffer
+
+    uint8_t buffer_idx = 0;
+
+    for(uint8_t sector = 0; sector < (mf_classic_get_total_block_num(data->type) / 4); sector++) {
+        for(uint8_t block = 0; block < 3;
+            block++) { // Only first 3 blocks, skip the 4th (sector trailer)
+            const uint8_t* block_data = data->block[sector * blocks_per_sector + block].data;
+            memcpy(
+                &new_buffer[buffer_idx * MF_CLASSIC_BLOCK_SIZE],
+                block_data,
+                MF_CLASSIC_BLOCK_SIZE);
+            buffer_idx++;
+        }
+    }
+
+    return new_buffer;
 }
 
 static bool is_text(const uint8_t* buf, size_t len) {
@@ -518,7 +543,10 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(parsed_data);
 
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
-
+    uint8_t* cleaned_buffer =
+        clone_buffer_without_trailer(data); /* This is very important, it removes
+    all sector trailers from the data buffer to avoid ndef parsing to go into the sector trailer
+    */
     bool parsed = false;
     if(data->type != MfClassicType1k && data->type != MfClassicType4k &&
        data->type != MfClassicTypeMini) {
@@ -534,8 +562,10 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     // number of valid ndef apps
     size_t ndef_sectors_num_to_check = 0;
     for(size_t i = 0; i < result_count; i++) {
-        const uint8_t ndef_start_block_num = results[i] * 4;
-        const uint8_t* block_data = &data->block[ndef_start_block_num].data[0];
+        const size_t ndef_start_block_num = results[i] * 3;
+        const size_t start_offset = ndef_start_block_num * MF_CLASSIC_BLOCK_SIZE;
+        const uint8_t* block_data = &cleaned_buffer[start_offset];
+
         for(size_t j = 0; j < MF_CLASSIC_BLOCK_SIZE; j++) {
             if(block_data[j] == 0x03) {
                 ndef_sectors_num_to_check++;
@@ -543,6 +573,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
             }
         }
     }
+
     if(ndef_sectors_num_to_check > 0) {
         furi_string_printf(
             parsed_data,
@@ -551,8 +582,10 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     }
     size_t cur_sector = 0;
     for(size_t i = 0; i < result_count; i++) {
-        const uint8_t ndef_start_block_num = results[i] * 4;
-        const uint8_t* block_data = &data->block[ndef_start_block_num].data[0];
+        const uint8_t ndef_start_block_num = results[i] * 3;
+        const size_t start_offset = ndef_start_block_num * MF_CLASSIC_BLOCK_SIZE;
+        const uint8_t* block_data = &cleaned_buffer[start_offset];
+
         const uint8_t* tlv_pos = NULL;
         for(size_t j = 0; j < MF_CLASSIC_BLOCK_SIZE; j++) {
             if(block_data[j] == 0x03) {
@@ -560,19 +593,22 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
                 break;
             }
         }
+
         if(tlv_pos) {
             cur_sector++;
             const uint8_t* data_area_size_ptr = tlv_pos + 4;
             uint8_t data_area_size = *data_area_size_ptr;
             const uint8_t* cur = tlv_pos;
             size_t ndef_length = data_area_size * MF_CLASSIC_BLOCK_SIZE;
-            const uint8_t* end = cur + ndef_length;
+            const uint8_t* end = cur + ndef_length - 1;
             size_t max_size = mf_classic_get_total_block_num(data->type) * MF_CLASSIC_BLOCK_SIZE;
-            end = MIN(end, &data->block[0].data[0] + max_size);
+            end = MIN(end, &cleaned_buffer[0] + max_size);
+
             while(cur < end) {
                 switch(*cur++) {
                 case 0x03: { // NDEF message
                     if(cur >= end) break;
+
                     uint16_t len;
                     if(*cur < 0xFF) { // 1 byte length
                         len = *cur++;
@@ -584,6 +620,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
                         len = bit_lib_bytes_to_num_be(++cur, 2);
                         cur += 2;
                     }
+
                     if(cur + len >= end) {
                         cur = end;
                         break;
@@ -592,7 +629,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
                     const uint8_t* message_end = cur + len;
                     cur = parse_ndef_message(parsed_data, cur_sector, cur, message_end);
                     if(cur != message_end) cur = end;
-                    ndef_sectors_num_to_check--; // substract by 1 when finished parsing sector x
+                    ndef_sectors_num_to_check--; // subtract by 1 when finished parsing sector x
                     break;
                 }
 
@@ -626,6 +663,7 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
                     break;
                 }
             }
+
             if(parsed) {
                 furi_string_trim(parsed_data, "\n");
                 furi_string_cat(parsed_data, "\n");
