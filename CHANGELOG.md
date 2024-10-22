@@ -79,6 +79,7 @@
 - Updater: New Yappy themed icon while updating (#253 by @the1anonlypr3 & @Kuronons & @nescap)
 - JS:
   - New `i2c` module (#259 by @jamisonderek)
+  - New `spi` module (#272 by @jamisonderek)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
