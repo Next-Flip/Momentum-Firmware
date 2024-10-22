@@ -25,6 +25,8 @@
       - effort required to update old scripts using gui: extensive
     - `keyboard`:
       - removed, now replaced by `gui/text_input` and `gui/byte_input` (see above)
+    - `math`:
+      - `is_equal()` renamed to `isEqual()`
     - `storage`:
       - fully overhauled, now you `openFile()`s and perform actions on them like `.read()`
       - now supports many more operations including different open modes, directories and much more
