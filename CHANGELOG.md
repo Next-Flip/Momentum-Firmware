@@ -60,6 +60,7 @@
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
+  - UL: Add Keeloq Monarch full support, with add manually (by anonymous UL contributor)
   - UL: Princeton custom buttons support (by @xMasterX)
 - NFC:
   - OFW: MIFARE Classic Key Recovery Improvements (PR 3822 by @noproto)
