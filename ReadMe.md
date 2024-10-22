@@ -34,7 +34,7 @@ We offer a powerful and easy-to-use application tailor-made for our firmware, th
 
 - <ins><b>Interface:</b></ins> Tweak every part of your Flipper, from the desktop animations, to the main menu, lockscreen behavior, file browser, etc.
 
-- <ins><b>Protocols:</b></ins> Configure SubGhz settings, add/remove custom frequencies, and setup which GPIO pins are used by different external modules.
+- <ins><b>Protocols:</b></ins> Configure SubGhz settings, add/remove custom frequencies, extend SubGhz frequencies to 281-361, 378-481, 749-962 MHz and setup which GPIO pins are used by different external modules.
 
 - <ins><b>Misc:</b></ins> Everything else that doesn't fit the previous categories. Change your Flipper's name, XP level, screen options, and configure the <a href="https://github.com/Z3BRO/Flipper-Zero-RGB-Backlight">RGB backlight</a>.
 
