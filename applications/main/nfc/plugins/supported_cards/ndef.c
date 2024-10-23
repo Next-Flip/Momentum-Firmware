@@ -22,6 +22,17 @@
 
 #define TAG "NDEF"
 
+#define NDEF_PROTO_NONE (0)
+#define NDEF_PROTO_UL   (1)
+#define NDEF_PROTO_MFC  (2)
+
+#ifndef NDEF_PROTO
+#define NDEF_PROTO NDEF_PROTO_NONE
+#endif
+#if NDEF_PROTO != NDEF_PROTO_UL && NDEF_PROTO != NDEF_PROTO_MFC
+#error Must specify what protocol to use with NDEF_PROTO define!
+#endif
+
 void find_ndef_sectors_num(uint8_t block_num, size_t byte_position, int* sec) {
     if(block_num == 1) {
         if(byte_position >= 3 && byte_position <= 16) {
@@ -182,31 +193,39 @@ static const char* ndef_uri_prepends[] = {
 // Shared context and state, read above
 typedef struct {
     FuriString* output;
-    NfcProtocol protocol;
-    union {
-        struct {
-            const uint8_t* start;
-            size_t size;
-        } ul;
-        struct {
-        } mfc;
-    };
+#if NDEF_PROTO == NDEF_PROTO_UL
+    struct {
+        const uint8_t* start;
+        size_t size;
+    } ul;
+#elif NDEF_PROTO == NDEF_PROTO_MFC
+    struct {
+    } mfc;
+#endif
 } Ndef;
 
 static bool ndef_read(Ndef* ndef, size_t pos, size_t len, void* buf) {
-    if(ndef->protocol == NfcProtocolMfUltralight) {
-        // Memory space is contiguous, simply need to remap to data pointer
-        if(pos + len > ndef->ul.size) return false;
-        memcpy(buf, ndef->ul.start + pos, len);
-        return true;
+#if NDEF_PROTO == NDEF_PROTO_UL
 
-    } else if(ndef->protocol == NfcProtocolMfClassic) {
-        // Need to skip sector trailers
-        furi_crash();
+    // Memory space is contiguous, simply need to remap to data pointer
+    if(pos + len > ndef->ul.size) return false;
+    memcpy(buf, ndef->ul.start + pos, len);
+    return true;
 
-    } else {
-        furi_crash();
-    }
+#elif NDEF_PROTO == NDEF_PROTO_MFC
+
+    // Need to skip sector trailers
+    furi_crash();
+
+#else
+
+    UNUSED(ndef);
+    UNUSED(pos);
+    UNUSED(len);
+    UNUSED(buf);
+    return false;
+
+#endif
 }
 
 // ---=== output helpers ===---
@@ -699,6 +718,8 @@ static bool ndef_parse_tlv(Ndef* ndef, size_t pos) {
 
 // ---=== protocol entry-points ===---
 
+#if NDEF_PROTO == NDEF_PROTO_UL
+
 // MF UL memory layout:
 // https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nfc/doc/type_2_tag.html#memory_layout
 static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
@@ -739,7 +760,6 @@ static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     Ndef ndef = {
         .output = parsed_data,
-        .protocol = NfcProtocolMfUltralight,
         .ul =
             {
                 .start = start,
@@ -757,6 +777,8 @@ static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     return parsed;
 }
+
+#elif NDEF_PROTO == NDEF_PROTO_MFC
 
 static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
@@ -897,44 +919,31 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     return parsed;
 }
 
+#endif
+
 // ---=== boilerplate ===---
 
 /* Actual implementation of app<>plugin interface */
-static const NfcSupportedCardsPlugin ndef_ul_plugin = {
-    .protocol = NfcProtocolMfUltralight,
+static const NfcSupportedCardsPlugin ndef_plugin = {
     .verify = NULL,
     .read = NULL,
+#if NDEF_PROTO == NDEF_PROTO_UL
     .parse = ndef_ul_parse,
-};
-
-/* Plugin descriptor to comply with basic plugin specification */
-static const FlipperAppPluginDescriptor ndef_ul_plugin_descriptor = {
-    .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
-    .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
-    .entry_point = &ndef_ul_plugin,
-};
-
-/* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* ndef_ul_plugin_ep(void) {
-    return &ndef_ul_plugin_descriptor;
-}
-
-/* Actual implementation of app<>plugin interface */
-static const NfcSupportedCardsPlugin ndef_mfc_plugin = {
-    .protocol = NfcProtocolMfClassic,
-    .verify = NULL,
-    .read = NULL,
+    .protocol = NfcProtocolMfUltralight,
+#elif NDEF_PROTO == NDEF_PROTO_MFC
     .parse = ndef_mfc_parse,
+    .protocol = NfcProtocolMfClassic,
+#endif
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
-static const FlipperAppPluginDescriptor ndef_mfc_plugin_descriptor = {
+static const FlipperAppPluginDescriptor ndef_plugin_descriptor = {
     .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
     .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
-    .entry_point = &ndef_mfc_plugin,
+    .entry_point = &ndef_plugin,
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* ndef_mfc_plugin_ep(void) {
-    return &ndef_mfc_plugin_descriptor;
+const FlipperAppPluginDescriptor* ndef_plugin_ep(void) {
+    return &ndef_plugin_descriptor;
 }
