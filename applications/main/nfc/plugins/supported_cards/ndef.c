@@ -137,7 +137,8 @@ _Static_assert(sizeof(NdefFlagsTnf) == 1);
 // URI payload format:
 // https://learn.adafruit.com/adafruit-pn532-rfid-nfc/ndef#uri-records-0x55-slash-u-607763
 static const char* ndef_uri_prepends[] = {
-    [0x00] = "",
+    // clang-format off
+    [0x00] = NULL,
     [0x01] = "http://www.",
     [0x02] = "https://www.",
     [0x03] = "http://",
@@ -173,6 +174,7 @@ static const char* ndef_uri_prepends[] = {
     [0x21] = "urn:epc:raw:",
     [0x22] = "urn:epc:",
     [0x23] = "urn:nfc:",
+    // clang-format on
 };
 
 // ---=== card memory layout abstraction ===---
@@ -272,59 +274,80 @@ static inline uint8_t hex_to_int(char c) {
     return 0;
 }
 
-static char decode_char(const char* str) {
-    return (hex_to_int(str[1]) << 4) | hex_to_int(str[2]);
+static char url_decode_char(const char* str) {
+    return (hex_to_int(str[0]) << 4) | hex_to_int(str[1]);
 }
 
 static bool ndef_parse_uri(Ndef* ndef, size_t pos, size_t len) {
-    const char* prepend = "";
+    const char* type = "URI";
+
+    // Parse URI prepend type
+    const char* prepend = NULL;
     uint8_t prepend_type;
-    if(!ndef_read(ndef, pos, 1, &prepend_type)) return false;
+    if(!ndef_read(ndef, pos++, 1, &prepend_type)) return false;
+    len--;
     if(prepend_type < COUNT_OF(ndef_uri_prepends)) {
         prepend = ndef_uri_prepends[prepend_type];
     }
-    size_t prepend_len = strlen(prepend);
-
-    size_t uri_len = prepend_len + (len - 1);
-    char* const uri_buf = malloc(uri_len); // const to keep the original pointer to free later
-    memcpy(uri_buf, prepend, prepend_len);
-    if(!ndef_read(ndef, pos + 1, len - 1, uri_buf + prepend_len)) return false;
-    char* uri = uri_buf; // cursor we can iterate and shift freely
-
-    // Encoded chars take 3 bytes (%AB), decoded chars take 1 byte
-    // We can decode by iterating and overwriting the same buffer
-    size_t decoded_len = 0;
-    for(size_t encoded_idx = 0; encoded_idx < uri_len; encoded_idx++) {
-        if(uri[encoded_idx] == '%' && encoded_idx + 2 < uri_len) {
-            char hi = toupper(uri[encoded_idx + 1]);
-            char lo = toupper(uri[encoded_idx + 2]);
-            if(((hi >= 'A' && hi <= 'F') || (hi >= '0' && hi <= '9')) &&
-               ((lo >= 'A' && lo <= 'F') || (lo >= '0' && lo <= '9'))) {
-                uri[decoded_len++] = decode_char(&uri[encoded_idx]);
-                encoded_idx += 2;
-                continue;
-            }
+    if(prepend) {
+        if(strncmp(prepend, "http", 4) == 0) {
+            type = "URL";
+        } else if(strncmp(prepend, "tel:", 4) == 0) {
+            type = "Phone";
+            prepend = ""; // Not NULL to avoid schema check below, only want to hide it from output
+        } else if(strncmp(prepend, "mailto:", 7) == 0) {
+            type = "Mail";
+            prepend = ""; // Not NULL to avoid schema check below, only want to hide it from output
         }
-        uri[decoded_len++] = uri[encoded_idx];
     }
 
-    const char* type = "URI";
-    if(strncmp(uri, "http", 4) == 0) {
-        type = "URL";
-    } else if(strncmp(uri, "tel:", 4) == 0) {
-        type = "Phone";
-        uri += 4;
-        decoded_len -= 4;
-    } else if(strncmp(uri, "mailto:", 7) == 0) {
-        type = "Mail";
-        uri += 7;
-        decoded_len -= 7;
+    // Parse and optionally skip schema, if no prepend was specified
+    if(!prepend) {
+        char schema[7] = {0}; // Longest schema we check is 7 char long without terminator
+        if(!ndef_read(ndef, pos, MIN(sizeof(schema), len), schema)) return false;
+        if(strncmp(schema, "http", 4) == 0) {
+            type = "URL";
+        } else if(strncmp(schema, "tel:", 4) == 0) {
+            type = "Phone";
+            pos += 4;
+            len -= 4;
+        } else if(strncmp(schema, "mailto:", 7) == 0) {
+            type = "Mail";
+            pos += 7;
+            len -= 7;
+        }
     }
 
+    // Print static data as-is
     furi_string_cat_printf(ndef->output, "%s\n", type);
-    ndef_print(ndef, NULL, uri, decoded_len, false);
+    if(prepend) {
+        furi_string_cat(ndef->output, prepend);
+    }
 
-    free(uri_buf);
+    // Print URI one char at a time and perform URL decode
+    while(len) {
+        char c;
+        if(!ndef_read(ndef, pos++, 1, &c)) return false;
+        len--;
+        if(c != '%' || len < 2) { // Not encoded, or not enough remaining text for encoded char
+            furi_string_push_back(ndef->output, c);
+            continue;
+        }
+        char enc[2];
+        if(!ndef_read(ndef, pos, 2, enc)) return false;
+        enc[0] = toupper(enc[0]);
+        enc[1] = toupper(enc[1]);
+        // Only consume and print these 2 characters if they're valid URL encoded
+        // Otherwise they're processed in next iterations and we output the % char
+        if(((enc[0] >= 'A' && enc[0] <= 'F') || (enc[0] >= '0' && enc[0] <= '9')) &&
+           ((enc[1] >= 'A' && enc[1] <= 'F') || (enc[1] >= '0' && enc[1] <= '9'))) {
+            pos += 2;
+            len -= 2;
+            c = url_decode_char(enc);
+        }
+        furi_string_push_back(ndef->output, c);
+    }
+
     return true;
 }
 
