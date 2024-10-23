@@ -582,11 +582,16 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
         }
 
         // Payload Type
-        char* type = NULL;
+        char type_buf[32]; // Longest type supported in ndef_parse_payload() is 32 chars excl terminator
+        char* type = type_buf;
+        bool type_was_allocated = false;
         if(type_len) {
-            type = malloc(type_len);
+            if(type_len > sizeof(type_buf)) {
+                type = malloc(type_len);
+                type_was_allocated = true;
+            }
             if(!ndef_read(ndef, pos, type_len, type)) {
-                free(type);
+                if(type_was_allocated) free(type);
                 return false;
             }
             pos += type_len;
@@ -598,12 +603,12 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
         furi_string_cat_printf(ndef->output, "\e*> M:%d R:%d - ", message_num, record_num);
         if(!ndef_parse_payload(
                ndef, pos, payload_len, flags_tnf.type_name_format, type, type_len)) {
-            free(type);
+            if(type_was_allocated) free(type);
             return false;
         }
         pos += payload_len;
 
-        free(type);
+        if(type_was_allocated) free(type);
         furi_string_trim(ndef->output, "\n");
         furi_string_cat(ndef->output, "\n\n");
     }
