@@ -536,8 +536,8 @@ static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
         }
         if(system_flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
             const uint8_t memory_info[2] = {
-                instance->data->system_info.block_count - 1,
-                instance->data->system_info.block_size - 1,
+                instance->data->system_info.block_count,
+                instance->data->system_info.block_size,
             };
             bit_buffer_append_bytes(instance->tx_buffer, memory_info, COUNT_OF(memory_info));
         }

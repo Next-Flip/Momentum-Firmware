@@ -131,9 +131,12 @@ Iso15693_3Error
         }
 
         if(data->flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
-            // Add 1 to get actual values
-            data->block_count = *extra++ + 1;
-            data->block_size = (*extra++ & 0x1F) + 1;
+            data->block_count = *extra++;
+            data->block_size = (*extra++ & 0x1F);
+            // Some tags report values -1 than actual values for some reason
+            // Some others don't, so let's just assume people use even numbers
+            if(data->block_count % 2) data->block_count++;
+            if(data->block_size % 2) data->block_size++;
         }
 
         if(data->flags & ISO15693_3_SYSINFO_FLAG_IC_REF) {
