@@ -33,79 +33,6 @@
 #error Must specify what protocol to use with NDEF_PROTO define!
 #endif
 
-void find_ndef_sectors_num(uint8_t block_num, size_t byte_position, int* sec) {
-    if(block_num == 1) {
-        if(byte_position >= 3 && byte_position <= 16) {
-            *sec = (byte_position - 3) / 2 + 1;
-        } else {
-            *sec = -1;
-        }
-        return;
-    }
-    if(block_num == 2) {
-        if(byte_position >= 1 && byte_position <= 16) {
-            *sec = (byte_position - 1) / 2 + 8;
-        } else {
-            *sec = -1;
-        }
-        return;
-    }
-    *sec = -1;
-}
-
-int* find_ndef_locations(const MfClassicData* data, size_t* result_count) {
-    *result_count = 0;
-    int* results = (int*)malloc(16 * sizeof(int));
-    bool found_ndef_aid = false;
-
-    for(uint8_t block_num = 1; block_num <= 2; block_num++) {
-        const uint8_t* block_data = data->block[block_num].data;
-
-        for(size_t i = 0; i < 16; i++) {
-            if(block_data[i] == 0xE1 && i > 0 && block_data[i - 1] == 0x03) {
-                int sec = -1;
-                find_ndef_sectors_num(block_num, i, &sec);
-
-                if(sec >= 0) {
-                    results[*result_count] = sec;
-                    (*result_count)++;
-                    found_ndef_aid = true;
-                }
-            }
-        }
-    }
-
-    if(!found_ndef_aid) {
-        free(results);
-        return NULL;
-    }
-
-    return results;
-}
-
-uint8_t* clone_buffer_without_trailer(const MfClassicData* data) {
-    const uint8_t blocks_per_sector = 4;
-    uint8_t* new_buffer = malloc(
-        blocks_per_sector * (mf_classic_get_total_block_num(data->type) / 4) *
-        MF_CLASSIC_BLOCK_SIZE); // allocate new buffer
-
-    uint8_t buffer_idx = 0;
-
-    for(uint8_t sector = 0; sector < (mf_classic_get_total_block_num(data->type) / 4); sector++) {
-        for(uint8_t block = 0; block < 3;
-            block++) { // Only first 3 blocks, skip the 4th (sector trailer)
-            const uint8_t* block_data = data->block[sector * blocks_per_sector + block].data;
-            memcpy(
-                &new_buffer[buffer_idx * MF_CLASSIC_BLOCK_SIZE],
-                block_data,
-                MF_CLASSIC_BLOCK_SIZE);
-            buffer_idx++;
-        }
-    }
-
-    return new_buffer;
-}
-
 // ---=== structures ===---
 
 // TLV structure:
@@ -200,6 +127,8 @@ typedef struct {
     } ul;
 #elif NDEF_PROTO == NDEF_PROTO_MFC
     struct {
+        const MfClassicBlock* blocks;
+        size_t size;
     } mfc;
 #endif
 } Ndef;
@@ -214,8 +143,53 @@ static bool ndef_read(Ndef* ndef, size_t pos, size_t len, void* buf) {
 
 #elif NDEF_PROTO == NDEF_PROTO_MFC
 
-    // Need to skip sector trailers
-    furi_crash();
+    // We need to skip sector trailers and MAD2, NDEF parsing just uses
+    // a position offset in data space, as if it were contiguous.
+
+    // Start with a simple data space size check
+    if(pos + len > ndef->mfc.size) return false;
+
+    // First 128 blocks are 32 sectors: 3 data blocks, 1 sector trailer.
+    // Sector 16 contains MAD2 and we need to skip this.
+    // So the first 93 (31*3) data blocks correspond to 128 real blocks.
+    // Last 128 blocks are 8 sectors: 15 data blocks, 1 sector trailer.
+    // So the last 120 (8*15) data blocks correspond to 128 real blocks.
+    div_t small_sector_data_blocks = div(pos, MF_CLASSIC_BLOCK_SIZE);
+    size_t large_sector_data_blocks = 0;
+    if(small_sector_data_blocks.quot > 93) {
+        large_sector_data_blocks = small_sector_data_blocks.quot - 93;
+        small_sector_data_blocks.quot = 93;
+    }
+
+    div_t small_sectors = div(small_sector_data_blocks.quot, 3);
+    size_t real_block = small_sectors.quot * 4 + small_sectors.rem;
+    if(small_sectors.quot >= 16) {
+        real_block += 4; // Skip MAD2
+    }
+    if(large_sector_data_blocks) {
+        div_t large_sectors = div(large_sector_data_blocks, 15);
+        real_block += large_sectors.quot * 16 + large_sectors.rem;
+    }
+
+    const uint8_t* cur = &ndef->mfc.blocks[real_block].data[small_sector_data_blocks.rem];
+    while(len) {
+        size_t sector_trailer = mf_classic_get_sector_trailer_num_by_block(real_block);
+        const uint8_t* end = &ndef->mfc.blocks[sector_trailer].data[0];
+
+        size_t chunk_len = MIN((size_t)(end - cur), len);
+        memcpy(buf, cur, chunk_len);
+        len -= chunk_len;
+
+        if(len) {
+            real_block = sector_trailer + 1;
+            if(real_block == 64) {
+                real_block += 4; // Skip MAD2
+            }
+            cur = &ndef->mfc.blocks[real_block].data[0];
+        }
+    }
+
+    return true;
 
 #else
 
@@ -780,143 +754,112 @@ static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
 
 #elif NDEF_PROTO == NDEF_PROTO_MFC
 
+// MFC MAD datasheet:
+// https://www.nxp.com/docs/en/application-note/AN10787.pdf
+#define AID_SIZE (2)
+
+// NDEF on MFC breakdown:
+// https://learn.adafruit.com/adafruit-pn532-rfid-nfc/ndef#storing-ndef-messages-in-mifare-sectors-607778
+static const uint8_t ndef_aid[AID_SIZE] = {0x03, 0xE1};
+
 static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
     furi_assert(parsed_data);
 
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
-    uint8_t* cleaned_buffer =
-        clone_buffer_without_trailer(data); /* This is very important, it removes
-    all sector trailers from the data buffer to avoid ndef parsing to go into the sector trailer
-    */
-    bool parsed = false;
+
+    // Check card type can contain NDEF
     if(data->type != MfClassicType1k && data->type != MfClassicType4k &&
        data->type != MfClassicTypeMini) {
         return false;
     }
 
-    size_t result_count;
-    int* results = find_ndef_locations(data, &result_count);
-    if(!results) {
-        return false;
-    }
-
-    // number of valid ndef apps
-    size_t ndef_sectors_num_to_check = 0;
-    for(size_t i = 0; i < result_count; i++) {
-        const size_t ndef_start_block_num = results[i] * 3;
-        const size_t start_offset = ndef_start_block_num * MF_CLASSIC_BLOCK_SIZE;
-        const uint8_t* block_data = &cleaned_buffer[start_offset];
-
-        for(size_t j = 0; j < MF_CLASSIC_BLOCK_SIZE; j++) {
-            if(block_data[j] == 0x03) {
-                ndef_sectors_num_to_check++;
-                break;
+    // Check MADs for what sectors contain NDEF data AIDs
+    bool sectors_with_ndef[MF_CLASSIC_TOTAL_SECTORS_MAX] = {0};
+    const size_t sector_count = mf_classic_get_total_sectors_num(data->type);
+    struct {
+        const uint8_t* aid;
+        uint8_t aid_count;
+    } mads[2] = {
+        {&data->block[1].data[2], 15},
+        {&data->block[64].data[2], 23},
+    };
+    for(uint8_t mad = 0; mad < COUNT_OF(mads); mad++) {
+        if(sector_count <= 16 && mad > 0) break; // Skip MAD2 if not present
+        for(uint8_t aid_index = 0; aid_index < mads[mad].aid_count; aid_index++) {
+            const uint8_t* aid = &mads[mad].aid[aid_index * AID_SIZE];
+            if(!memcmp(aid, ndef_aid, AID_SIZE)) {
+                sectors_with_ndef[aid_index + 1] = true;
             }
         }
     }
 
-    if(ndef_sectors_num_to_check > 0) {
-        furi_string_printf(
-            parsed_data,
-            "\e#NDEF Format Data\nCard type: %s\n",
-            mf_classic_get_device_name(data, NfcDeviceNameTypeFull));
-    }
-    size_t cur_sector = 0;
-    for(size_t i = 0; i < result_count; i++) {
-        const uint8_t ndef_start_block_num = results[i] * 3;
-        const size_t start_offset = ndef_start_block_num * MF_CLASSIC_BLOCK_SIZE;
-        const uint8_t* block_data = &cleaned_buffer[start_offset];
+    furi_string_printf(
+        parsed_data,
+        "\e#NDEF Format Data\nCard type: %s\n",
+        mf_classic_get_device_name(data, NfcDeviceNameTypeFull));
 
-        const uint8_t* tlv_pos = NULL;
-        for(size_t j = 0; j < MF_CLASSIC_BLOCK_SIZE; j++) {
-            if(block_data[j] == 0x03) {
-                tlv_pos = &block_data[j];
-                break;
-            }
+    // Calculate how large the data space is, so excluding sector trailers and MAD2.
+    // Makes sure we stay within this card's actual content when parsing.
+    // First 32 sectors: 3 data blocks, 1 sector trailer.
+    // Sector 16 contains MAD2 and we need to skip this.
+    // So the first 32 sectors correspond to 93 (31*3) data blocks.
+    // Last 8 sectors: 15 data blocks, 1 sector trailer.
+    // So the last 8 sectors correspond to 120 (8*15) data blocks.
+    size_t data_size;
+    if(sector_count > 32) {
+        data_size = 93 + (sector_count - 32) * 15;
+    } else {
+        data_size = sector_count * 3;
+        if(sector_count >= 16) {
+            data_size -= 3; // Skip MAD2
         }
+    }
+    data_size *= MF_CLASSIC_BLOCK_SIZE;
 
-        if(tlv_pos) {
-            cur_sector++;
-            const uint8_t* data_area_size_ptr = tlv_pos + 4;
-            uint8_t data_area_size = *data_area_size_ptr;
-            const uint8_t* cur = tlv_pos;
-            size_t ndef_length = data_area_size * MF_CLASSIC_BLOCK_SIZE;
-            const uint8_t* end = cur + ndef_length - 1;
-            size_t max_size = mf_classic_get_total_block_num(data->type) * MF_CLASSIC_BLOCK_SIZE;
-            end = MIN(end, &cleaned_buffer[0] + max_size);
+    Ndef ndef = {
+        .output = parsed_data,
+        .mfc =
+            {
+                .blocks = data->block,
+                .size = data_size,
+            },
+    };
+    size_t total_parsed = 0;
 
-            while(cur < end) {
-                switch(*cur++) {
-                case 0x03: { // NDEF message
-                    if(cur >= end) break;
+    for(size_t sector = 0; sector < sector_count; sector++) {
+        if(!sectors_with_ndef[sector]) continue;
+        FURI_LOG_D(TAG, "sector: %d", sector);
+        size_t string_prev = furi_string_size(parsed_data);
 
-                    uint16_t len;
-                    if(*cur < 0xFF) { // 1 byte length
-                        len = *cur++;
-                    } else { // 3 byte length (0xFF marker + 2 byte integer)
-                        if(cur + 2 >= end) {
-                            cur = end;
-                            break;
-                        }
-                        len = bit_lib_bytes_to_num_be(++cur, 2);
-                        cur += 2;
-                    }
-
-                    if(cur + len >= end) {
-                        cur = end;
-                        break;
-                    }
-
-                    const uint8_t* message_end = cur + len;
-                    cur = parse_ndef_message(parsed_data, cur_sector, cur, message_end);
-                    if(cur != message_end) cur = end;
-                    ndef_sectors_num_to_check--; // subtract by 1 when finished parsing sector x
-                    break;
-                }
-
-                case 0xFE: // TLV end
-                    cur = end;
-                    if(ndef_sectors_num_to_check == 1 || ndef_sectors_num_to_check == 0)
-                        parsed = true;
-                    break;
-
-                case 0x00: // Padding, has no length, skip
-                    break;
-
-                case 0x01: // Lock control
-                case 0x02: // Memory control
-                case 0xFD: // Proprietary
-                    // We don't care, skip this TLV block
-                    if(cur >= end) break;
-                    if(*cur < 0xFF) { // 1 byte length
-                        cur += *cur + 1; // Shift by TLV length
-                    } else { // 3 byte length (0xFF marker + 2 byte integer)
-                        if(cur + 2 >= end) {
-                            cur = end;
-                            break;
-                        }
-                        cur += bit_lib_bytes_to_num_be(cur + 1, 2) + 3; // Shift by TLV length
-                    }
-                    break;
-
-                default: // Unknown, bail to avoid problems
-                    cur = end;
-                    break;
-                }
+        // Convert real sector number to data block number
+        // to skip sector trailers and MAD2
+        size_t data_block;
+        if(sector < 32) {
+            data_block = sector * 3;
+            if(sector >= 16) {
+                data_block -= 3; // Skip MAD2
             }
+        } else {
+            data_block = 93 + (sector - 32) * 15;
+        }
+        FURI_LOG_D(TAG, "data_block: %d", data_block);
+        bool parsed = ndef_parse_tlv(&ndef, data_block * MF_CLASSIC_BLOCK_SIZE);
 
-            if(parsed) {
-                furi_string_trim(parsed_data, "\n");
-                furi_string_cat(parsed_data, "\n");
-            } else {
-                furi_string_reset(parsed_data);
-            }
+        if(parsed) {
+            total_parsed++;
+            furi_string_trim(parsed_data, "\n");
+            furi_string_cat(parsed_data, "\n");
+        } else {
+            furi_string_left(parsed_data, string_prev);
         }
     }
 
-    free(results); // Free the memory allocated for results
-    return parsed;
+    if(!total_parsed) {
+        furi_string_reset(parsed_data);
+    }
+
+    return total_parsed > 0;
 }
 
 #endif
