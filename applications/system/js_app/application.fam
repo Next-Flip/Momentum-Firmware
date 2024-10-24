@@ -1,15 +1,15 @@
 App(
     appid="js_app",
     name="JS Runner",
-    apptype=FlipperAppType.EXTERNAL,
+    apptype=FlipperAppType.SYSTEM,
     entry_point="js_app",
-    cdefines=["JS_RUNNER_FAP"],
+    # cdefines=["JS_RUNNER_FAP"],
     # Sources separation breaks linking when internal, comment as needed
-    sources=[
-        "*.c*",
-        "!modules",
-        "modules/js_flipper.c",
-    ],
+    # sources=[
+    #     "*.c*",
+    #     "!modules",
+    #     "modules/js_flipper.c",
+    # ],
     stack_size=2 * 1024,
     resources="examples",
     order=0,
@@ -34,7 +34,7 @@ App(
     appid="js_app_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="js_app_on_system_start",
-    sources=["js_start.c"],
+    # sources=["js_start.c"],
     order=160,
 )
 
