@@ -8,7 +8,7 @@
 // We use an arbitrary position system here, in order to support more protocols.
 // Each protocol parses basic structure of the card, then starts ndef_parse_tlv()
 // using an arbitrary position value that it can understand. When accessing data
-// to parse NDEF content, ndef_read() will then map this arbitrary value to the
+// to parse NDEF content, ndef_get() will then map this arbitrary value to the
 // card using state in Ndef struct, skip blocks or sectors as needed. This way,
 // NDEF parsing code does not need to know details of card layout.
 
@@ -130,7 +130,7 @@ typedef struct {
 #endif
 } Ndef;
 
-static bool ndef_read(Ndef* ndef, size_t pos, size_t len, void* buf) {
+static bool ndef_get(Ndef* ndef, size_t pos, size_t len, void* buf) {
 #if NDEF_PROTO == NDEF_PROTO_UL
 
     // Memory space is contiguous, simply need to remap to data pointer
@@ -222,7 +222,7 @@ static bool ndef_dump(Ndef* ndef, const char* prefix, size_t pos, size_t len, bo
         size_t string_prev = furi_string_size(ndef->output);
         for(size_t i = 0; i < len; i++) {
             char c;
-            if(!ndef_read(ndef, pos + i, 1, &c)) return false;
+            if(!ndef_get(ndef, pos + i, 1, &c)) return false;
             if(!is_printable(c)) {
                 furi_string_left(ndef->output, string_prev);
                 force_hex = true;
@@ -234,7 +234,7 @@ static bool ndef_dump(Ndef* ndef, const char* prefix, size_t pos, size_t len, bo
     if(force_hex) {
         for(size_t i = 0; i < len; i++) {
             uint8_t b;
-            if(!ndef_read(ndef, pos + i, 1, &b)) return false;
+            if(!ndef_get(ndef, pos + i, 1, &b)) return false;
             furi_string_cat_printf(ndef->output, "%02X ", b);
         }
     }
@@ -274,7 +274,7 @@ static bool ndef_parse_uri(Ndef* ndef, size_t pos, size_t len) {
     // Parse URI prepend type
     const char* prepend = NULL;
     uint8_t prepend_type;
-    if(!ndef_read(ndef, pos++, 1, &prepend_type)) return false;
+    if(!ndef_get(ndef, pos++, 1, &prepend_type)) return false;
     len--;
     if(prepend_type < COUNT_OF(ndef_uri_prepends)) {
         prepend = ndef_uri_prepends[prepend_type];
@@ -294,7 +294,7 @@ static bool ndef_parse_uri(Ndef* ndef, size_t pos, size_t len) {
     // Parse and optionally skip schema, if no prepend was specified
     if(!prepend) {
         char schema[7] = {0}; // Longest schema we check is 7 char long without terminator
-        if(!ndef_read(ndef, pos, MIN(sizeof(schema), len), schema)) return false;
+        if(!ndef_get(ndef, pos, MIN(sizeof(schema), len), schema)) return false;
         if(strncmp(schema, "http", 4) == 0) {
             type = "URL";
         } else if(strncmp(schema, "tel:", 4) == 0) {
@@ -317,14 +317,14 @@ static bool ndef_parse_uri(Ndef* ndef, size_t pos, size_t len) {
     // Print URI one char at a time and perform URL decode
     while(len) {
         char c;
-        if(!ndef_read(ndef, pos++, 1, &c)) return false;
+        if(!ndef_get(ndef, pos++, 1, &c)) return false;
         len--;
         if(c != '%' || len < 2) { // Not encoded, or not enough remaining text for encoded char
             furi_string_push_back(ndef->output, c);
             continue;
         }
         char enc[2];
-        if(!ndef_read(ndef, pos, 2, enc)) return false;
+        if(!ndef_get(ndef, pos, 2, enc)) return false;
         enc[0] = toupper(enc[0]);
         enc[1] = toupper(enc[1]);
         // Only consume and print these 2 characters if they're valid URL encoded
@@ -362,7 +362,7 @@ static bool ndef_parse_vcard(Ndef* ndef, size_t pos, size_t len) {
     furi_string_reserve(fmt, len + 1);
     while(pos < end) {
         char c;
-        if(!ndef_read(ndef, pos++, 1, &c)) return false;
+        if(!ndef_get(ndef, pos++, 1, &c)) return false;
         furi_string_push_back(fmt, c);
     }
 
@@ -406,10 +406,10 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
 
     uint8_t tmp_buf[2];
     while(pos < end) {
-        if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
+        if(!ndef_get(ndef, pos, 2, &tmp_buf)) return false;
         uint16_t field_id = bit_lib_bytes_to_num_be(tmp_buf, 2);
         pos += 2;
-        if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
+        if(!ndef_get(ndef, pos, 2, &tmp_buf)) return false;
         uint16_t field_len = bit_lib_bytes_to_num_be(tmp_buf, 2);
         pos += 2;
         FURI_LOG_D(TAG, "wifi field: %04X len: %d", field_id, field_len);
@@ -421,10 +421,10 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
         if(field_id == CREDENTIAL_FIELD_ID) {
             size_t field_end = pos + field_len;
             while(pos < field_end) {
-                if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
+                if(!ndef_get(ndef, pos, 2, &tmp_buf)) return false;
                 uint16_t cfg_id = bit_lib_bytes_to_num_be(tmp_buf, 2);
                 pos += 2;
-                if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
+                if(!ndef_get(ndef, pos, 2, &tmp_buf)) return false;
                 uint16_t cfg_len = bit_lib_bytes_to_num_be(tmp_buf, 2);
                 pos += 2;
                 FURI_LOG_D(TAG, "wifi cfg: %04X len: %d", cfg_id, cfg_len);
@@ -449,7 +449,7 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
                     if(cfg_len != AUTH_TYPE_EXPECTED_SIZE) {
                         return false;
                     }
-                    if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
+                    if(!ndef_get(ndef, pos, 2, &tmp_buf)) return false;
                     uint16_t auth_type = bit_lib_bytes_to_num_be(tmp_buf, 2);
                     pos += 2;
                     const char* auth;
@@ -560,7 +560,7 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
     while(pos < end) {
         // Flags and TNF
         NdefFlagsTnf flags_tnf;
-        if(!ndef_read(ndef, pos++, 1, &flags_tnf)) return false;
+        if(!ndef_get(ndef, pos++, 1, &flags_tnf)) return false;
         FURI_LOG_D(TAG, "flags_tnf: %02X", *(uint8_t*)&flags_tnf);
         FURI_LOG_D(TAG, "flags_tnf.message_begin: %d", flags_tnf.message_begin);
         FURI_LOG_D(TAG, "flags_tnf.message_end: %d", flags_tnf.message_end);
@@ -578,16 +578,16 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
 
         // Type Length
         uint8_t type_len;
-        if(!ndef_read(ndef, pos++, 1, &type_len)) return false;
+        if(!ndef_get(ndef, pos++, 1, &type_len)) return false;
 
         // Payload Length field of 1 or 4 bytes
         uint32_t payload_len;
         if(flags_tnf.short_record) {
             uint8_t payload_len_short;
-            if(!ndef_read(ndef, pos++, 1, &payload_len_short)) return false;
+            if(!ndef_get(ndef, pos++, 1, &payload_len_short)) return false;
             payload_len = payload_len_short;
         } else {
-            if(!ndef_read(ndef, pos, sizeof(payload_len), &payload_len)) return false;
+            if(!ndef_get(ndef, pos, sizeof(payload_len), &payload_len)) return false;
             payload_len = bit_lib_bytes_to_num_be((void*)&payload_len, sizeof(payload_len));
             pos += sizeof(payload_len);
         }
@@ -595,7 +595,7 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
         // ID Length
         uint8_t id_len = 0;
         if(flags_tnf.id_length_present) {
-            if(!ndef_read(ndef, pos++, 1, &id_len)) return false;
+            if(!ndef_get(ndef, pos++, 1, &id_len)) return false;
         }
 
         // Payload Type
@@ -607,7 +607,7 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
                 type = malloc(type_len);
                 type_was_allocated = true;
             }
-            if(!ndef_read(ndef, pos, type_len, type)) {
+            if(!ndef_get(ndef, pos, type_len, type)) {
                 if(type_was_allocated) free(type);
                 return false;
             }
@@ -640,7 +640,7 @@ static size_t ndef_parse_tlv(Ndef* ndef, size_t pos, size_t already_parsed) {
 
     while(true) {
         NdefTlv tlv;
-        if(!ndef_read(ndef, pos++, 1, &tlv)) return 0;
+        if(!ndef_get(ndef, pos++, 1, &tlv)) return 0;
         FURI_LOG_D(TAG, "tlv: %02X", tlv);
 
         switch(tlv) {
@@ -663,11 +663,11 @@ static size_t ndef_parse_tlv(Ndef* ndef, size_t pos, size_t already_parsed) {
             // Calculate length
             uint16_t len;
             uint8_t len_type;
-            if(!ndef_read(ndef, pos++, 1, &len_type)) return 0;
+            if(!ndef_get(ndef, pos++, 1, &len_type)) return 0;
             if(len_type < 0xFF) { // 1 byte length
                 len = len_type;
             } else { // 3 byte length (0xFF marker + 2 byte integer)
-                if(!ndef_read(ndef, pos, sizeof(len), &len)) return 0;
+                if(!ndef_get(ndef, pos, sizeof(len), &len)) return 0;
                 len = bit_lib_bytes_to_num_be((void*)&len, sizeof(len));
                 pos += sizeof(len);
             }
