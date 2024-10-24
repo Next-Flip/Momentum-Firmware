@@ -579,13 +579,9 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
             if(!ndef_read(ndef, pos++, 1, &payload_len_short)) return false;
             payload_len = payload_len_short;
         } else {
-            if(!ndef_read(ndef, pos, 4, &payload_len)) return false;
-            FURI_LOG_I(TAG, "raw %ld", payload_len);
-            uint8_t payload_len_buf[4]; // FIXME: might not need a buffer, just copy to uint32_t
-            if(!ndef_read(ndef, pos, 4, payload_len_buf)) return false;
-            payload_len = bit_lib_bytes_to_num_be(payload_len_buf, 4);
-            FURI_LOG_I(TAG, "expected %ld", payload_len);
-            pos += 4;
+            if(!ndef_read(ndef, pos, sizeof(payload_len), &payload_len)) return false;
+            payload_len = bit_lib_bytes_to_num_be((void*)&payload_len, sizeof(payload_len));
+            pos += sizeof(payload_len);
         }
 
         // ID Length
@@ -663,13 +659,9 @@ static size_t ndef_parse_tlv(Ndef* ndef, size_t pos, size_t already_parsed) {
             if(len_type < 0xFF) { // 1 byte length
                 len = len_type;
             } else { // 3 byte length (0xFF marker + 2 byte integer)
-                if(!ndef_read(ndef, pos, 2, &len)) return 0;
-                FURI_LOG_I(TAG, "raw %d", len);
-                uint8_t len_buf[2]; // FIXME: might not need a buffer, just copy to uint16_t
-                if(!ndef_read(ndef, pos, 2, len_buf)) return 0;
-                len = bit_lib_bytes_to_num_be(len_buf, 2);
-                FURI_LOG_I(TAG, "expected %d", len);
-                pos += 2;
+                if(!ndef_read(ndef, pos, sizeof(len), &len)) return 0;
+                len = bit_lib_bytes_to_num_be((void*)&len, sizeof(len));
+                pos += sizeof(len);
             }
 
             if(tlv != NdefTlvNdefMessage) {
