@@ -26,10 +26,7 @@
 #define NDEF_PROTO_UL   (1)
 #define NDEF_PROTO_MFC  (2)
 
-#ifndef NDEF_PROTO
-#define NDEF_PROTO NDEF_PROTO_NONE
-#endif
-#if NDEF_PROTO != NDEF_PROTO_UL && NDEF_PROTO != NDEF_PROTO_MFC
+#if !defined(NDEF_PROTO) || (NDEF_PROTO != NDEF_PROTO_UL && NDEF_PROTO != NDEF_PROTO_MFC)
 #error Must specify what protocol to use with NDEF_PROTO define!
 #endif
 
