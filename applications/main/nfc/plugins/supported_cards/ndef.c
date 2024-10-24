@@ -497,7 +497,7 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
 static bool
     ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t message_num, bool smart_poster);
 static size_t ndef_parse_tlv(Ndef* ndef, size_t pos, size_t already_parsed);
-static bool ndef_parse_payload(
+static bool ndef_parse_record(
     Ndef* ndef,
     size_t pos,
     size_t len,
@@ -505,7 +505,7 @@ static bool ndef_parse_payload(
     const char* type,
     uint8_t type_len);
 
-static bool ndef_parse_payload(
+static bool ndef_parse_record(
     Ndef* ndef,
     size_t pos,
     size_t len,
@@ -614,7 +614,7 @@ static bool
         }
 
         // Payload Type
-        char type_buf[32]; // Longest type supported in ndef_parse_payload() is 32 chars excl terminator
+        char type_buf[32]; // Longest type supported in ndef_parse_record() is 32 chars excl terminator
         char* type = type_buf;
         bool type_was_allocated = false;
         if(type_len) {
@@ -637,8 +637,7 @@ static bool
         } else {
             furi_string_cat_printf(ndef->output, "\e*> M%dR%d: ", message_num, record_num);
         }
-        if(!ndef_parse_payload(
-               ndef, pos, payload_len, flags_tnf.type_name_format, type, type_len)) {
+        if(!ndef_parse_record(ndef, pos, payload_len, flags_tnf.type_name_format, type, type_len)) {
             if(type_was_allocated) free(type);
             return false;
         }
