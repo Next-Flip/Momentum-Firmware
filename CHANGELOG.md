@@ -115,7 +115,7 @@
   - OFW: USB/BT Remote: Mouse clicker option to click as fast as possible (by @sumukhj1219)
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - NFC:
-  - NDEF parser supports Mifare Classic (#265 by @luu176), rewritten to be protocol-independent and more improvements (#265 by @Willy-JL)
+  - NDEF parser supports Mifare Classic (#265 by @luu176), rewritten to be protocol-agnostic and more improvements (#265 by @Willy-JL)
   - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
   - NDEF parser decodes URL-encoded URI characters (#267 by @jaylikesbunda)
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
