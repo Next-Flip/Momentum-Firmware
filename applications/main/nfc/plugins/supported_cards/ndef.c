@@ -405,7 +405,7 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
     size_t end = pos + len;
 
     uint8_t tmp_buf[2];
-    while(pos < len) {
+    while(pos < end) {
         if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
         uint16_t field_id = bit_lib_bytes_to_num_be(tmp_buf, 2);
         pos += 2;
