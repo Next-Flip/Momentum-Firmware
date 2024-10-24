@@ -509,7 +509,9 @@ static bool ndef_parse_payload(
         } else if(strncmp("T", type, type_len) == 0) {
             return ndef_parse_text(ndef, pos, len);
         }
-        ndef_print(ndef, "Well-known type", type, type_len, false);
+        // Dump data without parsing
+        furi_string_cat(ndef->output, "Unsupported\n");
+        ndef_print(ndef, "Well-known Type", type, type_len, false);
         if(!ndef_dump(ndef, "Payload", pos, len, false)) return false;
         return true;
 
@@ -521,6 +523,8 @@ static bool ndef_parse_payload(
         } else if(strncmp("application/vnd.wfa.wsc", type, type_len) == 0) {
             return ndef_parse_wifi(ndef, pos, len);
         }
+        // Dump data without parsing
+        furi_string_cat(ndef->output, "Unsupported\n");
         ndef_print(ndef, "Media Type", type, type_len, false);
         if(!ndef_dump(ndef, "Payload", pos, len, false)) return false;
         return true;
@@ -533,6 +537,7 @@ static bool ndef_parse_payload(
     case NdefTnfReserved:
     default:
         // Dump data without parsing
+        furi_string_cat(ndef->output, "Unsupported\n");
         ndef_print(ndef, "Type name format", &tnf, 1, true);
         ndef_print(ndef, "Type", type, type_len, false);
         if(!ndef_dump(ndef, "Payload", pos, len, false)) return false;
@@ -609,7 +614,7 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
         // Payload ID
         pos += id_len;
 
-        furi_string_cat_printf(ndef->output, "\e*> M:%d R:%d - ", message_num, record_num);
+        furi_string_cat_printf(ndef->output, "\e*> M%dR%d: ", message_num, record_num);
         if(!ndef_parse_payload(
                ndef, pos, payload_len, flags_tnf.type_name_format, type, type_len)) {
             if(type_was_allocated) free(type);
