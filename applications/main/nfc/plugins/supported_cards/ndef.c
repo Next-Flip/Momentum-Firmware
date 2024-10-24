@@ -634,18 +634,18 @@ static bool ndef_parse_message(Ndef* ndef, size_t pos, size_t len, size_t messag
 
 // TLV structure:
 // https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nfc/doc/type_2_tag.html#data
-static bool ndef_parse_tlv(Ndef* ndef, size_t pos) {
+static size_t ndef_parse_tlv(Ndef* ndef, size_t pos, size_t already_parsed) {
     size_t message_num = 0;
 
     while(true) {
         NdefTlv tlv;
-        if(!ndef_read(ndef, pos++, 1, &tlv)) return false;
+        if(!ndef_read(ndef, pos++, 1, &tlv)) return 0;
         FURI_LOG_D(TAG, "tlv: %02X", tlv);
 
         switch(tlv) {
         default:
             // Unknown, bail to avoid problems
-            return false;
+            return 0;
 
         case NdefTlvPadding:
             // Has no length, skip to next byte
@@ -653,7 +653,7 @@ static bool ndef_parse_tlv(Ndef* ndef, size_t pos) {
 
         case NdefTlvTerminator:
             // NDEF message finished, return whether we parsed something
-            return message_num != 0;
+            return message_num;
 
         case NdefTlvLockControl:
         case NdefTlvMemoryControl:
@@ -662,14 +662,14 @@ static bool ndef_parse_tlv(Ndef* ndef, size_t pos) {
             // Calculate length
             uint16_t len;
             uint8_t len_type;
-            if(!ndef_read(ndef, pos++, 1, &len_type)) return false;
+            if(!ndef_read(ndef, pos++, 1, &len_type)) return 0;
             if(len_type < 0xFF) { // 1 byte length
                 len = len_type;
             } else { // 3 byte length (0xFF marker + 2 byte integer)
-                if(!ndef_read(ndef, pos, 2, &len)) return false;
+                if(!ndef_read(ndef, pos, 2, &len)) return 0;
                 FURI_LOG_I(TAG, "raw %d", len);
                 uint8_t len_buf[2]; // FIXME: might not need a buffer, just copy to uint16_t
-                if(!ndef_read(ndef, pos, 2, len_buf)) return false;
+                if(!ndef_read(ndef, pos, 2, len_buf)) return 0;
                 len = bit_lib_bytes_to_num_be(len_buf, 2);
                 FURI_LOG_I(TAG, "expected %d", len);
                 pos += 2;
@@ -681,7 +681,7 @@ static bool ndef_parse_tlv(Ndef* ndef, size_t pos) {
                 break;
             }
 
-            if(!ndef_parse_message(ndef, pos, len, ++message_num)) return false;
+            if(!ndef_parse_message(ndef, pos, len, ++message_num + already_parsed)) return 0;
             pos += len;
 
             break;
@@ -740,7 +740,7 @@ static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
                 .size = end - start,
             },
     };
-    bool parsed = ndef_parse_tlv(&ndef, 0);
+    size_t parsed = ndef_parse_tlv(&ndef, 0, 0);
 
     if(parsed) {
         furi_string_trim(parsed_data, "\n");
@@ -749,7 +749,7 @@ static bool ndef_ul_parse(const NfcDevice* device, FuriString* parsed_data) {
         furi_string_reset(parsed_data);
     }
 
-    return parsed;
+    return parsed > 0;
 }
 
 #elif NDEF_PROTO == NDEF_PROTO_MFC
@@ -844,10 +844,10 @@ static bool ndef_mfc_parse(const NfcDevice* device, FuriString* parsed_data) {
             data_block = 93 + (sector - 32) * 15;
         }
         FURI_LOG_D(TAG, "data_block: %d", data_block);
-        bool parsed = ndef_parse_tlv(&ndef, data_block * MF_CLASSIC_BLOCK_SIZE);
+        size_t parsed = ndef_parse_tlv(&ndef, data_block * MF_CLASSIC_BLOCK_SIZE, total_parsed);
 
         if(parsed) {
-            total_parsed++;
+            total_parsed += parsed;
             furi_string_trim(parsed_data, "\n");
             furi_string_cat(parsed_data, "\n");
         } else {
