@@ -227,7 +227,9 @@ class Main(App):
                     icons.append((icon_name, width, height, 0, 1))
                     p = fullfilename.removeprefix(self.args.input_directory)[1:]
                     if icon_in_api:
-                        paths.append((icon_name, p.replace("\\", "/").rsplit(".", 1)[0]))
+                        paths.append(
+                            (icon_name, p.replace("\\", "/").rsplit(".", 1)[0])
+                        )
         # Create array of images:
         self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:

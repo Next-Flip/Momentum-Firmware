@@ -4,6 +4,7 @@ import pathlib
 root = pathlib.Path(__file__).parent / ".."
 icons = root / "assets/icons"
 
+
 def source_dir_uses_icon(dir: str, name: str):
     count = 0
     name = name.encode()
@@ -14,6 +15,7 @@ def source_dir_uses_icon(dir: str, name: str):
         except Exception:
             print(f"Faield to read {file}")
     return count
+
 
 for category in icons.iterdir():
     if not category.is_dir():
