@@ -412,6 +412,7 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
         if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
         uint16_t field_len = bit_lib_bytes_to_num_be(tmp_buf, 2);
         pos += 2;
+        FURI_LOG_D(TAG, "wifi field: %04X len: %d", field_id, field_len);
 
         if(pos + field_len > end) {
             return false;
@@ -426,6 +427,7 @@ static bool ndef_parse_wifi(Ndef* ndef, size_t pos, size_t len) {
                 if(!ndef_read(ndef, pos, 2, &tmp_buf)) return false;
                 uint16_t cfg_len = bit_lib_bytes_to_num_be(tmp_buf, 2);
                 pos += 2;
+                FURI_LOG_D(TAG, "wifi cfg: %04X len: %d", cfg_id, cfg_len);
 
                 if(pos + cfg_len > field_end) {
                     return false;
@@ -497,6 +499,7 @@ static bool ndef_parse_payload(
     NdefTnf tnf,
     const char* type,
     uint8_t type_len) {
+    FURI_LOG_D(TAG, "payload type: %.*s len: %d", type_len, type, len);
     if(!len) {
         furi_string_cat(ndef->output, "Empty\n");
         return true;
