@@ -25,6 +25,8 @@
       - effort required to update old scripts using gui: extensive
     - `keyboard`:
       - removed, now replaced by `gui/text_input` and `gui/byte_input` (see above)
+    - `math`:
+      - `is_equal()` renamed to `isEqual()`
     - `storage`:
       - fully overhauled, now you `openFile()`s and perform actions on them like `.read()`
       - now supports many more operations including different open modes, directories and much more
@@ -60,6 +62,7 @@
   - UL: Add GangQi protocol (static 34 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hollarm protocol (static 42 bit) with button parsing and add manually (by @xMasterX & @Skorpionm)
   - UL: Add Hay21 protocol (dynamic 21 bit) with button parsing (by @xMasterX)
+  - UL: Add Keeloq Monarch full support, with add manually (by anonymous UL contributor)
   - UL: Princeton custom buttons support (by @xMasterX)
 - NFC:
   - OFW: MIFARE Classic Key Recovery Improvements (PR 3822 by @noproto)
@@ -76,6 +79,7 @@
 - Updater: New Yappy themed icon while updating (#253 by @the1anonlypr3 & @Kuronons & @nescap)
 - JS:
   - New `i2c` module (#259 by @jamisonderek)
+  - New `spi` module (#272 by @jamisonderek)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
@@ -100,19 +104,24 @@
   - DTMF Dolphin: Add EAS tone support (by @JendrBendr)
   - NFC Playlist: Error screens for playlist already exists and item already in playlist, general improvements (by @acegoal07), refactor rename/new scene without thread (by @Willy-JL)
   - CLI-GUI Bridge: Fixes and improvements (by @ranchordo)
-  - Seader: Enable T=1, show error for timeout, fix wrong LRC logging (by @bettse)
+  - Seader: Enable T=1, show error for timeout, fix wrong LRC logging, fix crash scanning NTAG215 with MFC option (by @bettse)
   - BLE Spam: Fix menu index callback (by @Willy-JL)
   - Solitaire: App rewrite, Added quick solve, New effects and sounds, Removed hacky canvas manipulation (by @doofy-dev)
   - CLI-GUI Bridge: Add more symbols to keyboard (#222 by @Willy-JL)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
+  - UL: W5500 Ethernet: Various fixes and improvements (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
   - OFW: USB/BT Remote: Mouse clicker option to click as fast as possible (by @sumukhj1219)
 - CLI: Print plugin name on load fail (by @Willy-JL)
 - NFC:
+  - NDEF Parser:
+    - Mifare Classic support (#265 by @luu176), protocol-agnostic rewrite and more improvements (#265 by @Willy-JL)
+    - SLIX support, parse even with TLV terminator omitted, parse empty NDEF TLVs (#278 by @Willy-JL)
+    - Decoding of URL-encoded URI characters (#267 by @jaylikesbunda)
+    - SmartPoster record support (#275 by @Willy-JL)
+    - Enable parsing NTAG I2C Plus 1k and 2k chips too (#237 by @RocketGod-git)
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
-  - NDEF parser supports NTAG I2C Plus 1k and 2k chips too (by @RocketGod-git)
-  - NDEF parser decodes URL-encoded URI characters (#267 by @jaylikesbunda)
   - UL: Add iq aparts hotel key (by @xMasterX)
   - OFW/UL: Rename 'Detect Reader' to 'Extract MFC Keys' (by @bettse & @xMasterX)
   - OFW: Plantain parser improvements (by @assasinfil)

@@ -45,6 +45,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
             furi_string_set(m->header, "PRNG Analysis");
             break;
         case MfClassicNestedPhaseDictAttack:
+        case MfClassicNestedPhaseDictAttackVerify:
         case MfClassicNestedPhaseDictAttackResume:
             furi_string_set(m->header, "Nested Dictionary");
             break;
@@ -91,6 +92,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         float dict_progress = 0;
         if(m->nested_phase == MfClassicNestedPhaseAnalyzePRNG ||
            m->nested_phase == MfClassicNestedPhaseDictAttack ||
+           m->nested_phase == MfClassicNestedPhaseDictAttackVerify ||
            m->nested_phase == MfClassicNestedPhaseDictAttackResume) {
             // Phase: Nested dictionary attack
             uint8_t target_sector =

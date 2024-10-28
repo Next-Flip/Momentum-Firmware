@@ -52,14 +52,15 @@ typedef enum {
  * @brief MfClassic poller nested attack phase.
  */
 typedef enum {
-    MfClassicNestedPhaseNone,
-    MfClassicNestedPhaseAnalyzePRNG,
-    MfClassicNestedPhaseDictAttack,
-    MfClassicNestedPhaseDictAttackResume,
-    MfClassicNestedPhaseCalibrate,
-    MfClassicNestedPhaseRecalibrate,
-    MfClassicNestedPhaseCollectNtEnc,
-    MfClassicNestedPhaseFinished,
+    MfClassicNestedPhaseNone, /**< No nested attack has taken place yet. */
+    MfClassicNestedPhaseAnalyzePRNG, /**< Analyze nonces produced by the PRNG to determine if they fit a weak PRNG */
+    MfClassicNestedPhaseDictAttack, /**< Search keys which match the expected PRNG properties and parity for collected nonces */
+    MfClassicNestedPhaseDictAttackVerify, /**< Verify candidate keys by authenticating to the sector with the key */
+    MfClassicNestedPhaseDictAttackResume, /**< Resume nested dictionary attack from the last tested (invalid) key */
+    MfClassicNestedPhaseCalibrate, /**< Perform necessary calculations to recover the plaintext nonce during later collection phase (weak PRNG tags only) */
+    MfClassicNestedPhaseRecalibrate, /**< Collect the next plaintext static encrypted nonce for backdoor static encrypted nonce nested attack */
+    MfClassicNestedPhaseCollectNtEnc, /**< Log nonces collected during nested authentication for key recovery */
+    MfClassicNestedPhaseFinished, /**< Nested attack has finished */
 } MfClassicNestedPhase;
 
 /**

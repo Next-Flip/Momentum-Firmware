@@ -1780,7 +1780,7 @@ NfcCommand mf_classic_poller_handler_nested_log(MfClassicPoller* instance) {
 bool mf_classic_nested_is_target_key_found(MfClassicPoller* instance, bool is_dict_attack) {
     MfClassicPollerDictAttackContext* dict_attack_ctx = &instance->mode_ctx.dict_attack_ctx;
     bool is_weak = dict_attack_ctx->prng_type == MfClassicPrngTypeWeak;
-    uint8_t nested_target_key = dict_attack_ctx->nested_target_key;
+    uint16_t nested_target_key = dict_attack_ctx->nested_target_key;
 
     MfClassicKeyType target_key_type;
     uint8_t target_sector;
@@ -1881,9 +1881,10 @@ NfcCommand mf_classic_poller_handler_nested_controller(MfClassicPoller* instance
     uint16_t dict_target_key_max = (dict_attack_ctx->prng_type == MfClassicPrngTypeWeak) ?
                                        (instance->sectors_total * 2) :
                                        (instance->sectors_total * 16);
-    if(dict_attack_ctx->nested_phase == MfClassicNestedPhaseDictAttackResume) {
+    if(dict_attack_ctx->nested_phase == MfClassicNestedPhaseDictAttackVerify) {
         if(!(mf_classic_nested_is_target_key_found(instance, true)) &&
            (dict_attack_ctx->nested_nonce.count > 0)) {
+            dict_attack_ctx->nested_phase = MfClassicNestedPhaseDictAttackResume;
             instance->state = MfClassicPollerStateNestedDictAttack;
             return command;
         } else {
@@ -1898,7 +1899,8 @@ NfcCommand mf_classic_poller_handler_nested_controller(MfClassicPoller* instance
             dict_attack_ctx->nested_phase = MfClassicNestedPhaseDictAttack;
         }
     }
-    if((dict_attack_ctx->nested_phase == MfClassicNestedPhaseDictAttack) &&
+    if((dict_attack_ctx->nested_phase == MfClassicNestedPhaseDictAttack ||
+        dict_attack_ctx->nested_phase == MfClassicNestedPhaseDictAttackResume) &&
        (dict_attack_ctx->nested_target_key < dict_target_key_max)) {
         bool is_last_iter_for_hard_key =
             ((!is_weak) && ((dict_attack_ctx->nested_target_key % 8) == 7));
@@ -1922,11 +1924,14 @@ NfcCommand mf_classic_poller_handler_nested_controller(MfClassicPoller* instance
                     NULL;
         }
         if((is_weak || is_last_iter_for_hard_key) && dict_attack_ctx->nested_nonce.count > 0) {
-            // Key reuse
-            dict_attack_ctx->nested_phase = MfClassicNestedPhaseDictAttackResume;
+            // Key verify and reuse
+            dict_attack_ctx->nested_phase = MfClassicNestedPhaseDictAttackVerify;
             dict_attack_ctx->auth_passed = false;
             instance->state = MfClassicPollerStateKeyReuseStartNoOffset;
             return command;
+        } else if(dict_attack_ctx->nested_phase == MfClassicNestedPhaseDictAttackResume) {
+            dict_attack_ctx->nested_phase = MfClassicNestedPhaseDictAttack;
+            dict_attack_ctx->auth_passed = true;
         }
         if(!(dict_attack_ctx->auth_passed)) {
             dict_attack_ctx->attempt_count++;
