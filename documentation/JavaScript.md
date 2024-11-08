@@ -2,7 +2,7 @@
 # JavaScript scripting API (WIP)
 
 > [!IMPORTANT]
-> This documentation is deprecated! You should now look at type info in `applications/system/js_app/types` and examples in `applications/system/js_app/examples/apps/Scripts`.
+> This documentation is deprecated! You should now look at type info in `applications/system/js_app/packages/fz-sdk` and examples in `applications/system/js_app/examples/apps/Scripts`.
 > Human readable documentation will eventually be derived from this type information.
 > For now, old documentation is still available here and in `documentation/js`, but it may be inaccurate or missing.
 

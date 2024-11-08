@@ -1,3 +1,6 @@
+// Script cannot work without i2c module so check before
+checkSdkFeatures(["i2c"]);
+
 // Connect an 24C32N EEPROM to the I2C bus of the board. SDA=pin 15, SCL=pin 16, VCC=pin 9, GND=pin 8.
 let i2c = require("i2c");
 

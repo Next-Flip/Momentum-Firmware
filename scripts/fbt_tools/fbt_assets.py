@@ -181,7 +181,15 @@ def _proto_ver_generator(target, source, env):
         file.write("\n".join(version_file_data))
 
 
-def CompileIcons(env, target_dir, source_dir, *, icon_bundle_name="assets_icons"):
+def CompileIcons(
+    env,
+    target_dir,
+    source_dir,
+    *,
+    icon_bundle_name="assets_icons",
+    fw_bundle=False,
+    add_include=False,
+):
     try:
         os.mkdir(str(source_dir))
     except FileExistsError:
@@ -191,6 +199,8 @@ def CompileIcons(env, target_dir, source_dir, *, icon_bundle_name="assets_icons"
         None,
         ICON_SRC_DIR=source_dir,
         ICON_FILE_NAME=icon_bundle_name,
+        ICON_FW_BUNDLE=int(fw_bundle),
+        ICON_ADD_INCLUDE=int(add_include),
     )
 
 
@@ -223,6 +233,10 @@ def generate(env):
                             "${TARGET.dir}",
                             "--filename",
                             "${ICON_FILE_NAME}",
+                            "--fw-bundle",
+                            "${ICON_FW_BUNDLE}",
+                            "--add-include",
+                            "${ICON_ADD_INCLUDE}",
                         ],
                     ],
                     "${ICONSCOMSTR}",

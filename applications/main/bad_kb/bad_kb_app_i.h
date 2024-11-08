@@ -110,3 +110,5 @@ void bad_kb_conn_reset(BadKbApp* app);
 void bad_kb_config_refresh(BadKbApp* app);
 
 void bad_kb_config_adjust(BadKbConfig* cfg);
+
+void reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);

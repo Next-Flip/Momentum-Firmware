@@ -25,7 +25,7 @@ typedef struct {
 } InputPinState;
 
 /** Input CLI command handler */
-void input_cli(Cli* cli, FuriString* args, void* context);
+void input_cli_wrapper(Cli* cli, FuriString* args, void* context);
 
 // #define INPUT_DEBUG
 
@@ -79,12 +79,6 @@ const char* input_get_type_name(InputType type) {
     }
 }
 
-#include <cli/cli_i.h>
-
-static void input_cli_wrapper(Cli* cli, FuriString* args, void* context) {
-    cli_plugin_wrapper("input", cli, args, context);
-}
-
 int32_t input_srv(void* p) {
     UNUSED(p);
 
@@ -102,8 +96,6 @@ int32_t input_srv(void* p) {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
     cli_add_command(cli, "input", CliCommandFlagParallelSafe, input_cli_wrapper, event_pubsub);
-#else
-    UNUSED(input_cli_wrapper);
 #endif
 
     InputPinState pin_states[input_pins_count];

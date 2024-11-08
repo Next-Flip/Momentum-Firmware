@@ -25,9 +25,9 @@ jobs:
       - name: "Download release assets from tag build"
         run: |
           set -e
-          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.tgz
-          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.zip
-          wget "${{ secrets.INDEXER_URL }}"/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-sdk-${{ github.event.release.tag_name }}.zip
+          wget "${{ secrets.INDEXER_URL }}"/builds/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.tgz
+          wget "${{ secrets.INDEXER_URL }}"/builds/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-update-${{ github.event.release.tag_name }}.zip
+          wget "${{ secrets.INDEXER_URL }}"/builds/firmware/${{ github.event.release.tag_name }}/flipper-z-f7-sdk-${{ github.event.release.tag_name }}.zip
 
       - name: "Update release with assets and notes"
         uses: "softprops/action-gh-release@v1"

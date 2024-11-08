@@ -269,6 +269,37 @@ static void
     rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
 }
 
+static void
+    rpc_system_gui_send_ascii_event_request_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_gui_send_ascii_event_request_tag);
+    furi_assert(context);
+
+    FURI_LOG_D(TAG, "SendAsciiEvent");
+
+    RpcGuiSystem* rpc_gui = context;
+    RpcSession* session = rpc_gui->session;
+    furi_assert(session);
+
+    bool is_valid = (request->content.gui_send_ascii_event_request.value <= 0xFF);
+
+    if(!is_valid) {
+        rpc_send_and_release_empty(
+            session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
+        return;
+    }
+
+    AsciiEvent event = {
+        .value = request->content.gui_send_ascii_event_request.value,
+    };
+
+    // Submit event
+    FuriPubSub* ascii_events = furi_record_open(RECORD_ASCII_EVENTS);
+    furi_pubsub_publish(ascii_events, &event);
+    furi_record_close(RECORD_ASCII_EVENTS);
+    rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
+}
+
 static void rpc_system_gui_virtual_display_render_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
@@ -458,6 +489,9 @@ void* rpc_system_gui_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_gui_send_input_event_request_process;
     rpc_add_handler(session, PB_Main_gui_send_input_event_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_gui_send_ascii_event_request_process;
+    rpc_add_handler(session, PB_Main_gui_send_ascii_event_request_tag, &rpc_handler);
 
     rpc_handler.message_handler = rpc_system_gui_start_virtual_display_process;
     rpc_add_handler(session, PB_Main_gui_start_virtual_display_request_tag, &rpc_handler);

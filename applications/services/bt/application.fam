@@ -23,7 +23,7 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="bt_cli_plugin_ep",
     requires=["cli"],
-    sources=["bt_cli.c"],
+    sources=["bt_cli.c", "bt_service/bt_settings_api.c"],
 )
 
 App(

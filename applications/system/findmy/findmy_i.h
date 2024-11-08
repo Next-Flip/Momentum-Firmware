@@ -20,9 +20,8 @@
 #include <gui/modules/popup.h>
 #include "scenes/findmy_scene.h"
 #include "helpers/base64.h"
-#ifdef FW_ORIGIN_Official
-void furi_hal_bt_reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
-#endif
+
+void reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]);
 
 struct FindMy {
     Gui* gui;

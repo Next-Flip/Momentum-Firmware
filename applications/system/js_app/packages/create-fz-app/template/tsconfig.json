@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "checkJs": true,
+        "module": "CommonJS",
+        "noLib": true,
+        "target": "ES2015",
+        "types": [],
+    },
+    "files": [
+        "./node_modules/@next-flip/fz-sdk-mntm/global.d.ts",
+    ],
+    "include": [
+        "./**/*.ts",
+        "./**/*.js",
+    ],
+    "exclude": [
+        "./node_modules/**/*",
+        "dist/**/*",
+    ],
+}

@@ -2,7 +2,6 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <furi.h>
-#include <core/dangerous_defines.h>
 
 struct TextInput {
     View* view;
@@ -38,10 +37,10 @@ typedef struct {
     FuriString* validator_text;
     bool validator_message_visible;
 
-    char extra_symbols[9];
+    bool illegal_symbols;
     bool cursor_select;
-    size_t cursor_pos;
     uint8_t selected_keyboard;
+    size_t cursor_pos;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -102,7 +101,7 @@ static const TextInputKey keyboard_keys_row_3[] = {
     {'9', 120, 32},
 };
 
-static TextInputKey symbol_keyboard_keys_row_1[] = {
+static const TextInputKey symbol_keyboard_keys_row_1[] = {
     {'!', 2, 8},
     {'@', 12, 8},
     {'#', 22, 8},
@@ -118,7 +117,7 @@ static TextInputKey symbol_keyboard_keys_row_1[] = {
     {'3', 120, 8},
 };
 
-static TextInputKey symbol_keyboard_keys_row_2[] = {
+static const TextInputKey symbol_keyboard_keys_row_2[] = {
     {'~', 2, 20},
     {'+', 12, 20},
     {'-', 22, 20},
@@ -133,7 +132,7 @@ static TextInputKey symbol_keyboard_keys_row_2[] = {
     {'6', 120, 20},
 };
 
-static TextInputKey symbol_keyboard_keys_row_3[] = {
+static const TextInputKey symbol_keyboard_keys_row_3[] = {
     {SWITCH_KEYBOARD_KEY, 0, 23},
     {'.', 15, 32},
     {',', 29, 32},
@@ -241,6 +240,33 @@ static char char_to_uppercase(const char letter) {
     }
 }
 
+static char char_to_illegal_symbol(char original) {
+    switch(original) {
+    default:
+        return original;
+    case '0':
+        return '_';
+    case '1':
+        return '<';
+    case '2':
+        return '>';
+    case '3':
+        return ':';
+    case '4':
+        return '"';
+    case '5':
+        return '/';
+    case '6':
+        return '\\';
+    case '7':
+        return '|';
+    case '8':
+        return '?';
+    case '9':
+        return '*';
+    }
+}
+
 static void text_input_backspace_cb(TextInputModel* model) {
     if(model->clear_default_text) {
         model->text_buffer[0] = 0;
@@ -301,7 +327,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
         while(len && canvas_string_width(canvas, str) > needed_string_width) {
             str[len--] = '\0';
         }
-        strcat(str, "...");
+        strlcat(str, "...", sizeof(buf) - (str - buf));
     }
 
     canvas_draw_str(canvas, start_pos, 22, str);
@@ -356,7 +382,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y -
                             (glyph == '_' || char_is_lowercase(glyph)),
-                        glyph);
+                        (symbols && model->illegal_symbols) ? char_to_illegal_symbol(glyph) :
+                                                              glyph);
                 }
             }
         }
@@ -478,6 +505,10 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, I
                 if(shift != (text_length == 0) &&
                    model->selected_keyboard != symbol_keyboard.keyboard_index) {
                     selected = char_to_uppercase(selected);
+                }
+                if(model->selected_keyboard == symbol_keyboard.keyboard_index &&
+                   model->illegal_symbols) {
+                    selected = char_to_illegal_symbol(selected);
                 }
                 if(model->clear_default_text) {
                     model->text_buffer[0] = selected;
@@ -622,35 +653,34 @@ static bool text_input_view_ascii_callback(AsciiEvent* event, void* context) {
             true);
         return true;
     default: // Look in keyboards
+        TextInputModel* model = view_get_model(text_input->view);
+        uint8_t text_length = model->text_buffer ? strlen(model->text_buffer) : 0;
+        bool uppercase = model->clear_default_text || text_length == 0;
         for(size_t k = 0; k < keyboard_count; k++) {
+            bool symbols = k == symbol_keyboard.keyboard_index;
             const Keyboard* keyboard = keyboards[k];
             for(size_t r = 0; r < keyboard_row_count; r++) {
                 const TextInputKey* row = get_row(keyboard, r);
                 uint8_t size = get_row_size(keyboard, r);
                 for(size_t key = 0; key < size; key++) {
                     char lower = row[key].text;
-                    char upper = char_to_uppercase(lower);
+                    if(symbols && model->illegal_symbols) lower = char_to_illegal_symbol(lower);
+                    char upper = symbols ? lower : char_to_uppercase(lower);
                     if(event->value == lower || event->value == upper) {
-                        with_view_model(
-                            text_input->view,
-                            TextInputModel * model,
-                            {
-                                model->cursor_select = false;
-                                model->selected_keyboard = k;
-                                model->selected_row = r;
-                                model->selected_column = key;
-                                bool shift =
-                                    (event->value == upper) !=
-                                    (model->clear_default_text || strlen(model->text_buffer) == 0);
-                                text_input_handle_ok(
-                                    text_input, model, shift ? InputTypeLong : InputTypeShort);
-                            },
-                            true);
+                        model->cursor_select = false;
+                        model->selected_keyboard = k;
+                        model->selected_row = r;
+                        model->selected_column = key;
+                        bool shift = (event->value == upper) != uppercase && !symbols;
+                        text_input_handle_ok(
+                            text_input, model, shift ? InputTypeLong : InputTypeShort);
+                        view_commit_model(text_input->view, true);
                         return true;
                     }
                 }
             }
         }
+        view_commit_model(text_input->view, false);
         break;
     }
 
@@ -666,33 +696,6 @@ void text_input_timer_callback(void* context) {
         TextInputModel * model,
         { model->validator_message_visible = false; },
         true);
-}
-
-static void reset_extra_symbols(TextInputModel* model) {
-    memset(model->extra_symbols, 0, sizeof(model->extra_symbols));
-    size_t symbol = 0;
-    for(size_t row = 0; row < 3; row++) {
-        size_t size = get_row_size(&symbol_keyboard, row) - 3;
-        for(size_t i = 0; i < 3; i++) {
-            FURI_CONST_ASSIGN_(
-                char, get_row(&symbol_keyboard, row)[size++].text, '1' + (symbol++));
-        }
-    }
-    FURI_CONST_ASSIGN_(
-        char, get_row(&symbol_keyboard, 0)[get_row_size(&symbol_keyboard, 0) - 4].text, '0');
-}
-
-static void apply_extra_symbols(TextInputModel* model) {
-    size_t symbol = 0;
-    for(size_t row = 0; row < 3; row++) {
-        size_t size = get_row_size(&symbol_keyboard, row) - 3;
-        for(size_t i = 0; i < 3; i++) {
-            FURI_CONST_ASSIGN_(
-                char, get_row(&symbol_keyboard, row)[size++].text, model->extra_symbols[symbol++]);
-        }
-    }
-    FURI_CONST_ASSIGN_(
-        char, get_row(&symbol_keyboard, 0)[get_row_size(&symbol_keyboard, 0) - 4].text, '_');
 }
 
 TextInput* text_input_alloc(void) {
@@ -712,7 +715,7 @@ TextInput* text_input_alloc(void) {
         {
             model->validator_text = furi_string_alloc();
             model->minimum_length = 1;
-            reset_extra_symbols(model);
+            model->illegal_symbols = false;
             model->cursor_pos = 0;
             model->cursor_select = false;
         },
@@ -752,7 +755,7 @@ void text_input_reset(TextInput* text_input) {
             model->selected_column = 0;
             model->selected_keyboard = 0;
             model->minimum_length = 1;
-            reset_extra_symbols(model);
+            model->illegal_symbols = false;
             model->clear_default_text = false;
             model->cursor_pos = 0;
             model->cursor_select = false;
@@ -813,43 +816,10 @@ void text_input_set_minimum_length(TextInput* text_input, size_t minimum_length)
         true);
 }
 
-void text_input_add_extra_symbol(TextInput* text_input, char symbol) {
-    furi_check(text_input);
-    if(!symbol) return;
-    with_view_model(
-        text_input->view,
-        TextInputModel * model,
-        {
-            for(size_t i = 0; i < sizeof(model->extra_symbols); i++) {
-                if(!model->extra_symbols[i]) {
-                    model->extra_symbols[i] = symbol;
-                    apply_extra_symbols(model);
-                    break;
-                }
-            }
-        },
-        true);
-}
-
-void text_input_add_illegal_symbols(TextInput* text_input) {
+void text_input_show_illegal_symbols(TextInput* text_input, bool show) {
     furi_check(text_input);
     with_view_model(
-        text_input->view,
-        TextInputModel * model,
-        {
-            size_t i = 0;
-            model->extra_symbols[i++] = '<';
-            model->extra_symbols[i++] = '>';
-            model->extra_symbols[i++] = ':';
-            model->extra_symbols[i++] = '"';
-            model->extra_symbols[i++] = '/';
-            model->extra_symbols[i++] = '\\';
-            model->extra_symbols[i++] = '|';
-            model->extra_symbols[i++] = '?';
-            model->extra_symbols[i++] = '*';
-            apply_extra_symbols(model);
-        },
-        true);
+        text_input->view, TextInputModel * model, { model->illegal_symbols = show; }, true);
 }
 
 void text_input_set_validator(

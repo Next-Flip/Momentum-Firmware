@@ -231,7 +231,7 @@ static void dolphin_reset_butthurt_timer(Dolphin* dolphin) {
     }
 }
 
-static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
+static void dolphin_process_event(FuriEventLoopObject* object, void* context) {
     UNUSED(object);
 
     Dolphin* dolphin = context;
@@ -284,8 +284,6 @@ static bool dolphin_process_event(FuriEventLoopObject* object, void* context) {
     }
 
     dolphin_event_release(&event);
-
-    return true;
 }
 
 static void dolphin_storage_callback(const void* message, void* context) {

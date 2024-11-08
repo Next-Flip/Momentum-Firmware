@@ -4,8 +4,9 @@ import requests
 import json
 import os
 
-artifact_tgz = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG']}.tgz"
-artifact_sdk = f"{os.environ['INDEXER_URL']}/firmware/dev/{os.environ['ARTIFACT_TAG'].replace('update', 'sdk')}.zip"
+base_url = f"{os.environ['INDEXER_URL']}/builds/firmware/dev"
+artifact_tgz = f"{base_url}/{os.environ['ARTIFACT_TAG']}.tgz"
+artifact_sdk = f"{base_url}/{os.environ['ARTIFACT_TAG'].replace('update', 'sdk')}.zip"
 artifact_lab = f"https://lab.flipper.net/?url={artifact_tgz}&channel=dev-cfw&version={os.environ['VERSION_TAG']}"
 
 
@@ -41,28 +42,34 @@ if __name__ == "__main__":
                     "fields": [
                         {
                             "name": "Code Diff:",
-                            "value": "\n".join([
-                                f"[From last release ({release} to {after[:8]})]({compare}/{release}...{after})",
-                                f"[From last build ({before[:8]} to {after[:8]})]({compare}/{before}...{after})",
-                            ])
+                            "value": "\n".join(
+                                [
+                                    f"[From last release ({release} to {after[:8]})]({compare}/{release}...{after})",
+                                    f"[From last build ({before[:8]} to {after[:8]})]({compare}/{before}...{after})",
+                                ]
+                            ),
                         },
                         {
                             "name": "Changelog:",
-                            "value": "\n".join([
-                                f"[Since last release ({release})]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)",
-                            ])
+                            "value": "\n".join(
+                                [
+                                    f"[Since last release ({release})]({event['repository']['html_url']}/blob/{after}/CHANGELOG.md)",
+                                ]
+                            ),
                         },
                         {
                             "name": "Firmware Artifacts:",
-                            "value": "\n".join([
-                                f"- [🖥️ Install with Web Updater](https://momentum-fw.dev/update)",
-                                f"- [☁️ Open in Flipper Lab/App]({artifact_lab})",
-                                f"- [🐬 Download Firmware TGZ]({artifact_tgz})",
-                                f"- [🛠️ SDK (for development)]({artifact_sdk})",
-                            ])
-                        }
+                            "value": "\n".join(
+                                [
+                                    f"- [🖥️ Install with Web Updater](https://momentum-fw.dev/update)",
+                                    f"- [☁️ Open in Flipper Lab/App]({artifact_lab})",
+                                    f"- [🐬 Download Firmware TGZ]({artifact_tgz})",
+                                    f"- [🛠️ SDK (for development)]({artifact_sdk})",
+                                ]
+                            ),
+                        },
                     ],
-                    "timestamp": dt.datetime.utcnow().isoformat()
+                    "timestamp": dt.datetime.utcnow().isoformat(),
                 }
             ],
         },

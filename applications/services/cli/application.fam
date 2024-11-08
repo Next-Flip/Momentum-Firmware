@@ -8,3 +8,102 @@ App(
     order=30,
     sdk_headers=["cli.h", "cli_vcp.h"],
 )
+
+App(
+    appid="info_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_info_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="src_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_src_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="neofetch_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_neofetch_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="help_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_help_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="uptime_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_uptime_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="date_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_date_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="sysctl_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_sysctl_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="vibro_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_vibro_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="led_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_led_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)
+
+App(
+    appid="gpio_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_gpio_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c", "cli_command_gpio.c"],
+)
+
+App(
+    appid="i2c_cli",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_command_i2c_plugin_ep",
+    requires=["cli"],
+    sources=["cli_commands.c"],
+)

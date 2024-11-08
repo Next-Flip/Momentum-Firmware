@@ -45,6 +45,12 @@ let views = {
     }),
 };
 
+// Enable illegal filename symbols since we're not choosing filenames, gives more flexibility
+// Not available in all firmwares, good idea to check if it is supported
+if (doesSdkSupport(["gui-textinput-illegalsymbols"])) {
+    views.keyboard.set("illegalSymbols", true);
+}
+
 // demo selector
 eventLoop.subscribe(views.demos.chosen, function (_sub, index, gui, eventLoop, views) {
     if (index === 0) {

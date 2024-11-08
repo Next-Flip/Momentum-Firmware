@@ -1,0 +1,30 @@
+{
+  "name": "@next-flip/fz-sdk-mntm",
+  "version": "0.1.3",
+  "description": "Type declarations and documentation for native JS modules available on Momentum Custom Firmware for Flipper Zero",
+  "keywords": [
+    "momentum",
+    "momentum firmware",
+    "next-flip",
+    "flipper",
+    "flipper zero",
+    "framework"
+  ],
+  "author": "Flipper Devices",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Next-Flip/Momentum-Firmware.git",
+    "directory": "applications/system/js_app/packages/fz-sdk"
+  },
+  "type": "module",
+  "dependencies": {
+    "esbuild": "^0.24.0",
+    "esbuild-plugin-tsc": "^0.4.0",
+    "json5": "^2.2.3",
+    "typedoc": "^0.26.10",
+    "typedoc-material-theme": "^1.1.0",
+    "prompts": "^2.4.2",
+    "serialport": "^12.0.0"
+  }
+}

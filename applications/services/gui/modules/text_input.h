@@ -77,11 +77,12 @@ void text_input_set_validator(
     TextInputValidatorCallback callback,
     void* callback_context);
 
-// Add up to 9 extra characters for symbol keyboard
-void text_input_add_extra_symbol(TextInput* text_input, char symbol);
-
-// Add the 9 predefined illegal (windows) symbols <>:"/\|?*
-void text_input_add_illegal_symbols(TextInput* text_input);
+/**
+ * @brief Show the 9 illegal (windows) symbols <>:"/\|?* in the symbols keyboard instead of the numbers
+ * @param [in] text_input TextInput
+ * @param [in] show Whether to show the illegal symbols or not
+ */
+void text_input_show_illegal_symbols(TextInput* text_input, bool show);
 
 TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_input);
 

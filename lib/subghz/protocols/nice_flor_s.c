@@ -271,7 +271,7 @@ SubGhzProtocolStatus
             key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> i * 8) & 0xFF;
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Unable to add Key");
+            FURI_LOG_E(TAG, "Unable to update Key");
             break;
         }
 
@@ -282,7 +282,7 @@ SubGhzProtocolStatus
             }
             uint32_t temp = (instance->generic.data_2 >> 4) & 0xFFFFF;
             if(!flipper_format_update_uint32(flipper_format, "Data", &temp, 1)) {
-                FURI_LOG_E(TAG, "Unable to add Data");
+                FURI_LOG_E(TAG, "Unable to update Data");
             }
         }
 
@@ -711,8 +711,13 @@ SubGhzProtocolStatus subghz_protocol_decoder_nice_flor_s_serialize(
     SubGhzProtocolStatus ret =
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
     if(instance->generic.data_count_bit == NICE_ONE_COUNT_BIT) {
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolStatusErrorParserOthers;
+        }
         if((ret == SubGhzProtocolStatusOk) &&
-           !flipper_format_write_uint32(flipper_format, "Data", (uint32_t*)&instance->data, 1)) {
+           !flipper_format_insert_or_update_uint32(
+               flipper_format, "Data", (uint32_t*)&instance->data, 1)) {
             FURI_LOG_E(TAG, "Unable to add Data");
             ret = SubGhzProtocolStatusErrorParserOthers;
         }
@@ -864,7 +869,7 @@ void subghz_protocol_decoder_nice_flor_s_get_string(void* context, FuriString* o
         furi_string_cat_printf(
             output,
             "%s %dbit\r\n"
-            "Key:0x%013llX%llX\r\n"
+            "Key:%013llX%llX\r\n"
             "Sn:%05lX\r\n"
             "Cnt:%04lX Btn:%02X\r\n",
             NICE_ONE_NAME,

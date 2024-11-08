@@ -93,7 +93,7 @@ bool infrared_scene_universal_from_file_on_event(void* context, SceneManagerEven
                 bool wrong_file_type =
                     INFRARED_ERROR_CHECK(task_error, InfraredErrorCodeWrongFileType);
                 const char* format = wrong_file_type ?
-                                         "Remote file\n\"%s\" can't be openned as a library" :
+                                         "Remote file\n\"%s\" can't be opened as a library" :
                                          "Failed to load\n\"%s\"";
 
                 infrared_show_error_message(

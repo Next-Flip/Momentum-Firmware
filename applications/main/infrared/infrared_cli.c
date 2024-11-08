@@ -555,15 +555,15 @@ static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
     furi_string_free(command);
 }
 
-#include <flipper_application/flipper_application.h>
 #include <cli/cli_i.h>
+CLI_PLUGIN_WRAPPER("infrared", infrared_cli_start_ir)
 
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &infrared_cli_start_ir,
-};
-
-const FlipperAppPluginDescriptor* infrared_cli_plugin_ep(void) {
-    return &plugin_descriptor;
+void infrared_on_system_start(void) {
+#ifdef SRV_CLI
+    Cli* cli = (Cli*)furi_record_open(RECORD_CLI);
+    cli_add_command(cli, "ir", CliCommandFlagDefault, infrared_cli_start_ir_wrapper, NULL);
+    furi_record_close(RECORD_CLI);
+#else
+    UNUSED(infrared_cli_start_ir);
+#endif
 }

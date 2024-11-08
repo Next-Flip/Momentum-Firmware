@@ -28,7 +28,7 @@ static const char* parse_nrf_connect(FindMy* app, const char* path) {
             }
         }
         if(error) break;
-        furi_hal_bt_reverse_mac_addr(mac);
+        reverse_mac_addr(mac);
 
         error = "Can't open file";
         if(!file_stream_open(stream, path, FSAM_READ, FSOM_OPEN_EXISTING)) break;
@@ -109,7 +109,7 @@ static const char* parse_open_haystack(FindMy* app, const char* path) {
 
         memcpy(app->state.mac, public_key, sizeof(app->state.mac));
         app->state.mac[0] |= 0b11000000;
-        furi_hal_bt_reverse_mac_addr(app->state.mac);
+        reverse_mac_addr(app->state.mac);
 
         uint8_t advertisement_template[EXTRA_BEACON_MAX_DATA_SIZE] = {
             0x1e, // length (30)

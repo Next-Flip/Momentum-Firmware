@@ -342,7 +342,7 @@ static bool ducky_set_bt_id(BadKbScript* bad_kb, const char* line) {
             return false;
         }
     }
-    furi_hal_bt_reverse_mac_addr(cfg->ble.mac);
+    reverse_mac_addr(cfg->ble.mac);
 
     strlcpy(cfg->ble.name, line + mac_len, sizeof(cfg->ble.name));
     FURI_LOG_D(WORKER_TAG, "set bt id: %s", line);

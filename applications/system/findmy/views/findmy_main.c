@@ -177,7 +177,7 @@ void findmy_main_update_mac(FindMyMain* findmy_main, uint8_t* mac) {
         FindMyMainModel * model,
         {
             memcpy(model->mac, mac, sizeof(model->mac));
-            furi_hal_bt_reverse_mac_addr(model->mac);
+            reverse_mac_addr(model->mac);
         },
         true);
 }
