@@ -14,8 +14,25 @@ icons_path = (
     if assetsenv["IS_BASE_FIRMWARE"]
     else assetsenv["ASSETS_WORK_DIR"]
 )
-icons = assetsenv.CompileIcons(icons_path, assetsenv["ASSETS_SRC_DIR"].Dir("icons"))
+icons = assetsenv.CompileIcons(
+    icons_path,
+    assetsenv["ASSETS_SRC_DIR"].Dir("icons"),
+    fw_bundle=True,
+)
 assetsenv.Alias("icons", icons)
+
+# Extra icons lib so apps don't override asset packs to use fw icons not exposed to api
+# Not used anywhere in code, apps still reference assets_icons.h, but if one of the
+# icons they need is not exposed in api, they can link with fap_libs=["assets"] which
+# will use this lib purely for linking as a drop-in for missing symbols.
+# Should mean that apps made for OFW with fap_libs=["assets"], when compiled with
+# this FBT, will still use asset packs at runtime and only link non-exposed icons.
+if assetsenv["IS_BASE_FIRMWARE"]:
+    dropin_icons = assetsenv.CompileIcons(
+        assetsenv["ASSETS_WORK_DIR"],
+        assetsenv["ASSETS_SRC_DIR"].Dir("icons"),
+        icon_bundle_name="_assets_icons_dropin",
+    )
 
 
 # Protobuf .proto -> .c + .h
@@ -59,8 +76,13 @@ assetsenv.Alias("proto_ver", proto_ver)
 assets_parts = (icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
 env.Replace(FW_ASSETS_HEADERS=assets_parts)
 
-assetslib = assetsenv.Library("${FW_LIB_NAME}", assets_parts)
+assetslib = assetsenv.Library("fw${FW_LIB_NAME}", assets_parts)
 assetsenv.Install("${LIB_DIST_DIR}", assetslib)
+
+if assetsenv["IS_BASE_FIRMWARE"]:
+    dropin_parts = (dropin_icons, proto, dolphin_blocking, dolphin_internal, proto_ver)
+    dropin_assetslib = assetsenv.Library("${FW_LIB_NAME}", dropin_parts)
+    assetsenv.Install("${LIB_DIST_DIR}", dropin_assetslib)
 
 
 # Resources for SD card

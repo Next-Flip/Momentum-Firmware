@@ -1,0 +1,25 @@
+{
+  "name": "@next-flip/create-fz-app-mntm",
+  "version": "0.1.1",
+  "description": "Template package for JS apps for Flipper Zero using Momentum Custom Firmware JS SDK",
+  "bin": "index.js",
+  "type": "module",
+  "keywords": [
+    "momentum",
+    "momentum firmware",
+    "next-flip",
+    "flipper",
+    "flipper zero"
+  ],
+  "author": "Flipper Devices",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Next-Flip/Momentum-Firmware.git",
+    "directory": "applications/system/js_app/packages/create-fz-app"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2",
+    "replace-in-file": "^8.2.0"
+  }
+}

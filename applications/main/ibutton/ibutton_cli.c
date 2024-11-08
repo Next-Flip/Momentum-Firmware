@@ -8,6 +8,22 @@
 #include <ibutton/ibutton_worker.h>
 #include <ibutton/ibutton_protocols.h>
 
+static void ibutton_cli(Cli* cli, FuriString* args, void* context);
+
+#include <cli/cli_i.h>
+CLI_PLUGIN_WRAPPER("ibutton", ibutton_cli)
+
+// app cli function
+void ibutton_on_system_start(void) {
+#ifdef SRV_CLI
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_add_command(cli, "ikey", CliCommandFlagDefault, ibutton_cli_wrapper, cli);
+    furi_record_close(RECORD_CLI);
+#else
+    UNUSED(ibutton_cli);
+#endif
+}
+
 static void ibutton_cli_print_usage(void) {
     printf("Usage:\r\n");
     printf("ikey read\r\n");
@@ -238,17 +254,4 @@ void ibutton_cli(Cli* cli, FuriString* args, void* context) {
     }
 
     furi_string_free(cmd);
-}
-
-#include <flipper_application/flipper_application.h>
-#include <cli/cli_i.h>
-
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &ibutton_cli,
-};
-
-const FlipperAppPluginDescriptor* ibutton_cli_plugin_ep(void) {
-    return &plugin_descriptor;
 }

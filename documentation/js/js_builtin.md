@@ -73,18 +73,18 @@ Transforms a string to lower case.
 toLowerCase("Example") // "example"
 ```
 
-## __dirpath
+## __dirname
 Path to the directory containing the current script.
 
 ### Examples:
 ```js
-print(__dirpath); // /ext/apps/Scripts/Examples
+print(__dirname); // /ext/apps/Scripts/Examples
 ```
 
-## __filepath
+## __filename
 Path to the current script file.
 
 ### Examples:
 ```js
-print(__filepath); // /ext/apps/Scripts/Examples/path.js
+print(__filename); // /ext/apps/Scripts/Examples/path.js
 ```

@@ -69,8 +69,7 @@ class ApplicationsCGenerator:
     {{
      .name = "{app.name}",
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .path = "{app_path}",
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
+     .path = "{app_path}" }}"""
 
     def generate(self):
         contents = [

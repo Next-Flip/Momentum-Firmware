@@ -1,3 +1,6 @@
+// Script cannot work without blebeacon module so check before
+checkSdkFeatures(["blebeacon"]);
+
 let blebeacon = require("blebeacon");
 
 // Stop if previous background beacon is active

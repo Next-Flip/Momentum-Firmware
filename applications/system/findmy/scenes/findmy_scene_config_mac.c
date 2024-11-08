@@ -17,7 +17,7 @@ void findmy_scene_config_mac_on_enter(void* context) {
     byte_input_set_header_text(byte_input, "Enter Bluetooth MAC:");
 
     memcpy(app->mac_buf, app->state.mac, sizeof(app->mac_buf));
-    furi_hal_bt_reverse_mac_addr(app->mac_buf);
+    reverse_mac_addr(app->mac_buf);
 
     byte_input_set_result_callback(
         byte_input,
@@ -38,7 +38,7 @@ bool findmy_scene_config_mac_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case ByteInputResultOk:
-            furi_hal_bt_reverse_mac_addr(app->mac_buf);
+            reverse_mac_addr(app->mac_buf);
             memcpy(&app->state.mac, app->mac_buf, sizeof(app->state.mac));
             findmy_state_save_and_apply(&app->state);
             findmy_main_update_mac(app->findmy_main, app->state.mac);

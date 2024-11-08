@@ -1185,15 +1185,24 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-#include <flipper_application/flipper_application.h>
 #include <cli/cli_i.h>
+CLI_PLUGIN_WRAPPER("subghz", subghz_cli_command)
 
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &subghz_cli_command,
-};
+static void subghz_cli_command_chat_wrapper(Cli* cli, FuriString* args, void* context) {
+    furi_string_replace_at(args, 0, 0, "chat ");
+    subghz_cli_command_wrapper(cli, args, context);
+}
 
-const FlipperAppPluginDescriptor* subghz_cli_plugin_ep(void) {
-    return &plugin_descriptor;
+void subghz_on_system_start(void) {
+#ifdef SRV_CLI
+    Cli* cli = furi_record_open(RECORD_CLI);
+
+    cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command_wrapper, NULL);
+    cli_add_command(cli, "chat", CliCommandFlagDefault, subghz_cli_command_chat_wrapper, NULL);
+
+    furi_record_close(RECORD_CLI);
+#else
+    UNUSED(subghz_cli_command);
+    UNUSED(subghz_cli_command_chat_wrapper);
+#endif
 }

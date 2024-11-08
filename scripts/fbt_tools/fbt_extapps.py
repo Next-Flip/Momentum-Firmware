@@ -90,6 +90,7 @@ class AppBuilder:
             self.app_work_dir,
             self.app._appdir.Dir(self.app.fap_icon_assets),
             icon_bundle_name=f"{self.app.fap_icon_assets_symbol or self.app.appid }_icons",
+            add_include=True,
         )
         self.app_env.Alias("_fap_icons", fap_icons)
         self.fw_env.Append(_APP_ICONS=[fap_icons])

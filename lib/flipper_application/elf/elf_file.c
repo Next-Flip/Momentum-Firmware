@@ -8,11 +8,11 @@
 
 #define TAG "Elf"
 
-#define ELF_NAME_BUFFER_LEN 32
-#define SECTION_OFFSET(e, n) ((e)->section_table + (n) * sizeof(Elf32_Shdr))
-#define IS_FLAGS_SET(v, m) (((v) & (m)) == (m))
+#define ELF_NAME_BUFFER_LEN        32
+#define SECTION_OFFSET(e, n)       ((e)->section_table + (n) * sizeof(Elf32_Shdr))
+#define IS_FLAGS_SET(v, m)         (((v) & (m)) == (m))
 #define RESOLVER_THREAD_YIELD_STEP 30
-#define FAST_RELOCATION_VERSION 1
+#define FAST_RELOCATION_VERSION    1
 
 // #define ELF_DEBUG_LOG 1
 
@@ -834,7 +834,9 @@ void elf_file_free(ELFFile* elf) {
                 aligned_free(itref->value.data);
             }
             if(itref->value.fast_rel) {
-                aligned_free(itref->value.fast_rel->data);
+                if(itref->value.fast_rel->data) {
+                    aligned_free(itref->value.fast_rel->data);
+                }
                 free(itref->value.fast_rel);
             }
             free((void*)itref->key);

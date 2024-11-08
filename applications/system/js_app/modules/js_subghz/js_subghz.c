@@ -223,7 +223,7 @@ static void js_subghz_transmit_file(struct mjs* mjs) {
     // - "repeat" as variable and loop in this code applies to RAW files only
     //   parsed files handle repeat in protocol layer instead
     // We keep 0 as default, or literal value if specified by user
-    // If user did not specify, -1 is detected below, and we use:
+    // If user did not specify, 0 is detected below, and we use:
     // - 1 repeat for RAW
     // - 10 repeats for parsed, which is passed to protocol, and we loop once here
     uint32_t repeat = 0;

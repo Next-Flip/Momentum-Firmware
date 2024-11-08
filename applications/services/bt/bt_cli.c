@@ -227,15 +227,15 @@ static void bt_cli(Cli* cli, FuriString* args, void* context) {
     furi_record_close(RECORD_BT);
 }
 
-#include <flipper_application/flipper_application.h>
 #include <cli/cli_i.h>
+CLI_PLUGIN_WRAPPER("bt", bt_cli)
 
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &bt_cli,
-};
-
-const FlipperAppPluginDescriptor* bt_cli_plugin_ep(void) {
-    return &plugin_descriptor;
+void bt_on_system_start(void) {
+#ifdef SRV_CLI
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_add_command(cli, RECORD_BT, CliCommandFlagDefault, bt_cli_wrapper, NULL);
+    furi_record_close(RECORD_CLI);
+#else
+    UNUSED(bt_cli);
+#endif
 }

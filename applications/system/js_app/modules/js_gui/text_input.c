@@ -85,7 +85,7 @@ static bool default_text_assign(
             context->buffer = realloc(context->buffer, context->buffer_size); //-V701
         }
         // Also trim excess previous data with strlcpy()
-        strlcpy(context->buffer, value.string, context->buffer_size);
+        strlcpy(context->buffer, value.string, context->buffer_size); //-V575
         text_input_set_result_callback(
             input,
             (TextInputCallback)input_callback,
@@ -115,6 +115,18 @@ static bool default_text_clear_assign(
     return true;
 }
 
+static bool illegal_symbols_assign(
+    struct mjs* mjs,
+    TextInput* input,
+    JsViewPropValue value,
+    JsKbdContext* context) {
+    UNUSED(mjs);
+    UNUSED(context);
+
+    text_input_show_illegal_symbols(input, value.boolean);
+    return true;
+}
+
 static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_obj) {
     JsKbdContext* context = malloc(sizeof(JsKbdContext));
     *context = (JsKbdContext){
@@ -135,7 +147,6 @@ static JsKbdContext* ctx_make(struct mjs* mjs, TextInput* input, mjs_val_t view_
                 .transformer_context = context,
             },
     };
-    text_input_add_illegal_symbols(input);
     text_input_set_result_callback(
         input,
         (TextInputCallback)input_callback,
@@ -162,7 +173,7 @@ static const JsViewDescriptor view_descriptor = {
     .get_view = (JsViewGetView)text_input_get_view,
     .custom_make = (JsViewCustomMake)ctx_make,
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
-    .prop_cnt = 5,
+    .prop_cnt = 6,
     .props = {
         (JsViewPropDescriptor){
             .name = "header",
@@ -184,6 +195,10 @@ static const JsViewDescriptor view_descriptor = {
             .name = "defaultTextClear",
             .type = JsViewPropTypeBool,
             .assign = (JsViewPropAssign)default_text_clear_assign},
+        (JsViewPropDescriptor){
+            .name = "illegalSymbols",
+            .type = JsViewPropTypeBool,
+            .assign = (JsViewPropAssign)illegal_symbols_assign},
     }};
 
 JS_GUI_VIEW_DEF(text_input, &view_descriptor);

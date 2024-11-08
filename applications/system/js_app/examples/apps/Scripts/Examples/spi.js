@@ -1,3 +1,6 @@
+// Script cannot work without spi module so check before
+checkSdkFeatures(["spi"]);
+
 // Connect a w25q32 SPI device to the Flipper Zero.
 // D1=pin 2 (MOSI), SLK=pin 5 (SCK), GND=pin 8 (GND), D0=pin 3 (MISO), CS=pin 4 (CS), VCC=pin 9 (3V3)
 let spi = require("spi");
@@ -5,8 +8,9 @@ let spi = require("spi");
 // Display textbox so user can scroll to see all output.
 let eventLoop = require("event_loop");
 let gui = require("gui");
+let textBoxView = require("gui/text_box");
 let text = "SPI demo\n";
-let textBox = require("gui/text_box").makeWith({
+let textBox = textBoxView.makeWith({
     focus: "end",
     font: "text",
     text: text,

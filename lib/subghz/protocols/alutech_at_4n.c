@@ -308,16 +308,22 @@ bool subghz_protocol_alutech_at_4n_create_data(
     instance->generic.serial = serial;
     instance->generic.cnt = cnt;
     instance->generic.data_count_bit = 72;
-    bool res = subghz_protocol_alutech_at_4n_gen_data(instance, btn);
-    if(res) {
+    if(subghz_protocol_alutech_at_4n_gen_data(instance, btn)) {
         if((subghz_block_generic_serialize(&instance->generic, flipper_format, preset) !=
-            SubGhzProtocolStatusOk) ||
-           !flipper_format_write_uint32(flipper_format, "CRC", &instance->crc, 1)) {
+            SubGhzProtocolStatusOk)) {
+            FURI_LOG_E(TAG, "Serialize error");
+            return false;
+        }
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            return false;
+        }
+        if(!flipper_format_insert_or_update_uint32(flipper_format, "CRC", &instance->crc, 1)) {
             FURI_LOG_E(TAG, "Unable to add CRC");
-            res = false;
+            return false;
         }
     }
-    return res;
+    return true;
 }
 
 /**
@@ -667,8 +673,12 @@ SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_serialize(
     SubGhzProtocolDecoderAlutech_at_4n* instance = context;
     SubGhzProtocolStatus res =
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    if(!flipper_format_rewind(flipper_format)) {
+        FURI_LOG_E(TAG, "Rewind error");
+        res = SubGhzProtocolStatusErrorParserOthers;
+    }
     if((res == SubGhzProtocolStatusOk) &&
-       !flipper_format_write_uint32(flipper_format, "CRC", &instance->crc, 1)) {
+       !flipper_format_insert_or_update_uint32(flipper_format, "CRC", &instance->crc, 1)) {
         FURI_LOG_E(TAG, "Unable to add CRC");
         res = SubGhzProtocolStatusErrorParserOthers;
     }

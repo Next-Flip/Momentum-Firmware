@@ -204,15 +204,13 @@ void js_cli_execute(Cli* cli, FuriString* args, void* context) {
     furi_record_close(RECORD_STORAGE);
 }
 
-#include <flipper_application/flipper_application.h>
 #include <cli/cli_i.h>
+CLI_PLUGIN_WRAPPER("js", js_cli_execute)
 
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &js_cli_execute,
-};
-
-const FlipperAppPluginDescriptor* js_cli_plugin_ep(void) {
-    return &plugin_descriptor;
+void js_app_on_system_start(void) {
+#ifdef SRV_CLI
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_add_command(cli, "js", CliCommandFlagDefault, js_cli_execute_wrapper, NULL);
+    furi_record_close(RECORD_CLI);
+#endif
 }

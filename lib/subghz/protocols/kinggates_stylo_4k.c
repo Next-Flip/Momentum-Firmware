@@ -309,7 +309,7 @@ SubGhzProtocolStatus subghz_protocol_encoder_kinggates_stylo_4k_deserialize(
             key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data_2 >> i * 8) & 0xFF;
         }
         if(!flipper_format_update_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Unable to add Key");
+            FURI_LOG_E(TAG, "Unable to update Data");
             break;
         }
 
@@ -524,8 +524,13 @@ SubGhzProtocolStatus subghz_protocol_decoder_kinggates_stylo_4k_serialize(
         key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data_2 >> (i * 8)) & 0xFF;
     }
 
+    if(!flipper_format_rewind(flipper_format)) {
+        FURI_LOG_E(TAG, "Rewind error");
+        ret = SubGhzProtocolStatusErrorParserOthers;
+    }
+
     if((ret == SubGhzProtocolStatusOk) &&
-       !flipper_format_write_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
+       !flipper_format_insert_or_update_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
         FURI_LOG_E(TAG, "Unable to add Data");
         ret = SubGhzProtocolStatusErrorParserOthers;
     }

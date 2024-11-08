@@ -226,15 +226,5 @@ void input_cli(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-#include <flipper_application/flipper_application.h>
 #include <cli/cli_i.h>
-
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &input_cli,
-};
-
-const FlipperAppPluginDescriptor* input_cli_plugin_ep(void) {
-    return &plugin_descriptor;
-}
+CLI_PLUGIN_WRAPPER("input", input_cli)

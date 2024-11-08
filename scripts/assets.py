@@ -11,11 +11,20 @@ ICONS_SUPPORTED_FORMATS = ["png"]
 
 ICONS_TEMPLATE_H_HEADER = """#pragma once
 
-#include <furi.h>
+#include <stddef.h>
 #include <gui/icon.h>
 
 """
 ICONS_TEMPLATE_H_ICON_NAME = "extern const Icon {name};\n"
+ICONS_TEMPLATE_H_ICON_PATHS = """
+typedef struct {
+    const Icon* icon;
+    const char* path;
+} IconPath;
+
+extern const IconPath ICON_PATHS[];
+extern const size_t ICON_PATHS_COUNT;
+"""
 
 ICONS_TEMPLATE_C_HEADER = """#include "{assets_filename}.h"
 
@@ -25,6 +34,15 @@ ICONS_TEMPLATE_C_HEADER = """#include "{assets_filename}.h"
 ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t* const {name}[] = {data};\n"
 ICONS_TEMPLATE_C_ICONS = "const Icon {name} = {{.width={width},.height={height},.frame_count={frame_count},.frame_rate={frame_rate},.frames=_{name}}};\n"
+ICONS_TEMPLATE_C_ICON_PATH = '    {{&{name}, "{path}"}},\n'
+ICONS_TEMPLATE_C_ICON_PATHS = """
+const IconPath ICON_PATHS[] = {{
+#ifndef FURI_RAM_EXEC
+{icon_paths}
+#endif
+}};
+const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
+"""
 
 MAX_IMAGE_WIDTH = 2**16 - 1
 MAX_IMAGE_HEIGHT = 2**16 - 1
@@ -44,6 +62,22 @@ class Main(App):
             help="Base filename for file with icon data",
             required=False,
             default="assets_icons",
+        )
+        self.parser_icons.add_argument(
+            "--fw-bundle",
+            dest="fw_bundle",
+            help="Bundle all icons and path info, only for use in firmware blob",
+            default=0,
+            type=int,
+            required=False,
+        )
+        self.parser_icons.add_argument(
+            "--add-include",
+            dest="add_include",
+            help="Add assets_icons.h include drop-in for apps",
+            default=0,
+            type=int,
+            required=False,
         )
 
         self.parser_icons.set_defaults(func=self.icons)
@@ -138,7 +172,6 @@ class Main(App):
         )
         icons = []
         paths = []
-        is_main_assets = self.args.filename == "assets_icons"
         symbols = pathlib.Path(__file__).parent.parent
         if "UFBT_HOME" in os.environ:
             symbols /= "sdk_headers/f7_sdk"
@@ -154,7 +187,8 @@ class Main(App):
             if "frame_rate" in filenames:
                 self.logger.debug("Folder contains animation")
                 icon_name = "A_" + os.path.split(dirpath)[1].replace("-", "_")
-                if not is_main_assets and api_has_icon(icon_name):
+                icon_in_api = api_has_icon(icon_name)
+                if not self.args.fw_bundle and icon_in_api:
                     self.logger.info(
                         f"{self.args.filename}: ignoring duplicate icon {icon_name}"
                     )
@@ -193,8 +227,9 @@ class Main(App):
                 )
                 icons_c.write("\n")
                 icons.append((icon_name, width, height, frame_rate, frame_count))
-                p = dirpath.removeprefix(self.args.input_directory)[1:]
-                paths.append((icon_name, p.replace("\\", "/")))
+                if self.args.fw_bundle and icon_in_api:
+                    path = dirpath.removeprefix(self.args.input_directory)[1:]
+                    paths.append((icon_name, path.replace("\\", "/")))
             else:
                 # process icons
                 for filename in filenames:
@@ -204,7 +239,8 @@ class Main(App):
                     icon_name = "I_" + "_".join(filename.split(".")[:-1]).replace(
                         "-", "_"
                     )
-                    if not is_main_assets and api_has_icon(icon_name):
+                    icon_in_api = api_has_icon(icon_name)
+                    if not self.args.fw_bundle and icon_in_api:
                         self.logger.info(
                             f"{self.args.filename}: ignoring duplicate icon {icon_name}"
                         )
@@ -222,8 +258,11 @@ class Main(App):
                     )
                     icons_c.write("\n")
                     icons.append((icon_name, width, height, 0, 1))
-                    p = fullfilename.removeprefix(self.args.input_directory)[1:]
-                    paths.append((icon_name, p.replace("\\", "/").rsplit(".", 1)[0]))
+                    if self.args.fw_bundle and icon_in_api:
+                        path = fullfilename.removeprefix(self.args.input_directory)[1:]
+                        paths.append(
+                            (icon_name, path.replace("\\", "/").rsplit(".", 1)[0])
+                        )
         # Create array of images:
         self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:
@@ -236,21 +275,14 @@ class Main(App):
                     frame_count=frame_count,
                 )
             )
-        if is_main_assets:
-            icons_c.write(
-                """
-const IconPath ICON_PATHS[] = {
-#ifndef FURI_RAM_EXEC
-"""
+        if not self.args.fw_bundle:
+            icons_c.write("\n")
+        else:
+            icon_paths = "\n".join(
+                ICONS_TEMPLATE_C_ICON_PATH.format(name=name, path=path)
+                for name, path in paths
             )
-            for name, path in paths:
-                icons_c.write(f'    {{&{name}, "{path}"}},\n')
-            icons_c.write(
-                """#endif
-};
-const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
-"""
-            )
+            icons_c.write(ICONS_TEMPLATE_C_ICON_PATHS.format(icon_paths=icon_paths))
         icons_c.close()
 
         # Create Public Header
@@ -263,19 +295,9 @@ const size_t ICON_PATHS_COUNT = COUNT_OF(ICON_PATHS);
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
-        if is_main_assets:
-            icons_h.write(
-                """
-typedef struct {
-    const Icon* icon;
-    const char* path;
-} IconPath;
-
-extern const IconPath ICON_PATHS[];
-extern const size_t ICON_PATHS_COUNT;
-"""
-            )
-        else:
+        if self.args.fw_bundle:
+            icons_h.write(ICONS_TEMPLATE_H_ICON_PATHS)
+        if self.args.add_include:
             icons_h.write("#include <assets_icons.h>\n")
         icons_h.close()
         self.logger.debug("Done")

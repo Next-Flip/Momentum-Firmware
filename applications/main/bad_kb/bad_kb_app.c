@@ -302,6 +302,15 @@ void bad_kb_config_refresh(BadKbApp* app) {
     scene_manager_previous_scene(app->scene_manager);
 }
 
+void reverse_mac_addr(uint8_t mac_addr[GAP_MAC_ADDR_SIZE]) {
+    uint8_t tmp;
+    for(size_t i = 0; i < GAP_MAC_ADDR_SIZE / 2; i++) {
+        tmp = mac_addr[i];
+        mac_addr[i] = mac_addr[GAP_MAC_ADDR_SIZE - 1 - i];
+        mac_addr[GAP_MAC_ADDR_SIZE - 1 - i] = tmp;
+    }
+}
+
 BadKbApp* bad_kb_app_alloc(char* arg) {
     BadKbApp* app = malloc(sizeof(BadKbApp));
 

@@ -141,15 +141,15 @@ static void loader_cli(Cli* cli, FuriString* args, void* context) {
     furi_record_close(RECORD_LOADER);
 }
 
-#include <flipper_application/flipper_application.h>
 #include <cli/cli_i.h>
+CLI_PLUGIN_WRAPPER("loader", loader_cli)
 
-static const FlipperAppPluginDescriptor plugin_descriptor = {
-    .appid = CLI_PLUGIN_APP_ID,
-    .ep_api_version = CLI_PLUGIN_API_VERSION,
-    .entry_point = &loader_cli,
-};
-
-const FlipperAppPluginDescriptor* loader_cli_plugin_ep(void) {
-    return &plugin_descriptor;
+void loader_on_system_start(void) {
+#ifdef SRV_CLI
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_add_command(cli, RECORD_LOADER, CliCommandFlagParallelSafe, loader_cli_wrapper, NULL);
+    furi_record_close(RECORD_CLI);
+#else
+    UNUSED(loader_cli);
+#endif
 }
