@@ -46,10 +46,10 @@ int32_t loader_menu_storage_settings(void* context) {
         dialog_ex_set_header(dialog_ex, "Update needed", 64, 0, AlignCenter, AlignTop);
         dialog_ex_set_text(
             dialog_ex,
-            "Update firmware\n"
-            "to run this app\n"
+            "Reinstall firmware\n"
+            "to run this app.\n"
             "Can format SD\n"
-            "here if needed",
+            "here if needed.",
             3,
             17,
             AlignLeft,

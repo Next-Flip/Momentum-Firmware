@@ -278,6 +278,7 @@ AFBECD121004
 763958704B78
 # Onity  S1 A/B
 8A19D40CF2B5
+3961EA82C46D
 # 24-7
 D21762B2DE3B
 0E83A374B513
@@ -1955,6 +1956,15 @@ FC9418BF788B
 4E4F584D2105
 686B35333376
 861861861861
+# Transport System Cracow / Polen
+B071A76BA2E9
+B3A181BCA5F2
+3225942F7717
+80D00703C5FB
+6DD510E080B1
+87529F30FC58
+B75C4FA614AE
+42DC568C64F4
 # Data from "the more the marriott" mifare project (colonelborkmundus)
 # aka The Horde
 # These keys seem to be from Vingcard / Saflok system which means they are diversified
@@ -2257,12 +2267,179 @@ BD6AF9754C18
 722F24F0722F
 # STS Hotel 2A
 535453535453
+# Public transport in Sofia, Bulgaria (SKGT)
+# upgraded to DESFire since January 2024
+# SKGT common
+# Sector 15, key A
+F618B3D7855A
+# Sector 15, key B
+F1AFA4DA949F
+# SKGT multi-use ticket
+# Sector 0
+67362DACE527
+633A010FA3C3
+# Sector 1
+F93C98655B9C
+67EC0A47B0FB
+# Sector 2
+54A028818AC7
+B2E87E53C5A0
+# Sector 3
+3E93CF0644B6
+79E12280E219
+# Sector 4
+2204B9FBF033
+4537FD238C8E
+# Sector 5
+D1B44A9DF05F
+CFA526835A1F
+# Sector 6
+21CC007AD81C
+C097D0A85446
+# Sector 7
+D2268262710F
+730BB7B8B3DE
+# Sector 8
+9FE7C5BE7DFF
+61AE2D920C79
+# Sector 9
+78FCD4470C50
+B638CAF7357B
+# Sector 10
+0DC1DD7C8EA2
+4C6A6866B934
+# Sector 11
+03DE2CEB2EA1
+93E0118B21ED
+# Sector 12
+8FBCED387BF4
+F57CA95C6EDD
+# Sector 13
+EF24FE3B4CF7
+8B44D303D62F
+# Sector 14
+B1EA40B2CAA6
+3ABF8431003B
+# Sector 15 - see above
+# SKGT personalised subscription card
+# Sector 0, 2, 16, key A
+# Sector 8-14, 17-39, key A
+# Sector 1, key A
+# blue
+F1DF0CA8948B
+# yellow
+7747B4912984
+# Sector 3, key A
+# blue
+09D556D57A4B
+# yellow
+3ED158C6934E
+# Sector 4-7, key A
+# blue
+839DEDBFEC0D
+# yellow
+C694A9ED2F9E
+# Sector 15 - see above
+# Sector 0, 16, key B (blue)
+81D55F4551B9
+# Sector 0, key B (yellow)
+6E9A040C3C91
+# Sector 1, key B
+# blue
+5B72C63FB416
+# yellow
+A3CDCED46371
+# Sector 2, key B
+# blue
+87A61433D026
+# yellow
+9CD3A81F11AB
+# Sector 3, key B
+# blue
+7070D331360C
+# yellow
+836C790F6E2C
+# Sector 4-7, key B
+# blue
+7FE057787C4F
+# yellow
+FF59C6D13F88
+# Sector 8-14, 17-39, key B
+536F6669614D
+# Sector 15 - see above
+# End of SKGT
+# Hanoi Bus Rapid Transit - 1/2/3 A
+AAAFBA10FC37
+C61F2C28DADF
+23AACA30CBF2
+# Keys dumped from student ID (AGH Cracow - Poland), may be diversified
+# Need to be verified
+833E4F32589E
+432D02DA59F3
+5C161CA2716F
+F60B5F9666B8
+98EAC5321D2F
+CC945E3FE5C4
+70783C436CF4
+2D186C7149A9
+5D60AC0939FC
+93A5CE63C873
+87174550E900
+45675B25A3DA
+F91750E629D5
+A3E662ABCDC8
+33D99E9FFA6A
+FF7AABA39C61
+A8248C049BEA
+C2AF731771C4
+9263B2E0DD80
+CE7FCCBBA5D8
+F8E385E5A2A0
+B27678B5C4AE
+D68D7EBB9551
+7AB63F082328
+# Payment cards used by Eurest on certain campuses
+7E2BC58168EB
+# Shower cards provided by Seijsener
+291A65CBEA7B
+344A359BBAD9
+476572726974
+4D696368656C
+4F3748E6C826
+69D40AF8B353
+72DEA10F21DF
+74845AA8E3F1
+8C3C43EDCC55
+ACD30DFFB434
+D1A27C8EC5DF
+F14D329CBDBE
+# Hotel cards from Austria
+AB287B3B4903
+7B0DEDA7E162
 # +-----------------------------------------------------------------------------------------------------------------------------------+
 # | https://github.com/ikarus23/MifareClassicTool/blob/master/Mifare%20Classic%20Tool/app/src/main/assets/key-files/extended-std.keys |
 # +-----------------------------------------------------------------------------------------------------------------------------------+
 # UK London Office
 435DF6296EC4
 2338B4913222
+# Acces card of students, and more in Occitanie, France
+E9A553102EA5
+F982E971CFED
+1F42AB9159EE
+BBFB836A48B8
+B5D170B2E8F5
+E76978A05F10
+0B1A995DD007
+650DB9CEDB6B
+13E54B4448B7
+3E3540C2C273
+A76152840117
+066CCC7666BC
+3C0B3AC3AFA3
+CCB541598D72
+1988B5D48EC3
+892EEF0D30FB
+0FE5CE5CC640
 # +----------------------------------------------------------------------------------------------+
 # | https://github.com/UberGuidoZ/Flipper/blob/main/NFC/mf_classic_dict/mf_classic_dict_user.nfc |
 # +----------------------------------------------------------------------------------------------+

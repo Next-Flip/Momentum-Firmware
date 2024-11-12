@@ -596,7 +596,7 @@ void cli_plugin_wrapper(const char* name, Cli* cli, FuriString* args, void* cont
         handler(cli, args, context);
     } else {
         printf(
-            "CLI plugin '%s' failed (code %" PRIu16 "), update firmware or check logs\r\n",
+            "CLI plugin '%s' failed (code %" PRIu16 "), reinstall firmware or check logs\r\n",
             name,
             error);
     }

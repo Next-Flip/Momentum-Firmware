@@ -119,6 +119,7 @@ def pack_font(src: pathlib.Path, dst: pathlib.Path):
                     .decode("unicode_escape")
                     .encode("latin_1")
                 )
+        font += b"\0"
         dst.with_suffix(".u8f").write_bytes(font)
     elif src.suffix == ".u8f":
         if not dst.is_file():

@@ -107,7 +107,7 @@ static void loader_show_gui_error(
         Storage* storage = furi_record_open(RECORD_STORAGE);
         if(storage_sd_status(storage) == FSE_OK) {
             header = "Update needed";
-            text = "Update firmware\nto run this app";
+            text = "Reinstall firmware\nto run this app";
         } else {
             header = "SD card needed";
             text = "Install SD card\nto run this app";

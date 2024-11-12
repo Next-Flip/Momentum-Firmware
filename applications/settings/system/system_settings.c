@@ -2,6 +2,21 @@
 #include <loader/loader.h>
 #include <lib/toolbox/value_index.h>
 #include <locale/locale.h>
+#include <dialogs/dialogs.h>
+
+enum VarItemListIndex {
+    VarItemListIndexHandOrient,
+    VarItemListIndexUnits,
+    VarItemListIndexTimeFormat,
+    VarItemListIndexDateFormat,
+    VarItemListIndexLogLevel,
+    VarItemListIndexLogDevice,
+    VarItemListIndexLogBaudRate,
+    VarItemListIndexDebug,
+    VarItemListIndexHeapTrace,
+    VarItemListIndexSleepMethod,
+    VarItemListIndexFileNaming,
+};
 
 const char* const log_level_text[] = {
     "Default",
@@ -80,10 +95,11 @@ const char* const debug_text[] = {
 };
 
 static void debug_changed(VariableItem* item) {
+    SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, debug_text[index]);
     if(index) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
+        view_dispatcher_send_custom_event(app->view_dispatcher, VarItemListIndexDebug);
     } else {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
     }
@@ -108,9 +124,13 @@ const uint32_t heap_trace_mode_value[] = {
 };
 
 static void heap_trace_mode_changed(VariableItem* item) {
+    SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, heap_trace_mode_text[index]);
     furi_hal_rtc_set_heap_track_mode(heap_trace_mode_value[index]);
+    if(index) {
+        view_dispatcher_send_custom_event(app->view_dispatcher, VarItemListIndexHeapTrace);
+    }
 }
 
 const char* const measurement_units_text[] = {
@@ -184,10 +204,11 @@ const char* const sleep_method[] = {
 };
 
 static void sleep_method_changed(VariableItem* item) {
+    SystemSettings* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, sleep_method[index]);
     if(index) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagLegacySleep);
+        view_dispatcher_send_custom_event(app->view_dispatcher, VarItemListIndexSleepMethod);
     } else {
         furi_hal_rtc_reset_flag(FuriHalRtcFlagLegacySleep);
     }
@@ -213,6 +234,81 @@ static uint32_t system_settings_exit(void* context) {
     return VIEW_NONE;
 }
 
+static bool system_settings_custom_event_callback(void* context, uint32_t event) {
+    furi_assert(context);
+    SystemSettings* app = context;
+
+    VariableItem* item = variable_item_list_get(app->var_item_list, event);
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    DialogMessage* msg = dialog_message_alloc();
+    dialog_message_set_buttons(msg, "No", NULL, "Yes");
+
+    switch(event) {
+    case VarItemListIndexDebug:
+        dialog_message_set_header(msg, "Enable Debug?", 64, 4, AlignCenter, AlignTop);
+        dialog_message_set_text(
+            msg,
+            "This consumes 400% more\n"
+            "battery life. Don't use unless\n"
+            "you know exactly what\n"
+            "you're doing.",
+            64,
+            36,
+            AlignCenter,
+            AlignCenter);
+        if(dialog_message_show(dialogs, msg) == DialogMessageButtonRight) {
+            furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
+        } else {
+            variable_item_set_current_value_text(item, debug_text[0]);
+            variable_item_set_current_value_index(item, 0);
+        }
+        break;
+    case VarItemListIndexSleepMethod:
+        dialog_message_set_header(msg, "Disable DeepSleep?", 64, 4, AlignCenter, AlignTop);
+        dialog_message_set_text(
+            msg,
+            "Disabling will consume 400%\n"
+            "more battery life. Only\n"
+            "disable if you have a\n"
+            "specific reason.",
+            64,
+            36,
+            AlignCenter,
+            AlignCenter);
+        if(dialog_message_show(dialogs, msg) == DialogMessageButtonRight) {
+            furi_hal_rtc_set_flag(FuriHalRtcFlagLegacySleep);
+        } else {
+            variable_item_set_current_value_text(item, sleep_method[0]);
+            variable_item_set_current_value_index(item, 0);
+        }
+        break;
+    case VarItemListIndexHeapTrace:
+        dialog_message_set_header(msg, "Enable Heap Trace?", 64, 4, AlignCenter, AlignTop);
+        dialog_message_set_text(
+            msg,
+            "Will use more RAM and might\n"
+            "cause Out Of Memory errors.\n"
+            "Don't enable without a\n"
+            "specific reason.",
+            64,
+            36,
+            AlignCenter,
+            AlignCenter);
+        if(dialog_message_show(dialogs, msg) != DialogMessageButtonRight) {
+            furi_hal_rtc_set_heap_track_mode(heap_trace_mode_value[0]);
+            variable_item_set_current_value_text(item, heap_trace_mode_text[0]);
+            variable_item_set_current_value_index(item, 0);
+        }
+        break;
+    default:
+        break;
+    }
+
+    dialog_message_free(msg);
+    furi_record_close(RECORD_DIALOGS);
+    return true;
+}
+
 SystemSettings* system_settings_alloc(void) {
     SystemSettings* app = malloc(sizeof(SystemSettings));
 
@@ -221,6 +317,8 @@ SystemSettings* system_settings_alloc(void) {
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, system_settings_custom_event_callback);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 

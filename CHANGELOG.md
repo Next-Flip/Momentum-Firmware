@@ -3,6 +3,10 @@
   - Reworks how communication with battery guage is done, improves reliability and fixes issues with battery percentage not showing
   - After installing firmware with this change, downgrading to old firmware will cause battery percentage to be blank
   - If you must downgrade firmware, use the [Guage Tool app](https://github.com/skotopes/flipperzero_gauge_tool) to unseal the guage
+- OFW: Furi: RTC Alarm support (目覚め時計) (by @skotopes)
+  - Reworks RTC initialization to support Alarms functionality
+  - Older firmware will be unable to handle alarm, downgrading might be problematic
+  - If you must downgrade firmware, disable Alarm in Settings > Clock & Alarm first
 - OFW: JS: Modules backport & overhaul (by @portasynthinca3), backport of backport (by @Willy-JL & @xMasterX)
   - OFW backported some modules we had, added lots of new stuff, and overhauled many other things
   - Non-exhaustive list of changes to help you fix your scripts:
@@ -47,7 +51,6 @@
       - effort required to update old scripts using these: minimal
   - Added type definitions (typescript files for type checking in IDE, Flipper does not run typescript)
   - Documentation is incomplete and deprecated, from now on you should refer to type definitions (`applications/system/js_app/packages/fz-sdk`), those will always be correct
-  - Type definitions for extra modules we have that OFW doesn't will come later
 - GUI: Refactored TextInput illegal symbols (by @Willy-JL)
   - If your app used `text_input_add_illegal_symbols(text_input)` it should change to `text_input_show_illegal_symbols(text_input, true)`
 
@@ -103,7 +106,9 @@
   - Added typedocs for all extra JS modules in Momentum (by @Willy-JL)
 - RPC: Added ASCII event support (#284 by @Willy-JL)
 - FBT/SDK: New app flag UnloadAssetPacks to free RAM in heavy apps like NFC, MFKey, uPython (#260 by @Willy-JL)
-- OFW: Settings: Clock editing & Alarm function (目覚め時計) (by @skotopes)
+- Settings:
+  - OFW: Clock editing & Alarm function (目覚め時計) (by @skotopes)
+  - Add warnings for some settings you shouldn't touch like Debug, Sleep Method, Heap Trace (#296 by @Willy-JL)
 - BadKB:
   - OFW: Add linux/gnome badusb demo files (by @thomasnemer)
   - Add older qFlipper install demos for windows and macos (by @DXVVAY & @grugnoymeme)
@@ -119,7 +124,6 @@
 - Furi:
   - OFW: Add FuriEventLoop support for FuriEventFlag, simplify API (by @Skorpionm)
   - OFW: Put errno into TCB, better integration with libc (by @portasynthinca3)
-  - OFW: FuriHalRtc Alarm support (目覚め時計) (by @skotopes)
 
 ### Updated:
 - Apps:
@@ -139,6 +143,7 @@
   - CLI-GUI Bridge: Add more symbols to keyboard (#222 by @Willy-JL)
   - NRF24 Batch: Add Aeropac SN board txt file (by @vad7)
   - UL: Sub-GHz Bruteforcer: Add new protocols for existing dump option (by @xMasterX), use FW functions for top buttons (by @DerSkythe)
+  - UL: RFID/iButton Fuzzer: Add protocols Electra, Idteck, Gallagher, Nexwatch, refactor to make RFID protocols easier to add (by @SkeletonMan03), add more Dallas 1990 IDs (by @eblis)
   - UL: NRF24 Apps: Use string library compatible with OFW SDK (by @xMasterX)
   - UL: W5500 Ethernet: Various fixes and improvements (by @xMasterX)
   - OFW: SPI Mem Manager: Fixed UI rendering bug related to line breaks (by @portasynthinca3)
@@ -150,6 +155,7 @@
     - Decoding of URL-encoded URI characters (#267 by @jaylikesbunda)
     - SmartPoster record support (#275 by @Willy-JL)
     - Enable parsing NTAG I2C Plus 1k and 2k chips too (#237 by @RocketGod-git)
+  - NFC: Updated MFC dict, +100 keys from RRG proxmark3, +17 keys from Mifare Classic Tool
   - Added 6 new Mifare Classic keys from Bulgaria Hotel (#216 by @z3r0l1nk)
   - UL: Add iq aparts hotel key (by @xMasterX)
   - OFW/UL: Rename 'Detect Reader' to 'Extract MFC Keys' (by @bettse & @xMasterX)
@@ -178,7 +184,9 @@
   - Move more commands as plugins on SD, refactor plugin wrapper (#276 by @Willy-JL)
 - FBT: Optimize icons blob, scrub unused icons (#291 by @Willy-JL)
 - OFW: BadKB: Improve ChromeOS and GNOME demo scripts (by @kowalski7cc)
-- OFW: GUI: Change dialog_ex text ownership model (by @skotopes)
+- GUI:
+  - OFW: Change dialog_ex text ownership model (by @skotopes)
+  - Improve some error messages to be more clear, like Sub-GHz region missing and Main Menu .fap file missing (#296 by @Willy-JL)
 - OFW: CCID: App changes and improvements (by @kidbomb)
 - OFW: API: Exposed `view_dispatcher_get_event_loop` (by @CookiePLMonster)
 - Furi:
@@ -199,6 +207,7 @@
   - OFW: Fix detection of GProx II cards and false detection of other cards (by @Astrrra)
   - OFW: Fix Guard GProxII False Positive and 36-bit Parsing (by @zinongli)
   - OFW: GProxII Fix Writing and Rendering Conflict (by @zinongli)
+- Asset Packer: Fix font terminator causing freezes/crashes, like in Marauder AP scan/list (#295 by @Willy-JL)
 - Desktop:
   - Fallback Poweroff prompt when power settings is unavailable (by @Willy-JL)
 - Sub-GHz:

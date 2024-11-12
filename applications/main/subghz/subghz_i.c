@@ -51,7 +51,7 @@ void subghz_dialog_message_freq_error(SubGhz* subghz, SubGhzTx can_tx) {
     default:
         return;
     case SubGhzTxBlockedRegionNotProvisioned:
-        message_text = "Region is not\nprovisioned.\nUpdate firmware\nor bypass region.";
+        message_text = "Missing region file.\nReinstall firmware\nwith Web/App\nor bypass region.";
         break;
     case SubGhzTxBlockedRegion:
         message_text = "Frequency outside\nof region range.\nMNTM > Protocols\n> Bypass Region";

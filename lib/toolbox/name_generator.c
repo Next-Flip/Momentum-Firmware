@@ -15,25 +15,9 @@ const char* const name_generator_left[] = {
 };
 
 const char* const name_generator_right[] = {
-    "bidet",
-    "sus",
-    "fed",
-    "moroder",
-    "bobr",
-    "chomik",
-    "sidorovich",
-    "stalker",
-    "yapper",
-    "bnuuy",
-    "jezyk",
-    "juzyk",
-    "cult",
-    "pp",
-    "zalaz",
-    "breeky",
-    "bunker"
-    "pingwin",
-    "kot",
+    "bidet",   "sus",    "fed",    "moroder", "bobr",  "chomik", "sidorovich",
+    "stalker", "yapper", "bnuuy",  "jezyk",   "juzyk", "cult",   "pp",
+    "zalaz",   "breeky", "bunker", "pingwin", "kot",
 };
 
 void name_generator_make_auto_datetime(
