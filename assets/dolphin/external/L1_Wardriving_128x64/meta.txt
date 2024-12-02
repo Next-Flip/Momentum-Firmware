@@ -3,12 +3,12 @@ Version: 1
 
 Width: 128
 Height: 64
-Passive frames: 9
+Passive frames: 8
 Active frames: 0
-Frames order: 0 1 2 3 4 5 6 7 7
+Frames order: 0 1 2 3 4 5 6 6
 Active cycles: 0
-Frame rate: 2
-Duration: 360
+Frame rate: 1
+Duration: 3600
 Active cooldown: 0
 
 Bubble slots: 1
@@ -19,5 +19,5 @@ Y: 14
 Text: Pwned!
 AlignH: Left
 AlignV: Center
-StartFrame: 7
-EndFrame: 8
+StartFrame: 6
+EndFrame: 7

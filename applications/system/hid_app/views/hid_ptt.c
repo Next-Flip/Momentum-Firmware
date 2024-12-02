@@ -42,6 +42,7 @@ typedef struct {
 enum HidPushToTalkAppIndex {
     HidPushToTalkAppIndexDiscord,
     HidPushToTalkAppIndexFaceTime,
+    HidPushToTalkAppIndexGather,
     HidPushToTalkAppIndexGoogleMeet,
     HidPushToTalkAppIndexGoogleHangouts,
     HidPushToTalkAppIndexJamulus,
@@ -308,7 +309,6 @@ static void hid_ptt_trigger_mute_jamulus(HidPushToTalk* hid_ptt) {
 }
 
 // webex
-
 static void hid_ptt_trigger_camera_webex(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
     hid_hal_keyboard_release(
@@ -323,6 +323,30 @@ static void hid_ptt_trigger_hand_linux_webex(HidPushToTalk* hid_ptt) {
     hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_R);
     hid_hal_keyboard_release(
         hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_RIGHT_SHIFT | HID_KEYBOARD_R);
+}
+
+// Gather
+static void hid_ptt_trigger_hand_gather(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_H);
+    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_H);
+}
+static void hid_ptt_trigger_camera_macos_gather(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+}
+static void hid_ptt_trigger_mute_macos_gather(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
+    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
+}
+static void hid_ptt_trigger_camera_linux_gather(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+    hid_hal_keyboard_release(
+        hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+}
+static void hid_ptt_trigger_mute_linux_gather(HidPushToTalk* hid_ptt) {
+    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
+    hid_hal_keyboard_release(
+        hid_ptt->hid, KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
 }
 
 static void hid_ptt_menu_callback(
@@ -358,6 +382,13 @@ static void hid_ptt_menu_callback(
                     model->callback_trigger_mute = hid_ptt_trigger_cmd_shift_m;
                     model->callback_start_ptt = hid_ptt_trigger_cmd_shift_m;
                     model->callback_stop_ptt = hid_ptt_trigger_cmd_shift_m;
+                    break;
+                case HidPushToTalkAppIndexGather:
+                    model->callback_trigger_mute = hid_ptt_trigger_mute_macos_gather;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_macos_gather;
+                    model->callback_trigger_hand = hid_ptt_trigger_hand_gather;
+                    model->callback_start_ptt = hid_ptt_trigger_mute_macos_gather;
+                    model->callback_stop_ptt = hid_ptt_trigger_mute_macos_gather;
                     break;
                 case HidPushToTalkAppIndexGoogleHangouts:
                     model->callback_trigger_mute = hid_ptt_trigger_mute_macos_hangouts;
@@ -433,6 +464,13 @@ static void hid_ptt_menu_callback(
                     model->callback_trigger_mute = hid_ptt_trigger_mute_linux_discord;
                     model->callback_start_ptt = hid_ptt_start_ptt_linux_discord;
                     model->callback_stop_ptt = hid_ptt_stop_ptt_linux_discord;
+                    break;
+                case HidPushToTalkAppIndexGather:
+                    model->callback_trigger_mute = hid_ptt_trigger_mute_linux_gather;
+                    model->callback_trigger_camera = hid_ptt_trigger_camera_linux_gather;
+                    model->callback_trigger_hand = hid_ptt_trigger_hand_gather;
+                    model->callback_start_ptt = hid_ptt_trigger_mute_linux_gather;
+                    model->callback_stop_ptt = hid_ptt_trigger_mute_linux_gather;
                     break;
                 case HidPushToTalkAppIndexGoogleHangouts:
                     model->callback_trigger_mute = hid_ptt_trigger_mute_linux_hangouts;
@@ -876,6 +914,20 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     ptt_menu_add_item_to_list(
         hid->hid_ptt_menu,
         HidPushToTalkMacOS,
+        "Gather",
+        HidPushToTalkAppIndexGather,
+        hid_ptt_menu_callback,
+        hid_ptt);
+    ptt_menu_add_item_to_list(
+        hid->hid_ptt_menu,
+        HidPushToTalkLinux,
+        "Gather",
+        HidPushToTalkAppIndexGather,
+        hid_ptt_menu_callback,
+        hid_ptt);
+    ptt_menu_add_item_to_list(
+        hid->hid_ptt_menu,
+        HidPushToTalkMacOS,
         "Jamulus",
         HidPushToTalkAppIndexJamulus,
         hid_ptt_menu_callback,
@@ -932,14 +984,14 @@ HidPushToTalk* hid_ptt_alloc(Hid* hid) {
     ptt_menu_add_item_to_list(
         hid->hid_ptt_menu,
         HidPushToTalkMacOS,
-        "Slack Hubble",
+        "Slack Huddle",
         HidPushToTalkAppIndexSlackHubble,
         hid_ptt_menu_callback,
         hid_ptt);
     ptt_menu_add_item_to_list(
         hid->hid_ptt_menu,
         HidPushToTalkLinux,
-        "Slack Hubble",
+        "Slack Huddle",
         HidPushToTalkAppIndexSlackHubble,
         hid_ptt_menu_callback,
         hid_ptt);
