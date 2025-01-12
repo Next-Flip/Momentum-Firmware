@@ -1,11 +1,12 @@
 #include "../infrared_app_i.h"
 #include <dolphin/dolphin.h>
 
-static const char* const easy_mode_button_names[] = {
-    "Power", "Vol_Up", "Vol_Down", "Ch_Up", "Ch_Down", "Mute",
-    "Menu", "Input", "Back", "Ok", "Up", "Down", "Left", "Right",
-    "Play", "Pause", "Stop", "Prev", "Next", "Rew", "FF"
-};
+static const char* const easy_mode_button_names[] = {"Power", "Vol_up", "Vol_dn", "Ch_up", "Ch_dn",
+                                                     "Mute",  "Eject",  "Input",  "Back",  "Ok",
+                                                     "Up",    "Down",   "Left",   "Right", "Play",
+                                                     "Pause", "Stop",   "Prev",   "Next",  "Rew",
+                                                     "FF",    "Exit",   "Menu"};
+
 
 void infrared_scene_learn_enter_name_on_enter(void* context) {
     InfraredApp* infrared = context;

@@ -46,8 +46,11 @@ void infrared_scene_start_on_enter(void* context) {
         infrared);
 
     char easy_learn_text[24];
-    snprintf(easy_learn_text, sizeof(easy_learn_text), "Easy Learn [%s]", 
-             infrared->app_state.is_easy_mode ? "X" : " ");
+    snprintf(
+        easy_learn_text,
+        sizeof(easy_learn_text),
+        "Easy Learn [%s]",
+        infrared->app_state.is_easy_mode ? "X" : " ");
     submenu_add_item(
         submenu,
         easy_learn_text,
@@ -104,8 +107,9 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
             if(event.event == SubmenuIndexUniversalRemotes) {
                 furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
                 scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
-            } else if(event.event == SubmenuIndexLearnNewRemote || 
-                     event.event == SubmenuIndexLearnNewRemoteRaw) {
+            } else if(
+                event.event == SubmenuIndexLearnNewRemote ||
+                event.event == SubmenuIndexLearnNewRemoteRaw) {
                 infrared_worker_rx_enable_signal_decoding(
                     infrared->worker, event.event == SubmenuIndexLearnNewRemote);
                 infrared->app_state.is_learning_new_remote = true;

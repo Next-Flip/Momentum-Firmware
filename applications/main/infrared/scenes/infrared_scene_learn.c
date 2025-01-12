@@ -1,11 +1,11 @@
 #include "../infrared_app_i.h"
 #include <dolphin/dolphin.h>
 
-static const char* const easy_mode_button_names[] = {
-    "Power", "Vol_Up", "Vol_Down", "Ch_Up", "Ch_Down", "Mute",
-    "Menu", "Input", "Back", "Ok", "Up", "Down", "Left", "Right",
-    "Play", "Pause", "Stop", "Prev", "Next", "Rew", "FF"
-};
+static const char* const easy_mode_button_names[] = {"Power", "Vol_up", "Vol_dn", "Ch_up", "Ch_dn",
+                                                     "Mute",  "Eject",  "Input",  "Back",  "Ok",
+                                                     "Up",    "Down",   "Left",   "Right", "Play",
+                                                     "Pause", "Stop",   "Prev",   "Next",  "Rew",
+                                                     "FF",    "Exit",   "Menu"};
 
 void infrared_scene_learn_on_enter(void* context) {
     InfraredApp* infrared = context;
@@ -25,15 +25,21 @@ void infrared_scene_learn_on_enter(void* context) {
         if(!infrared->app_state.is_learning_new_remote && infrared->remote) {
             button_count = infrared_remote_get_signal_count(infrared->remote);
         }
-        const char* button_name = button_count < COUNT_OF(easy_mode_button_names) ? 
-            easy_mode_button_names[button_count] : "Button";
-        
+        const char* button_name = button_count < COUNT_OF(easy_mode_button_names) ?
+                                      easy_mode_button_names[button_count] :
+                                      "Button";
+
         infrared_text_store_set(
             infrared, 0, "Point remote at IR port\nand press the %s button", button_name);
         popup_set_text(popup, infrared->text_store[0], 5, 10, AlignLeft, AlignCenter);
     } else {
         popup_set_text(
-            popup, "Point the remote at IR port\nand push the button", 5, 10, AlignLeft, AlignCenter);
+            popup,
+            "Point the remote at IR port\nand push the button",
+            5,
+            10,
+            AlignLeft,
+            AlignCenter);
     }
 
     popup_set_callback(popup, NULL);
