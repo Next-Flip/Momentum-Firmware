@@ -1,11 +1,12 @@
 #include "../infrared_app_i.h"
 #include <dolphin/dolphin.h>
 
-static const char* const easy_mode_button_names[] = {"Power", "Vol_up", "Vol_dn", "Ch_up", "Ch_dn",
-                                                     "Mute",  "Eject",  "Input",  "Back",  "Ok",
-                                                     "Up",    "Down",   "Left",   "Right", "Play",
-                                                     "Pause", "Stop",   "Prev",   "Next",  "Rew",
-                                                     "FF",    "Exit",   "Menu"};
+/* Button names for easy mode */
+const char* const easy_mode_button_names[] = {"Power", "Vol_up", "Vol_dn", "Ch_up", "Ch_dn",
+                                              "Mute",  "Eject",  "Input",  "Back",  "Ok",
+                                              "Up",    "Down",   "Left",   "Right", "Play",
+                                              "Pause", "Stop",   "Prev",   "Next",  "Rew",
+                                              "FF",    "Exit",   "Menu"};
 
 static void infrared_scene_learn_dialog_result_callback(DialogExResult result, void* context) {
     InfraredApp* infrared = context;
@@ -21,7 +22,7 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
         button_index = infrared->app_state.current_button_index;
         if(increment) {
             // Only increment if we haven't reached the last button
-            if(button_index + 1 < (int32_t)COUNT_OF(easy_mode_button_names)) {
+            if(button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT) {
                 button_index++;
                 infrared->app_state.current_button_index = button_index;
             }
@@ -29,7 +30,7 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
     } else if(infrared->remote) {
         // For existing remotes, get signal count but ensure it fits in int32_t
         button_index = (int32_t)infrared_remote_get_signal_count(infrared->remote);
-        if(increment && button_index + 1 < (int32_t)COUNT_OF(easy_mode_button_names)) {
+        if(increment && button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT) {
             button_index++;
         }
     } else {
@@ -38,8 +39,8 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
 
     // Ensure button_index is valid
     if(button_index < 0) button_index = 0;
-    if(button_index >= (int32_t)COUNT_OF(easy_mode_button_names)) {
-        button_index = (int32_t)COUNT_OF(easy_mode_button_names) - 1;
+    if(button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
+        button_index = (int32_t)EASY_MODE_BUTTON_COUNT - 1;
     }
 
     // Now we know button_index is valid, use it to get the name
@@ -50,7 +51,7 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
     dialog_ex_set_text(dialog_ex, infrared->text_store[0], 5, 10, AlignLeft, AlignCenter);
 
     // Hide skip button if we're at the last predefined button
-    if(button_index + 1 >= (int32_t)COUNT_OF(easy_mode_button_names)) {
+    if(button_index + 1 >= (int32_t)EASY_MODE_BUTTON_COUNT) {
         dialog_ex_set_center_button_text(dialog_ex, NULL);
     }
 }
@@ -63,7 +64,7 @@ void infrared_scene_learn_on_enter(void* context) {
     // Initialize or validate current_button_index
     if(infrared->app_state.is_learning_new_remote) {
         // If index is beyond our predefined names, reset it
-        if(infrared->app_state.current_button_index >= (int32_t)COUNT_OF(easy_mode_button_names)) {
+        if(infrared->app_state.current_button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
             infrared->app_state.current_button_index = 0;
         }
     }
@@ -80,8 +81,7 @@ void infrared_scene_learn_on_enter(void* context) {
         infrared_scene_learn_update_button_name(infrared, false);
         dialog_ex_set_icon(dialog_ex, 0, 22, &I_InfraredLearnShort_128x31);
         // Only show skip if not at last button
-        if(infrared->app_state.current_button_index + 1 <
-           (int32_t)COUNT_OF(easy_mode_button_names)) {
+        if(infrared->app_state.current_button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT) {
             dialog_ex_set_center_button_text(dialog_ex, "Skip");
         }
     } else {

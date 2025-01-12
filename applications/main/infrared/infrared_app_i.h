@@ -52,6 +52,10 @@
 #define INFRARED_DEFAULT_REMOTE_NAME "Remote"
 #define INFRARED_LOG_TAG             "InfraredApp"
 
+/* Button names for easy mode */
+#define EASY_MODE_BUTTON_COUNT 23 // Number of buttons in the array
+extern const char* const easy_mode_button_names[];
+
 /**
  * @brief Enumeration of invalid remote button indices.
  */
