@@ -84,7 +84,12 @@ void infrared_scene_start_on_enter(void* context) {
     const uint32_t submenu_index =
         scene_manager_get_scene_state(scene_manager, InfraredSceneStart);
     submenu_set_selected_item(submenu, submenu_index);
-    scene_manager_set_scene_state(scene_manager, InfraredSceneStart, SubmenuIndexUniversalRemotes);
+
+    // Only reset menu position if we're not coming from a toggle
+    if(submenu_index == 0) {
+        scene_manager_set_scene_state(
+            scene_manager, InfraredSceneStart, SubmenuIndexUniversalRemotes);
+    }
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewSubmenu);
 }
@@ -99,6 +104,9 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexEasyLearn) {
             infrared->app_state.is_easy_mode = !infrared->app_state.is_easy_mode;
             infrared_save_settings(infrared);
+            // Save current position
+            scene_manager_set_scene_state(
+                scene_manager, InfraredSceneStart, SubmenuIndexEasyLearn);
             scene_manager_previous_scene(scene_manager);
             scene_manager_next_scene(scene_manager, InfraredSceneStart);
             consumed = true;

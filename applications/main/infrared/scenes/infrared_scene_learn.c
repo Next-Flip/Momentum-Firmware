@@ -15,7 +15,7 @@ static void infrared_scene_learn_dialog_result_callback(DialogExResult result, v
 static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool increment) {
     DialogEx* dialog_ex = infrared->dialog_ex;
     int32_t button_index;
-    
+
     if(infrared->app_state.is_learning_new_remote) {
         // For new remotes, use current_button_index directly
         button_index = infrared->app_state.current_button_index;
@@ -80,7 +80,8 @@ void infrared_scene_learn_on_enter(void* context) {
         infrared_scene_learn_update_button_name(infrared, false);
         dialog_ex_set_icon(dialog_ex, 0, 22, &I_InfraredLearnShort_128x31);
         // Only show skip if not at last button
-        if(infrared->app_state.current_button_index + 1 < (int32_t)COUNT_OF(easy_mode_button_names)) {
+        if(infrared->app_state.current_button_index + 1 <
+           (int32_t)COUNT_OF(easy_mode_button_names)) {
             dialog_ex_set_center_button_text(dialog_ex, "Skip");
         }
     } else {
@@ -125,7 +126,7 @@ bool infrared_scene_learn_on_event(void* context, SceneManagerEvent event) {
 
 void infrared_scene_learn_on_exit(void* context) {
     InfraredApp* infrared = context;
-    
+
     // Reset dialog
     dialog_ex_reset(infrared->dialog_ex);
 

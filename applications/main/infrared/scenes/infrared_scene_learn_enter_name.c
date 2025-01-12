@@ -7,7 +7,6 @@ static const char* const easy_mode_button_names[] = {"Power", "Vol_up", "Vol_dn"
                                                      "Pause", "Stop",   "Prev",   "Next",  "Rew",
                                                      "FF",    "Exit",   "Menu"};
 
-
 void infrared_scene_learn_enter_name_on_enter(void* context) {
     InfraredApp* infrared = context;
     TextInput* text_input = infrared->text_input;
