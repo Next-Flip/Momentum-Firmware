@@ -15,7 +15,12 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
 
     if(infrared->app_state.is_easy_mode) {
         // In easy mode, use predefined names based on button count
-        size_t button_count = infrared_remote_get_signal_count(infrared->remote);
+        size_t button_count;
+        if(infrared->app_state.is_learning_new_remote) {
+            button_count = (size_t)infrared->app_state.current_button_index;
+        } else {
+            button_count = infrared_remote_get_signal_count(infrared->remote);
+        }
         if(button_count < COUNT_OF(easy_mode_button_names)) {
             infrared_text_store_set(infrared, 0, "%s", easy_mode_button_names[button_count]);
         } else {
