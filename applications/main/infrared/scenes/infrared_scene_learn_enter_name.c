@@ -1,12 +1,26 @@
 #include "../infrared_app_i.h"
 #include <dolphin/dolphin.h>
 
+static const char* const easy_mode_button_names[] = {
+    "Power", "Vol_Up", "Vol_Down", "Ch_Up", "Ch_Down", "Mute",
+    "Menu", "Input", "Back", "Ok", "Up", "Down", "Left", "Right",
+    "Play", "Pause", "Stop", "Prev", "Next", "Rew", "FF"
+};
+
 void infrared_scene_learn_enter_name_on_enter(void* context) {
     InfraredApp* infrared = context;
     TextInput* text_input = infrared->text_input;
     InfraredSignal* signal = infrared->current_signal;
 
-    if(infrared_signal_is_raw(signal)) {
+    if(infrared->app_state.is_easy_mode) {
+        // In easy mode, use predefined names based on button count
+        size_t button_count = infrared_remote_get_signal_count(infrared->remote);
+        if(button_count < COUNT_OF(easy_mode_button_names)) {
+            infrared_text_store_set(infrared, 0, "%s", easy_mode_button_names[button_count]);
+        } else {
+            infrared_text_store_set(infrared, 0, "Button_%d", button_count + 1);
+        }
+    } else if(infrared_signal_is_raw(signal)) {
         const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
         infrared_text_store_set(infrared, 0, "RAW_%zu", raw->timings_size);
     } else {
@@ -27,7 +41,7 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
         context,
         infrared->text_store[0],
         INFRARED_MAX_BUTTON_NAME_LENGTH,
-        true);
+        !infrared->app_state.is_easy_mode); // Only allow editing in normal mode
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewTextInput);
 }

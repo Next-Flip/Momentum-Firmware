@@ -24,4 +24,5 @@ typedef struct InfraredApp InfraredApp;
 typedef struct {
     FuriHalInfraredTxPin tx_pin;
     bool otg_enabled;
+    bool easy_mode;
 } InfraredSettings;

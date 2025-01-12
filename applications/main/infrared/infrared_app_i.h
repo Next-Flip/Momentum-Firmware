@@ -85,6 +85,7 @@ typedef struct {
     bool is_debug_enabled; /**< Whether to enable or disable debugging features. */
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
     bool is_otg_enabled; /**< Whether OTG power (external 5V) is enabled. */
+    bool is_easy_mode; /**< Whether easy learning mode is enabled. */
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
     InfraredEditMode edit_mode     : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
