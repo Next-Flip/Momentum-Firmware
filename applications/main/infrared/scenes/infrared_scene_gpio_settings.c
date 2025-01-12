@@ -1,8 +1,8 @@
 #include "../infrared_app_i.h"
 
 static const char* const infrared_scene_gpio_settings_pin_text[FuriHalInfraredTxPinMax + 1] = {
-    "Internal",
-    "External",
+    "Flipper",
+    "2 (A7)",
     "Auto",
 };
 
