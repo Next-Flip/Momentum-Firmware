@@ -2,6 +2,7 @@
 - Apps:
   - Games: Pinball0 (by @rdefeo)
   - NFC: Metroflip (by @luu176)
+- CLI: Add `clear` and `cls` commands, add `did you mean ...?` command suggestion (#342 by @dexvleads)
 - UL: Sub-GHz: Jolly Motors support with add manually (by @pkooiman & @xMasterX)
 - OFW: Desktop: Add winter animations (by @Astrrra)
 - OFW: Furi: Pipe support (by @portasynthinca3)
