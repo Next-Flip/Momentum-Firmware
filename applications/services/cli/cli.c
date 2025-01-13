@@ -210,24 +210,29 @@ static void cli_execute_command(Cli* cli, CliCommand* command, FuriString* args)
 }
 
 static size_t cli_string_distance(const char* s1, const char* s2) {
-    size_t len1 = strlen(s1), len2 = strlen(s2);
     size_t distance = 0;
-    
-    for(size_t i = 0; i < MIN(len1, len2); i++) {
-        if(tolower(s1[i]) != tolower(s2[i])) distance++;
+
+    while(*s1 && *s2) {
+        if(*s1++ != *s2++) distance++;
     }
-    return distance + (len1 > len2 ? len1 - len2 : len2 - len1);
+    while(*s1++)
+        distance++;
+    while(*s2++)
+        distance++;
+
+    return distance;
 }
 
 static void cli_find_similar_command(Cli* cli, const char* input, FuriString* suggestion) {
-    size_t min_distance = SIZE_MAX;
+    size_t min_distance = (size_t)-1;
+    size_t max_allowed = (strlen(input) + 1) / 2;
     furi_string_reset(suggestion);
 
     CliCommandTree_it_t it;
     for(CliCommandTree_it(it, cli->commands); !CliCommandTree_end_p(it); CliCommandTree_next(it)) {
         const char* cmd_name = furi_string_get_cstr(*CliCommandTree_ref(it)->key_ptr);
         size_t distance = cli_string_distance(input, cmd_name);
-        if(distance < min_distance && distance <= 3) {
+        if(distance < min_distance && distance <= max_allowed) {
             min_distance = distance;
             furi_string_set(suggestion, cmd_name);
         }
@@ -273,18 +278,18 @@ static void cli_handle_enter(Cli* cli) {
         cli_nl(cli);
         FuriString* suggestion = furi_string_alloc();
         cli_find_similar_command(cli, furi_string_get_cstr(command), suggestion);
-        
-        if(furi_string_size(suggestion) > 0) {
+
+        if(furi_string_empty(suggestion)) {
+            printf(
+                "`%s` command not found, use `help` or `?` to list all available commands",
+                furi_string_get_cstr(command));
+        } else {
             printf(
                 "`%s` command not found, did you mean `%s`? Use `help` or `?` to list all available commands",
                 furi_string_get_cstr(command),
                 furi_string_get_cstr(suggestion));
-        } else {
-            printf(
-                "`%s` command not found, use `help` or `?` to list all available commands",
-                furi_string_get_cstr(command));
         }
-        
+
         furi_string_free(suggestion);
         cli_putc(cli, CliKeyBell);
     }
