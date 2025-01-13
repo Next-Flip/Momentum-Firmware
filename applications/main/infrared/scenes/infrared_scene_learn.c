@@ -13,6 +13,35 @@ static void infrared_scene_learn_dialog_result_callback(DialogExResult result, v
     view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
 }
 
+static bool infrared_scene_learn_get_next_name(
+    InfraredApp* infrared,
+    int32_t start_index,
+    int32_t* next_index) {
+    if(!infrared->remote) return false;
+
+    // Search through remaining button names to find one that doesn't exist
+    for(int32_t i = start_index; i < (int32_t)EASY_MODE_BUTTON_COUNT; i++) {
+        const char* name = easy_mode_button_names[i];
+        bool name_exists = false;
+
+        // Check if this name already exists in remote
+        for(size_t j = 0; j < infrared_remote_get_signal_count(infrared->remote); j++) {
+            if(strcmp(name, infrared_remote_get_signal_name(infrared->remote, j)) == 0) {
+                name_exists = true;
+                break;
+            }
+        }
+
+        // If we found a name that doesn't exist, return it
+        if(!name_exists) {
+            *next_index = i;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool increment) {
     DialogEx* dialog_ex = infrared->dialog_ex;
     int32_t button_index;
@@ -28,10 +57,14 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
             }
         }
     } else if(infrared->remote) {
-        // For existing remotes, get signal count but ensure it fits in int32_t
-        button_index = (int32_t)infrared_remote_get_signal_count(infrared->remote);
-        if(increment && button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT) {
-            button_index++;
+        // For existing remotes, find next available button name
+        button_index = infrared->app_state.existing_remote_button_index;
+        if(increment) {
+            int32_t next_index;
+            if(infrared_scene_learn_get_next_name(infrared, button_index + 1, &next_index)) {
+                button_index = next_index;
+                infrared->app_state.existing_remote_button_index = button_index;
+            }
         }
     } else {
         button_index = 0;
@@ -50,9 +83,21 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
         infrared, 0, "Point remote at IR port\nand press the %s button", button_name);
     dialog_ex_set_text(dialog_ex, infrared->text_store[0], 5, 10, AlignLeft, AlignCenter);
 
-    // Hide skip button if we're at the last predefined button
-    if(button_index + 1 >= (int32_t)EASY_MODE_BUTTON_COUNT) {
+    // For existing remotes, check if there are any more buttons to add
+    bool has_more_buttons = false;
+    if(!infrared->app_state.is_learning_new_remote && infrared->remote) {
+        int32_t next_index;
+        has_more_buttons =
+            infrared_scene_learn_get_next_name(infrared, button_index + 1, &next_index);
+    } else {
+        has_more_buttons = (button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT);
+    }
+
+    // Show/hide skip button based on whether there are more buttons
+    if(!has_more_buttons) {
         dialog_ex_set_center_button_text(dialog_ex, NULL);
+    } else {
+        dialog_ex_set_center_button_text(dialog_ex, "Skip");
     }
 }
 
@@ -67,6 +112,15 @@ void infrared_scene_learn_on_enter(void* context) {
         if(infrared->app_state.current_button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
             infrared->app_state.current_button_index = 0;
         }
+    } else {
+        // For existing remotes, find first missing button name
+        int32_t next_index;
+        if(infrared_scene_learn_get_next_name(infrared, 0, &next_index)) {
+            infrared->app_state.existing_remote_button_index = next_index;
+        } else {
+            // If no missing buttons found, start at beginning
+            infrared->app_state.existing_remote_button_index = 0;
+        }
     }
 
     infrared_worker_rx_set_received_signal_callback(
@@ -80,10 +134,6 @@ void infrared_scene_learn_on_enter(void* context) {
     if(infrared->app_state.is_easy_mode) {
         infrared_scene_learn_update_button_name(infrared, false);
         dialog_ex_set_icon(dialog_ex, 0, 22, &I_InfraredLearnShort_128x31);
-        // Only show skip if not at last button
-        if(infrared->app_state.current_button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT) {
-            dialog_ex_set_center_button_text(dialog_ex, "Skip");
-        }
     } else {
         dialog_ex_set_text(
             dialog_ex,
@@ -114,9 +164,11 @@ bool infrared_scene_learn_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        // Reset button index when exiting learn mode completely
+        // Reset button indices when exiting learn mode completely
         if(infrared->app_state.is_learning_new_remote) {
             infrared->app_state.current_button_index = 0;
+        } else {
+            infrared->app_state.existing_remote_button_index = 0;
         }
         consumed = false;
     }

@@ -7,18 +7,22 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
     InfraredSignal* signal = infrared->current_signal;
 
     if(infrared->app_state.is_easy_mode) {
-        // In easy mode, use predefined names based on button count
-        size_t button_count;
+        // In easy mode, use predefined names based on button index
+        int32_t button_index;
         if(infrared->app_state.is_learning_new_remote) {
-            button_count = (size_t)infrared->app_state.current_button_index;
+            button_index = infrared->app_state.current_button_index;
         } else {
-            button_count = infrared_remote_get_signal_count(infrared->remote);
+            button_index = infrared->app_state.existing_remote_button_index;
         }
-        if(button_count < EASY_MODE_BUTTON_COUNT) {
-            infrared_text_store_set(infrared, 0, "%s", easy_mode_button_names[button_count]);
-        } else {
-            infrared_text_store_set(infrared, 0, "Button_%d", button_count + 1);
+
+        // Ensure button_index is valid
+        if(button_index < 0) button_index = 0;
+        if(button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
+            button_index = (int32_t)EASY_MODE_BUTTON_COUNT - 1;
         }
+
+        // Always use predefined names in easy mode
+        infrared_text_store_set(infrared, 0, "%s", easy_mode_button_names[button_index]);
     } else if(infrared_signal_is_raw(signal)) {
         const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
         infrared_text_store_set(infrared, 0, "RAW_%zu", raw->timings_size);

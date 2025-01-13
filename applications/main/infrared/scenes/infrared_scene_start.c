@@ -97,6 +97,7 @@ void infrared_scene_start_on_enter(void* context) {
 bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
     InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
+    Submenu* submenu = infrared->submenu;
 
     bool consumed = false;
 
@@ -104,11 +105,16 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexEasyLearn) {
             infrared->app_state.is_easy_mode = !infrared->app_state.is_easy_mode;
             infrared_save_settings(infrared);
-            // Save current position
-            scene_manager_set_scene_state(
-                scene_manager, InfraredSceneStart, SubmenuIndexEasyLearn);
-            scene_manager_previous_scene(scene_manager);
-            scene_manager_next_scene(scene_manager, InfraredSceneStart);
+
+            // Update the menu item text without scene transition
+            char easy_learn_text[24];
+            snprintf(
+                easy_learn_text,
+                sizeof(easy_learn_text),
+                "Easy Learn [%s]",
+                infrared->app_state.is_easy_mode ? "X" : " ");
+            submenu_change_item_label(submenu, SubmenuIndexEasyLearn, easy_learn_text);
+
             consumed = true;
         } else {
             scene_manager_set_scene_state(scene_manager, InfraredSceneStart, event.event);
