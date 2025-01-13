@@ -48,6 +48,7 @@
 - NFC:
   - OFW: Plantain parser Last payment amount fix (by @mxcdoam)
   - OFW: Fix skylander ID reading (by @bettse)
+  - OFW: Fix MIFARE Plus detection (by @GMMan)
   - OFW: Fix ISO15693 stuck in wrong mode (by @RebornedBrain)
   - OFW: Fix MFUL PWD_AUTH command creation when 0x00 in password (by @GMMan)
   - OFW: Fix typo for `mf_classic_key_cahce_get_next_key()` function (by @luu176)
