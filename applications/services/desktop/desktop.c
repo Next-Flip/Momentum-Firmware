@@ -193,11 +193,11 @@ static void desktop_stop_auto_lock_timer(Desktop* desktop) {
 
 static void desktop_auto_lock_arm(Desktop* desktop) {
     if(desktop->settings.auto_lock_delay_ms) {
-        if(desktop->input_events_subscription == NULL) {
+        if(!desktop->input_events_subscription) {
             desktop->input_events_subscription = furi_pubsub_subscribe(
                 desktop->input_events_pubsub, desktop_auto_lock_callback, desktop);
         }
-        if(desktop->ascii_events_subscription == NULL) {
+        if(!desktop->ascii_events_subscription) {
             desktop->ascii_events_subscription = furi_pubsub_subscribe(
                 desktop->ascii_events_pubsub, desktop_auto_lock_callback, desktop);
         }

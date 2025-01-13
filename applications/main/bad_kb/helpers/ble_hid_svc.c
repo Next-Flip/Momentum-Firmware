@@ -157,6 +157,7 @@ static BleEventAckStatus ble_svc_hid_event_handler(void* event, void* context) {
     hci_event_pckt* event_pckt = (hci_event_pckt*)(((hci_uart_pckt*)event)->data);
     evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
     // aci_gatt_attribute_modified_event_rp0* attribute_modified;
+
     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
             // Process modification events
@@ -274,6 +275,7 @@ bool ble_svc_hid_update_input_report(
         .data_ptr = data,
         .data_len = len,
     };
+
     return ble_gatt_characteristic_update(
         hid_svc->svc_handle, &hid_svc->input_report_chars[input_report_num], &report_data);
 }
