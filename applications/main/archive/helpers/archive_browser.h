@@ -80,6 +80,8 @@ inline bool archive_is_known_app(ArchiveFileTypeEnum type) {
     return type < ArchiveFileTypeUnknown;
 }
 
+bool archive_is_parent_or_identical(const char* path_a, const char* path_b);
+bool archive_is_nested_path(const char* dst_path, char** clipboard_paths, size_t clipboard_count);
 bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx);
 bool archive_is_file_list_load_required(ArchiveBrowserViewModel* model);
 void archive_update_offset(ArchiveBrowserView* browser);
@@ -108,3 +110,6 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key);
 void archive_enter_dir(ArchiveBrowserView* browser, FuriString* name);
 void archive_leave_dir(ArchiveBrowserView* browser);
 void archive_refresh_dir(ArchiveBrowserView* browser);
+
+void archive_clear_selection(ArchiveBrowserViewModel* model);
+void archive_deselect_children(ArchiveBrowserViewModel* model, const char* parent);

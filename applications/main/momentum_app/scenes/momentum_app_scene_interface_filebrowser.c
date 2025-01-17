@@ -7,6 +7,12 @@ enum VarItemListIndex {
     VarItemListIndexFavoriteTimeout,
 };
 
+const char* const selection_indicator_styles[SelectionIndicatorStyleCount] = {
+    "+",
+    "*",
+    "-",
+};
+
 void momentum_app_scene_interface_filebrowser_var_item_list_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -35,6 +41,15 @@ static void
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     momentum_settings.show_internal_tab = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_filebrowser_selection_indicator_style_changed(
+    VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, selection_indicator_styles[index]);
+    momentum_settings.selection_indicator_style = index;
     app->save_settings = true;
 }
 
@@ -79,6 +94,16 @@ void momentum_app_scene_interface_filebrowser_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, momentum_settings.show_internal_tab);
     variable_item_set_current_value_text(item, momentum_settings.show_internal_tab ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Selection Indicator",
+        SelectionIndicatorStyleCount,
+        momentum_app_scene_interface_filebrowser_selection_indicator_style_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.selection_indicator_style);
+    variable_item_set_current_value_text(
+        item, selection_indicator_styles[momentum_settings.selection_indicator_style]);
 
     item = variable_item_list_add(
         var_item_list,

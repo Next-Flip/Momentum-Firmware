@@ -55,6 +55,13 @@ typedef union __attribute__((packed)) {
     uint32_t value;
 } ScreenFrameColor;
 
+typedef enum {
+    SelectionIndicatorStylePlus,
+    SelectionIndicatorStyleStar,
+    SelectionIndicatorStyleDash,
+    SelectionIndicatorStyleCount,
+} SelectionIndicatorStyle;
+
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
     uint32_t anim_speed;
@@ -79,6 +86,7 @@ typedef struct {
     bool sort_dirs_first;
     bool show_hidden_files;
     bool show_internal_tab;
+    SelectionIndicatorStyle selection_indicator_style;
     uint32_t favorite_timeout;
     bool dark_mode;
     bool rgb_backlight;

@@ -85,12 +85,28 @@ static void
                                 break;
                             }
                         }
+                        furi_string_free(selected);
                     }
 
                     if(model->item_idx < 0) {
                         model->item_idx = 0;
                     }
                 }
+
+                // Files lose their selected stateafter re entering, so we need to restore them
+                if(model->select_mode && model->selected_count > 0) {
+                    for(size_t i = 0; i < files_array_size(model->files); i++) {
+                        ArchiveFile_t* file = files_array_get(model->files, i);
+                        file->selected = false;
+                        for(size_t j = 0; j < model->selected_count; j++) {
+                            if(furi_string_cmp(model->selected_files[j], file->path) == 0) {
+                                file->selected = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 if(archive_is_file_list_load_required(model)) {
                     model->list_loading = true;
                     load_again = true;
@@ -136,6 +152,28 @@ static void archive_file_browser_set_path(
         file_browser_worker_set_config(
             browser->worker, path, filter_ext, skip_assets, hide_dot_files);
     }
+}
+
+bool archive_is_parent_or_identical(const char* path_a, const char* path_b) {
+    size_t len_a = strlen(path_a);
+    return (
+        strncmp(path_b, path_a, len_a) == 0 && (path_b[len_a] == '/' || path_b[len_a] == '\0'));
+}
+
+bool archive_is_nested_path(const char* dst_path, char** clipboard_paths, size_t clipboard_count) {
+    if(!dst_path || !clipboard_paths) {
+        return false;
+    }
+
+    for(size_t i = 0; i < clipboard_count; i++) {
+        if(!clipboard_paths[i]) continue;
+        const char* src_path = clipboard_paths[i];
+        if(archive_is_parent_or_identical(src_path, dst_path) && strcmp(src_path, dst_path) != 0) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx) {
@@ -679,4 +717,34 @@ void archive_refresh_dir(ArchiveBrowserView* browser) {
     }
     file_browser_worker_folder_refresh_sel(browser->worker, furi_string_get_cstr(str));
     furi_string_free(str);
+}
+
+void archive_clear_selection(ArchiveBrowserViewModel* model) {
+    model->select_mode = false;
+    for(size_t i = 0; i < model->selected_count; i++) {
+        furi_string_free(model->selected_files[i]);
+    }
+    free(model->selected_files);
+    model->selected_files = NULL;
+    model->selected_count = 0;
+
+    for(size_t i = 0; i < files_array_size(model->files); i++) {
+        ArchiveFile_t* file = files_array_get(model->files, i);
+        file->selected = false;
+    }
+}
+
+void archive_deselect_children(ArchiveBrowserViewModel* model, const char* parent) {
+    size_t write_idx = 0;
+    for(size_t i = 0; i < model->selected_count; i++) {
+        if(!furi_string_start_with(model->selected_files[i], parent)) {
+            if(write_idx != i) {
+                model->selected_files[write_idx] = model->selected_files[i];
+            }
+            write_idx++;
+        } else {
+            furi_string_free(model->selected_files[i]);
+        }
+    }
+    model->selected_count = write_idx;
 }
