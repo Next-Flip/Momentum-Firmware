@@ -637,3 +637,85 @@ int32_t infrared_app(void* p) {
 
     return 0;
 }
+
+bool infrared_settings_load(InfraredApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool success = false;
+    
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, INFRARED_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        uint8_t magic = 0;
+        if(storage_file_read(file, &magic, sizeof(magic)) == sizeof(magic)) {
+            if(magic == INFRARED_SETTINGS_MAGIC) {
+                uint32_t version = 0;
+                if(storage_file_read(file, &version, sizeof(version)) == sizeof(version)) {
+                    if(version == 1) {
+                        // Load v1 structure
+                        struct {
+                            FuriHalInfraredTxPin tx_pin;
+                            bool otg_enabled;
+                        } v1_settings;
+
+                        if(storage_file_read(file, &v1_settings, sizeof(v1_settings)) == sizeof(v1_settings)) {
+                            // Migrate to v2
+                            app->app_state.tx_pin = v1_settings.tx_pin;
+                            app->app_state.is_otg_enabled = v1_settings.otg_enabled;
+                            app->app_state.is_easy_mode = false;  // Default for migrated settings
+                            success = true;
+                        }
+                    } else if(version == 2) {
+                        // Current version - load directly
+                        InfraredSettings settings;
+                        if(storage_file_read(file, &settings, sizeof(InfraredSettings)) == sizeof(InfraredSettings)) {
+                            app->app_state.tx_pin = settings.tx_pin;
+                            app->app_state.is_otg_enabled = settings.otg_enabled;
+                            app->app_state.is_easy_mode = settings.easy_mode;
+                            success = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if(!success) {
+        // Load defaults if anything fails
+        app->app_state.tx_pin = FuriHalInfraredTxPinInternal;
+        app->app_state.is_otg_enabled = false;
+        app->app_state.is_easy_mode = false;
+    }
+
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+    return success;
+}
+
+bool infrared_settings_save(InfraredApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool success = false;
+
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, INFRARED_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        // Write magic
+        uint8_t magic = INFRARED_SETTINGS_MAGIC;
+        if(storage_file_write(file, &magic, sizeof(magic)) == sizeof(magic)) {
+            // Write version
+            uint32_t version = INFRARED_SETTINGS_VERSION;
+            if(storage_file_write(file, &version, sizeof(version)) == sizeof(version)) {
+                // Write settings
+                InfraredSettings settings = {
+                    .tx_pin = app->app_state.tx_pin,
+                    .otg_enabled = app->app_state.is_otg_enabled,
+                    .easy_mode = app->app_state.is_easy_mode,
+                };
+                if(storage_file_write(file, &settings, sizeof(InfraredSettings)) == sizeof(InfraredSettings)) {
+                    success = true;
+                }
+            }
+        }
+    }
+
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+    return success;
+}
