@@ -548,13 +548,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             // Draw label for center item
             if(center_item) {
                 menu_get_name(center_item, name, false);
+                size_t scroll_counter = menu_scroll_counter(model, true);
                 elements_scrollable_text_line_centered(
                     canvas,
                     pos_x_center,
                     (pos_y_center + icon_size / 2) + pos_y_offset,
-                    126,
+                    124,
                     name,
-                    0,
+                    scroll_counter,
                     false,
                     true);
             }

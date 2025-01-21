@@ -39,6 +39,8 @@
   - FlipWeather: Stability improvements (by @jblanked), improved progress display, added connectivity check on startup (by @jamisonderek)
   - FlipWiFi: Improve error handling, update scan loading and parsing, many bug/crash fixes, max 100 network scan, add some fast commands (by @jblanked), add connectivity check on startup (by @jamisonderek)
   - KeyCopier: Support for formats AR4, M1, AM7, Y2, Y11, S22, NA25, CO88, LW4, LW5, NA12, RU45, H75, B102, Y159, KA14, YM63, SFIC, RV (by @HonestLocksmith)
+  - NFC Maker: Allow setting custom UID, code cleanup (by @Willy-JL), show extra symbols for WiFi SSID/Password and Emails (by @956MB)
+  - Nightstand: Show battery percentage and show AM/PM in timer mode (by @956MB)
   - Oscilloscope: Add simple spectrum analyser and basic software scaling support (by @anfractuosity)
   - Picopass: Handle write key retry when a different card is presented, save SR as legacy from saved menu (by @bettse)
   - Pokemon Trade Tool: Update to gblink v0.63 which includes saving/loading of pin configurations for the EXT link interface, bug fixes (by @kbembedded)
