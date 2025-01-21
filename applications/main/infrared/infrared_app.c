@@ -510,7 +510,7 @@ void infrared_enable_otg(InfraredApp* infrared, bool enable) {
 bool infrared_settings_load(InfraredApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
-    
+
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, INFRARED_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint8_t magic = 0;
@@ -525,17 +525,19 @@ bool infrared_settings_load(InfraredApp* app) {
                             bool otg_enabled;
                         } v1_settings;
 
-                        if(storage_file_read(file, &v1_settings, sizeof(v1_settings)) == sizeof(v1_settings)) {
+                        if(storage_file_read(file, &v1_settings, sizeof(v1_settings)) ==
+                           sizeof(v1_settings)) {
                             // Migrate to v2
                             app->app_state.tx_pin = v1_settings.tx_pin;
                             app->app_state.is_otg_enabled = v1_settings.otg_enabled;
-                            app->app_state.is_easy_mode = false;  // Default for migrated settings
+                            app->app_state.is_easy_mode = false; // Default for migrated settings
                             success = true;
                         }
                     } else if(version == 2) {
                         // Current version - load directly
                         InfraredSettings settings;
-                        if(storage_file_read(file, &settings, sizeof(InfraredSettings)) == sizeof(InfraredSettings)) {
+                        if(storage_file_read(file, &settings, sizeof(InfraredSettings)) ==
+                           sizeof(InfraredSettings)) {
                             app->app_state.tx_pin = settings.tx_pin;
                             app->app_state.is_otg_enabled = settings.otg_enabled;
                             app->app_state.is_easy_mode = settings.easy_mode;
@@ -577,7 +579,8 @@ bool infrared_settings_save(InfraredApp* app) {
                     .otg_enabled = app->app_state.is_otg_enabled,
                     .easy_mode = app->app_state.is_easy_mode,
                 };
-                if(storage_file_write(file, &settings, sizeof(InfraredSettings)) == sizeof(InfraredSettings)) {
+                if(storage_file_write(file, &settings, sizeof(InfraredSettings)) ==
+                   sizeof(InfraredSettings)) {
                     success = true;
                 }
             }
