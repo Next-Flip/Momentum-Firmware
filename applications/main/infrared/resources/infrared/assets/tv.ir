@@ -333,13 +333,12 @@ protocol: NECext
 address: AD ED 00 00
 command: B5 4A 00 00
 #
-# ON
-# ON
 name: Power
 type: parsed
 protocol: NEC
 address: 01 00 00 00
 command: 40 00 00 00
+#
 name: Power
 type: parsed
 protocol: NECext
