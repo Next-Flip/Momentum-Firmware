@@ -1,13 +1,17 @@
 #include "infrared_app_i.h"
 
 #include <furi_hal_power.h>
-
+#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <toolbox/path.h>
 #include <toolbox/saved_struct.h>
 #include <dolphin/dolphin.h>
 
 #define TAG "InfraredApp"
+
+bool infrared_settings_load(InfraredApp* app);
+bool infrared_settings_save(InfraredApp* app);
 
 #define INFRARED_TX_MIN_INTERVAL_MS (50U)
 #define INFRARED_TASK_STACK_SIZE    (2048UL)
@@ -503,141 +507,6 @@ void infrared_enable_otg(InfraredApp* infrared, bool enable) {
     infrared->app_state.is_otg_enabled = enable;
 }
 
-static void infrared_load_settings(InfraredApp* infrared) {
-    InfraredSettings settings = {0};
-
-    if(!saved_struct_load(
-           INFRARED_SETTINGS_PATH,
-           &settings,
-           sizeof(InfraredSettings),
-           INFRARED_SETTINGS_MAGIC,
-           INFRARED_SETTINGS_VERSION)) {
-        FURI_LOG_D(TAG, "Failed to load settings, using defaults");
-        // infrared_save_settings(infrared);
-    }
-
-    infrared_set_tx_pin(infrared, settings.tx_pin);
-    if(settings.tx_pin < FuriHalInfraredTxPinMax) {
-        infrared_enable_otg(infrared, settings.otg_enabled);
-    }
-    infrared->app_state.is_easy_mode = settings.easy_mode;
-}
-
-void infrared_save_settings(InfraredApp* infrared) {
-    InfraredSettings settings = {
-        .tx_pin = infrared->app_state.tx_pin,
-        .otg_enabled = infrared->app_state.is_otg_enabled,
-        .easy_mode = infrared->app_state.is_easy_mode,
-    };
-
-    if(!saved_struct_save(
-           INFRARED_SETTINGS_PATH,
-           &settings,
-           sizeof(InfraredSettings),
-           INFRARED_SETTINGS_MAGIC,
-           INFRARED_SETTINGS_VERSION)) {
-        FURI_LOG_E(TAG, "Failed to save settings");
-    }
-}
-
-void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
-    furi_assert(context);
-    InfraredApp* infrared = context;
-
-    if(infrared_worker_signal_is_decoded(received_signal)) {
-        infrared_signal_set_message(
-            infrared->current_signal, infrared_worker_get_decoded_signal(received_signal));
-    } else {
-        const uint32_t* timings;
-        size_t timings_size;
-        infrared_worker_get_raw_signal(received_signal, &timings, &timings_size);
-        infrared_signal_set_raw_signal(
-            infrared->current_signal,
-            timings,
-            timings_size,
-            INFRARED_COMMON_CARRIER_FREQUENCY,
-            INFRARED_COMMON_DUTY_CYCLE);
-    }
-
-    view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventTypeSignalReceived);
-}
-
-void infrared_text_input_callback(void* context) {
-    furi_assert(context);
-    InfraredApp* infrared = context;
-    view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventTypeTextEditDone);
-}
-
-void infrared_popup_closed_callback(void* context) {
-    furi_assert(context);
-    InfraredApp* infrared = context;
-    view_dispatcher_send_custom_event(
-        infrared->view_dispatcher, InfraredCustomEventTypePopupClosed);
-}
-
-int32_t infrared_app(void* p) {
-    InfraredApp* infrared = infrared_alloc();
-
-    infrared_load_settings(infrared);
-    infrared_make_app_folder(infrared);
-
-    bool is_remote_loaded = false;
-    bool is_rpc_mode = false;
-
-    if(p && strlen(p)) {
-        uint32_t rpc_ctx = 0;
-        if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
-            infrared->rpc_ctx = (void*)rpc_ctx;
-            rpc_system_app_set_callback(
-                infrared->rpc_ctx, infrared_rpc_command_callback, infrared);
-            rpc_system_app_send_started(infrared->rpc_ctx);
-            is_rpc_mode = true;
-        } else {
-            const char* file_path = (const char*)p;
-            InfraredErrorCode error = infrared_remote_load(infrared->remote, file_path);
-
-            if(!INFRARED_ERROR_PRESENT(error)) {
-                is_remote_loaded = true;
-            } else {
-                is_remote_loaded = false;
-                bool wrong_file_type = INFRARED_ERROR_CHECK(error, InfraredErrorCodeWrongFileType);
-                const char* format = wrong_file_type ?
-                                         "Library file\n\"%s\" can't be opened as a remote" :
-                                         "Failed to load\n\"%s\"";
-
-                infrared_show_error_message(infrared, format, file_path);
-                return -1;
-            }
-
-            furi_string_set(infrared->file_path, file_path);
-        }
-    }
-
-    if(is_rpc_mode) {
-        view_dispatcher_attach_to_gui(
-            infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeDesktop);
-        scene_manager_next_scene(infrared->scene_manager, InfraredSceneRpc);
-    } else {
-        view_dispatcher_attach_to_gui(
-            infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeFullscreen);
-        if(is_remote_loaded) { //-V547
-            scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
-        } else {
-            scene_manager_next_scene(infrared->scene_manager, InfraredSceneStart);
-        }
-    }
-
-    view_dispatcher_run(infrared->view_dispatcher);
-
-    infrared_set_tx_pin(infrared, FuriHalInfraredTxPinInternal);
-    infrared_enable_otg(infrared, false);
-    infrared_free(infrared);
-
-    return 0;
-}
-
 bool infrared_settings_load(InfraredApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
@@ -718,4 +587,102 @@ bool infrared_settings_save(InfraredApp* app) {
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
     return success;
+}
+
+void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
+    furi_assert(context);
+    InfraredApp* infrared = context;
+
+    if(infrared_worker_signal_is_decoded(received_signal)) {
+        infrared_signal_set_message(
+            infrared->current_signal, infrared_worker_get_decoded_signal(received_signal));
+    } else {
+        const uint32_t* timings;
+        size_t timings_size;
+        infrared_worker_get_raw_signal(received_signal, &timings, &timings_size);
+        infrared_signal_set_raw_signal(
+            infrared->current_signal,
+            timings,
+            timings_size,
+            INFRARED_COMMON_CARRIER_FREQUENCY,
+            INFRARED_COMMON_DUTY_CYCLE);
+    }
+
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeSignalReceived);
+}
+
+void infrared_text_input_callback(void* context) {
+    furi_assert(context);
+    InfraredApp* infrared = context;
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeTextEditDone);
+}
+
+void infrared_popup_closed_callback(void* context) {
+    furi_assert(context);
+    InfraredApp* infrared = context;
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypePopupClosed);
+}
+
+int32_t infrared_app(void* p) {
+    InfraredApp* infrared = infrared_alloc();
+
+    infrared_settings_load(infrared);
+    infrared_make_app_folder(infrared);
+
+    bool is_remote_loaded = false;
+    bool is_rpc_mode = false;
+
+    if(p && strlen(p)) {
+        uint32_t rpc_ctx = 0;
+        if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
+            infrared->rpc_ctx = (void*)rpc_ctx;
+            rpc_system_app_set_callback(
+                infrared->rpc_ctx, infrared_rpc_command_callback, infrared);
+            rpc_system_app_send_started(infrared->rpc_ctx);
+            is_rpc_mode = true;
+        } else {
+            const char* file_path = (const char*)p;
+            InfraredErrorCode error = infrared_remote_load(infrared->remote, file_path);
+
+            if(!INFRARED_ERROR_PRESENT(error)) {
+                is_remote_loaded = true;
+            } else {
+                is_remote_loaded = false;
+                bool wrong_file_type = INFRARED_ERROR_CHECK(error, InfraredErrorCodeWrongFileType);
+                const char* format = wrong_file_type ?
+                                         "Library file\n\"%s\" can't be opened as a remote" :
+                                         "Failed to load\n\"%s\"";
+
+                infrared_show_error_message(infrared, format, file_path);
+                return -1;
+            }
+
+            furi_string_set(infrared->file_path, file_path);
+        }
+    }
+
+    if(is_rpc_mode) {
+        view_dispatcher_attach_to_gui(
+            infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeDesktop);
+        scene_manager_next_scene(infrared->scene_manager, InfraredSceneRpc);
+    } else {
+        view_dispatcher_attach_to_gui(
+            infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeFullscreen);
+        if(is_remote_loaded) { //-V547
+            scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
+        } else {
+            scene_manager_next_scene(infrared->scene_manager, InfraredSceneStart);
+        }
+    }
+
+    view_dispatcher_run(infrared->view_dispatcher);
+
+    infrared_set_tx_pin(infrared, FuriHalInfraredTxPinInternal);
+    infrared_enable_otg(infrared, false);
+    infrared_free(infrared);
+
+    return 0;
 }
