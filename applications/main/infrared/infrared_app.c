@@ -10,9 +10,6 @@
 
 #define TAG "InfraredApp"
 
-bool infrared_settings_load(InfraredApp* app);
-bool infrared_settings_save(InfraredApp* app);
-
 #define INFRARED_TX_MIN_INTERVAL_MS (50U)
 #define INFRARED_TASK_STACK_SIZE    (2048UL)
 
@@ -507,7 +504,7 @@ void infrared_enable_otg(InfraredApp* infrared, bool enable) {
     infrared->app_state.is_otg_enabled = enable;
 }
 
-bool infrared_settings_load(InfraredApp* app) {
+bool infrared_load_settings(InfraredApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
 
@@ -561,7 +558,7 @@ bool infrared_settings_load(InfraredApp* app) {
     return success;
 }
 
-bool infrared_settings_save(InfraredApp* app) {
+bool infrared_save_settings(InfraredApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
 
@@ -632,7 +629,7 @@ void infrared_popup_closed_callback(void* context) {
 int32_t infrared_app(void* p) {
     InfraredApp* infrared = infrared_alloc();
 
-    infrared_settings_load(infrared);
+    infrared_load_settings(infrared);
     infrared_make_app_folder(infrared);
 
     bool is_remote_loaded = false;

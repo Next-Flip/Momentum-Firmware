@@ -325,7 +325,7 @@ void infrared_enable_otg(InfraredApp* infrared, bool enable);
  *
  * @param[in] infrared pointer to the application instance.
  */
-void infrared_save_settings(InfraredApp* infrared);
+bool infrared_save_settings(InfraredApp* infrared);
 
 /**
  * @brief Common received signal callback.
