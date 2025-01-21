@@ -12,6 +12,7 @@
 - Archive: Setting to show dynamic path in file browser statusbar (#322 by @956MB)
 - CLI: Add `clear` and `cls` commands, add `did you mean ...?` command suggestion (#342 by @dexvleads)
 - Main Menu: Add coverflow menu style (#314 by @CodyTolene)
+- MNTM Settings: Add Menu Style submenu for easier selection (#359 by @jaylikesbunda)
 - BadKB: Added german Mac keyboard Layout (#325 by @Cloudy261)
 - UL: Sub-GHz: Jolly Motors support with add manually (by @pkooiman & @xMasterX)
 - OFW: Desktop: Add winter animations (by @Astrrra)
