@@ -33,11 +33,20 @@ static void momentum_app_scene_interface_lockscreen_bad_pins_format_changed(Vari
 }
 
 static void
-    momentum_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed(VariableItem* item) {
+    momentum_app_scene_interface_lockscreen_allow_locked_rpc_usb_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    momentum_settings.allow_locked_rpc_commands = value;
+    momentum_settings.allow_locked_rpc_usb = value;
+    app->save_settings = true;
+}
+
+static void
+    momentum_app_scene_interface_lockscreen_allow_locked_rpc_ble_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.allow_locked_rpc_ble = value;
     app->save_settings = true;
 }
 
@@ -126,13 +135,23 @@ void momentum_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Allow RPC While Locked",
+        "Allow USB RPC While Locked",
         2,
-        momentum_app_scene_interface_lockscreen_allow_locked_rpc_commands_changed,
+        momentum_app_scene_interface_lockscreen_allow_locked_rpc_usb_changed,
         app);
-    variable_item_set_current_value_index(item, momentum_settings.allow_locked_rpc_commands);
+    variable_item_set_current_value_index(item, momentum_settings.allow_locked_rpc_usb);
     variable_item_set_current_value_text(
-        item, momentum_settings.allow_locked_rpc_commands ? "ON" : "OFF");
+        item, momentum_settings.allow_locked_rpc_usb ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Allow BLE RPC While Locked",
+        2,
+        momentum_app_scene_interface_lockscreen_allow_locked_rpc_ble_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.allow_locked_rpc_ble);
+    variable_item_set_current_value_text(
+        item, momentum_settings.allow_locked_rpc_ble ? "ON" : "OFF");
 
     item = variable_item_list_add(
         var_item_list,

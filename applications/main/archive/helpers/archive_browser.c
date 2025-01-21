@@ -34,6 +34,7 @@ static void
                 model->list_offset = 0;
                 model->list_loading = true;
                 model->folder_loading = false;
+                browser->path_changed = true;
             },
             false);
         archive_update_offset(browser);
@@ -556,6 +557,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     archive_set_tab(browser, tab);
 
     furi_string_set(browser->path, archive_get_default_path(tab));
+    browser->path_changed = true;
     bool tab_empty = true;
     bool is_app_tab = furi_string_start_with_str(browser->path, "/app:");
     if(tab == ArchiveTabFavorites) {
@@ -644,6 +646,7 @@ void archive_leave_dir(ArchiveBrowserView* browser) {
 
     size_t dirname_start = furi_string_search_rchar(browser->path, '/');
     furi_string_left(browser->path, dirname_start);
+    browser->path_changed = true;
 
     const char* switch_ext = NULL;
     switch(archive_get_tab(browser)) {

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,78.1,,
+Version,+,79.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/main/archive/helpers/archive_helpers_ext.h,,
 Header,+,applications/main/subghz/subghz_fap.h,,
@@ -840,6 +840,7 @@ Function,+,canvas_draw_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,canvas_draw_glyph,void,"Canvas*, int32_t, int32_t, uint16_t"
 Function,+,canvas_draw_icon,void,"Canvas*, int32_t, int32_t, const Icon*"
 Function,+,canvas_draw_icon_animation,void,"Canvas*, int32_t, int32_t, IconAnimation*"
+Function,+,canvas_draw_icon_animation_ex,void,"Canvas*, int32_t, int32_t, int32_t, int32_t, IconAnimation*"
 Function,+,canvas_draw_icon_ex,void,"Canvas*, int32_t, int32_t, const Icon*, IconRotation"
 Function,+,canvas_draw_line,void,"Canvas*, int32_t, int32_t, int32_t, int32_t"
 Function,+,canvas_draw_rbox,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"

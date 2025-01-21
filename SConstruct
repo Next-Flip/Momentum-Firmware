@@ -327,8 +327,9 @@ firmware_env.Append(
     IMG_LINT_SOURCES=[
         # Image assets
         "applications",
-        "!applications/external",
         "assets",
+        # Avoid merge conflicts
+        "!applications/external",
     ],
 )
 
@@ -346,8 +347,9 @@ black_commandline = [
 black_base_args = [
     "--include",
     '"(\\.scons|\\.py|SConscript|SConstruct|\\.fam)$"',
+    # Avoid merge conflicts
     "--exclude",
-    '"(mp_flipper/flipperzero/random\\.py)$"',
+    '"applications/external"',
 ]
 
 distenv.PhonyTarget(

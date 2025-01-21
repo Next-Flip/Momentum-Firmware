@@ -682,7 +682,13 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
-CLI_PLUGIN_WRAPPER("info", cli_command_info)
+void cli_command_clear(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
+    printf("\e[2J\e[H");
+}
+
 CLI_PLUGIN_WRAPPER("src", cli_command_src)
 CLI_PLUGIN_WRAPPER("neofetch", cli_command_neofetch)
 CLI_PLUGIN_WRAPPER("help", cli_command_help)
@@ -693,12 +699,12 @@ CLI_PLUGIN_WRAPPER("vibro", cli_command_vibro)
 CLI_PLUGIN_WRAPPER("led", cli_command_led)
 CLI_PLUGIN_WRAPPER("gpio", cli_command_gpio)
 CLI_PLUGIN_WRAPPER("i2c", cli_command_i2c)
+CLI_PLUGIN_WRAPPER("clear", cli_command_clear)
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info_wrapper, (void*)true);
-    cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info_wrapper, NULL);
-    cli_add_command(
-        cli, "device_info", CliCommandFlagParallelSafe, cli_command_info_wrapper, (void*)true);
+    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_add_command(cli, "source", CliCommandFlagParallelSafe, cli_command_src_wrapper, NULL);
     cli_add_command(cli, "src", CliCommandFlagParallelSafe, cli_command_src_wrapper, NULL);
     cli_add_command(
@@ -724,4 +730,7 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led_wrapper, NULL);
     cli_add_command(cli, "gpio", CliCommandFlagDefault, cli_command_gpio_wrapper, NULL);
     cli_add_command(cli, "i2c", CliCommandFlagDefault, cli_command_i2c_wrapper, NULL);
+
+    cli_add_command(cli, "clear", CliCommandFlagParallelSafe, cli_command_clear, NULL);
+    cli_add_command(cli, "cls", CliCommandFlagParallelSafe, cli_command_clear, NULL);
 }

@@ -10,15 +10,6 @@ App(
 )
 
 App(
-    appid="info_cli",
-    targets=["f7"],
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_info_plugin_ep",
-    requires=["cli"],
-    sources=["cli_commands.c"],
-)
-
-App(
     appid="src_cli",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,

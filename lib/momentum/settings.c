@@ -14,7 +14,8 @@ MomentumSettings momentum_settings = {
     .menu_style = MenuStyleDsi, // DSi
     .lock_on_boot = false, // OFF
     .bad_pins_format = false, // OFF
-    .allow_locked_rpc_commands = false, // OFF
+    .allow_locked_rpc_usb = false, // OFF
+    .allow_locked_rpc_ble = false, // OFF
     .lockscreen_poweroff = true, // ON
     .lockscreen_time = true, // ON
     .lockscreen_seconds = false, // OFF
@@ -29,6 +30,7 @@ MomentumSettings momentum_settings = {
     .sort_dirs_first = true, // ON
     .show_hidden_files = false, // OFF
     .show_internal_tab = false, // OFF
+    .browser_path_mode = BrowserPathOff, // OFF
     .favorite_timeout = 0, // OFF
     .dark_mode = false, // OFF
     .rgb_backlight = false, // OFF
@@ -82,7 +84,8 @@ static const struct {
     {setting_bool(unlock_anims)},
     {setting_enum(menu_style, MenuStyleCount)},
     {setting_bool(bad_pins_format)},
-    {setting_bool(allow_locked_rpc_commands)},
+    {setting_bool(allow_locked_rpc_usb)},
+    {setting_bool(allow_locked_rpc_ble)},
     {setting_bool(lock_on_boot)},
     {setting_bool(lockscreen_poweroff)},
     {setting_bool(lockscreen_time)},
@@ -98,6 +101,7 @@ static const struct {
     {setting_bool(sort_dirs_first)},
     {setting_bool(show_hidden_files)},
     {setting_bool(show_internal_tab)},
+    {setting_enum(browser_path_mode, BrowserPathModeCount)},
     {setting_uint(favorite_timeout, 0, 60)},
     {setting_bool(dark_mode)},
     {setting_bool(rgb_backlight)},
