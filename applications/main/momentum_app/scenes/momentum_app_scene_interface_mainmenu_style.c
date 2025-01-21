@@ -5,9 +5,7 @@ extern const char* const menu_style_names[MenuStyleCount];
 
 void momentum_app_scene_interface_mainmenu_style_submenu_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
-    momentum_settings.menu_style = index;
-    app->save_settings = true;
-    scene_manager_previous_scene(app->scene_manager);
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void momentum_app_scene_interface_mainmenu_style_on_enter(void* context) {
@@ -29,11 +27,14 @@ void momentum_app_scene_interface_mainmenu_style_on_enter(void* context) {
 }
 
 bool momentum_app_scene_interface_mainmenu_style_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
+    MomentumApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
+        momentum_settings.menu_style = event.event;
+        app->save_settings = true;
+        scene_manager_previous_scene(app->scene_manager);
     }
 
     return consumed;
