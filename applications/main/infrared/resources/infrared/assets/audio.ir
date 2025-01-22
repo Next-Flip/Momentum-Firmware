@@ -5786,7 +5786,7 @@ protocol: NECext
 address: 87 7C 00 00
 command: 1A E5 00 00
 #
-## Model: AEG
+# Model: AEG
 name: Prev
 type: parsed
 protocol: NECext

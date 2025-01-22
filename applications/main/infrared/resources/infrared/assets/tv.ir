@@ -3732,19 +3732,12 @@ protocol: NECext
 address: 72 DD 00 00
 command: 5E A1 00 00
 #
-## Model: AKAI ATE_22Y604W
+# Model: AKAI ATE_22Y604W
 name: Ch_prev
 type: parsed
 protocol: NECext
 address: 72 DD 00 00
 command: 56 A9 00 00
-#
-# Model: Android TV_MXQ
-name: Power
-type: parsed
-protocol: NEC
-address: 01 00 00 00
-command: 40 00 00 00
 #
 # Model: Brandt B3228HD
 name: Power
