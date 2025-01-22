@@ -50,7 +50,7 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <notification/notification_settings_filename.h>
 #include <power/power_settings_filename.h>
 #include <drivers/rgb_backlight_filename.h>
-#include <applications/main/infrared/infrared_app.h>
+#include <applications/main/infrared/infrared_settings.h>
 #include <applications/main/u2f/u2f_data.h>
 
 void flipper_migrate_files() {
