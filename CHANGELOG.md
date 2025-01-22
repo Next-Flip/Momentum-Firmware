@@ -51,7 +51,7 @@
   - UL: NFC Magic: Added possibility to write 7b MFC to Gen1 tags (by @mishamyte)
   - UL: Unitemp: Fixed handling of hPa units (by @shininghero)
   - UL: Fixed apps for firmware USB CDC callback changes (by @xMasterX)
-- Infrared: Update universal bluray remote (#348 by @jaylikesbunda)
+- Infrared: Update audio, bluray and tv universal remotes (#348 #358 by @jaylikesbunda)
 - NFC:
   - OFW: Replace mf_classic_dict.nfc with Proxmark3 version (by @onovy)
   - OFW: More station IDs for Clipper plugin (by @ted-logan)
