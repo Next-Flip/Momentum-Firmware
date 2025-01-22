@@ -21,13 +21,14 @@ static bool infrared_scene_learn_get_next_name(
     if(!infrared->remote) return false;
 
     // Search through remaining button names to find one that doesn't exist
+    FuriString* name = furi_string_alloc();
     for(int32_t i = start_index; i < (int32_t)easy_mode_button_count; i++) {
-        const char* name = easy_mode_button_names[i];
+        furi_string_set(name, easy_mode_button_names[i]);
         bool name_exists = false;
 
         // Check if this name already exists in remote
         for(size_t j = 0; j < infrared_remote_get_signal_count(infrared->remote); j++) {
-            if(strcmp(name, infrared_remote_get_signal_name(infrared->remote, j)) == 0) {
+            if(furi_string_cmpi(name, infrared_remote_get_signal_name(infrared->remote, j)) == 0) {
                 name_exists = true;
                 break;
             }
@@ -39,6 +40,7 @@ static bool infrared_scene_learn_get_next_name(
             return true;
         }
     }
+    furi_string_free(name);
 
     return false;
 }
