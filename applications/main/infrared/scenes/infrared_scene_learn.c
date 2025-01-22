@@ -180,13 +180,9 @@ bool infrared_scene_learn_on_event(void* context, SceneManagerEvent event) {
 
 void infrared_scene_learn_on_exit(void* context) {
     InfraredApp* infrared = context;
-
-    // Reset dialog
-    dialog_ex_reset(infrared->dialog_ex);
-
-    // Stop worker and clear callback
-    infrared_worker_rx_stop(infrared->worker);
+    DialogEx* dialog_ex = infrared->dialog_ex;
     infrared_worker_rx_set_received_signal_callback(infrared->worker, NULL, NULL);
-
+    infrared_worker_rx_stop(infrared->worker);
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
+    dialog_ex_reset(dialog_ex);
 }

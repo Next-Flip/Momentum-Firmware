@@ -93,8 +93,7 @@ typedef struct {
     InfraredEditTarget edit_target : 8; /**< Selected editing target (a remote or a button). */
     InfraredEditMode edit_mode     : 8; /**< Selected editing operation (rename or delete). */
     int32_t current_button_index; /**< Selected button index (move destination). */
-    int32_t
-        existing_remote_button_index; /**< Current button index for existing remotes in easy mode. */
+    int32_t existing_remote_button_index; /**< Existing remote's current button index (easy mode). */
     int32_t prev_button_index; /**< Previous button index (move source). */
     uint32_t last_transmit_time; /**< Lat time a signal was transmitted. */
     FuriHalInfraredTxPin tx_pin;
