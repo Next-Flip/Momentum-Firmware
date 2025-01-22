@@ -17,8 +17,8 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
 
         // Ensure button_index is valid
         if(button_index < 0) button_index = 0;
-        if(button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
-            button_index = (int32_t)EASY_MODE_BUTTON_COUNT - 1;
+        if(button_index >= (int32_t)easy_mode_button_count) {
+            button_index = (int32_t)easy_mode_button_count - 1;
         }
 
         // Always use predefined names in easy mode

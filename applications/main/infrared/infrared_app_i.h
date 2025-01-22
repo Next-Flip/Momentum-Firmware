@@ -53,8 +53,8 @@
 #define INFRARED_LOG_TAG             "InfraredApp"
 
 /* Button names for easy mode */
-#define EASY_MODE_BUTTON_COUNT 23 // Number of buttons in the array
 extern const char* const easy_mode_button_names[];
+extern const size_t easy_mode_button_count; // Number of buttons in the array
 
 /**
  * @brief Enumeration of invalid remote button indices.

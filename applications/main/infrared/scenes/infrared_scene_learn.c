@@ -7,6 +7,7 @@ const char* const easy_mode_button_names[] = {"Power", "Vol_up", "Vol_dn", "Mute
                                               "Right", "Menu",   "Back",   "Play",    "Pause",
                                               "Stop",  "Next",   "Prev",   "FF",      "Rew",
                                               "Input", "Exit",   "Eject",  "Subtitle"};
+const size_t easy_mode_button_count = COUNT_OF(easy_mode_button_names);
 
 static void infrared_scene_learn_dialog_result_callback(DialogExResult result, void* context) {
     InfraredApp* infrared = context;
@@ -20,7 +21,7 @@ static bool infrared_scene_learn_get_next_name(
     if(!infrared->remote) return false;
 
     // Search through remaining button names to find one that doesn't exist
-    for(int32_t i = start_index; i < (int32_t)EASY_MODE_BUTTON_COUNT; i++) {
+    for(int32_t i = start_index; i < (int32_t)easy_mode_button_count; i++) {
         const char* name = easy_mode_button_names[i];
         bool name_exists = false;
 
@@ -51,7 +52,7 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
         button_index = infrared->app_state.current_button_index;
         if(increment) {
             // Only increment if we haven't reached the last button
-            if(button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT) {
+            if(button_index + 1 < (int32_t)easy_mode_button_count) {
                 button_index++;
                 infrared->app_state.current_button_index = button_index;
             }
@@ -72,8 +73,8 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
 
     // Ensure button_index is valid
     if(button_index < 0) button_index = 0;
-    if(button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
-        button_index = (int32_t)EASY_MODE_BUTTON_COUNT - 1;
+    if(button_index >= (int32_t)easy_mode_button_count) {
+        button_index = (int32_t)easy_mode_button_count - 1;
     }
 
     // Now we know button_index is valid, use it to get the name
@@ -90,7 +91,7 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
         has_more_buttons =
             infrared_scene_learn_get_next_name(infrared, button_index + 1, &next_index);
     } else {
-        has_more_buttons = (button_index + 1 < (int32_t)EASY_MODE_BUTTON_COUNT);
+        has_more_buttons = (button_index + 1 < (int32_t)easy_mode_button_count);
     }
 
     // Show/hide skip button based on whether there are more buttons
@@ -109,7 +110,7 @@ void infrared_scene_learn_on_enter(void* context) {
     // Initialize or validate current_button_index
     if(infrared->app_state.is_learning_new_remote) {
         // If index is beyond our predefined names, reset it
-        if(infrared->app_state.current_button_index >= (int32_t)EASY_MODE_BUTTON_COUNT) {
+        if(infrared->app_state.current_button_index >= (int32_t)easy_mode_button_count) {
             infrared->app_state.current_button_index = 0;
         }
     } else {
