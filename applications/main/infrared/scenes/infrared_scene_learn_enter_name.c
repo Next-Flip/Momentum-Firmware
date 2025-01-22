@@ -44,7 +44,7 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
         context,
         infrared->text_store[0],
         INFRARED_MAX_BUTTON_NAME_LENGTH,
-        !infrared->app_state.is_easy_mode); // Only allow editing in normal mode
+        true);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewTextInput);
 }
