@@ -81,10 +81,9 @@ static void infrared_scene_learn_update_button_name(InfraredApp* infrared, bool 
 
     // Now we know button_index is valid, use it to get the name
     const char* button_name = easy_mode_button_names[button_index];
-
-    infrared_text_store_set(
-        infrared, 0, "Point remote at IR port\nand press the %s button", button_name);
-    dialog_ex_set_text(dialog_ex, infrared->text_store[0], 5, 10, AlignLeft, AlignCenter);
+    dialog_ex_set_text(
+        dialog_ex, "Point remote at IR port\nand press button:", 5, 10, AlignLeft, AlignCenter);
+    dialog_ex_set_header(dialog_ex, button_name, 78, 11, AlignLeft, AlignTop);
 
     // For existing remotes, check if there are any more buttons to add
     bool has_more_buttons = false;
@@ -188,9 +187,6 @@ void infrared_scene_learn_on_exit(void* context) {
     // Stop worker and clear callback
     infrared_worker_rx_stop(infrared->worker);
     infrared_worker_rx_set_received_signal_callback(infrared->worker, NULL, NULL);
-
-    // Clear any stored text
-    infrared_text_store_clear(infrared, 0);
 
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStop);
 }
