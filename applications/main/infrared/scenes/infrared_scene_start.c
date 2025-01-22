@@ -112,6 +112,7 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
             infrared_worker_rx_enable_signal_decoding(
                 infrared->worker, submenu_index == SubmenuIndexLearnNewRemote);
             infrared->app_state.is_learning_new_remote = true;
+            infrared->app_state.current_button_index = 0;  // Reset index when starting new remote
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
         } else if(submenu_index == SubmenuIndexSavedRemotes) {
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
