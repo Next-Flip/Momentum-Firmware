@@ -7,6 +7,7 @@
 - Apps:
   - Games: Pinball0 (by @rdefeo)
   - GPIO: FlipperHTTP: FlipWorld (by @jblanked)
+  - GPIO: TEA5767 FM Radio (by @coolshrimp)
   - NFC: Metroflip (by @luu176)
   - USB: USB Game Controller (by @expected-ingot)
 - Archive: Setting to show dynamic path in file browser statusbar (#322 by @956MB)
