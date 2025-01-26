@@ -205,3 +205,33 @@ uint32_t bq25896_get_ntc_mpct(FuriHalI2cBusHandle* handle) {
         handle, BQ25896_ADDRESS, 0x10, (uint8_t*)&bq25896_regs.r10, BQ25896_I2C_TIMEOUT);
     return (uint32_t)bq25896_regs.r10.TSPCT * 465 + 21000;
 }
+
+// Do warning in UI if try to set this to more than 500mAh as that's the default
+// And could cause magic smoke
+void bq25896_set_iinlim_current(
+    FuriHalI2cBusHandle* handle,
+    uint16_t charge_current_limit_milliamps) {
+    uint16_t true_charge_current_limit_milliamps = charge_current_limit_milliamps;
+
+    // Current is offset by 100mA
+    // Validate input range (100mA - 3250mA)
+    if(charge_current_limit_milliamps < 100) { // Minimum setting
+        true_charge_current_limit_milliamps = 100;
+    }
+    if(charge_current_limit_milliamps > 3250) { // Maximum setting
+        true_charge_current_limit_milliamps = 3250;
+    }
+
+    bq25896_regs.r00.IINLIM = (uint8_t)((true_charge_current_limit_milliamps - 100) / 50);
+
+    // Apply changes
+    furi_hal_i2c_write_reg_8(
+        handle, BQ25896_ADDRESS, 0x00, *(uint8_t*)&bq25896_regs.r00, BQ25896_I2C_TIMEOUT);
+}
+
+uint16_t bq25896_get_iinlim_current(FuriHalI2cBusHandle* handle) {
+    // Read real value
+    furi_hal_i2c_read_reg_8(
+        handle, BQ25896_ADDRESS, 0x00, (uint8_t*)&bq25896_regs.r00, BQ25896_I2C_TIMEOUT);
+    return (uint16_t)bq25896_regs.r00.IINLIM * 50 + 100;
+}

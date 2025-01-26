@@ -5,6 +5,8 @@
 static void power_test_deinit(void) {
     // Try to reset to default charge voltage limit
     furi_hal_power_set_battery_charge_voltage_limit(4.208f);
+    // Try to reset to default charge current limit
+    furi_hal_power_set_battery_charge_current_limit(500f);
 }
 
 MU_TEST(test_power_charge_voltage_limit_exact) {
@@ -17,6 +19,18 @@ MU_TEST(test_power_charge_voltage_limit_exact) {
         furi_hal_power_set_battery_charge_voltage_limit(charge_volt);
         mu_assert_double_eq(
             (double)charge_volt, (double)furi_hal_power_get_battery_charge_voltage_limit());
+    }
+}
+
+MU_TEST(test_power_charge_current_limit_exact) {
+    // Power of 50mA charge current limits get applied exactly
+    // (bq25896 charge controller works in 50mA increments)
+    //
+    // This test may need adapted if other charge controllers are used in the future.
+    for(uint16_t charge_limit_ma = 1000; charge_limit_ma <= 3250; charge_limit_ma += 50) {
+        furi_hal_power_set_battery_charge_voltage_limit(charge_limit_ma);
+        mu_assert_double_eq(
+            (double)charge_limit_ma, (double)furi_hal_power_get_battery_charge_current_limit());
     }
 }
 
@@ -56,11 +70,21 @@ MU_TEST(test_power_charge_voltage_limit_invalid_clamped) {
     mu_assert_double_eq(4.208, (double)furi_hal_power_get_battery_charge_voltage_limit());
 }
 
+MU_TEST(test_power_charge_current_limit_invalid_clamped) {
+    // Out-of-range charge current limits get clamped to 100 mA and 3250 mA
+    furi_hal_power_set_battery_charge_current_limit(0.0f);
+    mu_assert_double_eq(100, (double)furi_hal_power_get_battery_charge_voltage_limit());
+    furi_hal_power_set_battery_charge_current_limit(3260f);
+    mu_assert_double_eq(3250, (double)furi_hal_power_get_battery_charge_voltage_limit());
+}
+
 MU_TEST_SUITE(test_power_suite) {
     MU_RUN_TEST(test_power_charge_voltage_limit_exact);
     MU_RUN_TEST(test_power_charge_voltage_limit_floating_imprecision);
     MU_RUN_TEST(test_power_charge_voltage_limit_inexact);
     MU_RUN_TEST(test_power_charge_voltage_limit_invalid_clamped);
+    MU_RUN_TEST(test_power_charge_current_limit_exact)
+    MU_RUN_TEST(test_power_charge_current_limit_invalid_clamped);
     power_test_deinit();
 }
 

@@ -65,3 +65,15 @@ uint16_t bq25896_get_vbat_current(FuriHalI2cBusHandle* handle);
 
 /** Get NTC voltage in mpct of REGN */
 uint32_t bq25896_get_ntc_mpct(FuriHalI2cBusHandle* handle);
+
+/** Set Current Input limit in mA  
+* 
+* Valid range: 100mA - 3250mA, in steps of 50mA
+* Default: 500mA
+*/
+void bq25896_set_iinlim_current(
+    FuriHalI2cBusHandle* handle,
+    uint16_t charge_current_limit_milliamps);
+
+/** Get Current Input limit in mA */
+uint16_t bq25896_get_iinlim_current(FuriHalI2cBusHandle* handle);

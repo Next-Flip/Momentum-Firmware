@@ -742,3 +742,18 @@ void furi_hal_power_debug_get(PropertyValueCallback out, void* context) {
 
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 }
+
+// in milliAmps
+float furi_hal_power_get_battery_charge_current_limit(void) {
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
+    float ret = (float)bq25896_get_iinlim_current(&furi_hal_i2c_handle_power) / 1000.0f;
+    furi_hal_i2c_release(&furi_hal_i2c_handle_power);
+    return ret;
+}
+
+// in milliAmps
+void furi_hal_power_set_battery_charge_current_limit(float current) {
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
+    bq25896_set_iinlim_current(&furi_hal_i2c_handle_power, current);
+    furi_hal_i2c_release(&furi_hal_i2c_handle_power);
+}

@@ -221,6 +221,20 @@ void furi_hal_power_info_get(PropertyValueCallback callback, char sep, void* con
  */
 void furi_hal_power_debug_get(PropertyValueCallback callback, void* context);
 
+/** Set battery charge current limit in milliAmps
+ *
+ * Invalid values will be clamped downward to the nearest valid value.
+ *
+ * @param[in]      current  current limit in milliAmps
+ */
+void furi_hal_power_set_battery_charge_current_limit(float current);
+
+/** Get battery charge current limit in milliAmps
+ *
+ * @return      current limit in milliAmps
+ */
+float furi_hal_power_get_battery_charge_current_limit(void);
+
 #ifdef __cplusplus
 }
 #endif
