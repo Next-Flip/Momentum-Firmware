@@ -17,9 +17,6 @@
 
 #define WORKER_TAG TAG "Worker"
 
-#define BADKB_ASCII_TO_KEY(script, x) \
-    (((uint8_t)x < 128) ? (script->layout[(uint8_t)x]) : HID_KEYBOARD_NONE)
-
 // Delays for waiting between HID key press and key release
 const uint8_t bt_hid_delays[LevelRssiNum] = {
     60, // LevelRssi122_100
@@ -586,6 +583,8 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->repeat_cnt = 0;
                 bad_kb->key_hold_nb = 0;
                 bad_kb->file_end = false;
+                bad_kb->speaker_volume = DEFAULT_VOLUME;
+                bad_kb->led_state = LEDS_NOT_UPDATED;
                 storage_file_seek(script_file, 0, true);
                 bad_kb_script_set_keyboard_layout(bad_kb, bad_kb->keyboard_layout);
                 worker_state = BadKbStateRunning;
@@ -615,6 +614,8 @@ static int32_t bad_kb_worker(void* context) {
                 bad_kb->defstringdelay = 0;
                 bad_kb->repeat_cnt = 0;
                 bad_kb->file_end = false;
+                bad_kb->speaker_volume = DEFAULT_VOLUME;
+                bad_kb->led_state = LEDS_NOT_UPDATED;
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
                 flags = furi_thread_flags_wait(

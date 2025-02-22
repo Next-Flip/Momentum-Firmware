@@ -17,6 +17,9 @@ extern "C" {
 
 #define FILE_BUFFER_LEN 16
 
+#define LEDS_NOT_UPDATED 255
+#define DEFAULT_VOLUME 0.5f
+
 struct BadKbScript {
     FuriThread* thread;
     BadKbState st;
@@ -40,6 +43,9 @@ struct BadKbScript {
 
     FuriString* string_print;
     size_t string_print_pos;
+
+    float speaker_volume;
+    uint8_t led_state;
 
     Bt* bt;
     BadKbApp* app;
