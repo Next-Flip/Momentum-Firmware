@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "input/input.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
