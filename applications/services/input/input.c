@@ -1,16 +1,21 @@
 #include "input.h"
 
+#include "input_settings.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <furi.h>
 #include <cli/cli.h>
 #include <furi_hal_gpio.h>
+#include <furi_hal_vibro.h>
 
 #define INPUT_DEBOUNCE_TICKS_HALF (INPUT_DEBOUNCE_TICKS / 2)
 #define INPUT_PRESS_TICKS         150
 #define INPUT_LONG_PRESS_COUNTS   2
 #define INPUT_THREAD_FLAG_ISR     0x00000001
+
+#define TAG "Input"
 
 /** Input pin state */
 typedef struct {
@@ -89,6 +94,11 @@ int32_t input_srv(void* p) {
     furi_record_create(RECORD_INPUT_EVENTS, event_pubsub);
     furi_record_create(RECORD_ASCII_EVENTS, ascii_pubsub);
 
+    //define object input_settings, take memory load (or init) settings and create record for access to settings structure from outside
+    InputSettings* settings = malloc(sizeof(InputSettings));
+    input_settings_load(settings);
+    furi_record_create(RECORD_INPUT_SETTINGS, settings);
+
 #ifdef INPUT_DEBUG
     furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
 #endif
@@ -151,6 +161,12 @@ int32_t input_srv(void* p) {
                 // Send Press/Release event
                 event.type = pin_states[i].state ? InputTypePress : InputTypeRelease;
                 furi_pubsub_publish(event_pubsub, &event);
+                // do vibro if user setup vibro touch level in Settings-Input.
+                if(settings->vibro_touch_level) {
+                    furi_hal_vibro_on(true);
+                    furi_delay_tick(settings->vibro_touch_level);
+                    furi_hal_vibro_on(false);
+                };
             }
         }
 

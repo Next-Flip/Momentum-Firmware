@@ -96,7 +96,7 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
             hour -= 12;
         }
         if(hour == 0) {
-            hour = 12;
+            hour = momentum_settings.midnight_format_00 ? 0 : 12;
         }
     }
 
@@ -137,6 +137,15 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
 
     } else if(event == DesktopGlobalAutoLock) {
         if(!desktop->app_running && !desktop->locked) {
+            // Disable AutoLock if usb_inhibit_autolock option enabled and device have active USB session.
+            if(desktop->settings.usb_inhibit_auto_lock) {
+                Rpc* rpc = furi_record_open(RECORD_RPC);
+                bool inhibit_auto_lock = furi_hal_usb_is_locked() || rpc_get_sessions_count(rpc);
+                furi_record_close(RECORD_RPC);
+                if(inhibit_auto_lock) {
+                    return true;
+                }
+            }
             desktop_lock(desktop, desktop->settings.auto_lock_with_pin);
         }
 
@@ -547,7 +556,8 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    if(momentum_settings.lock_on_boot || furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+    if(desktop_pin_code_is_set() &&
+       (momentum_settings.lock_on_boot || furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock))) {
         desktop_lock(desktop, true);
     }
 

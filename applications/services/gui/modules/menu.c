@@ -1,5 +1,6 @@
 #include "menu.h"
 
+#include "locale/locale.h"
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <gui/icon_i.h>
@@ -441,11 +442,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             furi_hal_rtc_get_datetime(&curr_dt);
             uint8_t hour = curr_dt.hour;
             uint8_t min = curr_dt.minute;
-            if(hour > 12) {
-                hour -= 12;
-            }
-            if(hour == 0) {
-                hour = 12;
+            LocaleTimeFormat time_format = locale_get_time_format();
+            if(time_format == LocaleTimeFormat12h) {
+                if(hour > 12) {
+                    hour -= 12;
+                }
+                if(hour == 0) {
+                    hour = (momentum_settings.midnight_format_00 ? 0 : 12);
+                }
             }
             canvas_set_font(canvas, FontSecondary);
             char clk[20];
@@ -516,36 +520,36 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             // Draw frames
             canvas_set_bitmap_mode(canvas, true);
             canvas_draw_frame(canvas, 0, 0, 128, 64);
-            canvas_draw_frame(canvas, 44, 2, 40, 40);
+            canvas_draw_rframe(canvas, 45, 4, 38, 38, 3);
 
             // Draw left side albums
-            canvas_draw_line(canvas, 6, 40, 17, 35);
-            canvas_draw_line(canvas, 19, 40, 30, 35);
-            canvas_draw_line(canvas, 32, 40, 43, 35);
-            canvas_draw_line(canvas, 6, 3, 17, 8);
-            canvas_draw_line(canvas, 19, 3, 30, 8);
-            canvas_draw_line(canvas, 32, 3, 43, 8);
-            canvas_draw_line(canvas, 18, 2, 18, 41);
-            canvas_draw_line(canvas, 31, 2, 31, 41);
-            canvas_draw_line(canvas, 5, 2, 5, 41);
-            canvas_draw_line(canvas, 4, 8, 1, 7);
-            canvas_draw_line(canvas, 5, 35, 1, 36);
+            canvas_draw_line(canvas, 5, 36, 1, 37);
+            canvas_draw_line(canvas, 4, 9, 1, 8);
+            canvas_draw_line(canvas, 6, 41, 17, 36);
+            canvas_draw_line(canvas, 19, 41, 30, 36);
+            canvas_draw_line(canvas, 32, 41, 43, 36);
+            canvas_draw_line(canvas, 6, 4, 17, 9);
+            canvas_draw_line(canvas, 19, 4, 30, 9);
+            canvas_draw_line(canvas, 32, 4, 43, 9);
+            canvas_draw_line(canvas, 5, 5, 5, 40);
+            canvas_draw_line(canvas, 18, 5, 18, 40);
+            canvas_draw_line(canvas, 31, 5, 31, 40);
 
             // Draw right side albums
-            canvas_draw_line(canvas, 95, 40, 84, 35);
-            canvas_draw_line(canvas, 108, 40, 97, 35);
-            canvas_draw_line(canvas, 121, 40, 110, 35);
-            canvas_draw_line(canvas, 84, 8, 95, 3);
-            canvas_draw_line(canvas, 97, 8, 108, 3);
-            canvas_draw_line(canvas, 110, 8, 121, 3);
-            canvas_draw_line(canvas, 96, 2, 96, 41);
-            canvas_draw_line(canvas, 109, 2, 109, 41);
-            canvas_draw_line(canvas, 122, 2, 122, 41);
-            canvas_draw_line(canvas, 123, 8, 126, 7);
-            canvas_draw_line(canvas, 123, 35, 126, 36);
+            canvas_draw_line(canvas, 95, 41, 84, 36);
+            canvas_draw_line(canvas, 108, 41, 97, 36);
+            canvas_draw_line(canvas, 121, 41, 110, 36);
+            canvas_draw_line(canvas, 84, 9, 95, 4);
+            canvas_draw_line(canvas, 97, 9, 108, 4);
+            canvas_draw_line(canvas, 110, 9, 121, 4);
+            canvas_draw_line(canvas, 96, 5, 96, 40);
+            canvas_draw_line(canvas, 109, 5, 109, 40);
+            canvas_draw_line(canvas, 122, 5, 122, 40);
+            canvas_draw_line(canvas, 123, 9, 126, 8);
+            canvas_draw_line(canvas, 123, 36, 126, 37);
 
             const int32_t pos_x_center = 128 / 2;
-            const int32_t pos_y_center = 64 / 2;
+            const int32_t pos_y_center = (64 / 2) + 1;
             const int32_t pos_y_offset = 10;
             const int32_t icon_size = 20;
             const int32_t side_icon_width = icon_size / 2;
@@ -604,7 +608,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 elements_scrollable_text_line_ex(
                     canvas,
                     pos_x_center,
-                    (pos_y_center + icon_size / 2) + pos_y_offset,
+                    (pos_y_center + icon_size / 2) + pos_y_offset + 1,
                     124,
                     name,
                     scroll_counter,

@@ -12,7 +12,7 @@
 #define JS_SDK_VENDOR_FIRMWARE "momentum"
 #define JS_SDK_VENDOR          "flipperdevices"
 #define JS_SDK_MAJOR           0
-#define JS_SDK_MINOR           1
+#define JS_SDK_MINOR           3
 
 /**
  * @brief Returns the foreign pointer in `obj["_"]`
@@ -82,6 +82,11 @@ typedef enum {
  */
 #define JS_AT_LEAST >=
 
+typedef struct {
+    const char* name;
+    size_t value;
+} JsEnumMapping;
+
 #define JS_ENUM_MAP(var_name, ...)                      \
     static const JsEnumMapping var_name##_mapping[] = { \
         {NULL, sizeof(var_name)},                       \
@@ -91,8 +96,14 @@ typedef enum {
 
 typedef struct {
     const char* name;
-    size_t value;
-} JsEnumMapping;
+    size_t offset;
+} JsObjectMapping;
+
+#define JS_OBJ_MAP(var_name, ...)                         \
+    static const JsObjectMapping var_name##_mapping[] = { \
+        __VA_ARGS__,                                      \
+        {NULL, 0},                                        \
+    };
 
 typedef struct {
     void* out;
@@ -200,6 +211,54 @@ static inline void
         _js_validate_enum,          \
         var_name##_mapping})
 
+static inline bool _js_validate_object(struct mjs* mjs, mjs_val_t val, const void* extra) {
+    for(const JsObjectMapping* mapping = (JsObjectMapping*)extra; mapping->name; mapping++)
+        if(mjs_get(mjs, val, mapping->name, ~0) == MJS_UNDEFINED) return false;
+    return true;
+}
+static inline void
+    _js_convert_object(struct mjs* mjs, mjs_val_t* val, void* out, const void* extra) {
+    const JsObjectMapping* mapping = (JsObjectMapping*)extra;
+    for(; mapping->name; mapping++) {
+        mjs_val_t field_val = mjs_get(mjs, *val, mapping->name, ~0);
+        *(mjs_val_t*)((uint8_t*)out + mapping->offset) = field_val;
+    }
+}
+#define JS_ARG_OBJECT(var_name, name) \
+    ((_js_arg_decl){                  \
+        &var_name,                    \
+        mjs_is_object,                \
+        _js_convert_object,           \
+        name " object",               \
+        _js_validate_object,          \
+        var_name##_mapping})
+
+/**
+ * @brief Validates and converts a JS value with a declarative interface
+ * 
+ * Example: `int32_t my_value; JS_CONVERT_OR_RETURN(mjs, &mjs_val, JS_ARG_INT32(&my_value), "value source");`
+ * 
+ * @warning This macro executes `return;` by design in case of a validation failure
+ */
+#define JS_CONVERT_OR_RETURN(mjs, value, decl, source, ...)        \
+    if(decl.validator)                                             \
+        if(!decl.validator(*value))                                \
+            JS_ERROR_AND_RETURN(                                   \
+                mjs,                                               \
+                MJS_BAD_ARGS_ERROR,                                \
+                source ": expected %s",                            \
+                ##__VA_ARGS__,                                     \
+                decl.expected_type);                               \
+    if(decl.extended_validator)                                    \
+        if(!decl.extended_validator(mjs, *value, decl.extra_data)) \
+            JS_ERROR_AND_RETURN(                                   \
+                mjs,                                               \
+                MJS_BAD_ARGS_ERROR,                                \
+                source ": expected %s",                            \
+                ##__VA_ARGS__,                                     \
+                decl.expected_type);                               \
+    decl.converter(mjs, value, decl.out, decl.extra_data);
+
 //-V:JS_FETCH_ARGS_OR_RETURN:1008
 /**
  * @brief Fetches and validates the arguments passed to a JS function
@@ -209,38 +268,21 @@ static inline void
  * @warning This macro executes `return;` by design in case of an argument count
  * mismatch or a validation failure
  */
-#define JS_FETCH_ARGS_OR_RETURN(mjs, arg_operator, ...)                                          \
-    _js_arg_decl _js_args[] = {__VA_ARGS__};                                                     \
-    int _js_arg_cnt = COUNT_OF(_js_args);                                                        \
-    mjs_val_t _js_arg_vals[_js_arg_cnt];                                                         \
-    if(!(mjs_nargs(mjs) arg_operator _js_arg_cnt))                                               \
-        JS_ERROR_AND_RETURN(                                                                     \
-            mjs,                                                                                 \
-            MJS_BAD_ARGS_ERROR,                                                                  \
-            "expected %s%d arguments, got %d",                                                   \
-            #arg_operator,                                                                       \
-            _js_arg_cnt,                                                                         \
-            mjs_nargs(mjs));                                                                     \
-    for(int _i = 0; _i < _js_arg_cnt; _i++) {                                                    \
-        _js_arg_vals[_i] = mjs_arg(mjs, _i);                                                     \
-        if(_js_args[_i].validator)                                                               \
-            if(!_js_args[_i].validator(_js_arg_vals[_i]))                                        \
-                JS_ERROR_AND_RETURN(                                                             \
-                    mjs,                                                                         \
-                    MJS_BAD_ARGS_ERROR,                                                          \
-                    "argument %d: expected %s",                                                  \
-                    _i,                                                                          \
-                    _js_args[_i].expected_type);                                                 \
-        if(_js_args[_i].extended_validator)                                                      \
-            if(!_js_args[_i].extended_validator(mjs, _js_arg_vals[_i], _js_args[_i].extra_data)) \
-                JS_ERROR_AND_RETURN(                                                             \
-                    mjs,                                                                         \
-                    MJS_BAD_ARGS_ERROR,                                                          \
-                    "argument %d: expected %s",                                                  \
-                    _i,                                                                          \
-                    _js_args[_i].expected_type);                                                 \
-        _js_args[_i].converter(                                                                  \
-            mjs, &_js_arg_vals[_i], _js_args[_i].out, _js_args[_i].extra_data);                  \
+#define JS_FETCH_ARGS_OR_RETURN(mjs, arg_operator, ...)                                \
+    _js_arg_decl _js_args[] = {__VA_ARGS__};                                           \
+    int _js_arg_cnt = COUNT_OF(_js_args);                                              \
+    mjs_val_t _js_arg_vals[_js_arg_cnt];                                               \
+    if(!(mjs_nargs(mjs) arg_operator _js_arg_cnt))                                     \
+        JS_ERROR_AND_RETURN(                                                           \
+            mjs,                                                                       \
+            MJS_BAD_ARGS_ERROR,                                                        \
+            "expected %s%d arguments, got %d",                                         \
+            #arg_operator,                                                             \
+            _js_arg_cnt,                                                               \
+            mjs_nargs(mjs));                                                           \
+    for(int _i = 0; _i < _js_arg_cnt; _i++) {                                          \
+        _js_arg_vals[_i] = mjs_arg(mjs, _i);                                           \
+        JS_CONVERT_OR_RETURN(mjs, &_js_arg_vals[_i], _js_args[_i], "argument %d", _i); \
     }
 
 /**
@@ -253,6 +295,18 @@ static inline void
         mjs_prepend_errorf(mjs, error_code, __VA_ARGS__); \
         mjs_return(mjs, MJS_UNDEFINED);                   \
         return;                                           \
+    } while(0)
+
+/**
+ * @brief Prepends an error, sets the JS return value to `undefined` and returns
+ * a value C function
+ * @warning This macro executes `return;` by design
+ */
+#define JS_ERROR_AND_RETURN_VAL(mjs, error_code, ret_val, ...) \
+    do {                                                       \
+        mjs_prepend_errorf(mjs, error_code, __VA_ARGS__);      \
+        mjs_return(mjs, MJS_UNDEFINED);                        \
+        return ret_val;                                        \
     } while(0)
 
 typedef struct JsModules JsModules;

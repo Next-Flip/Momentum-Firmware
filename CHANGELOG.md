@@ -1,85 +1,102 @@
 ### Breaking Changes:
-- Lockscreen: Separate 'Allow RPC While Locked' settings for USB/BLE (#343 by @956MB)
-  - Both default to OFF like before
-  - If you had enabled this option before, you will need to re-enable
+- BadKB: Rewritten BadKB extras on top of "new" OFW BadUSB structure (by @Willy-JL)
+  - Should be more reliable with BLE, will be easier to keep updated
+  - Previous settings and pairing will be reset, need to reconfigure and pair again
+- UL: Desktop: Option to prevent Auto Lock when connected to USB/RPC (by @Dmitry422)
+  - Desktop settings will be reset, need to reconfigure
+  - Keybinds will remain configured
+- UL: Power: Moved Charge Cap to Power Settings as Charge Limit option (by @Dmitry422)
+  - No longer located in Momentum Settings
+  - Value will be reset, needs to be reconfigured in Power Settings if it was enabled
+- OFW: JS: New `gui/widget` view, replaces old `widget` module (by @portasynthinca3)
+  - Scripts using `widget` module will need to be updated
+  - Check the `gui.js` example for reference usage
 
 ### Added:
 - Apps:
-  - Games: Pinball0 (by @rdefeo)
-  - GPIO: FlipperHTTP: FlipWorld (by @jblanked)
-  - GPIO: TEA5767 FM Radio (by @coolshrimp)
-  - NFC: Metroflip (by @luu176)
-  - USB: USB Game Controller (by @expected-ingot)
-- Infrared:
-  - Easy Learn mode to quickly save buttons without typing (#350 by @jaylikesbunda)
-  - Move Easy Learn and Learn RAW toggles inside Learning/Receiving screen for quick access, RAW mode doesn't require Debug anymore (by @Willy-JL)
-- Archive: Setting to show dynamic path in file browser statusbar (#322 by @956MB)
-- CLI: Add `clear` and `cls` commands, add `did you mean ...?` command suggestion (#342 by @dexvleads)
-- Main Menu: Add coverflow menu style (#314 by @CodyTolene)
-- MNTM Settings: Add Menu Style submenu for easier selection (#359 by @jaylikesbunda)
-- BadKB: Added german Mac keyboard Layout (#325 by @Cloudy261)
-- UL: Sub-GHz: Jolly Motors support with add manually (by @pkooiman & @xMasterX)
-- OFW: Desktop: Add winter animations (by @Astrrra)
-- API:
-  - Added `canvas_draw_icon_animation_ex()` to draw animated icons resized (#314 by @CodyTolene)
-  - OFW: Added `flipper_format_write_empty_line()` (by @janwiesemann)
-- OFW: Furi: Pipe support (by @portasynthinca3)
-- OFW: Furi: Thread stdin support (by @portasynthinca3)
-- OFW: RPC: Command to send a signal once (by @Astrrra)
-- OFW: Add VCP break support (by @gsurkov)
+  - Games: Quadrastic (by @ivanbarsukov)
+  - GPIO: Longwave Clock (by @m7i-org)
+  - USB: Portal Of Flipper (by @Bettse)
+- UL: Sub-GHz: Add ReversRB2/RB2M Protocol full support with add manually (by @xMasterX)
+- RFID:
+  - OFW: EM4305 support (by @Astrrra)
+  - OFW: Noralsy Format/Brand protocol (by @zinongli)
+- OFW: BadKB: Mouse control (by @jetrp1)
+- OFW: Infrared: Universal IR signal selection (by @portasynthinca3)
+- OFW: NFC: Disney Infinity KDF plugin (by @bettse)
+- Archive: Add item count to directory info scene (#378 by @956MB)
+- Clock: 12 hour "midnight format" in Momentum Settings (#341 by @956MB)
+- UL: Input: Vibro on Button press option (by @Dmitry422)
+- Desktop:
+  - UL: Option to prevent Auto Lock when connected to USB/RPC (by @Dmitry422)
+  - OFW: Add the Showtime animation (by @Astrrra)
+- JS:
+  - OFW: Features & bugfixes, SDK 0.2 (by @portasynthinca3)
+    - New `gui/widget` view, replaces old `widget` module
+    - Support for PWM in `gpio` module
+    - Stop `eventloop` on request and error
+  - OFW: SDK 0.3
+    - Backport of missing features to new `gui/widget` (by @Willy-JL)
+    - UART framing data/stop/parity bits options in `serial` module (by @portasynthinca3)
+- OFW: Alarm: Snooze, timeouts, and dismissing from the locked state (by @Astrrra)
+- OFW: Furi: UART framing mode selection, support for different data/stop/parity bits (by @portasynthinca3)
+- OFW: GUI: Widget elements for line, rect and circle with fill options (by @Willy-JL)
 
 ### Updated:
 - Apps:
-  - BT/USB Remote: Add PTT support for Gather (by @SapphicCode)
-  - Chess: Fix illegal move bug (by @956MB)
-  - Color Guess: Simplify app code (by @leedave)
-  - Countdown Timer: Default to 60 seconds on open (by @andrejka27)
-  - Cross Remote: Fix Sub-GHz actions rolling code support, animations for transmit, allow interrupting chain (by @leedave), loop transmit feature (by @miccayo)
-  - ESP Flasher: Add c3 and c6 to s3 option (by @jaylikesbunda), update bins for Marauder to 1.2.0 (by @justcallmekoko) and FlipperHTTP to 1.6.1 (by @jblanked)
-  - FlipBIP: Refactor to make adding coins easier (by @xtruan)
-  - FlipLibrary: Wikipedia, dog facts, random quotes, weather, asset price, predictions, trivia, advice, uuid and many more, bug fixes (by @jblanked), holidays, improvements to connectivity and progress (by @jamisonderek)
-  - FlipSocial: Improved authentication, loading screens, many bug fixes, bio and friend counts, new feed screen with posted time, search users and contacts, home announcements and notifications, private feed option, endless feed (by @jblanked), RPC_KEYBOARD support (by @jamisonderek)
-  - FlipStore: Many bugfixes, support downloading ESP32 and VGM firmwares and Github repos, allow deleting apps, memory fixes, update Marauder, use Flipper catalog API (by @jblanked), more improvements (by @jamisonderek)
-  - FlipTrader: Improved progress display, added connectivity check on startup (by @jamisonderek)
-  - FlipWeather: Stability improvements (by @jblanked), improved progress display, added connectivity check on startup (by @jamisonderek)
-  - FlipWiFi: Improve error handling, update scan loading and parsing, many bug/crash fixes, max 100 network scan, add some fast commands (by @jblanked), add connectivity check on startup (by @jamisonderek)
-  - KeyCopier: Support for formats AR4, M1, AM7, Y2, Y11, S22, NA25, CO88, LW4, LW5, NA12, RU45, H75, B102, Y159, KA14, YM63, SFIC, RV (by @HonestLocksmith)
-  - NFC Maker: Allow setting custom UID, code cleanup (by @Willy-JL), show extra symbols for WiFi SSID/Password and Emails (by @956MB)
-  - Nightstand: Show battery percentage and show AM/PM in timer mode (by @956MB)
-  - Oscilloscope: Add simple spectrum analyser and basic software scaling support (by @anfractuosity)
-  - Picopass: Handle write key retry when a different card is presented, save SR as legacy from saved menu (by @bettse)
-  - Pokemon Trade Tool: Update to gblink v0.63 which includes saving/loading of pin configurations for the EXT link interface, bug fixes (by @kbembedded)
-  - Snake 2.0: Progress saving, endless mode, game timer, fruit positioning bugfixes (by @Willzvul)
-  - uPython: Enabled extra functions for the `random` module, optimized speaker note constants to save space (by @ofabel)
-  - WebCrawler: New BROWSE option to read HTML pages, many bugfixes (by @jblanked), improved progress display, added connectivity check on startup (by @jamisonderek)
-  - WiFi Marauder: AirTag Spoof, flipper blespam, sniff airtag and flipper, list airtag (by @0xchocolate)
-  - UL: NFC Magic: Added possibility to write 7b MFC to Gen1 tags (by @mishamyte)
-  - UL: Unitemp: Fixed handling of hPa units (by @shininghero)
-  - UL: Fixed apps for firmware USB CDC callback changes (by @xMasterX)
-- Infrared: Update audio, bluray and tv universal remotes (#348 #358 by @jaylikesbunda)
+  - Authenticator: Extended valid UTC offset range to be from -12 to +14 (by @akopachov)
+  - BH1750 Lightmeter: Update EV compute logic (by @bogdumi)
+  - Cross Remote: Support external IR modules, fix loop transmit with RAW files, support pinning to favorites in firmware (by @leedave)
+  - DTMF Dolphin: GPIO sound output (by @Dmitry422)
+  - FlipWorld: NPCs, in-game menu, new controls, weapon option, many bugfixes (by @jblanked)
+  - IR Intervalometer: Add Pentax camera support (by @petrikjp)
+  - KeyCopier: Separate Brand and Key Format selection for ease of use (by @zinongli)
+  - Metroflip: Big refactor with plugins and assets to save RAM, RavKav moved to Calypso parser, ability to save and load files, added gocard plugin (by @luu176), unified Calypso parser (by @DocSystem)
+  - Picopass: Added Save SR as legacy from saved menu, fix write key 'retry' when presented with new card, make iClass SIO sniffing more dynamic (by @bettse)
+  - Pinball0: Prevent tilt before ball is in play, fixed Endless table by making bottom portal extend full width (by @rdefeo)
+  - Pomodoro Timer: Add time constraint to talking feature (by @Th3Un1q3)
+  - Quac: Refactor Sub-GHz code to support rolling codes and auto-detect external CC1101, add option to import files as links without copying, scroll long action names (by @rdefeo)
+  - Solitaire: Fixed cards from waste can be placed on the first tableau (by @Erbonator3000)
+  - W5500 Ethernet: Add traceroute command (by @arag0re)
+  - Many app fixes for new firmware changes (by @xMasterX & @Willy-JL)
+- BadKB: Rewritten BadKB extras on top of "new" OFW BadUSB structure (by @Willy-JL)
+  - Additionally, can now customize MAC address when BLE Remember is enabled
+  - Also added `BLE_ID` command, same as `BT_ID`
+- Main Menu: Refined CoverFlow menu style (#379 by @956MB)
 - NFC:
-  - OFW: Replace mf_classic_dict.nfc with Proxmark3 version (by @onovy)
-  - OFW: More station IDs for Clipper plugin (by @ted-logan)
-- OFW: Infrared: Add IR command for NAD DR2 D7050 D3020 (by @nikos9742)
+  - OFW: Added naming for DESFire cards + fix MF3ICD40 cards unable to be read (by @Demae)
+  - OFW: FeliCa Protocol Expose Read Block API and Allow Specifying Service (by @zinongli)
+  - OFW: Enable MFUL sync poller to be provided with passwords (by @GMMan)
+- UL: Power: Moved Charge Cap to Power Settings as Charge Limit option (by @Dmitry422)
+- Infrared:
+  - OFW: Add Fujitsu ASTG12LVCC to AC Universal Remote (by @KereruA0i)
+  - OFW: Increase max carrier limit to 1000000 (by @skotopes)
+- OFW: Power: Added OTG controls to Power service, remembers OTG when unplugging USB (by @Astrrra & @skotopes)
+- OFW: GUI: Updated Button Panel with more options for button handling (by @Akiva-Cohen)
+- Furi:
+  - OFW: Update heap4 implementation, enabled heap corruption detection (by @portasynthinca3)
+  - OFW: Update mbedtls & expose AES to API (by @portasynthinca3)
+  - OFW: Stdio API improvements, pipe stdout timeout (by @portasynthinca3)
+  - OFW: Stricter constness for const data (by @hedger)
 
 ### Fixed:
-- Desktop: Fixed Wardriving animation design (by @Davim09)
-- Main Menu: Fix MNTM style battery percent off by 1 (#339 by @956MB)
-- OFW: Fix lost BadBLE keystrokes (by @Astrrra)
-- OFW: GPIO: Fix USB UART Bridge Crash by increasing system stack size (by @Astrrra)
-- OFW: Loader: Fix BusFault in handling of OOM (by @Willy-JL)
-- NFC:
-  - XERO: Fix issue with MFC key recovery state machine performing key reuse early (by @noproto)
-  - OFW: Plantain parser Last payment amount fix (by @mxcdoam)
-  - OFW: Fix skylander ID reading (by @bettse)
-  - OFW: Fix MIFARE Plus detection (by @GMMan)
-  - OFW: Fix ISO15693 stuck in wrong mode (by @RebornedBrain)
-  - OFW: Fix MFUL PWD_AUTH command creation when 0x00 in password (by @GMMan)
-  - OFW: Fix typo for `mf_classic_key_cahce_get_next_key()` function (by @luu176)
-- OFW: U2F: Fix message digest memory leak (by @GMMan)
-- OFW: JS: SDK workaround incorrect serial port handling by OS (by @portasynthinca3)
-- OFW: FBT: Fix invalid path errors on Windows with UTF8 paths (by @Alex4386)
+- Asset Packs: Fix level-up animations not being themed (by @Willy-JL)
+- About: Fix missing Prev. button when invoked from Device Info keybind (by @Willy-JL)
+- Sub-GHz:
+  - UL: Fix Hollarm protocol with more verification (by @xMasterX)
+  - UL: Fix GangQi protocol (by @DoberBit and @mishamyte)
+  - UL: Came Atomo button hold simulation with full cycle to allow proper pairing with receiver (by @xMasterX)
+- OFW: NFC: ST25TB poller mode check (by @RebornedBrain)
+- OFW: RFID: Fix Detection Conflict Between Securakey and Noralsy Format (by @zinongli)
+- Furi:
+  - OFW: EventLoop unsubscribe fix (by @gsurkov & @portasynthinca3)
+  - OFW: Various bug fixes and improvements (by @skotopes)
+  - OFW: Clear IRQ status before calling user handler, fixes some interrupt edge cases / weirdness (by @mammothbane)
+  - OFW: Ensure that `furi_record_create()` is passed a non-NULL data pointer (by @dcoles)
+- OFW: CLI: Fixed repeat in subghz tx_from_file command (by @Jnesselr)
+- OFW: VSCode: Disabled auto-update for clangd since correct version is in the toolchain (by @hedger)
+- OFW: uFBT: Bumped action version in example github workflow for project template (by @hedger)
 
 ### Removed:
-- NFC: Previous fix for ISO15693 stuck in wrong mode (#225)
-  - Removes APIs `nfc_iso15693_detect_mode()`, `nfc_iso15693_force_1outof4()`, `nfc_iso15693_force_1outof256()`
+- JS: Removed old `widget` module, replaced by new `gui/widget` view
+- MNTM: Removed Charge Cap option, replaced by Charge Limit in Power Settings

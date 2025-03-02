@@ -117,7 +117,7 @@ void momentum_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Lock on Boot",
+        "Lock on Boot if PIN set",
         2,
         momentum_app_scene_interface_lockscreen_lock_on_boot_changed,
         app);

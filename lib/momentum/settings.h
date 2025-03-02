@@ -93,7 +93,7 @@ typedef struct {
     bool dark_mode;
     bool rgb_backlight;
     uint32_t butthurt_timer;
-    uint32_t charge_cap;
+    bool midnight_format_00;
     SpiHandle spi_cc1101_handle;
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;
