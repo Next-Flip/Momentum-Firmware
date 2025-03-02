@@ -58,6 +58,7 @@
 - BadKB: Rewritten BadKB extras on top of "new" OFW BadUSB structure (by @Willy-JL)
   - Additionally, can now customize MAC address when BLE Remember is enabled
   - Also added `BLE_ID` command, same as `BT_ID`
+- Main Menu: Refined CoverFlow menu style (#379 by @956MB)
 - NFC:
   - OFW: Added naming for DESFire cards + fix MF3ICD40 cards unable to be read (by @Demae)
   - OFW: FeliCa Protocol Expose Read Block API and Allow Specifying Service (by @zinongli)
