@@ -29,12 +29,14 @@ const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
         return EXT_PATH("apps/Sub-Ghz/subghz_remote.fap");
     case ArchiveFileTypeInfraredRemote:
         return EXT_PATH("apps/Infrared/ir_remote.fap");
-    case ArchiveFileTypeBadKb:
+    case ArchiveFileTypeBadUsb:
         return "Bad KB";
     case ArchiveFileTypeWAV:
         return EXT_PATH("apps/Media/wav_player.fap");
     case ArchiveFileTypeMag:
         return EXT_PATH("apps/GPIO/magspoof.fap");
+    case ArchiveFileTypeCrossRemote:
+        return EXT_PATH("apps/Infrared/xremote.fap");
     case ArchiveFileTypeU2f:
         return "U2F";
     case ArchiveFileTypeUpdateManifest:

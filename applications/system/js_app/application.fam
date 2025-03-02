@@ -132,6 +132,23 @@ App(
 )
 
 App(
+    appid="js_gui__widget",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_view_widget_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/widget.c"],
+)
+
+App(
+    appid="js_gui__icon",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_gui_icon_ep",
+    requires=["js_app"],
+    sources=["modules/js_gui/icon.c"],
+    fap_libs=["assets"],
+)
+
+App(
     appid="js_notification",
     apptype=FlipperAppType.PLUGIN,
     entry_point="js_notification_ep",
@@ -177,14 +194,6 @@ App(
     entry_point="js_storage_ep",
     requires=["js_app"],
     sources=["modules/js_storage.c"],
-)
-
-App(
-    appid="js_widget",
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="js_widget_ep",
-    requires=["js_app"],
-    sources=["modules/js_widget.c"],
 )
 
 App(

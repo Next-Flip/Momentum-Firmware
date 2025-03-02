@@ -433,7 +433,13 @@ distenv.PhonyTarget(
 # Find blackmagic probe
 distenv.PhonyTarget(
     "get_blackmagic",
-    "@echo $( ${BLACKMAGIC_ADDR} $)",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/enable_debug.py",
+        ],
+        "@echo $( ${BLACKMAGIC_ADDR} $)",
+    ],
 )
 
 

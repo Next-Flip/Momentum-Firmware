@@ -12,7 +12,7 @@ MomentumSettings momentum_settings = {
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
     .menu_style = MenuStyleDsi, // DSi
-    .lock_on_boot = false, // OFF
+    .lock_on_boot = true, // ON
     .bad_pins_format = false, // OFF
     .allow_locked_rpc_usb = false, // OFF
     .allow_locked_rpc_ble = false, // OFF
@@ -35,7 +35,6 @@ MomentumSettings momentum_settings = {
     .dark_mode = false, // OFF
     .rgb_backlight = false, // OFF
     .butthurt_timer = 21600, // 6 H
-    .charge_cap = 100, // 100%
     .midnight_format_00 = true, // 00:XX
     .spi_cc1101_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .spi_nrf24_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
@@ -107,7 +106,6 @@ static const struct {
     {setting_bool(dark_mode)},
     {setting_bool(rgb_backlight)},
     {setting_uint(butthurt_timer, 0, 172800)},
-    {setting_uint(charge_cap, 5, 100)},
     {setting_bool(midnight_format_00)},
     {setting_enum(spi_cc1101_handle, SpiCount)},
     {setting_enum(spi_nrf24_handle, SpiCount)},

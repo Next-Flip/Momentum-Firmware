@@ -185,7 +185,7 @@ static int32_t usb_uart_worker(void* context) {
     usb_uart->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     usb_uart->tx_thread =
-        furi_thread_alloc_ex("UsbUartTxWorker", 512, usb_uart_tx_thread, usb_uart);
+        furi_thread_alloc_ex("UsbUartTxWorker", 768, usb_uart_tx_thread, usb_uart);
 
     usb_uart_vcp_init(usb_uart, usb_uart->cfg.vcp_ch);
     usb_uart_serial_init(usb_uart, usb_uart->cfg.uart_ch);
@@ -293,8 +293,6 @@ static int32_t usb_uart_worker(void* context) {
             furi_hal_serial_send_break(usb_uart->serial_handle);
         }
     }
-    usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
-    usb_uart_serial_deinit(usb_uart);
 
     furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
@@ -306,6 +304,9 @@ static int32_t usb_uart_worker(void* context) {
     furi_thread_flags_set(furi_thread_get_id(usb_uart->tx_thread), WorkerEvtTxStop);
     furi_thread_join(usb_uart->tx_thread);
     furi_thread_free(usb_uart->tx_thread);
+
+    usb_uart_vcp_deinit(usb_uart, usb_uart->cfg.vcp_ch);
+    usb_uart_serial_deinit(usb_uart);
 
     furi_stream_buffer_free(usb_uart->rx_stream);
     furi_mutex_free(usb_uart->usb_mutex);

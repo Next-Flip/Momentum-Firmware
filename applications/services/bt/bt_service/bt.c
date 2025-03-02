@@ -186,8 +186,6 @@ Bt* bt_alloc(void) {
     // API evnent
     bt->api_event = furi_event_flag_alloc();
 
-    bt->pin = 0;
-
     return bt;
 }
 
@@ -264,7 +262,6 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
     furi_assert(context);
     Bt* bt = context;
     bool ret = false;
-    bt->pin = 0;
     bool do_update_status = false;
     bool current_profile_is_serial =
         furi_hal_bt_check_profile_type(bt->current_profile, ble_profile_serial);
@@ -303,14 +300,12 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         do_update_status = true;
         ret = true;
     } else if(event.type == GapEventTypePinCodeShow) {
-        bt->pin = event.data.pin_code;
         BtMessage message = {
             .type = BtMessageTypePinCodeShow, .data.pin_code = event.data.pin_code};
         furi_check(
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
         ret = true;
     } else if(event.type == GapEventTypePinCodeVerify) {
-        bt->pin = event.data.pin_code;
         ret = bt_pin_code_verify_event_handler(bt, event.data.pin_code);
     } else if(event.type == GapEventTypeUpdateMTU) {
         bt->max_packet_size = event.data.max_packet_size;

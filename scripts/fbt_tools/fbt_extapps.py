@@ -318,6 +318,28 @@ def _validate_app_imports(target, source, env):
                 # social_moscow, troika
                 "mosgortrans_parse_transport_block",
                 "render_section_header",
+                # metroflip
+                "metroflip_",
+                "apdu_success",
+                "bit_slice_to_dec",
+                "byte_to_binary",
+                "free_calypso_",
+                "get_calypso_",
+                "get_intercode_",
+                "get_network_",
+                "get_opus_",
+                "get_ravkav_",
+                "guess_card_type",
+                "handle_keyfile_case",
+                "is_calypso_",
+                "manage_keyfiles",
+                "mf_classic_key_cache_",
+                "read_file",
+                "select_app",
+                "show_navigo_",
+                "show_opus_",
+                "show_ravkav_",
+                "uid_to_string",
             )
         )
         and any(
@@ -330,6 +352,18 @@ def _validate_app_imports(target, source, env):
                 "test_js",
                 "totp_",
                 "troika",
+                # metroflip
+                "bip_plugin",
+                "calypso_plugin",
+                "charliecard_plugin",
+                "clipper_plugin",
+                "gocard_plugin",
+                "itso_plugin",
+                "metromoney_plugin",
+                "myki_plugin",
+                "opal_plugin",
+                "smartrider_plugin",
+                "troika_plugin",
             ]
         )
     ]

@@ -217,7 +217,7 @@ const AboutDialogScreen about_screens[] = {
 };
 
 int32_t about_settings_app(void* p) {
-    UNUSED(p);
+    bool about_battery = p && !strncmp(p, "about_battery", strlen("about_battery"));
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogMessage* message = dialog_message_alloc();
 
@@ -236,7 +236,7 @@ int32_t about_settings_app(void* p) {
     while(1) {
         if(screen_index >= COUNT_OF(about_screens) - 1) {
             dialog_message_set_buttons(message, "Prev.", NULL, NULL);
-        } else if(screen_index == 0) {
+        } else if(screen_index == 0 && !about_battery) {
             dialog_message_set_buttons(message, NULL, NULL, "Next");
         } else {
             dialog_message_set_buttons(message, "Prev.", NULL, "Next");

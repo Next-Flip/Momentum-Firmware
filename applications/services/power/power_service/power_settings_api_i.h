@@ -1,8 +1,10 @@
 #pragma once
 
 #include "power.h"
-#include "../power_settings.h"
+#include "power_settings.h"
 
-void power_get_settings(Power* power, PowerSettings* settings);
+// get settings from service to app
+void power_api_get_settings(Power* instance, PowerSettings* settings);
 
-void power_set_settings(Power* power, const PowerSettings* settings);
+// set settings from app to service
+void power_api_set_settings(Power* instance, const PowerSettings* settings);

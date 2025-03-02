@@ -446,6 +446,37 @@ void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
     }
 }
 
+void cli_command_sysctl_sleep_mode(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+    if(!furi_string_cmp(args, "default")) {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagLegacySleep);
+        printf("Deep sleep enabled");
+    } else if(!furi_string_cmp(args, "legacy")) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagLegacySleep);
+        printf("Deep sleep disabled");
+    } else {
+        cli_print_usage("sysctl sleep_mode", "<default|legacy>", furi_string_get_cstr(args));
+    }
+}
+
+void cli_command_sysctl_log_level(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+    FuriLogLevel log_level;
+    if(!furi_log_level_from_string(furi_string_get_cstr(args), &log_level)) {
+        cli_print_usage(
+            "sysctl log_level",
+            "<error|warn|info|default|debug|trace>",
+            furi_string_get_cstr(args));
+        return;
+    }
+    furi_hal_rtc_set_log_level(log_level);
+    const char* log_level_str;
+    furi_log_level_to_string(log_level, &log_level_str);
+    printf("Set log level to %s", log_level_str);
+}
+
 void cli_command_sysctl_print_usage(void) {
     printf("Usage:\r\n");
     printf("sysctl <cmd> <args>\r\n");
@@ -457,6 +488,8 @@ void cli_command_sysctl_print_usage(void) {
 #else
     printf("\theap_track <none|main>\t - Set heap allocation tracking mode\r\n");
 #endif
+    printf("\tsleep_mode <default|legacy>\t - Enable or disable deep sleep\r\n");
+    printf("\tlog_level <error|warn|info|default|debug|trace>\t - Set system log level\r\n");
 }
 
 void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
@@ -476,6 +509,16 @@ void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "heap_track") == 0) {
             cli_command_sysctl_heap_track(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "sleep_mode") == 0) {
+            cli_command_sysctl_sleep_mode(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "log_level") == 0) {
+            cli_command_sysctl_log_level(cli, args, context);
             break;
         }
 

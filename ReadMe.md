@@ -71,7 +71,7 @@ After installing the packs to Flipper, hit the <code>Arrow Up</code> button on t
 <h2 align="center">Bad Keyboard:</h2>
 
 <img src=".github/assets/badkb.png" align="left" width="250px"/>
-BadUSB is a great app, but it lacks Bluetooth connectivity. Bad-KB allows you to toggle between USB and Bluetooth mode for your attacks.
+BadUSB is a great app, but it lacks a lot of options. Bad-KB allows you to customize all USB and Bluetooth parameters for your attacks.
 
 In Bluetooth mode it allows you to spoof the display name and MAC address of the device to whatever you want. Showing up as a portable speaker or a wireless keyboard is easily doable, allowing you to get the attention of your target without needing a cable at hand.
 
