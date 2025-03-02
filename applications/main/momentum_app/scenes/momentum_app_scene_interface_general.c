@@ -12,7 +12,7 @@ void momentum_app_scene_interface_general_var_item_list_callback(void* context, 
 static void momentum_app_scene_interface_general_midnight_format_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "00:XX" : "XX:00");
+    variable_item_set_current_value_text(item, value ? "00:XX" : "12:00");
     momentum_settings.midnight_format_00 = value;
     app->save_settings = true;
 }
