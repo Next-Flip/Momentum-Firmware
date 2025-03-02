@@ -129,8 +129,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 menu_centered_icon(canvas, item, 4, 3 + 22 * i, 14, 14);
                 menu_get_name(item, name, false);
                 size_t scroll_counter = menu_scroll_counter(model, i == 1);
-                elements_scrollable_text_line_centered(
-                    canvas, 22, 14 + 22 * i, 98, name, scroll_counter, false, false);
+                elements_scrollable_text_line(
+                    canvas, 22, 14 + 22 * i, 98, name, scroll_counter, false);
             }
             // Frame and scrollbar
             elements_frame(canvas, 0, 21, 128 - 5, 21);
@@ -257,14 +257,13 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     canvas_set_font(canvas, FontSecondary);
                     menu_get_name(item, name, true);
                     size_t scroll_counter = menu_scroll_counter(model, true);
-                    elements_scrollable_text_line_centered(
+                    elements_scrollable_text_line(
                         canvas,
                         pos_x + width / 2 + 2,
                         pos_y + height / 2 + 7,
                         74,
                         name,
                         scroll_counter,
-                        false,
                         false);
                 } else {
                     pos_x += (width + 1) * i + (i < 0 ? -6 : 6);
@@ -302,8 +301,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 menu_centered_icon(canvas, item, 0, y_off, 16, 16);
                 menu_get_name(item, name, true);
                 size_t scroll_counter = menu_scroll_counter(model, selected);
-                elements_scrollable_text_line_centered(
-                    canvas, 17, y_off + 12, 46, name, scroll_counter, false, false);
+                elements_scrollable_text_line(
+                    canvas, 17, y_off + 12, 46, name, scroll_counter, false);
                 if(selected) {
                     canvas_set_color(canvas, ColorBlack);
                 }
@@ -344,8 +343,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     snprintf(indexstr, sizeof(indexstr), "%d.", index);
                     furi_string_replace_at(name, 0, 0, indexstr);
 
-                    elements_scrollable_text_line_centered(
-                        canvas, x_off + 2, y_off + 12, 60, name, scroll_counter, false, false);
+                    elements_scrollable_text_line(
+                        canvas, x_off + 2, y_off + 12, 60, name, scroll_counter, false);
 
                     if(selected) {
                         canvas_set_color(canvas, ColorBlack);
@@ -376,8 +375,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     item = MenuItemArray_get(model->items, index);
                     menu_get_name(item, name, true);
 
-                    elements_scrollable_text_line_centered(
-                        canvas, x_off + 1, y_off + 7, 62, name, scroll_counter, false, false);
+                    elements_scrollable_text_line(
+                        canvas, x_off + 1, y_off + 7, 62, name, scroll_counter, false);
 
                     if(selected) {
                         canvas_set_color(canvas, ColorBlack);
@@ -459,8 +458,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 menu_get_name(item, name, true);
                 uint8_t yPos = startY + ((i - position) * itemHeight);
                 size_t scroll_counter = menu_scroll_counter(model, i == position);
-                elements_scrollable_text_line_centered(
-                    canvas, 83, yPos, 43, name, scroll_counter, false, false);
+                elements_scrollable_text_line(canvas, 83, yPos, 43, name, scroll_counter, false);
             }
             break;
         }

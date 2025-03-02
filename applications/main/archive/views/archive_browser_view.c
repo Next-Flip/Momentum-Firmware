@@ -304,15 +304,14 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
         }
 
-        elements_scrollable_text_line_centered(
+        elements_scrollable_text_line(
             canvas,
             15 + x_offset,
             24 + i * FRAME_HEIGHT,
             ((scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX) - x_offset),
             str_buf,
             scroll_counter,
-            (model->item_idx != idx),
-            false);
+            (model->item_idx != idx));
 
         furi_string_free(str_buf);
     }

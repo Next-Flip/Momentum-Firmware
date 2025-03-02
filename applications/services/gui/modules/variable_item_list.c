@@ -108,15 +108,14 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 label_width = 71;
             }
 
-            elements_scrollable_text_line_centered(
+            elements_scrollable_text_line(
                 canvas,
                 6,
                 item_text_y,
                 label_width,
                 item->label,
                 scroll_counter,
-                (position != model->position),
-                false);
+                (position != model->position));
 
             if(item->locked) {
                 canvas_draw_icon(canvas, value_pos_x, item_text_y - 8, &I_Lock_7x8);
