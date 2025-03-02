@@ -5,7 +5,7 @@
 #include <assets_icons.h>
 #include <m-array.h>
 #include <stdint.h>
-#include <lib/momentum/settings.h>
+
 struct VariableItem {
     FuriString* label;
     uint8_t current_value_index;
