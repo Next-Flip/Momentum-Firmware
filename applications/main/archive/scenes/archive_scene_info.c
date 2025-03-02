@@ -21,16 +21,22 @@ static uint32_t archive_scene_info_dirwalk(void* context) {
     char buf[128];
     FileInfo fileinfo;
     uint64_t total = 0;
+    uint32_t item_count = 0;
     DirWalk* dir_walk = dir_walk_alloc(furi_record_open(RECORD_STORAGE));
     ArchiveFile_t* current = archive_get_current_file(instance->browser);
     if(dir_walk_open(dir_walk, furi_string_get_cstr(current->path))) {
         while(scene_manager_get_scene_state(instance->scene_manager, ArchiveAppSceneInfo)) {
             DirWalkResult result = dir_walk_read(dir_walk, NULL, &fileinfo);
             if(result == DirWalkError) {
-                widget_element_text_box_set_text(instance->element, "Size: \e#Error\e#");
+                widget_element_text_box_set_text(instance->size_element, "Size: \e#Error\e#");
+                if(instance->count_element) {
+                    widget_element_text_box_set_text(
+                        instance->count_element, "Items: \e#Error\e#");
+                }
                 break;
             }
             bool is_last = result == DirWalkLast;
+            if(!is_last) item_count++;
             if(!file_info_is_dir(&fileinfo) || is_last) {
                 if(!is_last) total += fileinfo.size;
                 double show = total;
@@ -46,12 +52,21 @@ static uint32_t archive_scene_info_dirwalk(void* context) {
                     is_last ? "" : "... ",
                     show,
                     units[unit]);
-                widget_element_text_box_set_text(instance->element, buf);
+                widget_element_text_box_set_text(instance->size_element, buf);
+
+                if(instance->count_element) {
+                    snprintf(
+                        buf, sizeof(buf), "Items: %s\e#%lu\e#", is_last ? "" : "... ", item_count);
+                    widget_element_text_box_set_text(instance->count_element, buf);
+                }
             }
             if(is_last) break;
         }
     } else {
-        widget_element_text_box_set_text(instance->element, "Size: \e#Error\e#");
+        widget_element_text_box_set_text(instance->size_element, "Size: \e#Error\e#");
+        if(instance->count_element) {
+            widget_element_text_box_set_text(instance->count_element, "Items: \e#Error\e#");
+        }
     }
     dir_walk_free(dir_walk);
     furi_record_close(RECORD_STORAGE);
@@ -94,7 +109,7 @@ static uint32_t archive_scene_info_md5sum(void* context) {
                 furi_string_cat_printf(md5, "%02x", output[i]);
             }
             furi_string_cat(md5, "\e*");
-            widget_element_text_box_set_text(instance->element, furi_string_get_cstr(md5));
+            widget_element_text_box_set_text(instance->size_element, furi_string_get_cstr(md5));
         }
         free(md5_ctx);
         free(data);
@@ -111,7 +126,7 @@ static uint32_t archive_scene_info_md5sum(void* context) {
             strlcat(buf, " ", sizeof(buf));
         }
         strlcat(buf, "\e*", sizeof(buf));
-        widget_element_text_box_set_text(instance->element, buf);
+        widget_element_text_box_set_text(instance->size_element, buf);
     }
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, ArchiveViewWidget);
@@ -158,7 +173,6 @@ void archive_scene_info_on_enter(void* context) {
     } else if(file_info_is_dir(&fileinfo)) {
         is_dir = true;
         snprintf(buf, sizeof(buf), "Size: ... \e#0\e# %s", units[0]);
-
     } else {
         double show = fileinfo.size;
         size_t unit;
@@ -173,8 +187,15 @@ void archive_scene_info_on_enter(void* context) {
             show,
             units[unit]);
     }
-    WidgetElement* element = widget_add_text_box_element(
+
+    WidgetElement* size_element = widget_add_text_box_element(
         instance->widget, 1, 31, 126, 13, AlignLeft, AlignTop, buf, true);
+    WidgetElement* count_element = NULL;
+    if(is_dir) {
+        snprintf(buf, sizeof(buf), "Items: ... \e#0\e#");
+        count_element = widget_add_text_box_element(
+            instance->widget, 1, 42, 126, 13, AlignLeft, AlignTop, buf, true);
+    }
 
     // MD5 hash
     if(!is_dir) {
@@ -184,11 +205,12 @@ void archive_scene_info_on_enter(void* context) {
             strlcat(buf, " ", sizeof(buf));
         }
         strlcat(buf, "\e*", sizeof(buf));
-        element = widget_add_text_box_element(
+        size_element = widget_add_text_box_element(
             instance->widget, 0, 43, 128, 24, AlignRight, AlignTop, buf, false);
     }
 
-    instance->element = element;
+    instance->size_element = size_element;
+    instance->count_element = count_element;
     furi_record_close(RECORD_STORAGE);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, ArchiveViewWidget);

@@ -24,6 +24,7 @@
 - OFW: BadKB: Mouse control (by @jetrp1)
 - OFW: Infrared: Universal IR signal selection (by @portasynthinca3)
 - OFW: NFC: Disney Infinity KDF plugin (by @bettse)
+- Archive: Add item count to directory info scene (#378 by @956MB)
 - UL: Input: Vibro on Button press option (by @Dmitry422)
 - Desktop:
   - UL: Option to prevent Auto Lock when connected to USB/RPC (by @Dmitry422)
