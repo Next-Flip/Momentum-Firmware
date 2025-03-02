@@ -606,7 +606,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             canvas_draw_icon(
                 canvas, 2, Y_OFFSET + 1 + i * FRAME_HEIGHT, BrowserItemIcons[item_type]);
         }
-        elements_scrollable_text_line_ex(
+        elements_scrollable_text_line_centered(
             canvas,
             15,
             Y_OFFSET + 9 + i * FRAME_HEIGHT,
@@ -614,8 +614,7 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             filename,
             scroll_counter,
             (model->item_idx != idx),
-            false,
-            momentum_settings.scroll_marquee);
+            false);
     }
 
     if(show_scrollbar) {

@@ -269,7 +269,7 @@ void elements_scrollable_text_line(
     size_t scroll,
     bool ellipsis);
 
-/** Draw scrollable text line, optionally centered and/or marquee
+/** Draw scrollable text line, optionally centered
  *
  * @param      canvas    The canvas
  * @param[in]  x         X coordinate
@@ -279,9 +279,8 @@ void elements_scrollable_text_line(
  * @param[in]  scroll    The scroll counter: 0 - no scroll, any other number - scroll. Just count up, everything else will be calculated on the inside.
  * @param[in]  ellipsis  The ellipsis flag: true to add ellipse
  * @param[in]  centered  The centered flag: true to center text horizontally, x coordinate will indicate the middle
- * @param[in]  marquee   The marquee flag: true to enable marquee mode
  */
-void elements_scrollable_text_line_ex(
+void elements_scrollable_text_line_centered(
     Canvas* canvas,
     int32_t x,
     int32_t y,
@@ -289,8 +288,7 @@ void elements_scrollable_text_line_ex(
     FuriString* string,
     size_t scroll,
     bool ellipsis,
-    bool centered,
-    bool marquee);
+    bool centered);
 
 /** Draw text box element
  *

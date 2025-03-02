@@ -304,7 +304,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
                 canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
         }
 
-        elements_scrollable_text_line_ex(
+        elements_scrollable_text_line_centered(
             canvas,
             15 + x_offset,
             24 + i * FRAME_HEIGHT,
@@ -312,8 +312,7 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
             str_buf,
             scroll_counter,
             (model->item_idx != idx),
-            false,
-            momentum_settings.scroll_marquee);
+            false);
 
         furi_string_free(str_buf);
     }
@@ -356,7 +355,7 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
     if(tab_name) {
         canvas_draw_str_aligned(canvas, 25, 9, AlignCenter, AlignBottom, tab_name);
     } else {
-        elements_scrollable_text_line_ex(
+        elements_scrollable_text_line_centered(
             canvas,
             25,
             9,
@@ -364,8 +363,7 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
             model->archive->browser->formatted_path,
             model->scroll_counter,
             false,
-            true,
-            momentum_settings.scroll_marquee);
+            true);
     }
 
     if(clip) {

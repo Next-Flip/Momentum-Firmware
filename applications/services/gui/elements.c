@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <momentum/settings.h>
+
 typedef struct {
     int32_t x;
     int32_t y;
@@ -680,10 +682,10 @@ void elements_scrollable_text_line(
     FuriString* string,
     size_t scroll,
     bool ellipsis) {
-    elements_scrollable_text_line_ex(canvas, x, y, width, string, scroll, ellipsis, false, false);
+    elements_scrollable_text_line_centered(canvas, x, y, width, string, scroll, ellipsis, false);
 }
 
-void elements_scrollable_text_line_ex(
+void elements_scrollable_text_line_centered(
     Canvas* canvas,
     int32_t x,
     int32_t y,
@@ -691,14 +693,14 @@ void elements_scrollable_text_line_ex(
     FuriString* string,
     size_t scroll,
     bool ellipsis,
-    bool centered,
-    bool marquee) {
+    bool centered) {
     furi_check(canvas);
     furi_check(string);
 
     FuriString* line = furi_string_alloc_set(string);
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
+    bool marquee = momentum_settings.scroll_marquee;
     if(len_px > width) {
         if(centered && !marquee) {
             centered = false;
