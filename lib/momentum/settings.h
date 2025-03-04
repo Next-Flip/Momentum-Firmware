@@ -94,6 +94,7 @@ typedef struct {
     bool rgb_backlight;
     uint32_t butthurt_timer;
     bool midnight_format_00;
+    bool popup_overlay;
     SpiHandle spi_cc1101_handle;
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;

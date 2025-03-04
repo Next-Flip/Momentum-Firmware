@@ -167,6 +167,9 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
     }
 
     if(m->show_lock_popup) {
+        if(momentum_settings.popup_overlay) {
+            canvas_draw_overlay(canvas);
+        }
         canvas_set_font(canvas, FontSecondary);
         elements_bold_rounded_frame(canvas, 24, 4, 80, 56);
         canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, "Keypad Lock");

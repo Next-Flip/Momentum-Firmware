@@ -26,6 +26,14 @@ static void momentum_app_scene_interface_general_midnight_format_changed(Variabl
     app->save_settings = true;
 }
 
+static void momentum_app_scene_interface_general_popup_overlay_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.popup_overlay = value;
+    app->save_settings = true;
+}
+
 void momentum_app_scene_interface_general_on_enter(void* context) {
     MomentumApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
@@ -50,6 +58,15 @@ void momentum_app_scene_interface_general_on_enter(void* context) {
     variable_item_set_current_value_index(item, momentum_settings.midnight_format_00);
     variable_item_set_current_value_text(
         item, momentum_settings.midnight_format_00 ? "00:XX" : "12:XX");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Popup Overlay",
+        2,
+        momentum_app_scene_interface_general_popup_overlay_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.popup_overlay);
+    variable_item_set_current_value_text(item, momentum_settings.popup_overlay ? "ON" : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, momentum_app_scene_interface_general_var_item_list_callback, app);

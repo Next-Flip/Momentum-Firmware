@@ -346,6 +346,12 @@ void canvas_draw_xbm_ex(
  */
 void canvas_draw_dot(Canvas* canvas, int32_t x, int32_t y);
 
+/** Draw overlay
+ *
+ * @param      canvas  Canvas instance
+ */
+void canvas_draw_overlay(Canvas* canvas);
+
 /** Draw box of width, height at x,y
  *
  * @param      canvas  Canvas instance

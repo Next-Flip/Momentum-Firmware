@@ -844,6 +844,7 @@ Function,+,canvas_draw_icon_animation,void,"Canvas*, int32_t, int32_t, IconAnima
 Function,+,canvas_draw_icon_animation_ex,void,"Canvas*, int32_t, int32_t, int32_t, int32_t, IconAnimation*"
 Function,+,canvas_draw_icon_ex,void,"Canvas*, int32_t, int32_t, const Icon*, IconRotation"
 Function,+,canvas_draw_line,void,"Canvas*, int32_t, int32_t, int32_t, int32_t"
+Function,+,canvas_draw_overlay,void,Canvas*
 Function,+,canvas_draw_rbox,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
 Function,+,canvas_draw_rframe,void,"Canvas*, int32_t, int32_t, size_t, size_t, size_t"
 Function,+,canvas_draw_str,void,"Canvas*, int32_t, int32_t, const char*"

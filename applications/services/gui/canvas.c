@@ -484,6 +484,22 @@ void canvas_draw_dot(Canvas* canvas, int32_t x, int32_t y) {
     u8g2_DrawPixel(&canvas->fb, x, y);
 }
 
+void canvas_draw_overlay(Canvas* canvas) {
+    furi_check(canvas);
+    uint8_t original = canvas->fb.draw_color;
+    canvas_set_color(canvas, ColorWhite);
+    for(size_t j = 0; j < canvas->height; j++) {
+        bool draw_pixel = (j % 2) == 0;
+        for(size_t i = 0; i < canvas->width; i += 2) {
+            size_t x = i + (draw_pixel ? 0 : 1);
+            if(x < canvas->width) {
+                canvas_draw_dot(canvas, x, j);
+            }
+        }
+    }
+    canvas->fb.draw_color = original;
+}
+
 void canvas_draw_box(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height) {
     furi_check(canvas);
     x += canvas->offset_x;
