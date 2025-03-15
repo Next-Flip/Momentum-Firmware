@@ -18,7 +18,7 @@ typedef struct FelicaPoller FelicaPoller;
  * @brief Enumeration of possible Felica poller event types.
  */
 typedef enum {
-    FelicaPollerEventTypeError, /**< An error occured during activation procedure. */
+    FelicaPollerEventTypeError, /**< An error occurred during activation procedure. */
     FelicaPollerEventTypeReady, /**< The card was activated and fully read by the poller. */
     FelicaPollerEventTypeIncomplete, /**< The card was activated and partly read by the poller. */
     FelicaPollerEventTypeRequestAuthContext, /**< Authentication context was requested by poller. */

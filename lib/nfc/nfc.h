@@ -6,7 +6,7 @@
  * and technology (ISO14443-3A/B, ISO15693, ...), data exchange between higher
  * protocol-specific levels and underlying NFC hardware, as well as timings handling.
  *
- * In applications using the NFC protocol system there is no need to neiter explicitly
+ * In applications using the NFC protocol system there is no need to neither explicitly
  * create an Nfc instance nor call any of its functions, as it is all handled
  * automatically under the hood.
  *
@@ -115,7 +115,7 @@ typedef enum {
  */
 typedef enum {
     NfcErrorNone, /**< No error has occurred. */
-    NfcErrorInternal, /**< An unknown error has occured on the lower level. */
+    NfcErrorInternal, /**< An unknown error has occurred on the lower level. */
     NfcErrorTimeout, /**< Operation is taking too long (e.g. card does not respond). */
     NfcErrorIncompleteFrame, /**< An incomplete data frame has been received. */
     NfcErrorDataFormat, /**< Data has not been parsed due to wrong/unknown format. */

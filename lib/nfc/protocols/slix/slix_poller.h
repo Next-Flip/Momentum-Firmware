@@ -17,7 +17,7 @@ typedef struct SlixPoller SlixPoller;
  * @brief Enumeration of possible Slix poller event types.
  */
 typedef enum {
-    SlixPollerEventTypeError, /**< An error occured while reading card. */
+    SlixPollerEventTypeError, /**< An error occurred while reading card. */
     SlixPollerEventTypePrivacyUnlockRequest, /**< Poller requests password to disable privacy mode. */
     SlixPollerEventTypeReady, /**< The card was successfully read by the poller. */
 } SlixPollerEventType;

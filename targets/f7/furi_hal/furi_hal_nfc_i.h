@@ -112,7 +112,7 @@ uint32_t furi_hal_nfc_get_irq(const FuriHalSpiBusHandle* handle);
  * @param[in,out] handle pointer to the SPI handle associated with the NFC chip.
  * @param[in] mask bitmask of one or more interrupts to wait for.
  * @param[in] timeout_ms maximum time to wait for an interrupt, in milliseconds.
- * @returns true if specified interrupt(s) have occured within timeout, false otherwise.
+ * @returns true if specified interrupt(s) have occurred within timeout, false otherwise.
  */
 bool furi_hal_nfc_event_wait_for_specific_irq(
     const FuriHalSpiBusHandle* handle,
