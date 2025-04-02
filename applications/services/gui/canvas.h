@@ -82,6 +82,8 @@ typedef enum {
     IconRotation270,
 } IconRotation;
 
+extern const CanvasFontParameters canvas_font_params[FontTotalNumber];
+
 /** Canvas anonymous structure */
 typedef struct Canvas Canvas;
 

@@ -1004,7 +1004,7 @@ Function,-,drem,double,"double, double"
 Function,-,dremf,float,"float, float"
 Function,+,elements_bold_rounded_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,elements_bubble,void,"Canvas*, int32_t, int32_t, size_t, size_t"
-Function,+,elements_bubble_str,void,"Canvas*, int32_t, int32_t, const char*, Align, Align"
+Function,+,elements_bubble_str,void,"Canvas*, int32_t, int32_t, int32_t, const char*, Align, Align"
 Function,+,elements_button_center,void,"Canvas*, const char*"
 Function,+,elements_button_down,void,"Canvas*, const char*"
 Function,+,elements_button_left,void,"Canvas*, const char*"
@@ -4237,6 +4237,7 @@ Variable,-,_sys_errlist,const char* const[],
 Variable,-,_sys_nerr,int,
 Variable,-,ble_profile_hid,const FuriHalBleProfileTemplate*,
 Variable,+,ble_profile_serial,const FuriHalBleProfileTemplate* const,
+Variable,+,canvas_font_params,const CanvasFontParameters[FontTotalNumber],
 Variable,+,cli_vcp,const CliSession,
 Variable,+,compress_config_heatshrink_default,const CompressConfigHeatshrink,
 Variable,+,firmware_api_interface,const ElfApiInterface* const,

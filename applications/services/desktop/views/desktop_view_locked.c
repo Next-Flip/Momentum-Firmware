@@ -117,13 +117,24 @@ void desktop_view_locked_draw_lockscreen(Canvas* canvas, void* m) {
     if(model->view_state == DesktopViewLockedStateLockedHintShown &&
        momentum_settings.lockscreen_prompt) {
         canvas_set_font(canvas, FontSecondary);
+
+        const CanvasFontParameters* font_params = canvas_get_font_params(canvas, FontSecondary);
+        int32_t y_offset =
+            font_params != &canvas_font_params[FontSecondary] ? (font_params->height / 2) : 0;
+
         if(model->pin_locked) {
             elements_bubble_str(
-                canvas, 12, 14 + y, "  Press   \nto unlock!", AlignRight, AlignBottom);
+                canvas, 12, 14 + y, y_offset, "  Press   \nto unlock!", AlignRight, AlignBottom);
             canvas_draw_icon(canvas, 45, 16 + y, &I_Pin_arrow_up_7x9);
         } else {
             elements_bubble_str(
-                canvas, 2, 14 + y, "Press 3x      \n  to unlock!", AlignRight, AlignBottom);
+                canvas,
+                2,
+                14 + y,
+                y_offset,
+                "Press 3x      \n  to unlock!",
+                AlignRight,
+                AlignBottom);
             canvas_draw_icon(canvas, 43, 17 + y, &I_Pin_back_arrow_10x8);
         }
     }
