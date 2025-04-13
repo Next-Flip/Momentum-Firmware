@@ -37,7 +37,9 @@
   - Add item count to directory info scene (#378 by @956MB)
   - OFW: Pinning of settings options (by @portasynthinca3)
 - Clock: 12 hour "midnight format" in Momentum Settings (#341 by @956MB)
-- GUI: Add marquee 'Text Scroll' option in Momentum Settings (#363 by @956MB)
+- GUI:
+  - Add marquee 'Text Scroll' option in Momentum Settings (#363 by @956MB)
+  - Checkerboard overlay behind popup elements, can be disabled in Momentum Settings (#380 by @956MB)
 - UL: Input: Vibro on Button press option (by @Dmitry422)
 - Desktop:
   - UL: Option to prevent Auto Lock when connected to USB/RPC (by @Dmitry422)
