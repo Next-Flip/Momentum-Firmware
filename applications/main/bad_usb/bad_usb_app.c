@@ -132,14 +132,14 @@ static void bad_usb_load_settings(BadUsbApp* app) {
     if(!loaded) {
         furi_string_set(app->keyboard_layout, BAD_USB_SETTINGS_DEFAULT_LAYOUT);
         app->interface = BadUsbHidInterfaceUsb;
-        hid_cfg->ble.bonding = true;
-        hid_cfg->ble.pairing = GapPairingPinCodeVerifyYesNo;
         hid_cfg->ble.name[0] = '\0';
         memset(hid_cfg->ble.mac, 0, sizeof(hid_cfg->ble.mac));
-        hid_cfg->usb.manuf[0] = '\0';
-        hid_cfg->usb.product[0] = '\0';
+        hid_cfg->ble.bonding = true;
+        hid_cfg->ble.pairing = GapPairingPinCodeVerifyYesNo;
         hid_cfg->usb.vid = 0;
         hid_cfg->usb.pid = 0;
+        hid_cfg->usb.manuf[0] = '\0';
+        hid_cfg->usb.product[0] = '\0';
     }
 }
 

@@ -6,7 +6,7 @@ App(
     cdefines=["APP_ARCHIVE"],
     requires=["gui"],
     stack_size=6 * 1024,
-    order=0,
+    order=10,
     sdk_headers=[
         "helpers/archive_helpers_ext.h",
     ],

@@ -46,12 +46,14 @@ bool bad_usb_scene_config_usb_name_on_event(void* context, SceneManagerEvent eve
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == TextInputResultOk) {
+            const BadUsbHidApi* hid = bad_usb_hid_get_interface(bad_usb->interface);
             if(scene_manager_get_scene_state(bad_usb->scene_manager, BadUsbSceneConfigUsbName)) {
                 // Apply to current script config
                 strlcpy(
                     bad_usb->script_hid_cfg.usb.manuf,
                     bad_usb->usb_name_buf,
                     sizeof(bad_usb->script_hid_cfg.usb.manuf));
+                hid->adjust_config(&bad_usb->script_hid_cfg);
                 // Set in user config to save in settings file
                 strlcpy(
                     bad_usb->user_hid_cfg.usb.manuf,
@@ -63,6 +65,7 @@ bool bad_usb_scene_config_usb_name_on_event(void* context, SceneManagerEvent eve
                     bad_usb->script_hid_cfg.usb.product,
                     bad_usb->usb_name_buf,
                     sizeof(bad_usb->script_hid_cfg.usb.product));
+                hid->adjust_config(&bad_usb->script_hid_cfg);
                 // Set in user config to save in settings file
                 strlcpy(
                     bad_usb->user_hid_cfg.usb.product,

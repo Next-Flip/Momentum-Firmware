@@ -296,63 +296,67 @@ def _validate_app_imports(target, source, env):
         for sym in unresolved_syms
         if sym.startswith(
             (
-                # advanced_plugin
+                # example_advanced_plugins app_api_table
                 "app_api_accumulator_",
-                # gallagher
-                "GALLAGHER_CARDAX_ASCII",
-                "gallagher_deobfuscate_and_parse_credential",
-                # js_
+                # js_app app_api_table
                 "js_delay_with_flags",
-                "js_event_loop_get_loop",
                 "js_flags_set",
                 "js_flags_wait",
-                "js_gui_make_view_factory",
                 "js_module_get",
-                # test_js
-                "js_thread_run",
-                "js_thread_stop",
-                # totp_
-                "totp_",
-                "token_info_",
-                "memset_s",
-                # social_moscow, troika
-                "mosgortrans_parse_transport_block",
-                "render_section_header",
-                # metroflip
+                "js_value_buffer_size",
+                "js_value_parse",
+                # js_event_loop_api_table
+                "js_event_loop_get_loop",
+                # js_gui_api_table
+                "js_gui_make_view_factory",
+                # metroflip_api_table
                 "metroflip_",
-                "apdu_success",
                 "bit_slice_to_dec",
                 "byte_to_binary",
-                "free_calypso_",
-                "get_calypso_",
-                "get_intercode_",
-                "get_network_",
-                "get_opus_",
-                "get_ravkav_",
-                "guess_card_type",
-                "handle_keyfile_case",
-                "is_calypso_",
-                "manage_keyfiles",
-                "mf_classic_key_cache_",
                 "read_file",
+                "apdu_success",
                 "select_app",
-                "show_navigo_",
-                "show_opus_",
-                "show_ravkav_",
+                "mf_classic_key_cache_",
+                "manage_keyfiles",
                 "uid_to_string",
+                "handle_keyfile_case",
+                "get_calypso_",
+                "get_network_",
+                "is_calypso_",
+                "free_calypso_",
+                "guess_card_type",
+                "get_intercode_",
+                "show_navigo_",
+                "get_opus_",
+                "show_opus_",
+                "get_ravkav_",
+                "show_ravkav_",
+                "mosgortrans_parse_transport_block",
+                "render_section_header",
+                # nfc_app_api_table
+                "gallagher_deobfuscate_and_parse_credential",
+                "GALLAGHER_CARDAX_ASCII",
+                "mosgortrans_parse_transport_block",
+                "render_section_header",
+                # totp app_api_table
+                "totp_",
+                "memset_s",
+                "token_info_",
+                # unit_tests_api_table
+                "js_thread_run",
+                "js_thread_stop",
+                "js_value_buffer_size",
+                "js_value_parse",
             )
         )
         and any(
             prefix in source[0].path
             for prefix in [
+                # example_advanced_plugins app_api_table
                 "advanced_plugin",
-                "gallagher",
+                # js_app app_api_table, js_event_loop_api_table, js_gui_api_table
                 "js_",  # js_app and all js_ modules
-                "social_moscow",
-                "test_js",
-                "totp_",
-                "troika",
-                # metroflip
+                # metroflip_api_table
                 "bip_plugin",
                 "calypso_plugin",
                 "charliecard_plugin",
@@ -364,6 +368,14 @@ def _validate_app_imports(target, source, env):
                 "opal_plugin",
                 "smartrider_plugin",
                 "troika_plugin",
+                # nfc_app_api_table
+                "gallagher",
+                "social_moscow",
+                "troika",
+                # totp app_api_table
+                "totp_",
+                # unit_tests_api_table
+                "test_js",
             ]
         )
     ]

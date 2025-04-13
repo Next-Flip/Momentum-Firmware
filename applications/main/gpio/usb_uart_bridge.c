@@ -1,7 +1,6 @@
 #include "usb_uart_bridge.h"
 #include "usb_cdc.h"
 #include <cli/cli_vcp.h>
-#include <cli/cli.h>
 #include <toolbox/api_lock.h>
 #include <furi_hal.h>
 #include <furi_hal_usb_cdc.h>
@@ -35,12 +34,12 @@ typedef enum {
 
     WorkerEvtLineCfgSet = (1 << 6),
     WorkerEvtCtrlLineSet = (1 << 7),
-    WorkerEvtSendBreak = (1 << 8),
+
 } WorkerEvtFlags;
 
 #define WORKER_ALL_RX_EVENTS                                                      \
     (WorkerEvtStop | WorkerEvtRxDone | WorkerEvtCfgChange | WorkerEvtLineCfgSet | \
-     WorkerEvtCtrlLineSet | WorkerEvtCdcTxComplete | WorkerEvtSendBreak)
+     WorkerEvtCtrlLineSet | WorkerEvtCdcTxComplete)
 #define WORKER_ALL_TX_EVENTS (WorkerEvtTxStop | WorkerEvtCdcRx)
 
 struct UsbUartBridge {
@@ -69,7 +68,6 @@ static void vcp_on_cdc_rx(void* context);
 static void vcp_state_callback(void* context, uint8_t state);
 static void vcp_on_cdc_control_line(void* context, uint8_t state);
 static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config);
-static void vcp_on_cdc_break(void* context, uint16_t duration);
 
 static const CdcCallbacks cdc_cb = {
     vcp_on_cdc_tx_complete,
@@ -77,7 +75,6 @@ static const CdcCallbacks cdc_cb = {
     vcp_state_callback,
     vcp_on_cdc_control_line,
     vcp_on_line_config,
-    vcp_on_cdc_break,
 };
 
 /* USB UART worker */
@@ -108,15 +105,15 @@ static void usb_uart_on_irq_rx_dma_cb(
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
     furi_hal_usb_unlock();
     if(vcp_ch == 0) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_close(cli);
-        furi_record_close(RECORD_CLI);
+        CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+        cli_vcp_disable(cli_vcp);
+        furi_record_close(RECORD_CLI_VCP);
         furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
     } else {
         furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_open(cli, &cli_vcp);
-        furi_record_close(RECORD_CLI);
+        CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+        cli_vcp_enable(cli_vcp);
+        furi_record_close(RECORD_CLI_VCP);
     }
     furi_hal_cdc_set_callbacks(vcp_ch, (CdcCallbacks*)&cdc_cb, usb_uart);
 }
@@ -125,9 +122,9 @@ static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
     UNUSED(usb_uart);
     furi_hal_cdc_set_callbacks(vcp_ch, NULL, NULL);
     if(vcp_ch != 0) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_close(cli);
-        furi_record_close(RECORD_CLI);
+        CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+        cli_vcp_disable(cli_vcp);
+        furi_record_close(RECORD_CLI_VCP);
     }
 }
 
@@ -289,9 +286,6 @@ static int32_t usb_uart_worker(void* context) {
         if(events & WorkerEvtCtrlLineSet) {
             usb_uart_update_ctrl_lines(usb_uart);
         }
-        if(events & WorkerEvtSendBreak) {
-            furi_hal_serial_send_break(usb_uart->serial_handle);
-        }
     }
 
     furi_hal_gpio_init(USB_USART_DE_RE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
@@ -314,9 +308,9 @@ static int32_t usb_uart_worker(void* context) {
 
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_session_open(cli, &cli_vcp);
-    furi_record_close(RECORD_CLI);
+    CliVcp* cli_vcp = furi_record_open(RECORD_CLI_VCP);
+    cli_vcp_enable(cli_vcp);
+    furi_record_close(RECORD_CLI_VCP);
 
     return 0;
 }
@@ -381,12 +375,6 @@ static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config
     UNUSED(config);
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtLineCfgSet);
-}
-
-static void vcp_on_cdc_break(void* context, uint16_t duration) {
-    UNUSED(duration);
-    UsbUartBridge* usb_uart = (UsbUartBridge*)context;
-    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtSendBreak);
 }
 
 UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {

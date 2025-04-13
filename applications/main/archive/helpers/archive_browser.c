@@ -18,7 +18,7 @@ static void
     ArchiveTabEnum tab = archive_get_tab(browser);
 
     if((item_cnt == 0) && (archive_is_home(browser)) && (tab != ArchiveTabBrowser) &&
-       (tab != ArchiveTabDiskImage || !browser->disk_image)) {
+       (tab != ArchiveTabSearch) && (tab != ArchiveTabDiskImage || !browser->disk_image)) {
         archive_switch_tab(browser, browser->last_tab_switch_dir);
     } else if(!furi_string_start_with_str(browser->path, "/app:")) {
         with_view_model(
@@ -489,6 +489,9 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show, bool manage)
                         } else {
                             model->menu = false;
                         }
+                    } else if(selected->type == ArchiveFileTypeSetting) {
+                        model->menu_manage = false;
+                        model->menu_can_switch = false;
                     }
                 } else {
                     model->menu_manage = true;
@@ -534,10 +537,10 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
         with_view_model(
             browser->view, ArchiveBrowserViewModel * model, { archive = model->archive; }, false);
         scene_manager_set_scene_state(archive->scene_manager, ArchiveAppSceneSearch, false);
-        if(archive->thread) {
-            furi_thread_join(archive->thread);
-            furi_thread_free(archive->thread);
-            archive->thread = NULL;
+        if(archive->search_thread) {
+            furi_thread_join(archive->search_thread);
+            furi_thread_free(archive->search_thread);
+            archive->search_thread = NULL;
         }
     }
 
@@ -561,7 +564,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     bool tab_empty = true;
     bool is_app_tab = furi_string_start_with_str(browser->path, "/app:");
     if(tab == ArchiveTabFavorites) {
-        if(archive_favorites_count() > 0) {
+        if(archive_favorites_count(browser) > 0) {
             tab_empty = false;
         }
     } else if(is_app_tab) {

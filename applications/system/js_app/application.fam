@@ -9,12 +9,12 @@ App(
     entry_point="js_app",
     stack_size=2 * 1024,
     resources="examples",
-    order=0,
-    provides=["js_app_start"],
+    order=10,
     sources=[
         "js_app.c",
         "js_modules.c",
         "js_thread.c",
+        "js_value.c",
         "plugin_api/app_api_table.cpp",
         "views/console_view.c",
         "modules/js_flipper.c",
@@ -23,10 +23,10 @@ App(
 )
 
 App(
-    appid="js_cli",
+    appid="cli_js",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="js_cli_execute_plugin_ep",
+    entry_point="cli_js_ep",
     requires=["cli"],
     sources=[
         "js_app.c",
@@ -37,14 +37,6 @@ App(
         "modules/js_tests.c",
     ],
     fap_libs=["assets"],
-)
-
-App(
-    appid="js_app_start",
-    apptype=FlipperAppType.STARTUP,
-    entry_point="js_app_on_system_start",
-    order=160,
-    sources=["js_app.c"],
 )
 
 App(

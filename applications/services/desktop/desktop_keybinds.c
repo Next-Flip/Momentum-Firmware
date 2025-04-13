@@ -216,7 +216,7 @@ void desktop_run_keybind(Desktop* desktop, InputType _type, InputKey _key) {
     } else if(furi_string_equal(keybind, "Lock with PIN")) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventLockWithPin);
     } else if(furi_string_equal(keybind, "Wipe Device")) {
-        loader_start_detached_with_gui_error(desktop->loader, "Storage", "wipe");
+        loader_start_detached_with_gui_error(desktop->loader, "Storage", "Wipe Device");
     } else {
         if(storage_common_exists(desktop->storage, furi_string_get_cstr(keybind))) {
             run_with_default_app(furi_string_get_cstr(keybind));

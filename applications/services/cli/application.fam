@@ -1,100 +1,141 @@
 App(
     appid="cli",
-    name="CliSrv",
-    apptype=FlipperAppType.SERVICE,
-    entry_point="cli_srv",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="cli_on_system_start",
     cdefines=["SRV_CLI"],
-    stack_size=4 * 1024,
-    order=30,
-    sdk_headers=["cli.h", "cli_vcp.h"],
+    sources=[
+        "cli_command_gpio.c",
+        "cli_main_commands.c",
+        "cli_main_shell.c",
+    ],
+    # This STARTUP has to be processed before those that depend on the "cli" record.
+    # "cli" used to be a SERVICE, but it's been converted into a STARTUP in order to
+    # reduce RAM usage. The "block until record has been created" mechanism
+    # unfortunately leads to a deadlock if the STARTUPs are processed sequentially.
+    order=0,
 )
 
 App(
-    appid="src_cli",
-    targets=["f7"],
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_src_plugin_ep",
-    requires=["cli"],
-    sources=["cli_commands.c"],
+    appid="cli_vcp",
+    name="CliVcpSrv",
+    apptype=FlipperAppType.SERVICE,
+    entry_point="cli_vcp_srv",
+    stack_size=1024,
+    order=10,
+    sdk_headers=["cli_vcp.h", "cli.h"],
+    sources=["cli_vcp.c"],
 )
 
 App(
-    appid="neofetch_cli",
-    targets=["f7"],
+    appid="cli_hello_world",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_neofetch_plugin_ep",
+    entry_point="cli_hello_world_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["commands/hello_world.c"],
 )
 
 App(
-    appid="help_cli",
-    targets=["f7"],
+    appid="cli_neofetch",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_help_plugin_ep",
+    entry_point="cli_neofetch_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["commands/neofetch.c"],
 )
 
 App(
-    appid="uptime_cli",
-    targets=["f7"],
+    appid="cli_subshell_demo",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_uptime_plugin_ep",
+    entry_point="cli_subshell_demo_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["commands/subshell_demo.c"],
 )
 
 App(
-    appid="date_cli",
+    appid="cli_src",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_date_plugin_ep",
+    entry_point="cli_src_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["cli_main_commands.c"],
 )
 
 App(
-    appid="sysctl_cli",
+    appid="cli_uptime",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_sysctl_plugin_ep",
+    entry_point="cli_uptime_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["cli_main_commands.c"],
 )
 
 App(
-    appid="vibro_cli",
+    appid="cli_date",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_vibro_plugin_ep",
+    entry_point="cli_date_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["cli_main_commands.c"],
 )
 
 App(
-    appid="led_cli",
+    appid="cli_sysctl",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_led_plugin_ep",
+    entry_point="cli_sysctl_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["cli_main_commands.c"],
 )
 
 App(
-    appid="gpio_cli",
+    appid="cli_top",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_gpio_plugin_ep",
+    entry_point="cli_top_ep",
     requires=["cli"],
-    sources=["cli_commands.c", "cli_command_gpio.c"],
+    sources=["cli_main_commands.c"],
 )
 
 App(
-    appid="i2c_cli",
+    appid="cli_vibro",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="cli_command_i2c_plugin_ep",
+    entry_point="cli_vibro_ep",
     requires=["cli"],
-    sources=["cli_commands.c"],
+    sources=["cli_main_commands.c"],
+)
+
+App(
+    appid="cli_led",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_led_ep",
+    requires=["cli"],
+    sources=["cli_main_commands.c"],
+)
+
+App(
+    appid="cli_gpio",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_gpio_ep",
+    requires=["cli"],
+    sources=["cli_main_commands.c", "cli_command_gpio.c"],
+)
+
+App(
+    appid="cli_i2c",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_i2c_ep",
+    requires=["cli"],
+    sources=["cli_main_commands.c"],
+)
+
+App(
+    appid="cli_clear",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_clear_ep",
+    requires=["cli"],
+    sources=["cli_main_commands.c"],
 )

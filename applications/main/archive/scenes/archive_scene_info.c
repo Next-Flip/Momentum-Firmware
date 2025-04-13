@@ -216,12 +216,12 @@ void archive_scene_info_on_enter(void* context) {
     view_dispatcher_switch_to_view(instance->view_dispatcher, ArchiveViewWidget);
 
     scene_manager_set_scene_state(instance->scene_manager, ArchiveAppSceneInfo, true);
-    instance->thread = furi_thread_alloc_ex(
+    instance->info_thread = furi_thread_alloc_ex(
         "ArchiveInfoWorker",
         1024,
         (FuriThreadCallback)(is_dir ? archive_scene_info_dirwalk : archive_scene_info_md5sum),
         instance);
-    furi_thread_start(instance->thread);
+    furi_thread_start(instance->info_thread);
 }
 
 bool archive_scene_info_on_event(void* context, SceneManagerEvent event) {
@@ -240,10 +240,10 @@ void archive_scene_info_on_exit(void* context) {
     ArchiveApp* app = (ArchiveApp*)context;
 
     scene_manager_set_scene_state(app->scene_manager, ArchiveAppSceneInfo, false);
-    if(app->thread) {
-        furi_thread_join(app->thread);
-        furi_thread_free(app->thread);
-        app->thread = NULL;
+    if(app->info_thread) {
+        furi_thread_join(app->info_thread);
+        furi_thread_free(app->info_thread);
+        app->info_thread = NULL;
     }
     widget_reset(app->widget);
 }

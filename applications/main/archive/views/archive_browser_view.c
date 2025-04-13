@@ -38,6 +38,7 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeMag] = &I_mag_card_10px,
     [ArchiveFileTypeCrossRemote] = &I_xremote_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
+    [ArchiveFileTypeSetting] = &I_settings_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
     [ArchiveFileTypeJS] = &I_js_script_10px,
     [ArchiveFileTypeSearch] = &I_search_10px,

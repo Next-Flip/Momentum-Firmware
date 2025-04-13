@@ -1,0 +1,4 @@
+> [!IMPORTANT]
+> This documentation may not be accurate! This folder contains source for the [Flipper developer docs on JS](https://developer.flipper.net/flipperzero/doxygen/js.html), and is updated by hand. \
+> You should instead look at the TypeScript definitions (`.d.ts`) in [`applications/system/js_app/packages/fz-sdk`](https://github.com/Next-Flip/Momentum-Firmware/tree/dev/applications/system/js_app/packages/fz-sdk) and examples in [`applications/system/js_app/examples/apps/Scripts`](https://github.com/Next-Flip/Momentum-Firmware/tree/dev/applications/system/js_app/examples/apps/Scripts), these will always reflect what is actually available in the JS engine. \
+> Human readable documentation will eventually be automatically generated from this type information, but for now it is maintained by hand and may not always reflect what is available or have discrepancies between Official and Custom Firmwares.

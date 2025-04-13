@@ -832,9 +832,7 @@ void elf_file_free(ELFFile* elf) {
             const ELFSectionDict_itref_t* itref = ELFSectionDict_cref(it);
             aligned_free(itref->value.data);
             if(itref->value.fast_rel) {
-                if(itref->value.fast_rel->data) {
-                    aligned_free(itref->value.fast_rel->data);
-                }
+                aligned_free(itref->value.fast_rel->data);
                 free(itref->value.fast_rel);
             }
             free((void*)itref->key);

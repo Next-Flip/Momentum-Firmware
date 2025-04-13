@@ -20,6 +20,7 @@ bool bad_usb_scene_work_on_event(void* context, SceneManagerEvent event) {
                 bad_usb_script_close(app->bad_usb_script);
                 app->bad_usb_script = NULL;
 
+                scene_manager_set_scene_state(app->scene_manager, BadUsbSceneConfig, 0);
                 scene_manager_next_scene(app->scene_manager, BadUsbSceneConfig);
             }
             consumed = true;

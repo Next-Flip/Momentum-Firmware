@@ -45,12 +45,14 @@ bool bad_usb_scene_config_ble_mac_on_event(void* context, SceneManagerEvent even
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == ByteInputResultOk) {
+            const BadUsbHidApi* hid = bad_usb_hid_get_interface(bad_usb->interface);
             reverse_mac_addr(bad_usb->ble_mac_buf);
             // Apply to current script config
             memcpy(
                 bad_usb->script_hid_cfg.ble.mac,
                 bad_usb->ble_mac_buf,
                 sizeof(bad_usb->script_hid_cfg.ble.mac));
+            hid->adjust_config(&bad_usb->script_hid_cfg);
             // Set in user config to save in settings file
             memcpy(
                 bad_usb->user_hid_cfg.ble.mac,

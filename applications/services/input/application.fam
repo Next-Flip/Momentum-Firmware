@@ -11,10 +11,10 @@ App(
 )
 
 App(
-    appid="input_cli",
+    appid="cli_input",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="input_cli_plugin_ep",
+    entry_point="cli_input_ep",
     requires=["cli"],
     sources=["input_cli.c"],
 )
