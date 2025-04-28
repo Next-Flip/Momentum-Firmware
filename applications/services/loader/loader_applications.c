@@ -124,7 +124,7 @@ static void loader_pubsub_callback(const void* message, void* context) {
     const LoaderEvent* event = message;
     const FuriThreadId thread_id = (FuriThreadId)context;
 
-    if(event->type == LoaderEventTypeApplicationStopped) {
+    if(event->type == LoaderEventTypeNoMoreAppsInQueue) {
         furi_thread_flags_set(thread_id, APPLICATION_STOP_EVENT);
     }
 }
@@ -148,6 +148,7 @@ static void
     }
 
     furi_pubsub_unsubscribe(loader_get_pubsub(app->loader), subscription);
+    furi_thread_flags_clear(APPLICATION_STOP_EVENT);
 }
 
 static int32_t loader_applications_thread(void* p) {

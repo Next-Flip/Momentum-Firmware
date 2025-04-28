@@ -294,27 +294,53 @@ void canvas_draw_bitmap(
     canvas_draw_u8g2_bitmap(&canvas->fb, x, y, width, height, bitmap_data, IconRotation0);
 }
 
+static void _canvas_draw_icon_animation(
+    Canvas* canvas,
+    int32_t x,
+    int32_t y,
+    int32_t width_scale,
+    int32_t height_scale,
+    IconAnimation* icon_animation) {
+    furi_check(canvas);
+    furi_check(icon_animation);
+    // Ensure scale % is > 0
+    furi_assert(width_scale > 0 && height_scale > 0);
+    // Ensure scale % is <= 100: animated icons > 100% are buggy
+    // TODO: Future, allow scaling > 100
+    furi_assert(width_scale <= 100 && height_scale <= 100);
+
+    x += canvas->offset_x;
+    y += canvas->offset_y;
+
+    uint8_t* icon_data = NULL;
+    compress_icon_decode(
+        canvas->compress_icon, icon_animation_get_data(icon_animation), &icon_data);
+
+    int32_t width = icon_animation_get_width(icon_animation);
+    int32_t height = icon_animation_get_height(icon_animation);
+    int32_t width_scaled = (width * width_scale) / 100;
+    int32_t height_scaled = (height * height_scale) / 100;
+
+    canvas_draw_u8g2_bitmap(
+        &canvas->fb, x, y, width_scaled, height_scaled, icon_data, IconRotation0);
+}
+
 void canvas_draw_icon_animation(
     Canvas* canvas,
     int32_t x,
     int32_t y,
     IconAnimation* icon_animation) {
-    furi_check(canvas);
-    furi_check(icon_animation);
+    _canvas_draw_icon_animation(canvas, x, y, 100, 100, icon_animation);
+}
 
-    x += canvas->offset_x;
-    y += canvas->offset_y;
-    uint8_t* icon_data = NULL;
-    compress_icon_decode(
-        canvas->compress_icon, icon_animation_get_data(icon_animation), &icon_data);
-    canvas_draw_u8g2_bitmap(
-        &canvas->fb,
-        x,
-        y,
-        icon_animation_get_width(icon_animation),
-        icon_animation_get_height(icon_animation),
-        icon_data,
-        IconRotation0);
+void canvas_draw_icon_animation_ex(
+    Canvas* canvas,
+    int32_t x,
+    int32_t y,
+    int32_t width_scale,
+    int32_t height_scale,
+    IconAnimation* icon_animation) {
+    _canvas_draw_icon_animation(canvas, x, y, width_scale, height_scale, icon_animation);
 }
 
 static void canvas_draw_u8g2_bitmap_int(
@@ -456,6 +482,22 @@ void canvas_draw_dot(Canvas* canvas, int32_t x, int32_t y) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     u8g2_DrawPixel(&canvas->fb, x, y);
+}
+
+void canvas_draw_overlay(Canvas* canvas) {
+    furi_check(canvas);
+    uint8_t original = canvas->fb.draw_color;
+    canvas_set_color(canvas, ColorWhite);
+    for(size_t j = 0; j < canvas->height; j++) {
+        bool draw_pixel = (j % 2) == 0;
+        for(size_t i = 0; i < canvas->width; i += 2) {
+            size_t x = i + (draw_pixel ? 0 : 1);
+            if(x < canvas->width) {
+                canvas_draw_dot(canvas, x, j);
+            }
+        }
+    }
+    canvas->fb.draw_color = original;
 }
 
 void canvas_draw_box(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t height) {

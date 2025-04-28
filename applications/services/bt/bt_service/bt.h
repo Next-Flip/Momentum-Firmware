@@ -79,26 +79,6 @@ void bt_keys_storage_set_storage_path(Bt* bt, const char* keys_storage_path);
  */
 void bt_keys_storage_set_default_path(Bt* bt);
 
-/** Get BLE remote RSSI value
- *
- * @param bt    Bt instance
- *
- * @return      true on success
- */
-bool bt_remote_rssi(Bt* bt, uint8_t* rssi);
-
-/** Open a new RPC connection
- *
- * @param bt                    Bt instance
- */
-void bt_open_rpc_connection(Bt* bt);
-
-/** Close the active RPC connection
- *
- * @param bt                    Bt instance
- */
-void bt_close_rpc_connection(Bt* bt);
-
 #ifdef __cplusplus
 }
 #endif

@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <momentum/settings.h>
+
 typedef struct {
     int32_t x;
     int32_t y;
@@ -698,8 +700,9 @@ void elements_scrollable_text_line_centered(
     FuriString* line = furi_string_alloc_set(string);
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
+    bool marquee = momentum_settings.scroll_marquee;
     if(len_px > width) {
-        if(centered) {
+        if(centered && !marquee) {
             centered = false;
             x -= width / 2;
         }
@@ -717,11 +720,31 @@ void elements_scrollable_text_line_centered(
             scroll_size--;
             if(!scroll_size) break;
         }
+
         // Ensure that we have something to scroll
         if(scroll_size) {
-            scroll_size += 3;
-            scroll = scroll % scroll_size;
-            furi_string_right(line, scroll);
+            if(marquee) {
+                const size_t delay = 3; // positions before/after scroll to delay
+                size_t total_scroll = (scroll_size * 2) + (delay * 2);
+                size_t use_scroll = scroll % total_scroll;
+
+                if(use_scroll < scroll_size) {
+                    furi_string_right(line, use_scroll);
+                } else if(use_scroll < (scroll_size + delay)) {
+                    // Delay right
+                    furi_string_right(line, scroll_size);
+                } else if(use_scroll < (scroll_size * 2 + delay)) {
+                    size_t reverse_pos = scroll_size - (use_scroll - (scroll_size + delay));
+                    furi_string_right(line, reverse_pos);
+                } else {
+                    // Delay left
+                    furi_string_right(line, 0);
+                }
+            } else {
+                scroll_size += 3;
+                scroll = scroll % scroll_size;
+                furi_string_right(line, scroll);
+            }
         }
 
         len_px = canvas_string_width(canvas, furi_string_get_cstr(line));

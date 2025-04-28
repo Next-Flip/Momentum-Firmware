@@ -202,14 +202,27 @@ distenv.AlwaysBuild(copro_dist)
 distenv.Alias("copro_dist", copro_dist)
 
 
+enable_debug_target = distenv.PhonyTarget(
+    "enable_debug",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/enable_debug.py",
+        ],
+    ],
+)
+coreenv.AlwaysBuild(enable_debug_target)
+
+
 firmware_flash = distenv.AddFwFlashTarget(firmware_env)
 distenv.Alias("flash", firmware_flash)
+distenv.Depends(firmware_flash, enable_debug_target)
 
 # To be implemented in fwflash.py
 firmware_jflash = distenv.AddJFlashTarget(firmware_env)
 distenv.Alias("jflash", firmware_jflash)
 
-distenv.PhonyTarget(
+gdb_trace_all_target = distenv.PhonyTarget(
     "gdb_trace_all",
     [["${GDB}", "${GDBOPTS}", "${SOURCES}", "${GDBFLASH}"]],
     source=firmware_env["FW_ELF"],
@@ -222,6 +235,7 @@ distenv.PhonyTarget(
         "quit",
     ],
 )
+distenv.Depends(gdb_trace_all_target, enable_debug_target)
 
 # Debugging firmware
 firmware_debug = distenv.PhonyTarget(
@@ -232,7 +246,7 @@ firmware_debug = distenv.PhonyTarget(
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
     FBT_FAP_DEBUG_ELF_ROOT=firmware_env["FBT_FAP_DEBUG_ELF_ROOT"],
 )
-distenv.Depends(firmware_debug, firmware_flash)
+distenv.Depends(firmware_debug, enable_debug_target)
 
 firmware_blackmagic = distenv.PhonyTarget(
     "blackmagic",
@@ -242,7 +256,7 @@ firmware_blackmagic = distenv.PhonyTarget(
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     FBT_FAP_DEBUG_ELF_ROOT=firmware_env["FBT_FAP_DEBUG_ELF_ROOT"],
 )
-distenv.Depends(firmware_blackmagic, firmware_flash)
+distenv.Depends(firmware_blackmagic, enable_debug_target)
 
 # Debug alien elf
 debug_other_opts = [
@@ -256,21 +270,23 @@ debug_other_opts = [
     "fw-version",
 ]
 
-distenv.PhonyTarget(
+debug_other_target = distenv.PhonyTarget(
     "debug_other",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
     GDBPYOPTS=debug_other_opts,
 )
+distenv.Depends(debug_other_target, enable_debug_target)
 
-distenv.PhonyTarget(
+debug_other_blackmagic_target = distenv.PhonyTarget(
     "debug_other_blackmagic",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     GDBPYOPTS=debug_other_opts,
 )
+distenv.Depends(debug_other_blackmagic_target, enable_debug_target)
 
 
 # Just start OpenOCD
@@ -327,8 +343,9 @@ firmware_env.Append(
     IMG_LINT_SOURCES=[
         # Image assets
         "applications",
-        "!applications/external",
         "assets",
+        # Avoid merge conflicts
+        "!applications/external",
     ],
 )
 
@@ -346,8 +363,9 @@ black_commandline = [
 black_base_args = [
     "--include",
     '"(\\.scons|\\.py|SConscript|SConstruct|\\.fam)$"',
+    # Avoid merge conflicts
     "--exclude",
-    '"(mp_flipper/flipperzero/random\\.py)$"',
+    '"applications/external"',
 ]
 
 distenv.PhonyTarget(
@@ -415,6 +433,21 @@ distenv.PhonyTarget(
     ],
 )
 
+
+# Measure CLI loopback performance
+distenv.PhonyTarget(
+    "cli_perf",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/serial_cli_perf.py",
+            "-p",
+            "${FLIP_PORT}",
+            "${ARGS}",
+        ]
+    ],
+)
+
 # Update WiFi devboard firmware with release channel
 distenv.PhonyTarget(
     "devboard_flash",
@@ -429,20 +462,22 @@ distenv.PhonyTarget(
 
 
 # Find blackmagic probe
-distenv.PhonyTarget(
+get_blackmagic_target = distenv.PhonyTarget(
     "get_blackmagic",
     "@echo $( ${BLACKMAGIC_ADDR} $)",
 )
+distenv.Depends(get_blackmagic_target, enable_debug_target)
 
 
 # Find STLink probe ids
-distenv.PhonyTarget(
+get_stlink_target = distenv.PhonyTarget(
     "get_stlink",
     distenv.Action(
         lambda **_: distenv.GetDevices(),
         None,
     ),
 )
+distenv.Depends(get_stlink_target, enable_debug_target)
 
 # Prepare vscode environment
 vscode_dist = distenv.Install(

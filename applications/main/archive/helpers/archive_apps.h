@@ -4,6 +4,7 @@
 
 typedef enum {
     ArchiveAppTypeU2f,
+    ArchiveAppTypeSetting,
     ArchiveAppTypeSearch,
     ArchiveAppTypeUnknown,
     ArchiveAppsTotal,
@@ -11,6 +12,7 @@ typedef enum {
 
 static const ArchiveFileTypeEnum app_file_types[] = {
     [ArchiveAppTypeU2f] = ArchiveFileTypeU2f,
+    [ArchiveAppTypeSetting] = ArchiveFileTypeSetting,
     [ArchiveAppTypeSearch] = ArchiveFileTypeSearch,
     [ArchiveAppTypeUnknown] = ArchiveFileTypeUnknown,
 };

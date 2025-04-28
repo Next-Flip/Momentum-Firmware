@@ -5,7 +5,6 @@ enum SubmenuIndex {
     SubmenuIndexLearnNewRemote,
     SubmenuIndexSavedRemotes,
     SubmenuIndexGpioSettings,
-    SubmenuIndexLearnNewRemoteRaw,
     SubmenuIndexDebug
 };
 
@@ -46,17 +45,6 @@ void infrared_scene_start_on_enter(void* context) {
 
     submenu_add_lockable_item(
         submenu,
-        "Learn New Remote RAW",
-        SubmenuIndexLearnNewRemoteRaw,
-        infrared_scene_start_submenu_callback,
-        infrared,
-        !infrared->app_state.is_debug_enabled,
-        "Enable\n"
-        "Settings >\n"
-        "System >\n"
-        "Debug");
-    submenu_add_lockable_item(
-        submenu,
         "Debug RX",
         SubmenuIndexDebug,
         infrared_scene_start_submenu_callback,
@@ -90,14 +78,9 @@ bool infrared_scene_start_on_event(void* context, SceneManagerEvent event) {
             // last selected file, feels more intuitive
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);
             scene_manager_next_scene(scene_manager, InfraredSceneUniversal);
-        } else if(
-            submenu_index == SubmenuIndexLearnNewRemote ||
-            submenu_index == SubmenuIndexLearnNewRemoteRaw) {
-            // enable automatic signal decoding if "Learn New Remote"
-            // disable automatic signal decoding if "Learn New Remote (RAW)"
-            infrared_worker_rx_enable_signal_decoding(
-                infrared->worker, submenu_index == SubmenuIndexLearnNewRemote);
+        } else if(submenu_index == SubmenuIndexLearnNewRemote) {
             infrared->app_state.is_learning_new_remote = true;
+            infrared->app_state.current_button_index = 0; // Reset index when starting new remote
             scene_manager_next_scene(scene_manager, InfraredSceneLearn);
         } else if(submenu_index == SubmenuIndexSavedRemotes) {
             furi_string_set(infrared->file_path, INFRARED_APP_FOLDER);

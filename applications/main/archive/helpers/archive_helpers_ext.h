@@ -8,6 +8,16 @@
 extern "C" {
 #endif
 
+/**
+ * Intended to be called by settings apps to handle long presses, as well as
+ * internally from within the archive
+ * 
+ * @param app_name name of the referring application
+ * @param setting  name of the setting, which will be both displayed to the user
+ *                 and passed to the application as an argument upon recall
+ */
+void archive_favorites_handle_setting_pin_unpin(const char* app_name, const char* setting);
+
 bool process_favorite_launch(char** p);
 
 typedef struct {

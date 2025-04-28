@@ -25,7 +25,7 @@ Applications for factory testing the Flipper.
 Applications for main Flipper menu.
 
 - `archive`             - Archive and file manager 
-- `bad_kb`              - Bad KB application
+- `bad_usb`             - Bad KB application
 - `gpio`                - GPIO application: includes USART bridge and GPIO control
 - `ibutton`             - iButton application, onewire keys and more
 - `infrared`            - Infrared application, controls your IR devices

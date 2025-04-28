@@ -10,7 +10,8 @@
 #include <furi.h>
 #include <furi_hal_rtc.h>
 
-#include <cli/cli.h>
+#include <toolbox/cli/cli_command.h>
+#include <cli/cli_main_commands.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <m-dict.h>
@@ -385,9 +386,10 @@ static void
 }
 
 RpcSession* rpc_session_open(Rpc* rpc, RpcOwner owner) {
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock) &&
-       !momentum_settings.allow_locked_rpc_commands)
-        return NULL;
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+        if(owner == RpcOwnerUsb && !momentum_settings.allow_locked_rpc_usb) return NULL;
+        if(owner == RpcOwnerBle && !momentum_settings.allow_locked_rpc_ble) return NULL;
+    }
 
     furi_check(rpc);
 
@@ -446,9 +448,14 @@ void rpc_on_system_start(void* p) {
 
     rpc->busy_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_add_command(
-        cli, "start_rpc_session", CliCommandFlagParallelSafe, rpc_cli_command_start_session, rpc);
+    CliRegistry* registry = furi_record_open(RECORD_CLI);
+    cli_registry_add_command(
+        registry,
+        "start_rpc_session",
+        CliCommandFlagParallelSafe,
+        rpc_cli_command_start_session,
+        rpc);
+    furi_record_close(RECORD_CLI);
 
     furi_record_create(RECORD_RPC, rpc);
 }

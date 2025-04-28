@@ -1,31 +1,36 @@
 <p align="center">
-  <img src=".github/assets/logo.png" alt="Momentum Firmware">
-  <h2 align="center">for Flipper Zero</h2>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo_dark.png">
+    <source media="(prefers-color-scheme: light)" srcset=".github/assets/logo_light.png">
+    <img
+        alt="Momentum Firmware"
+        src=".github/assets/logo_dark.png">
+  </picture>
 </p>
 
 <h2 align="center">
-  <a href="#Install">Install</a> | <a href="#list-of-changes">Features</a> | <a href="https://discord.gg/momentum">Discord</a> | <a href="#%EF%B8%8F-support">Donate</a>
+  <a href="#Install">Install</a> · <a href="#list-of-changes">Features</a> · <a href="https://discord.gg/momentum">Discord</a> · <a href="#%EF%B8%8F-support">Donate</a>
 </h2>
 
-This custom firmware is based on the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware), and includes most of the awesome features from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware). It is a direct continuation of the Xtreme firmware, built by the same (and only) developers who made that project special.
+This custom firmware is based on the [Official Firmware](https://github.com/flipperdevices/flipperzero-firmware) for [Flipper Zero](https://flipperzero.one/), and includes most of the awesome features from [Unleashed](https://github.com/DarkFlippers/unleashed-firmware). It is a direct continuation of the Xtreme firmware, built by the same (and only) developers who made that project special.
 
------
 <br>
-<h2 align="center">Modus Operandi:</h2>
+<h2 align="center">Modus Operandi</h2>
 
 The goal of this firmware is to constantly push the bounds of what is possible with Flipper Zero, driving the innovation of many new groundbreaking features, while maintaining the easiest and most customizable user experience of any firmware. Fixing bugs promptly and ensuring a stable and compatible system is also of our utmost importance.
-<br><br>
+
 - <h4>Feature-rich: We include all third-party features and apps as long as they fulfill a useful purpose and they work correctly, aswell as implement ourselves many new exciting functionalities.</h4>
 
 - <h4>Stable: We ensure the most stable experience possible by having an actual understanding of what's going on, and proactively making all tweaks and additions backwards-, and inter-, compatible.</h4>
 
 - <h4>Customizable: You can tweak just about everything you see: add/remove apps from the menu, change the animations, replace icon graphics, change your Flipper's name, change how the main menu looks, setup different keybinds like never before, and so much more. All on-device, with no complicated configuration.</h4>
-<br><br>
+
+<br>
+
 Note that mentioned below are only a few of our staple additions to the firmware. For a full list check [down here](https://github.com/Next-Flip/Momentum-Firmware#List-of-Changes).
 
------
 <br>
-<h2 align="center">Momentum Settings:</h2>
+<h2 align="center">Momentum Settings</h2>
 
 We offer a powerful and easy-to-use application tailor-made for our firmware, that lets you configure everything you could dream of, and more:
 
@@ -40,9 +45,9 @@ We offer a powerful and easy-to-use application tailor-made for our firmware, th
 
 <br>
 
------
 <br>
-<h2 align="center">Animations / Asset Packs:</h2>
+
+<h2 align="center">Animations / Asset Packs</h2>
 
 We created our own improved Animation / Asset system that lets you create and cycle through your own `Asset Packs` with only a few button presses, allowing you to easily load custom Animations, Icons and Fonts like never before. Think of it as a Theme system that's never been easier.
 
@@ -66,20 +71,20 @@ After installing the packs to Flipper, hit the <code>Arrow Up</code> button on t
 
 <br clear="left"/>
 
------
 <br>
-<h2 align="center">Bad Keyboard:</h2>
+
+<h2 align="center">Bad Keyboard</h2>
 
 <img src=".github/assets/badkb.png" align="left" width="250px"/>
-BadUSB is a great app, but it lacks Bluetooth connectivity. Bad-KB allows you to toggle between USB and Bluetooth mode for your attacks.
+BadUSB is a great app, but it lacks a lot of options. Bad-KB allows you to customize all USB and Bluetooth parameters for your attacks.
 
 In Bluetooth mode it allows you to spoof the display name and MAC address of the device to whatever you want. Showing up as a portable speaker or a wireless keyboard is easily doable, allowing you to get the attention of your target without needing a cable at hand.
 
 In USB mode it also enables additional functionality to spoof the manufacturer and product names, as well as vendor and product IDs (VID/PID).
 
------
 <br>
-<h2 align="center">List of changes:</h2>
+
+<h2 align="center">List of changes</h2>
 
 There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**. For a more detailed list, you can read through the [**changelogs**](https://github.com/Next-Flip/Momentum-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://momentum-fw.dev/#features).
 
@@ -128,14 +133,11 @@ Note that this repo is always updated with the great work from our friends at [U
 - Broken or Superfluous apps
 ```
 
-----
 <br>
-<h2 align="center">Install:</h2>
-<br>
+
+<h2 align="center">Install</h2>
 
 There are 4 methods to install Momentum, we recommend you use the **Web Updater**, but choose whichever one you prefer:
-
-<br>
 
 > <details><summary><code>Web Updater (Chrome)</code></summary><ul>
 >   <li>Make sure qFlipper is closed</li>
@@ -173,9 +175,7 @@ There are 4 methods to install Momentum, we recommend you use the **Web Updater*
 
 <br>
 
-----
-<br>
-<h2 align="center">Build it yourself:</h2>
+<h2 align="center">Build it yourself</h2>
 
 ```bash
 To download the repository:
@@ -192,19 +192,12 @@ To build and launch a single app:
 $ ./fbt launch APPSRC=your_appid
 ```
 
-----
 <h2 align="center">Stargazers over time</h2>
 
-[![Stargazers over time](https://starchart.cc/Next-Flip/Momentum-Firmware.svg)](https://starchart.cc/Next-Flip/Momentum-Firmware)
+[![Stargazers over time](https://starchart.cc/Next-Flip/Momentum-Firmware.svg?variant=adaptive)](https://starchart.cc/Next-Flip/Momentum-Firmware)
 
-<!-- ----
-<h2 align="center">Contributors</h2>
+<h2 align="center">❤️ Support</h2>
 
-[![Contributors]()](https://github.com/Next-Flip/Momentum-Firmware/graphs/contributors) -->
-
-
-
-## ❤️ Support
 If you enjoy the firmware please __**spread the word!**__ And if you really love it, maybe consider donating to the team? :D
 
 > **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required

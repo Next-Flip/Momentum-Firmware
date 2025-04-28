@@ -15,7 +15,7 @@ static const char* ArchiveTabNames[] = {
     [ArchiveTabSubGhz] = "Sub-GHz",
     [ArchiveTabLFRFID] = "RFID LF",
     [ArchiveTabInfrared] = "Infrared",
-    [ArchiveTabBadKb] = "Bad KB",
+    [ArchiveTabBadUsb] = "Bad KB",
     [ArchiveTabU2f] = "U2F",
     [ArchiveTabApplications] = "Apps",
     [ArchiveTabSearch] = "Search",
@@ -33,10 +33,12 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeSubghzPlaylist] = &I_subplaylist_10px,
     [ArchiveFileTypeSubghzRemote] = &I_subrem_10px,
     [ArchiveFileTypeInfraredRemote] = &I_ir_scope_10px,
-    [ArchiveFileTypeBadKb] = &I_badkb_10px,
+    [ArchiveFileTypeBadUsb] = &I_badusb_10px,
     [ArchiveFileTypeWAV] = &I_music_10px,
     [ArchiveFileTypeMag] = &I_mag_card_10px,
+    [ArchiveFileTypeCrossRemote] = &I_xremote_10px,
     [ArchiveFileTypeU2f] = &I_u2f_10px,
+    [ArchiveFileTypeSetting] = &I_settings_10px,
     [ArchiveFileTypeApplication] = &I_Apps_10px,
     [ArchiveFileTypeJS] = &I_js_script_10px,
     [ArchiveFileTypeSearch] = &I_search_10px,
@@ -56,6 +58,58 @@ void archive_browser_set_callback(
     furi_assert(callback);
     browser->callback = callback;
     browser->context = context;
+}
+
+static void archive_update_formatted_path(ArchiveBrowserViewModel* model) {
+    ArchiveBrowserView* browser = model->archive->browser;
+    if(!browser->path_changed) {
+        return;
+    }
+
+    if(momentum_settings.browser_path_mode == BrowserPathOff || archive_is_home(browser)) {
+        furi_string_set(browser->formatted_path, ArchiveTabNames[model->tab_idx]);
+    } else {
+        const char* path = furi_string_get_cstr(browser->path);
+        switch(momentum_settings.browser_path_mode) {
+        case BrowserPathFull:
+            furi_string_set(browser->formatted_path, browser->path);
+            break;
+
+        case BrowserPathBrief: {
+            furi_string_reset(browser->formatted_path);
+            FuriString* token = furi_string_alloc();
+            FuriString* remaining = furi_string_alloc_set(path);
+
+            while(furi_string_size(remaining) > 0) {
+                size_t slash_pos = furi_string_search_char(remaining, '/');
+                if(slash_pos == FURI_STRING_FAILURE) {
+                    furi_string_cat_printf(
+                        browser->formatted_path, "/%s", furi_string_get_cstr(remaining));
+                    break;
+                }
+                furi_string_set_n(token, remaining, 0, slash_pos);
+                if(furi_string_size(token) > 0) {
+                    furi_string_cat_printf(
+                        browser->formatted_path, "/%c", furi_string_get_char(token, 0));
+                }
+                furi_string_right(remaining, slash_pos + 1);
+            }
+
+            furi_string_free(token);
+            furi_string_free(remaining);
+            break;
+        }
+
+        case BrowserPathCurrent:
+            path_extract_basename(path, browser->formatted_path);
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    browser->path_changed = false;
 }
 
 static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
@@ -140,9 +194,9 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
     const uint8_t calc_height = menu_height - ((MENU_ITEMS - size_menu - 1) * line_height);
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 72, 2, 56, calc_height + 4);
+    canvas_draw_rbox(canvas, 72, 2, 56, calc_height + 4, 3);
     canvas_set_color(canvas, ColorBlack);
-    elements_slightly_rounded_frame(canvas, 71, 2, 57, calc_height + 4);
+    canvas_draw_rframe(canvas, 71, 2, 57, calc_height + 4, 3);
 
     canvas_draw_str_aligned(
         canvas, 100, 11, AlignCenter, AlignBottom, model->menu_manage ? "Manage:" : "Actions:");
@@ -192,75 +246,93 @@ static void archive_draw_loading(Canvas* canvas, ArchiveBrowserViewModel* model)
     canvas_draw_icon(canvas, x, y, &A_Loading_24);
 }
 
-static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
-    furi_assert(model);
-
+static void draw_list_item(
+    Canvas* canvas,
+    ArchiveBrowserViewModel* model,
+    bool scrollbar,
+    uint32_t i,
+    int32_t idx) {
     size_t array_size = files_array_size(model->files);
-    bool scrollbar = model->item_cnt > 4;
 
-    for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
-        FuriString* str_buf;
-        str_buf = furi_string_alloc();
-        int32_t idx = CLAMP((uint32_t)(i + model->list_offset), model->item_cnt, 0u);
-        uint8_t x_offset = (model->move_fav && model->item_idx == idx) ? MOVE_OFFSET : 0;
+    FuriString* str_buf;
+    str_buf = furi_string_alloc();
+    uint8_t x_offset = (model->move_fav && model->item_idx == idx) ? MOVE_OFFSET : 0;
 
-        ArchiveFileTypeEnum file_type = ArchiveFileTypeLoading;
-        uint8_t* custom_icon_data = NULL;
+    ArchiveFileTypeEnum file_type = ArchiveFileTypeLoading;
+    uint8_t* custom_icon_data = NULL;
 
-        if(!model->list_loading && archive_is_item_in_array(model, idx)) {
-            ArchiveFile_t* file = files_array_get(
-                model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
-            file_type = file->type;
-            bool ext = model->tab_idx == ArchiveTabBrowser ||
-                       model->tab_idx == ArchiveTabInternal ||
-                       model->tab_idx == ArchiveTabDiskImage || model->tab_idx == ArchiveTabSearch;
-            if(file_type == ArchiveFileTypeApplication) {
-                if(file->custom_icon_data) {
-                    custom_icon_data = file->custom_icon_data;
-                    furi_string_set(str_buf, file->custom_name);
-                } else {
-                    file_type = ArchiveFileTypeUnknown;
-                    path_extract_filename(file->path, str_buf, !ext);
-                }
+    if(!model->list_loading && archive_is_item_in_array(model, idx)) {
+        ArchiveFile_t* file = files_array_get(
+            model->files, CLAMP(idx - model->array_offset, (int32_t)(array_size - 1), 0));
+        file_type = file->type;
+        bool ext = model->tab_idx == ArchiveTabBrowser || model->tab_idx == ArchiveTabInternal ||
+                   model->tab_idx == ArchiveTabDiskImage || model->tab_idx == ArchiveTabSearch;
+        if(file_type == ArchiveFileTypeApplication) {
+            if(file->custom_icon_data) {
+                custom_icon_data = file->custom_icon_data;
+                furi_string_set(str_buf, file->custom_name);
             } else {
+                file_type = ArchiveFileTypeUnknown;
                 path_extract_filename(file->path, str_buf, !ext);
             }
         } else {
-            furi_string_set(str_buf, "---");
+            path_extract_filename(file->path, str_buf, !ext);
         }
+    } else {
+        furi_string_set(str_buf, "---");
+    }
 
-        size_t scroll_counter = model->scroll_counter;
+    size_t scroll_counter = model->scroll_counter;
 
-        if(!model->list_loading && model->item_idx == idx) {
-            archive_draw_frame(canvas, i, scrollbar, model->move_fav);
-            if(scroll_counter < SCROLL_DELAY) {
-                scroll_counter = 0;
-            } else {
-                scroll_counter -= SCROLL_DELAY;
-            }
-        } else {
-            canvas_set_color(canvas, ColorBlack);
+    if(!model->list_loading && model->item_idx == idx) {
+        archive_draw_frame(canvas, i, scrollbar, model->move_fav);
+        if(scroll_counter < SCROLL_DELAY) {
             scroll_counter = 0;
-        }
-
-        if(custom_icon_data) {
-            canvas_draw_bitmap(
-                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 11, 10, custom_icon_data);
         } else {
-            canvas_draw_icon(
-                canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
+            scroll_counter -= SCROLL_DELAY;
         }
+    } else {
+        canvas_set_color(canvas, ColorBlack);
+        scroll_counter = 0;
+    }
 
-        elements_scrollable_text_line(
-            canvas,
-            15 + x_offset,
-            24 + i * FRAME_HEIGHT,
-            ((scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX) - x_offset),
-            str_buf,
-            scroll_counter,
-            (model->item_idx != idx));
+    if(custom_icon_data) {
+        canvas_draw_bitmap(canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, 11, 10, custom_icon_data);
+    } else {
+        canvas_draw_icon(canvas, 2 + x_offset, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file_type]);
+    }
 
-        furi_string_free(str_buf);
+    elements_scrollable_text_line(
+        canvas,
+        15 + x_offset,
+        24 + i * FRAME_HEIGHT,
+        ((scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX) - x_offset),
+        str_buf,
+        scroll_counter,
+        (model->item_idx != idx));
+
+    furi_string_free(str_buf);
+}
+
+static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
+    furi_assert(model);
+
+    bool scrollbar = model->item_cnt > 4;
+
+    for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
+        int32_t idx = CLAMP((uint32_t)(i + model->list_offset), model->item_cnt, 0u);
+        if(model->item_idx == idx) continue;
+        draw_list_item(canvas, model, scrollbar, i, idx);
+    }
+
+    if(momentum_settings.popup_overlay && model->menu) {
+        canvas_draw_overlay(canvas);
+    }
+
+    for(uint32_t i = 0; i < MIN(model->item_cnt, MENU_ITEMS); ++i) {
+        int32_t idx = CLAMP((uint32_t)(i + model->list_offset), model->item_cnt, 0u);
+        if(model->item_idx != idx) continue;
+        draw_list_item(canvas, model, scrollbar, i, idx);
     }
 
     if(scrollbar) {
@@ -275,10 +347,15 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
 static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* model) {
     furi_assert(model);
 
-    const char* tab_name = ArchiveTabNames[model->tab_idx];
-    if(model->tab_idx == ArchiveTabSearch &&
-       scene_manager_get_scene_state(model->archive->scene_manager, ArchiveAppSceneSearch)) {
-        tab_name = "Searching";
+    const char* tab_name = NULL;
+    if(model->tab_idx == ArchiveTabSearch) {
+        if(scene_manager_get_scene_state(model->archive->scene_manager, ArchiveAppSceneSearch)) {
+            tab_name = "Searching";
+        } else {
+            tab_name = ArchiveTabNames[model->tab_idx];
+        }
+    } else {
+        archive_update_formatted_path(model);
     }
     bool clip = model->clipboard != NULL;
 
@@ -293,7 +370,19 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
     canvas_draw_rframe(canvas, 0, 0, 51, 13, 1); // frame
     canvas_draw_line(canvas, 49, 1, 49, 11); // shadow right
     canvas_draw_line(canvas, 1, 11, 49, 11); // shadow bottom
-    canvas_draw_str_aligned(canvas, 25, 9, AlignCenter, AlignBottom, tab_name);
+    if(tab_name) {
+        canvas_draw_str_aligned(canvas, 25, 9, AlignCenter, AlignBottom, tab_name);
+    } else {
+        elements_scrollable_text_line_centered(
+            canvas,
+            25,
+            9,
+            45,
+            model->archive->browser->formatted_path,
+            model->menu ? 0 : model->scroll_counter,
+            false,
+            true);
+    }
 
     if(clip) {
         canvas_draw_rframe(canvas, 69, 0, 25, 13, 1);
@@ -593,6 +682,8 @@ ArchiveBrowserView* browser_alloc(void) {
     browser->scroll_timer = furi_timer_alloc(browser_scroll_timer, FuriTimerTypePeriodic, browser);
 
     browser->path = furi_string_alloc_set(archive_get_default_path(TAB_DEFAULT));
+    browser->formatted_path = furi_string_alloc();
+    browser->path_changed = true;
 
     with_view_model(
         browser->view,
@@ -626,6 +717,7 @@ void browser_free(ArchiveBrowserView* browser) {
         false);
 
     furi_string_free(browser->path);
+    furi_string_free(browser->formatted_path);
 
     view_free(browser->view);
     free(browser);

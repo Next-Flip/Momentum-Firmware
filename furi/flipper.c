@@ -12,6 +12,8 @@
 
 #define TAG "Flipper"
 
+#define HEAP_CANARY_VALUE 0x8BADF00D
+
 static void flipper_print_version(const char* target, const Version* version) {
     if(version) {
         FURI_LOG_I(
@@ -48,9 +50,9 @@ static void flipper_print_version(const char* target, const Version* version) {
 #include <expansion/expansion_settings_filename.h>
 #include <loader/loader_menu.h>
 #include <notification/notification_settings_filename.h>
-#include <power/power_settings_filename.h>
+#include <power/power_service/power_settings_filename.h>
 #include <drivers/rgb_backlight_filename.h>
-#include <applications/main/infrared/infrared_app.h>
+#include <applications/main/infrared/infrared_settings.h>
 #include <applications/main/u2f/u2f_data.h>
 
 void flipper_migrate_files() {
@@ -243,4 +245,8 @@ void vApplicationGetTimerTaskMemory(
     *tcb_ptr = memmgr_alloc_from_pool(sizeof(StaticTask_t));
     *stack_ptr = memmgr_alloc_from_pool(sizeof(StackType_t) * configTIMER_TASK_STACK_DEPTH);
     *stack_size = configTIMER_TASK_STACK_DEPTH;
+}
+
+void vApplicationGetRandomHeapCanary(portPOINTER_SIZE_TYPE* pxHeapCanary) {
+    *pxHeapCanary = HEAP_CANARY_VALUE;
 }

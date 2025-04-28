@@ -12,6 +12,10 @@ env.Append(
     ],
     SDK_HEADERS=[
         File("api_lock.h"),
+        File("cli/cli_ansi.h"),
+        File("cli/cli_command.h"),
+        File("cli/cli_registry.h"),
+        File("cli/shell/cli_shell.h"),
         File("compress.h"),
         File("manchester_decoder.h"),
         File("manchester_encoder.h"),
@@ -30,6 +34,7 @@ env.Append(
         File("stream/string_stream.h"),
         File("stream/buffered_file_stream.h"),
         File("strint.h"),
+        File("pipe.h"),
         File("protocols/protocol_dict.h"),
         File("pretty_format.h"),
         File("hex.h"),

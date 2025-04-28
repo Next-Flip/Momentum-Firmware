@@ -5,7 +5,6 @@ enum VarItemListIndex {
     VarItemListIndexDolphin,
     VarItemListIndexSpoof,
     VarItemListIndexVgm,
-    VarItemListIndexChargeCap,
     VarItemListIndexShowMomentumIntro,
 };
 
@@ -14,22 +13,10 @@ void momentum_app_scene_misc_var_item_list_callback(void* context, uint32_t inde
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-#define CHARGE_CAP_INTV 5
-static void momentum_app_scene_misc_charge_cap_changed(VariableItem* item) {
-    MomentumApp* app = variable_item_get_context(item);
-    char cap_str[6];
-    uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_CAP_INTV;
-    snprintf(cap_str, sizeof(cap_str), "%lu%%", value);
-    variable_item_set_current_value_text(item, cap_str);
-    momentum_settings.charge_cap = value;
-    app->save_settings = true;
-}
-
 void momentum_app_scene_misc_on_enter(void* context) {
     MomentumApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
-    uint8_t value_index;
 
     item = variable_item_list_add(var_item_list, "Screen", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
@@ -42,18 +29,6 @@ void momentum_app_scene_misc_on_enter(void* context) {
 
     item = variable_item_list_add(var_item_list, "VGM Options", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
-
-    char cap_str[6];
-    value_index = momentum_settings.charge_cap / CHARGE_CAP_INTV;
-    snprintf(cap_str, sizeof(cap_str), "%lu%%", (uint32_t)value_index * CHARGE_CAP_INTV);
-    item = variable_item_list_add(
-        var_item_list,
-        "Charge Cap",
-        100 / CHARGE_CAP_INTV,
-        momentum_app_scene_misc_charge_cap_changed,
-        app);
-    variable_item_set_current_value_index(item, value_index - 1);
-    variable_item_set_current_value_text(item, cap_str);
 
     variable_item_list_add(var_item_list, "Show Momentum Intro", 0, NULL, app);
 

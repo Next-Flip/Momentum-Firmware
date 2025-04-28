@@ -11,23 +11,22 @@
 
 #include "views/battery_info.h"
 #include <gui/modules/submenu.h>
-#include <gui/modules/dialog_ex.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/dialog_ex.h>
 
 #include "scenes/power_settings_scene.h"
 
 typedef struct {
     PowerSettings settings;
-
     Power* power;
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     BatteryInfo* battery_info;
     Submenu* submenu;
-    VariableItemList* variable_item_list;
     DialogEx* dialog;
     PowerInfo info;
+    VariableItemList* variable_item_list;
 
     bool about_battery;
 } PowerSettingsApp;
