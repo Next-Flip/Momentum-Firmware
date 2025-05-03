@@ -29,7 +29,7 @@ struct SubGhzFrequencyAnalyzerWorker {
     SubGhzSetting* setting;
 
     const SubGhzDevice* radio_device;
-    FuriHalSpiBusHandle* spi_bus;
+    const FuriHalSpiBusHandle* spi_bus;
     bool ext_radio;
 
     float filVal;
@@ -40,7 +40,7 @@ struct SubGhzFrequencyAnalyzerWorker {
 };
 
 static void subghz_frequency_analyzer_worker_load_registers(
-    FuriHalSpiBusHandle* spi_bus,
+    const FuriHalSpiBusHandle* spi_bus,
     const uint8_t data[][2]) {
     furi_hal_spi_acquire(spi_bus);
     size_t i = 0;
@@ -82,7 +82,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     float rssi_temp = 0;
     uint32_t frequency_temp = 0;
 
-    FuriHalSpiBusHandle* spi_bus = instance->spi_bus;
+    const FuriHalSpiBusHandle* spi_bus = instance->spi_bus;
     const SubGhzDevice* radio_device = instance->radio_device;
 
     //Start CC1101
