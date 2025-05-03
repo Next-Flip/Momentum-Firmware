@@ -75,6 +75,7 @@ Watch this video to learn more and see how different boards can be programmed (v
 
 ## Doorhan
 
+With access to the receiver box:
 1. Create new remote with randomly generated serial: Go to SubGHz -> Add Manually -> KL: Doorhan 433Mhz or 315Mhz depends on your receiver (find out by reading your existing remote)
 2. Open your new remote file
 3. Push `P` button for ~2 sec, led will start flashing
@@ -82,7 +83,29 @@ Watch this video to learn more and see how different boards can be programmed (v
 5. Led on the receiver board will flash and turn off
 6. Done!
 
-Also you can program new remote using old remote on newer boards! See first video below:
+
+With existing remote:
+1. Create new remote with randomly generated serial: Go to SubGHz -> Add Manually -> KL: Doorhan 433Mhz or 315Mhz depends on your receiver (find out by reading your existing remote)
+2. Open your new remote file
+3. For next steps be close to the receiver board, around 1-2 meters
+4. Press second button (lowest one) on the old remote, do not release second button and press 1st (upper) button, hold buttons for 1 sec and release them
+5. Press working button on the old remote (the button you use for operating the receiver, aka opening the gate, etc) hold for 1 sec and release 
+6. Actions with old remote must be done in 5 seconds time, do not hold buttons for too long, and do not make it very fast
+7. Receiver will beep, you will have 10 seconds to add new remote, now press Send on new remote on flipper two times holding for at least 1 sec
+8. Receiver will beep again telling that new remote is added sucessfuly!
+9. Done!
+
+With copy of existing remote on flipper:
+1. Create new remote with randomly generated serial: Go to SubGHz -> Add Manually -> KL: Doorhan 433Mhz or 315Mhz depends on your receiver (find out by reading your existing remote)
+2. Open your existing remote (original) file
+3. For next steps be close to the receiver board, around 1-2 meters
+4. Press left button (0x8) on the flipper, hold for 1 sec and release the button and press right (0xA) button, hold button for 1 sec and release
+5. Press working button on the flipper, should be center one aka Send (the button you use for operating the receiver, aka opening the gate, etc) hold for 1 sec and release 
+6. Actions with original remote copy must be done in 5 seconds time, do not hold buttons for too long, and do not make it very fast
+7. Receiver will beep, now hold back and open new remote file, you will have 10 seconds to add new remote, press Send on new remote on flipper two times holding for at least 1 sec
+8. Receiver will beep again telling that new remote is added sucessfuly!
+9. Done!
+
 Watch this videos to learn more (videos in Russian language): https://www.youtube.com/watch?v=wZ5121HYv50 / https://www.youtube.com/watch?v=1ucrDKF3vWc
 
 ## Somfy Telis
@@ -124,14 +147,24 @@ How to get seed to make full clone of your remote (**will conflict with original
 
 1. Open `Read` in SubGHz on your flipper
 2. (ONLY FOR ORIGINAL REMOTES) Hold all buttons on your remote at same time, example -> for 2 button remote - press them both at same time and hold OR press hidden button on back of remote with a pin or paper clip
+For 4 buttons remote press & hold two buttons at upper row
 3. You will receive signal on your flipper, open that signal and see `Fix:` value, it should start from `F` like `F00F1C9B`
-4. If `Fix:` is showing first `F` see `Hop:` value -> This is your remote Seed
-5. Write down Hop value
+4. If `Fix:` is showing first `F` see `Hop:` value -> This is your remote Seed (except first digit `F` (this is the button code, aka programming button pressed means `F`))
+5. Write down Hop value and replace first digit - `F` with `0`
 6. Press button on your remote that you want to clone and receive its signal on your flipper
 7. Open and write down `Fix:` value where first digit will be same as your button ID `Btn:`
 8. Create new remote using BFT Mitto [Manual] - Enter FIX from step 7, enter counter `FF F9`, enter seed from step 5
 9. Using counter values like `FF F9` can help bypassing current original remote counter value, and in result it also can fully desync original remote, only one remote can work at same time using this method
-10. Throw away your original remote since now it needs to be re-added into receiver board :C
+10. Also you can do this: Save your signal of the original remote (will say KL: Unknown),
+then copy file to the PC and edit it and insert/replace those values after the `Key: 01 23 45 67 89 AB CD EF` (your key will have different value)
+```
+Seed: 0X XX XX XX
+Manufacture: BFT
+``` 
+Replace `X`'s with digits from your Seed that you obtained by reading two button hold at the first steps, 
+Save and copy that file back to the flipper
+Now you will have exact clone of your remote that will have same counter, by making couple presses you will make it higher than original and receiver will work with it, but original remote will reguire same amount of presses to work again, and vice versa.
+11. Also your original remote may become non working since it needs to be re-added into receiver board if you made counter much higher than original :C
 
 ## CAME Atomo
 
