@@ -29,6 +29,7 @@ static const char* submenu_names[SetTypeMAX] = {
     [SetTypeAllmatic868] = "KL: Allmatic 868MHz",
     [SetTypeCenturion433] = "KL: Centurion 433MHz",
     [SetTypeMonarch433] = "KL: Monarch 433MHz",
+    [SetTypeJollyMotors433] = "KL: Jolly Mot. 433MHz",
     [SetTypeSommer_FM_434] = "KL: Sommer 434MHz",
     [SetTypeSommer_FM_868] = "KL: Sommer 868MHz",
     [SetTypeSommer_FM238_434] = "KL: Sommer fm2 434Mhz",
@@ -66,6 +67,7 @@ static const char* submenu_names[SetTypeMAX] = {
     [SetTypePricenton433] = "Princeton 433MHz",
     [SetTypeGangQi_433] = "GangQi 433MHz",
     [SetTypeHollarm_433] = "Hollarm 433MHz",
+    [SetTypeReversRB2_433] = "Revers RB2 433MHz",
     [SetTypeMarantec24_868] = "Marantec24 868MHz",
     [SetTypeBETT_433] = "BETT 433MHz",
     [SetTypeLinear_300_00] = "Linear 300MHz",
@@ -336,6 +338,16 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 .data.bits = 42,
                 .data.te = 0};
             break;
+        case SetTypeReversRB2_433:
+            gen_info = (GenInfo){
+                .type = GenData,
+                .mod = "AM650",
+                .freq = 433920000,
+                .data.name = SUBGHZ_PROTOCOL_REVERSRB2_NAME, // 64bits no buttons
+                .data.key = (key & 0x00000FFFFFFFF000) | 0xFFFFF00000000000 | 0x0000000000000A00,
+                .data.bits = 64,
+                .data.te = 0};
+            break;
         case SetTypeMarantec24_868:
             gen_info = (GenInfo){
                 .type = GenData,
@@ -427,6 +439,16 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 .keeloq.btn = 0x0A,
                 .keeloq.cnt = 0x03,
                 .keeloq.manuf = "Monarch"};
+            break;
+        case SetTypeJollyMotors433:
+            gen_info = (GenInfo){
+                .type = GenKeeloq,
+                .mod = "AM650",
+                .freq = 433920000,
+                .keeloq.serial = (key & 0x000FFFFF),
+                .keeloq.btn = 0x02,
+                .keeloq.cnt = 0x03,
+                .keeloq.manuf = "Jolly_Motors"};
             break;
         case SetTypeElmesElectronic:
             gen_info = (GenInfo){

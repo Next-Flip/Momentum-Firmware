@@ -138,7 +138,7 @@ typedef enum {
 
 typedef enum {
     SubGhzProtocolFilter_StarLine = (1 << 0),
-    SubGhzProtocolFilter_AutoAlarms = (1 << 1),
+    SubGhzProtocolFilter_Alarms = (1 << 1),
     SubGhzProtocolFilter_Magellan = (1 << 2),
     SubGhzProtocolFilter_Princeton = (1 << 3),
     SubGhzProtocolFilter_NiceFlorS = (1 << 4),

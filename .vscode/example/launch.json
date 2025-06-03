@@ -11,9 +11,10 @@
             "args": {
                 "useSingleResult": true,
                 "env": {
-                    "PATH": "${workspaceFolder}${command:extension.commandvariable.envListSep}${env:PATH}"
+                    "PATH": "${workspaceFolder}${command:extension.commandvariable.envListSep}${env:PATH}",
+                    "FBT_NO_SYNC": "1"
                 },
-                "command": "fbt -s get_blackmagic",
+                "command": "fbt -s get_blackmagic SKIP_EXTERNAL=1",
                 "description": "Get Blackmagic device"
             }
         }

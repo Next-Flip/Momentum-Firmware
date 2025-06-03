@@ -73,9 +73,9 @@ FBT_TOOLCHAIN_VERSIONS = (" 12.3.", " 13.2.")
 
 OPENOCD_OPTS = [
     "-f",
-    "interface/stlink.cfg",
+    "interface/cmsis-dap.cfg",
     "-c",
-    "transport select hla_swd",
+    "transport select swd",
     "-f",
     "${FBT_DEBUG_DIR}/stm32wbx.cfg",
     "-c",
@@ -117,6 +117,7 @@ FIRMWARE_APPS = {
         "radio_device_cc1101_ext",
         "unit_tests",
         "js_app",
+        "archive",
     ],
 }
 

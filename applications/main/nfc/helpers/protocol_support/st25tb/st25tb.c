@@ -109,3 +109,5 @@ const NfcProtocolSupportBase nfc_protocol_support_st25tb = {
             .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };
+
+NFC_PROTOCOL_SUPPORT_PLUGIN(st25tb, NfcProtocolSt25tb);

@@ -136,6 +136,18 @@ dist_env = env.Clone(
     ],
 )
 
+
+enable_debug_target = dist_env.PhonyTarget(
+    "enable_debug",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/enable_debug.py",
+        ],
+    ],
+)
+env.AlwaysBuild(enable_debug_target)
+
 flash_target = dist_env.FwFlash(
     dist_env["UFBT_STATE_DIR"].File("flash"),
     dist_env["FW_ELF"],
@@ -144,6 +156,7 @@ dist_env.Alias("firmware_flash", flash_target)
 dist_env.Alias("flash", flash_target)
 if env["FORCE"]:
     env.AlwaysBuild(flash_target)
+dist_env.Depends(flash_target, enable_debug_target)
 
 
 firmware_jflash = dist_env.JFlash(
@@ -164,14 +177,16 @@ firmware_debug = dist_env.PhonyTarget(
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
 )
+dist_env.Depends(firmware_debug, enable_debug_target)
 
-dist_env.PhonyTarget(
+blackmagic_target = dist_env.PhonyTarget(
     "blackmagic",
     "${GDBPYCOM}",
     source=dist_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
 )
+dist_env.Depends(blackmagic_target, enable_debug_target)
 
 # Debug alien elf
 debug_other_opts = [
@@ -183,21 +198,23 @@ debug_other_opts = [
     "fw-version",
 ]
 
-dist_env.PhonyTarget(
+debug_other_target = dist_env.PhonyTarget(
     "debug_other",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
     GDBPYOPTS=debug_other_opts,
 )
+dist_env.Depends(debug_other_target, enable_debug_target)
 
-dist_env.PhonyTarget(
+debug_other_blackmagic_target = dist_env.PhonyTarget(
     "debug_other_blackmagic",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     GDBPYOPTS=debug_other_opts,
 )
+dist_env.Depends(debug_other_blackmagic_target, enable_debug_target)
 
 flash_usb_full = dist_env.UsbInstall(
     dist_env["UFBT_STATE_DIR"].File("usbinstall"),
@@ -461,10 +478,11 @@ dist_env.Precious(app_template_dist)
 dist_env.NoClean(app_template_dist)
 dist_env.Alias("create", app_template_dist)
 
-dist_env.PhonyTarget(
+get_blackmagic_target = dist_env.PhonyTarget(
     "get_blackmagic",
     "@echo $( ${BLACKMAGIC_ADDR} $)",
 )
+dist_env.Depends(get_blackmagic_target, enable_debug_target)
 
 dist_env.PhonyTarget(
     "get_apiversion",

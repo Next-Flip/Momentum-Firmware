@@ -2,10 +2,7 @@
 
 ## Command syntax
 
-BadUsb app uses extended DuckyScript syntax.
-
-It is compatible with classic USB Rubber Ducky 1.0 scripts but provides some additional commands and features,
-such as custom USB ID, `ALT` + `Numpad` input method, `SYSRQ` command, and more functional keys.
+BadUsb app uses extended Duckyscript syntax. It is compatible with classic USB Rubber Ducky 1.0 scripts but provides some additional commands and features, such as custom USB ID, ALT+Numpad input method, SYSRQ command, and more functional keys.
 
 ## Script file format
 
@@ -15,181 +12,185 @@ BadUsb app can execute only text scripts from `.txt` files, no compilation is re
 
 ### Comment line
 
-Just a single comment line. The interpreter will ignore all text after the `REM` command.
-
-| Command  | Parameters    | Notes   |
-|:---------|:--------------|:--------|
-| REM      | Comment text  |         |
+Just a single comment line. The interpreter will ignore all text after the REM command.
+| Command | Parameters   | Notes |
+| ------- | ------------ | ----- |
+| REM     | Comment text |       |
 
 ### Delay
 
 Pause script execution by a defined time.
-
-| Command       | Parameters                | Notes                                 |
-|:--------------|:--------------------------|:--------------------------------------|
-| DELAY         | Delay value in ms         | Single delay                          |
-| DEFAULT_DELAY | Delay value in ms         | Add delay before every next command   |
-| DEFAULTDELAY  | Delay value in ms         | Same as DEFAULT_DELAY                 |
+| Command       | Parameters        | Notes                               |
+| ------------- | ----------------- | ----------------------------------- |
+| DELAY         | Delay value in ms | Single delay                        |
+| DEFAULT_DELAY | Delay value in ms | Add delay before every next command |
+| DEFAULTDELAY  | Delay value in ms | Same as DEFAULT_DELAY               |
 
 ### Special keys
 
-| Command             | Notes             |
-|:--------------------|:------------------|
-| DOWNARROW / DOWN    |                   |
-| LEFTARROW / LEFT    |                   |
-| RIGHTARROW / RIGHT  |                   |
-| UPARROW / UP        |                   |
-| ENTER               |                   |
-| DELETE              |                   |
-| BACKSPACE           |                   |
-| END                 |                   |
-| HOME                |                   |
-| ESCAPE / ESC        |                   |
-| INSERT              |                   |
-| PAGEUP              |                   |
-| PAGEDOWN            |                   |
-| CAPSLOCK            |                   |
-| NUMLOCK             |                   |
-| SCROLLLOCK          |                   |
-| PRINTSCREEN         |                   |
-| BREAK               | Pause/Break key   |
-| PAUSE               | Pause/Break key   |
-| SPACE               |                   |
-| TAB                 |                   |
-| MENU                | Context menu key  |
-| APP                 | Same as MENU      |
-| Fx                  | F1-F12 keys       |
+| Command            | Notes            |
+| ------------------ | ---------------- |
+| DOWNARROW / DOWN   |                  |
+| LEFTARROW / LEFT   |                  |
+| RIGHTARROW / RIGHT |                  |
+| UPARROW / UP       |                  |
+| ENTER              |                  |
+| DELETE             |                  |
+| BACKSPACE          |                  |
+| END                |                  |
+| HOME               |                  |
+| ESCAPE / ESC       |                  |
+| INSERT             |                  |
+| PAGEUP             |                  |
+| PAGEDOWN           |                  |
+| CAPSLOCK           |                  |
+| NUMLOCK            |                  |
+| SCROLLLOCK         |                  |
+| PRINTSCREEN        |                  |
+| BREAK              | Pause/Break key  |
+| PAUSE              | Pause/Break key  |
+| SPACE              |                  |
+| TAB                |                  |
+| MENU               | Context menu key |
+| APP                | Same as MENU     |
+| Fx                 | F1-F12 keys      |
 
 ### Modifier keys
 
-Can be combined with a special key command or a single character.
+The following modifier keys are recognized:
+| Command | Notes        |
+| ------- | ------------ |
+| CTRL    |              |
+| CONTROL | Same as CTRL |
+| SHIFT   |              |
+| ALT     |              |
+| GUI     |              |
+| WINDOWS | Same as GUI  |
 
-| Command         | Notes        |
-|:----------------|:-------------|
-| CONTROL / CTRL  |              |
-| SHIFT           |              |
-| ALT             |              |
-| WINDOWS / GUI   |              |
-| CTRL-ALT        | CTRL+ALT     |
-| CTRL-SHIFT      | CTRL+SHIFT   |
-| ALT-SHIFT       | ALT+SHIFT    |
-| ALT-GUI         | ALT+WIN      |
-| GUI-SHIFT       | WIN+SHIFT    |
-| GUI-CTRL        | WIN+CTRL     |
+You can chain multiple modifier keys together using hyphens (`-`) or spaces.
 
 ## Key hold and release
 
 Up to 5 keys can be hold simultaneously.
-
-| Command  | Parameters                       | Notes                                     |
-|:---------|:---------------------------------|:------------------------------------------|
-| HOLD     | Special key or single character  | Press and hold key until RELEASE command  |
-| RELEASE  | Special key or single character  | Release key                               |
+| Command | Parameters                      | Notes                                    |
+| ------- | ------------------------------- | ---------------------------------------- |
+| HOLD    | Special key or single character | Press and hold key until RELEASE command |
+| RELEASE | Special key or single character | Release key                              |
 
 ## String
 
-| Command   | Parameters   | Notes                                       |
-|:----------|:-------------|:--------------------------------------------|
-| STRING    | Text string  | Print text string                           |
-| STRINGLN  | Text string  | Print text string and press enter after it  |
+| Command  | Parameters  | Notes                                      |
+| -------  | ----------- | -----------------                          |
+| STRING   | Text string | Print text string                          |
+| STRINGLN | Text string | Print text string and press enter after it |
 
 ## String delay
 
-Delay between key presses.
-
-| Command               | Parameters         | Notes                                          |
-|:----------------------|:-------------------|:-----------------------------------------------|
-| STRING_DELAY          | Delay value in ms  | Applied once to next appearing STRING command  |
-| STRINGDELAY           | Delay value in ms  | Same as STRING_DELAY                           |
-| DEFAULT_STRING_DELAY  | Delay value in ms  | Apply to every appearing STRING command        |
-| DEFAULTSTRINGDELAY    | Delay value in ms  | Same as DEFAULT_STRING_DELAY                   |
+Delay between keypresses.
+| Command              | Parameters        | Notes                                         |
+| -------------------- | ----------------- | --------------------------------------------- |
+| STRING_DELAY         | Delay value in ms | Applied once to next appearing STRING command |
+| STRINGDELAY          | Delay value in ms | Same as STRING_DELAY                          |
+| DEFAULT_STRING_DELAY | Delay value in ms | Apply to every appearing STRING command       |
+| DEFAULTSTRINGDELAY   | Delay value in ms | Same as DEFAULT_STRING_DELAY                  |
 
 ### Repeat
 
-| Command  | Parameters                    | Notes                    |
-|:---------|:------------------------------|:-------------------------|
-| REPEAT   | Number of additional repeats  | Repeat previous command  |
+| Command | Parameters                   | Notes                   |
+| ------- | ---------------------------- | ----------------------- |
+| REPEAT  | Number of additional repeats | Repeat previous command |
 
 ### ALT+Numpad input
 
 On Windows and some Linux systems, you can print characters by holding `ALT` key and entering its code on Numpad.
 | Command   | Parameters     | Notes                                                           |
-| :---------- | :--------------- | :--------------------------------------------------------------- |
+| --------- | -------------- | --------------------------------------------------------------- |
 | ALTCHAR   | Character code | Print single character                                          |
 | ALTSTRING | Text string    | Print text string using ALT+Numpad method                       |
-| ALTCODE   | Text string    | Same as ALTSTRING, presents in some DuckyScript implementations |
+| ALTCODE   | Text string    | Same as ALTSTRING, presents in some Duckyscript implementations |
 
 ### SysRq
 
 Send [SysRq command](https://en.wikipedia.org/wiki/Magic_SysRq_key)
-
-| Command  | Parameters        | Notes  |
-|:---------|:------------------|:-------|
-| SYSRQ    | Single character  |        |
+| Command | Parameters       | Notes |
+| ------- | ---------------- | ----- |
+| SYSRQ   | Single character |       |
 
 ## Media keys
 
-Some Media/Consumer Control keys can be pressed with `MEDIA` command
+Some Media/Consumer Control keys can be pressed with "MEDIA" command
 
-| Command  | Parameters                 | Notes |
-|:---------|:---------------------------|:------|
-| MEDIA    | Media key, see list below  |       |
+| Command | Parameters                | Notes |
+| ------- | ------------------------- | ----- |
+| MEDIA   | Media key, see list below |       |
 
-
-| Key name           | Notes                          |
-|:-------------------|:-------------------------------|
-| POWER              |                                |
-| REBOOT             |                                |
-| SLEEP              |                                |
-| LOGOFF             |                                |
-| EXIT               |                                |
-| HOME               |                                |
-| BACK               |                                |
-| FORWARD            |                                |
-| REFRESH            |                                |
-| SNAPSHOT           | Take photo in a camera app     |
-| PLAY               |                                |
-| PAUSE              |                                |
-| PLAY_PAUSE         |                                |
-| NEXT_TRACK         |                                |
-| PREV_TRACK         |                                |
-| STOP               |                                |
-| EJECT              |                                |
-| MUTE               |                                |
-| VOLUME_UP          |                                |
-| VOLUME_DOWN        |                                |
-| FN                 | Fn/Globe key on Mac keyboard   |
-| BRIGHT_UP          | Increase display brightness    |
-| BRIGHT_DOWN        | Decrease display brightness    |
+| Key name          | Notes                         |
+| ----------------- | ----------------------------- |
+| POWER             |                               |
+| REBOOT            |                               |
+| SLEEP             |                               |
+| LOGOFF            |                               |
+| EXIT              |                               |
+| HOME              |                               |
+| BACK              |                               |
+| FORWARD           |                               |
+| REFRESH           |                               |
+| SNAPSHOT          | Take photo in a camera app    |
+| PLAY              |                               |
+| PAUSE             |                               |
+| PLAY_PAUSE        |                               |
+| NEXT_TRACK        |                               |
+| PREV_TRACK        |                               |
+| STOP              |                               |
+| EJECT             |                               |
+| MUTE              |                               |
+| VOLUME_UP         |                               |
+| VOLUME_DOWN       |                               |
+| FN                | Fn/Globe key on Mac keyboard  |
+| BRIGHT_UP         | Increase display brightness   |
+| BRIGHT_DOWN       | Decrease display brightness   |
 
 ## Fn/Globe key commands (Mac/iPad)
 
-| Command  | Parameters                       | Notes  |
-|:---------|:---------------------------------|:-------|
-| GLOBE    | Special key or single character  |        |
+| Command | Parameters                      | Notes |
+| ------- | ------------------------------- | ----- |
+| GLOBE   | Special key or single character |       |
 
 ## Wait for button press
 
 Will wait indefinitely for a button to be pressed
+| Command               | Parameters   | Notes                                                                 |
+| --------------------- | ------------ | --------------------------------------------------------------------- |
+| WAIT_FOR_BUTTON_PRESS | None         | Will wait for the user to press a button to continue script execution |
 
-| Command               | Parameters | Notes                                                                         |
-|:----------------------|:-----------|:------------------------------------------------------------------------------|
-| WAIT_FOR_BUTTON_PRESS | None       | Will wait for the user to press a button to continue script execution         |
+## Device ID
 
-## USB device ID
+You can set the custom ID of the Flipper HID device. This command must be in the **first line** of script, it is executed before script run.
 
-You can set the custom ID of the Flipper USB HID device. ID command should be in the **first line** of script, it is executed before script run.
+| Command | Parameters                   | Example                                     | Notes                         |
+| ------- | ---------------------------- | ------------------------------------------- | ----------------------------- |
+| ID      | VID:PID Manufacturer:Product | `ID 1234:abcd Flipper Devices:Flipper Zero` | For USB connection mode       |
+| BLE_ID  | MAC:Addr Device Name         | `BLE_ID AA:BB:CC:DD:EE:FF Smart Fridge`     | For Bluetooth connection mode |
+| BT_ID   | MAC:Addr Device Name         | `BT_ID AA:BB:CC:DD:EE:FF Smart Fridge`      | Same as BLE_ID                |
 
-| Command  | Parameters                    | Notes  |
-|:---------|:------------------------------|:-------|
-| ID       | VID:PID Manufacturer:Product  |        |
+For `ID`, VID and PID are hex codes and are mandatory, while Manufacturer and Product are text strings and are optional.
 
-Example:
-```text
-ID 1234:abcd Flipper Devices:Flipper Zero
-```
+For `BLE_ID` and `BT_ID`, MAC address is a 6 byte hex sequence, and both MAC address and device name are mandatory.
 
-> [!IMPORTANT]
-> 
-> VID and PID are hex codes and are mandatory. 
-> Manufacturer and Product are text strings and are optional.
+When opening a script with one of these commands on the first line, the connection mode will be automatically switched to the one specified by the command.
+You can then manually switch back to the other connection mode.
+
+## Mouse Commands
+
+Mouse movement and click commands. Mouse click commands support HOLD functionality.
+
+| Command       | Parameters                     | Notes                            |
+| ------------- | -------------------------------| -------------------------------- |
+|  LEFTCLICK    | None                           |                                  |
+|  LEFT_CLICK   | None                           | functionally same as LEFTCLICK   |
+|  RIGHTCLICK   | None                           |                                  |
+|  RIGHT_CLICK  | None                           | functionally same as RIGHTCLICK  |
+|  MOUSEMOVE    | x y: int move mount/direction  |                                  |
+|  MOUSE_MOVE   | x y: int move mount/direction  | functionally same as MOUSEMOVE   |
+|  MOUSESCROLL  | delta: int scroll distance     |                                  |
+|  MOUSE_SCROLL | delta: int scroll distance     | functionally same as MOUSESCROLL |

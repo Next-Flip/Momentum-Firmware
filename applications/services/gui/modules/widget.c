@@ -119,7 +119,7 @@ static void widget_add_element(Widget* widget, WidgetElement* element) {
         true);
 }
 
-WidgetElement* widget_add_string_multiline_element(
+void widget_add_string_multiline_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -131,10 +131,9 @@ WidgetElement* widget_add_string_multiline_element(
     WidgetElement* string_multiline_element =
         widget_element_string_multiline_create(x, y, horizontal, vertical, font, text);
     widget_add_element(widget, string_multiline_element);
-    return string_multiline_element;
 }
 
-WidgetElement* widget_add_string_element(
+void widget_add_string_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -146,7 +145,6 @@ WidgetElement* widget_add_string_element(
     WidgetElement* string_element =
         widget_element_string_create(x, y, horizontal, vertical, font, text);
     widget_add_element(widget, string_element);
-    return string_element;
 }
 
 WidgetElement* widget_add_text_box_element(
@@ -166,7 +164,7 @@ WidgetElement* widget_add_text_box_element(
     return text_box_element;
 }
 
-WidgetElement* widget_add_text_scroll_element(
+void widget_add_text_scroll_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
@@ -177,10 +175,9 @@ WidgetElement* widget_add_text_scroll_element(
     WidgetElement* text_scroll_element =
         widget_element_text_scroll_create(x, y, width, height, text);
     widget_add_element(widget, text_scroll_element);
-    return text_scroll_element;
 }
 
-WidgetElement* widget_add_button_element(
+void widget_add_button_element(
     Widget* widget,
     GuiButtonType button_type,
     const char* text,
@@ -190,26 +187,36 @@ WidgetElement* widget_add_button_element(
     WidgetElement* button_element =
         widget_element_button_create(button_type, text, callback, context);
     widget_add_element(widget, button_element);
-    return button_element;
 }
 
-WidgetElement* widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon) {
+void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* icon) {
     furi_check(widget);
     furi_check(icon);
     WidgetElement* icon_element = widget_element_icon_create(x, y, icon);
     widget_add_element(widget, icon_element);
-    return icon_element;
 }
 
-WidgetElement* widget_add_frame_element(
+void widget_add_rect_element(
     Widget* widget,
     uint8_t x,
     uint8_t y,
     uint8_t width,
     uint8_t height,
-    uint8_t radius) {
+    uint8_t radius,
+    bool fill) {
     furi_check(widget);
-    WidgetElement* frame_element = widget_element_frame_create(x, y, width, height, radius);
-    widget_add_element(widget, frame_element);
-    return frame_element;
+    WidgetElement* rect_element = widget_element_rect_create(x, y, width, height, radius, fill);
+    widget_add_element(widget, rect_element);
+}
+
+void widget_add_circle_element(Widget* widget, uint8_t x, uint8_t y, uint8_t radius, bool fill) {
+    furi_check(widget);
+    WidgetElement* circle_element = widget_element_circle_create(x, y, radius, fill);
+    widget_add_element(widget, circle_element);
+}
+
+void widget_add_line_element(Widget* widget, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
+    furi_check(widget);
+    WidgetElement* line_element = widget_element_line_create(x1, y1, x2, y2);
+    widget_add_element(widget, line_element);
 }

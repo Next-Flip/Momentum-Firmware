@@ -1,8 +1,9 @@
-
 #include "archive_favorites.h"
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
+
+#include <dialogs/dialogs.h>
 
 #define ARCHIVE_FAV_FILE_BUF_LEN 32
 
@@ -46,7 +47,9 @@ static bool archive_favorites_read_line(File* file, FuriString* str_result) {
     return result;
 }
 
-uint16_t archive_favorites_count(void) {
+uint16_t archive_favorites_count(void* context) {
+    furi_assert(context);
+
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
 
@@ -57,7 +60,10 @@ uint16_t archive_favorites_count(void) {
     uint16_t lines = 0;
 
     if(result) {
-        while(archive_favorites_read_line(file, buffer)) {
+        while(1) {
+            if(!archive_favorites_read_line(file, buffer)) {
+                break;
+            }
             if(!furi_string_size(buffer)) {
                 continue; // Skip empty lines
             }
@@ -82,7 +88,10 @@ static bool archive_favourites_rescan(void) {
 
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
     if(result) {
-        while(archive_favorites_read_line(file, buffer)) {
+        while(1) {
+            if(!archive_favorites_read_line(file, buffer)) {
+                break;
+            }
             if(!furi_string_size(buffer)) {
                 continue;
             }
@@ -133,7 +142,10 @@ bool archive_favorites_read(void* context) {
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
-        while(archive_favorites_read_line(file, buffer)) {
+        while(1) {
+            if(!archive_favorites_read_line(file, buffer)) {
+                break;
+            }
             if(!furi_string_size(buffer)) {
                 continue;
             }
@@ -188,7 +200,10 @@ bool archive_favorites_delete(const char* format, ...) {
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
-        while(archive_favorites_read_line(file, buffer)) {
+        while(1) {
+            if(!archive_favorites_read_line(file, buffer)) {
+                break;
+            }
             if(!furi_string_size(buffer)) {
                 continue;
             }
@@ -229,7 +244,10 @@ bool archive_is_favorite(const char* format, ...) {
     bool result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
-        while(archive_favorites_read_line(file, buffer)) {
+        while(1) {
+            if(!archive_favorites_read_line(file, buffer)) {
+                break;
+            }
             if(!furi_string_size(buffer)) {
                 continue;
             }
@@ -316,4 +334,47 @@ void archive_favorites_save(void* context) {
 
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
+}
+
+void archive_favorites_handle_setting_pin_unpin(const char* app_name, const char* setting) {
+    DialogMessage* message = dialog_message_alloc();
+
+    FuriString* setting_path = furi_string_alloc_set_str(app_name);
+    if(setting) {
+        furi_string_push_back(setting_path, '/');
+        furi_string_cat_str(setting_path, setting);
+    }
+    const char* setting_path_str = furi_string_get_cstr(setting_path);
+
+    bool is_favorite = archive_is_favorite("/app:setting/%s", setting_path_str);
+    dialog_message_set_header(
+        message,
+        is_favorite ? "Unpin This Setting?" : "Pin This Setting?",
+        64,
+        0,
+        AlignCenter,
+        AlignTop);
+    dialog_message_set_text(
+        message,
+        is_favorite ? "It will no longer be\naccessible from the\nFavorites menu" :
+                      "It will be accessible from the\nFavorites menu",
+        64,
+        32,
+        AlignCenter,
+        AlignCenter);
+    dialog_message_set_buttons(
+        message, is_favorite ? "Unpin" : "Go back", NULL, is_favorite ? "Keep pinned" : "Pin");
+
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    DialogMessageButton button = dialog_message_show(dialogs, message);
+    furi_record_close(RECORD_DIALOGS);
+
+    if(is_favorite && button == DialogMessageButtonLeft) {
+        archive_favorites_delete("/app:setting/%s", setting_path_str);
+    } else if(!is_favorite && button == DialogMessageButtonRight) {
+        archive_file_append(ARCHIVE_FAV_PATH, "/app:setting/%s\n", setting_path_str);
+    }
+
+    furi_string_free(setting_path);
+    dialog_message_free(message);
 }

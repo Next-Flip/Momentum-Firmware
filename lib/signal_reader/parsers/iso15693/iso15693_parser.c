@@ -26,7 +26,6 @@ typedef enum {
 struct Iso15693Parser {
     Iso15693ParserState state;
     Iso15693ParserMode mode;
-    bool detect_mode;
 
     SignalReader* signal_reader;
 
@@ -63,7 +62,6 @@ typedef Iso15693ParserCommand (*Iso15693ParserStateHandler)(Iso15693Parser* inst
 
 Iso15693Parser* iso15693_parser_alloc(const GpioPin* pin, size_t max_frame_size) {
     Iso15693Parser* instance = malloc(sizeof(Iso15693Parser));
-    instance->detect_mode = true;
     instance->parsed_frame = bit_buffer_alloc(max_frame_size);
 
     instance->signal_reader = signal_reader_alloc(pin, ISO15693_PARSER_SIGNAL_READER_BUFF_SIZE);
@@ -88,7 +86,7 @@ void iso15693_parser_reset(Iso15693Parser* instance) {
     furi_assert(instance);
 
     instance->state = Iso15693ParserStateParseSoF;
-    if(instance->detect_mode) instance->mode = Iso15693ParserMode1OutOf4;
+    instance->mode = Iso15693ParserMode1OutOf4;
     memset(instance->bitstream_buff, 0x00, sizeof(instance->bitstream_buff));
     instance->bitstream_idx = 0;
 
@@ -124,10 +122,10 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
 
     if(instance->state == Iso15693ParserStateParseSoF) {
         if(event.data->data[0] == sof_1_out_of_4) {
-            if(instance->detect_mode) instance->mode = Iso15693ParserMode1OutOf4;
+            instance->mode = Iso15693ParserMode1OutOf4;
             instance->state = Iso15693ParserStateParseFrame;
         } else if(event.data->data[0] == sof_1_out_of_256) {
-            if(instance->detect_mode) instance->mode = Iso15693ParserMode1OutOf256;
+            instance->mode = Iso15693ParserMode1OutOf256;
             instance->state = Iso15693ParserStateParseFrame;
         } else if(event.data->data[0] == eof_single) {
             instance->eof_received = true;
@@ -245,6 +243,8 @@ static Iso15693ParserCommand iso15693_parser_parse_1_out_of_256(Iso15693Parser* 
                             instance->parsed_frame, instance->next_byte_part * 4 + j / 2);
                     }
                 }
+            } else {
+                instance->zero_found = true;
             }
         }
         instance->next_byte_part = (instance->next_byte_part + 1) % 64;
@@ -299,24 +299,4 @@ void iso15693_parser_get_data(
 
     bit_buffer_write_bytes(instance->parsed_frame, buff, buff_size);
     *data_bits = bit_buffer_get_size(instance->parsed_frame);
-}
-
-void iso15693_parser_detect_mode(Iso15693Parser* instance) {
-    furi_assert(instance);
-
-    instance->detect_mode = true;
-}
-
-void iso15693_parser_force_1outof4(Iso15693Parser* instance) {
-    furi_assert(instance);
-
-    instance->detect_mode = false;
-    instance->mode = Iso15693ParserMode1OutOf4;
-}
-
-void iso15693_parser_force_1outof256(Iso15693Parser* instance) {
-    furi_assert(instance);
-
-    instance->detect_mode = false;
-    instance->mode = Iso15693ParserMode1OutOf256;
 }

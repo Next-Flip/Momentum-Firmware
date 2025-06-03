@@ -1,5 +1,6 @@
 #include "menu.h"
 
+#include "locale/locale.h"
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <gui/icon_i.h>
@@ -78,6 +79,24 @@ static void menu_centered_icon(
         canvas,
         x + (width - item->icon->icon->width) / 2,
         y + (height - item->icon->icon->height) / 2,
+        item->icon);
+}
+
+static void menu_centered_icon_scaled(
+    Canvas* canvas,
+    MenuItem* item,
+    size_t x,
+    size_t y,
+    size_t width,
+    size_t height,
+    size_t width_scale,
+    size_t height_scale) {
+    canvas_draw_icon_animation_ex(
+        canvas,
+        x + (width - item->icon->icon->width) / 2,
+        y + (height - item->icon->icon->height) / 2,
+        width_scale,
+        height_scale,
         item->icon);
 }
 
@@ -191,7 +210,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                         canvas,
                         pos_x,
                         pos_y - height / 2 - 8,
-                        126,
+                        124,
                         name,
                         scroll_counter,
                         false,
@@ -380,21 +399,22 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             furi_hal_rtc_get_datetime(&curr_dt);
             uint8_t hour = curr_dt.hour;
             uint8_t min = curr_dt.minute;
-            if(hour > 12) {
-                hour -= 12;
-            }
-            if(hour == 0) {
-                hour = 12;
+            LocaleTimeFormat time_format = locale_get_time_format();
+            if(time_format == LocaleTimeFormat12h) {
+                if(hour > 12) {
+                    hour -= 12;
+                }
+                if(hour == 0) {
+                    hour = (momentum_settings.midnight_format_00 ? 0 : 12);
+                }
             }
             canvas_set_font(canvas, FontSecondary);
             char clk[20];
             snprintf(clk, sizeof(clk), "%02u:%02u", hour, min);
             canvas_draw_str(canvas, 5, 34, clk);
 
-            uint32_t battery_capacity = furi_hal_power_get_battery_full_capacity();
-            uint32_t battery_remaining = furi_hal_power_get_battery_remaining_capacity();
             bool ext5v = furi_hal_power_is_otg_enabled();
-            uint16_t battery_percent = (battery_remaining * 100) / battery_capacity;
+            uint8_t battery_percent = furi_hal_power_get_pct();
             bool charge_state = false;
 
             // Determine charge state
@@ -440,6 +460,113 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 size_t scroll_counter = menu_scroll_counter(model, i == position);
                 elements_scrollable_text_line(canvas, 83, yPos, 43, name, scroll_counter, false);
             }
+            break;
+        }
+        case MenuStyleCoverFlow: {
+            canvas_set_font(canvas, FontPrimary);
+
+            // Draw frames
+            canvas_set_bitmap_mode(canvas, true);
+            canvas_draw_frame(canvas, 0, 0, 128, 64);
+            canvas_draw_rframe(canvas, 45, 4, 38, 38, 3);
+
+            // Draw left side albums
+            canvas_draw_line(canvas, 5, 36, 1, 37);
+            canvas_draw_line(canvas, 4, 9, 1, 8);
+            canvas_draw_line(canvas, 6, 41, 17, 36);
+            canvas_draw_line(canvas, 19, 41, 30, 36);
+            canvas_draw_line(canvas, 32, 41, 43, 36);
+            canvas_draw_line(canvas, 6, 4, 17, 9);
+            canvas_draw_line(canvas, 19, 4, 30, 9);
+            canvas_draw_line(canvas, 32, 4, 43, 9);
+            canvas_draw_line(canvas, 5, 5, 5, 40);
+            canvas_draw_line(canvas, 18, 5, 18, 40);
+            canvas_draw_line(canvas, 31, 5, 31, 40);
+
+            // Draw right side albums
+            canvas_draw_line(canvas, 95, 41, 84, 36);
+            canvas_draw_line(canvas, 108, 41, 97, 36);
+            canvas_draw_line(canvas, 121, 41, 110, 36);
+            canvas_draw_line(canvas, 84, 9, 95, 4);
+            canvas_draw_line(canvas, 97, 9, 108, 4);
+            canvas_draw_line(canvas, 110, 9, 121, 4);
+            canvas_draw_line(canvas, 96, 5, 96, 40);
+            canvas_draw_line(canvas, 109, 5, 109, 40);
+            canvas_draw_line(canvas, 122, 5, 122, 40);
+            canvas_draw_line(canvas, 123, 9, 126, 8);
+            canvas_draw_line(canvas, 123, 36, 126, 37);
+
+            const int32_t pos_x_center = 128 / 2;
+            const int32_t pos_y_center = (64 / 2) + 1;
+            const int32_t pos_y_offset = 10;
+            const int32_t icon_size = 20;
+            const int32_t side_icon_width = icon_size / 2;
+            const int32_t padding_center_icon = 14;
+            const int32_t spacing_between_icons = 3;
+            const int32_t scale_base = 100;
+
+            MenuItem* center_item = NULL;
+
+            // Draw 7 icons, where index 0 is the center icon
+            // [-3, -2, -1, 0, 1, 2, 3]
+            for(int8_t i = -3; i <= 3; i++) {
+                shift_position = (position + items_count + i) % items_count;
+                item = MenuItemArray_get(model->items, shift_position);
+
+                int32_t pos_x = pos_x_center;
+                int32_t pos_y = pos_y_center;
+
+                int32_t scale_width = scale_base;
+                int32_t scale_height = scale_base;
+
+                if(i < 0) {
+                    // Left sided icons
+                    pos_x -= padding_center_icon;
+                    pos_x -= ((-i) * (side_icon_width + spacing_between_icons));
+                    pos_x -= (side_icon_width / 2) / 2;
+                    pos_y = (pos_y_center - icon_size / 2) - pos_y_offset;
+                    scale_width = 50;
+                } else if(i > 0) {
+                    // Right sided icons
+                    pos_x += padding_center_icon;
+                    pos_x += (i * (side_icon_width + spacing_between_icons));
+                    pos_x -= side_icon_width;
+                    pos_y = (pos_y_center - icon_size / 2) - pos_y_offset;
+                    scale_width = 50;
+                } else if(i == 0) {
+                    // Center icon
+                    pos_x -= icon_size / 2;
+                    pos_y = (pos_y_center - (icon_size / 2)) - pos_y_offset;
+                    // Scaling > 100% doesn't look good, keep 100% for now
+                    scale_width = scale_base; // TODO: 200%
+                    scale_height = scale_base; // TODO: 200%
+                    // Save center item pointer for later
+                    center_item = item;
+                }
+
+                // Draw the icon
+                menu_centered_icon_scaled(
+                    canvas, item, pos_x, pos_y, icon_size, icon_size, scale_width, scale_height);
+            }
+
+            // Draw label for center item
+            if(center_item) {
+                menu_get_name(center_item, name, false);
+                size_t scroll_counter = menu_scroll_counter(model, true);
+                elements_scrollable_text_line_centered(
+                    canvas,
+                    pos_x_center,
+                    (pos_y_center + icon_size / 2) + pos_y_offset + 1,
+                    124,
+                    name,
+                    scroll_counter,
+                    false,
+                    true);
+            }
+
+            // Add scrollbar element
+            elements_scrollbar_horizontal(canvas, 0, 60, 128, position, items_count);
+
             break;
         }
         default:
@@ -792,6 +919,7 @@ static void menu_process_left(Menu* menu) {
             case MenuStyleDsi:
             case MenuStylePs4:
             case MenuStyleVertical:
+            case MenuStyleCoverFlow:
                 size_t vertical_offset = model->vertical_offset;
                 if(position > 0) {
                     position--;
@@ -856,6 +984,7 @@ static void menu_process_right(Menu* menu) {
             case MenuStyleDsi:
             case MenuStylePs4:
             case MenuStyleVertical:
+            case MenuStyleCoverFlow:
                 size_t vertical_offset = model->vertical_offset;
                 if(position < count - 1) {
                     position++;

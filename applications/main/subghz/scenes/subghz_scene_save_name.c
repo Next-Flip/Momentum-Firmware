@@ -86,6 +86,9 @@ void subghz_scene_save_name_on_enter(void* context) {
 bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeBack) {
+        // Set file path to default
+        furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
+        //
         if(!(strcmp(subghz->file_name_tmp, "") == 0) ||
            scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
                SubGhzCustomEventManagerNoSet) {
@@ -99,8 +102,6 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         } else {
             scene_manager_previous_scene(subghz->scene_manager);
         }
-        // Set file path to default
-        furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
 
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {

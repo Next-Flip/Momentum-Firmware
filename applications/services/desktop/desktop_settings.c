@@ -6,7 +6,7 @@
 
 #define TAG "DesktopSettings"
 
-#define DESKTOP_SETTINGS_VER   (11)
+#define DESKTOP_SETTINGS_VER   (12)
 #define DESKTOP_SETTINGS_MAGIC (0x13) // Different from OFW 0x17
 
 void desktop_settings_load(DesktopSettings* settings) {

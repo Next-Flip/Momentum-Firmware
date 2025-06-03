@@ -32,8 +32,8 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
                     case ArchiveFileTypeInfraredRemote:
                         txt_path = IR_REMOTE_PATH;
                         break;
-                    case ArchiveFileTypeBadKb:
-                        txt_path = archive_get_default_path(ArchiveTabBadKb);
+                    case ArchiveFileTypeBadUsb:
+                        txt_path = archive_get_default_path(ArchiveTabBadUsb);
                         break;
                     }
                     if(txt_path != NULL) {

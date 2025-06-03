@@ -12,7 +12,7 @@ for universal in universals.glob("*.ir"):
     signal = []
     comment = []
     signals = []
-    for line in lines:
+    for line in lines[2:]:
         if line.startswith("#"):
             comment.append(line)
             continue

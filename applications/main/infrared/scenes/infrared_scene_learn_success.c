@@ -15,9 +15,9 @@ void infrared_scene_learn_success_on_enter(void* context) {
 
     if(infrared_signal_is_raw(signal)) {
         const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
-        dialog_ex_set_header(dialog_ex, "Unknown", 95, 10, AlignCenter, AlignCenter);
+        dialog_ex_set_header(dialog_ex, "Unknown\n(RAW)", 95, 12, AlignCenter, AlignCenter);
         infrared_text_store_set(infrared, 0, "%zu samples", raw->timings_size);
-        dialog_ex_set_text(dialog_ex, infrared->text_store[0], 75, 23, AlignLeft, AlignTop);
+        dialog_ex_set_text(dialog_ex, infrared->text_store[0], 75, 32, AlignLeft, AlignTop);
 
     } else {
         const InfraredMessage* message = infrared_signal_get_message(signal);

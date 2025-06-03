@@ -6,6 +6,7 @@
 #pragma once
 
 #include <furi_hal_resources.h>
+#include <storage/storage.h>
 
 #ifdef __cplusplus
 extern "C" {
