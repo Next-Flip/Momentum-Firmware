@@ -68,6 +68,8 @@ const SubGhzProtocol subghz_protocol_hollarm = {
 
     .decoder = &subghz_protocol_hollarm_decoder,
     .encoder = &subghz_protocol_hollarm_encoder,
+
+    .filter = SubGhzProtocolFilter_Alarms,
 };
 
 void* subghz_protocol_encoder_hollarm_alloc(SubGhzEnvironment* environment) {

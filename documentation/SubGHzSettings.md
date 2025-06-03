@@ -72,6 +72,7 @@ if you need your custom one, make sure it doesn't listed here
     434775000, /* LPD433 last channels */
     438900000,
     440175000,
+    462750000,
     464000000,
     467750000,
 

@@ -77,7 +77,7 @@ const SubGhzProtocol subghz_protocol_scher_khan = {
     .decoder = &subghz_protocol_scher_khan_decoder,
     .encoder = &subghz_protocol_scher_khan_encoder,
 
-    .filter = SubGhzProtocolFilter_AutoAlarms,
+    .filter = SubGhzProtocolFilter_Alarms,
 };
 
 void* subghz_protocol_decoder_scher_khan_alloc(SubGhzEnvironment* environment) {

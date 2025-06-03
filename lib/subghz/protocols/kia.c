@@ -70,7 +70,7 @@ const SubGhzProtocol subghz_protocol_kia = {
     .decoder = &subghz_protocol_kia_decoder,
     .encoder = &subghz_protocol_kia_encoder,
 
-    .filter = SubGhzProtocolFilter_AutoAlarms,
+    .filter = SubGhzProtocolFilter_Alarms,
 };
 
 void* subghz_protocol_decoder_kia_alloc(SubGhzEnvironment* environment) {

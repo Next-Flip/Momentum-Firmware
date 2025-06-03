@@ -15,7 +15,7 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexDeleteOldSignals,
     SubGhzSettingIndexAutosave,
     SubGhzSettingIndexIgnoreStarline,
-    SubGhzSettingIndexIgnoreCars,
+    SubGhzSettingIndexIgnoreAlarms,
     SubGhzSettingIndexIgnoreMagellan,
     SubGhzSettingIndexIgnorePrinceton,
     SubGhzSettingIndexIgnoreNiceFlorS,
@@ -416,7 +416,7 @@ static void subghz_scene_receiver_config_set_starline(VariableItem* item) {
 }
 
 static void subghz_scene_receiver_config_set_auto_alarms(VariableItem* item) {
-    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_AutoAlarms);
+    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Alarms);
 }
 
 static void subghz_scene_receiver_config_set_magellan(VariableItem* item) {
@@ -618,13 +618,13 @@ void subghz_scene_receiver_config_on_enter(void* context) {
 
         item = variable_item_list_add(
             subghz->variable_item_list,
-            "Ignore Cars",
+            "Ignore Alarms",
             COMBO_BOX_COUNT,
             subghz_scene_receiver_config_set_auto_alarms,
             subghz);
 
         value_index = subghz_scene_receiver_config_ignore_filter_get_index(
-            subghz->ignore_filter, SubGhzProtocolFilter_AutoAlarms);
+            subghz->ignore_filter, SubGhzProtocolFilter_Alarms);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
 
