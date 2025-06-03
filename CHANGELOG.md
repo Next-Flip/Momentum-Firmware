@@ -19,6 +19,7 @@
   - WiFi Marauder: Support for new commands from ESP32Marauder 1.6.x (by @justcallmekoko)
   - VGM Tool: Fixed RGB firmware UART regression (by @WillyJL)
   - UL: Sub-GHz Playlist: Add support for custom modulation presets, remake with txrx library and support for dynamic signals, cleanup code (by @xMasterX)
+- RFID: Add DEZ10 representation to EM410X (by @realcatgirly)
 - OFW: Infrared: Add text scroll to remote buttons (by @956MB)
 - Sub-GHz:
   - UL: Rename and extend Alarms ignore option with Hollarm & GangQi (by @xMasterX)
