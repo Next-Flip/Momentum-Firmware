@@ -156,13 +156,23 @@ int32_t input_srv(void* p) {
                 event.type = pin_states[i].state ? InputTypePress : InputTypeRelease;
                 furi_pubsub_publish(event_pubsub, &event);
                 // vibro signal if user setup vibro touch level in Settings-Input.
+                bool vibro_send = false;
                 if(settings->vibro_touch_level) {
-                    //delay 1 ticks for compatibility with rgb_backlight_mod
-                    furi_delay_tick(1);
-                    furi_hal_vibro_on(true);
-                    furi_delay_tick(settings->vibro_touch_level);
-                    furi_hal_vibro_on(false);
-                };
+                    if((settings->vibro_touch_trigger == 0) && (event.type == InputTypePress)) {
+                        vibro_send = true;
+                    } else if((settings->vibro_touch_trigger == 1) && (event.type == InputTypeRelease)) {
+                        vibro_send = true;
+                    } else if(settings->vibro_touch_trigger == 2) {
+                        vibro_send = true;
+                    }
+                    if(vibro_send) {
+                        //delay 1 ticks for compatibility with rgb_backlight_mod
+                        furi_delay_tick(1);
+                        furi_hal_vibro_on(true);
+                        furi_delay_tick(settings->vibro_touch_level);
+                        furi_hal_vibro_on(false);
+                    }
+                }
             }
         }
 

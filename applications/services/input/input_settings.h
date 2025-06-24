@@ -6,6 +6,7 @@
 
 typedef struct {
     uint8_t vibro_touch_level;
+    uint8_t vibro_touch_trigger;
 } InputSettings;
 
 void input_settings_load(InputSettings* settings);
