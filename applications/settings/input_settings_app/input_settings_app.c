@@ -3,7 +3,7 @@
 
 #define TAG "InputSettingsApp"
 
-#define VIBRO_TOUCH_LEVEL_COUNT 10
+#define VIBRO_TOUCH_LEVEL_COUNT        10
 #define VIBRO_TOUCH_TRIGGER_TYPE_COUNT 3
 
 // vibro touch human readable levels
@@ -100,7 +100,9 @@ InputSettingsApp* input_settings_app_alloc(void) {
         app);
 
     value_index = value_index_uint32(
-        app->settings->vibro_touch_trigger, vibro_touch_trigger_type_value, VIBRO_TOUCH_TRIGGER_TYPE_COUNT);
+        app->settings->vibro_touch_trigger,
+        vibro_touch_trigger_type_value,
+        VIBRO_TOUCH_TRIGGER_TYPE_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, vibro_touch_trigger_type_text[value_index]);
 

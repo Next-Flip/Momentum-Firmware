@@ -160,7 +160,8 @@ int32_t input_srv(void* p) {
                 if(settings->vibro_touch_level) {
                     if((settings->vibro_touch_trigger == 0) && (event.type == InputTypePress)) {
                         vibro_send = true;
-                    } else if((settings->vibro_touch_trigger == 1) && (event.type == InputTypeRelease)) {
+                    } else if(
+                        (settings->vibro_touch_trigger == 1) && (event.type == InputTypeRelease)) {
                         vibro_send = true;
                     } else if(settings->vibro_touch_trigger == 2) {
                         vibro_send = true;
