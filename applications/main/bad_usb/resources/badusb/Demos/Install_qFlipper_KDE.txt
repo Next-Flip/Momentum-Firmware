@@ -1,0 +1,53 @@
+ID 1234:abcd Generic:USB Keyboard
+REM Identify as a generic USB keyboard
+
+REM This script installs qFlipper on Linux/KDE using the latest AppImage package
+
+REM Open the KDE terminal (Konsole)
+ALT F2
+DELAY 1000
+STRINGLN konsole --new-tab -e "bash -c 'clear; exec bash'"
+DELAY 1000
+
+REM Ensure the folder for executables exists
+STRINGLN mkdir -p $HOME/.local/bin
+
+REM Download the latest AppImage
+STRINGLN curl -fsSL "https://update.flipperzero.one/qFlipper/release/linux-amd64/AppImage" -o "$HOME/.local/bin/qFlipper"
+DELAY 1000
+
+REM Make it executable
+STRINGLN chmod +x $HOME/.local/bin/qFlipper
+
+REM Extract the AppImage in /tmp to install the icon and .desktop file
+STRINGLN cd /tmp
+STRINGLN $HOME/.local/bin/qFlipper --appimage-extract > /dev/null
+STRINGLN sed "s@Exec=qFlipper@Exec=$HOME/.local/bin/qFlipper@" squashfs-root/usr/share/applications/qFlipper.desktop > $HOME/.local/share/applications/qFlipper.desktop
+
+REM Create the icons folder if it does not exist
+STRINGLN mkdir -p $HOME/.local/share/icons/hicolor/512x512/apps
+STRINGLN cp squashfs-root/usr/share/icons/hicolor/512x512/apps/qFlipper.png $HOME/.local/share/icons/hicolor/512x512/apps/qFlipper.png
+
+REM Clean up the extracted folder
+STRINGLN rm -rf squashfs-root
+STRINGLN cd
+
+REM Update the desktop entries (for KDE, you might need to restart plasmashell)
+STRINGLN update-desktop-database $HOME/.local/share/applications || true
+
+REM Display final message to the user
+STRINGLN echo "
+ENTER
+REPEAT 60
+STRINGLN ==========================================================================================
+STRINGLN qFlipper has been installed to $HOME/.local/bin/
+STRINGLN It should appear in your Applications menu.
+STRINGLN If it does not, you might want to log out and log in again.
+ENTER
+STRINGLN To run qFlipper from your terminal, use the absolute path
+STRINGLN or ensure $HOME/.local/bin/ is included in your PATH environment variable.
+ENTER
+STRINGLN You might need additional configurations depending on your Linux distribution (such as
+STRINGLN group membership, udev rules, etc.).
+STRINGLN ==========================================================================================
+STRINGLN "
