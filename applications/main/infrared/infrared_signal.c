@@ -8,6 +8,10 @@
 
 #define TAG "InfraredSignal"
 
+// reusable string buffers to avoid per-call alloc/free overhead during bruteforce reading
+static FuriString* irsig_tmp_global = NULL; // lazy-init
+static FuriString* irsig_buf_global = NULL; // lazy-init
+
 // Common keys
 #define INFRARED_SIGNAL_NAME_KEY "name"
 #define INFRARED_SIGNAL_TYPE_KEY "type"
@@ -167,8 +171,8 @@ static inline InfraredErrorCode
 
 static inline InfraredErrorCode
     infrared_signal_read_message(InfraredSignal* signal, FlipperFormat* ff) {
-    FuriString* buf;
-    buf = furi_string_alloc();
+    if(!irsig_buf_global) irsig_buf_global = furi_string_alloc();
+    FuriString* buf = irsig_buf_global;
     InfraredErrorCode error = InfraredErrorCodeNone;
 
     do {
@@ -199,7 +203,6 @@ static inline InfraredErrorCode
         infrared_signal_set_message(signal, &message);
     } while(false);
 
-    furi_string_free(buf);
     return error;
 }
 
@@ -268,7 +271,8 @@ static inline InfraredErrorCode
 }
 
 InfraredErrorCode infrared_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
-    FuriString* tmp = furi_string_alloc();
+    if(!irsig_tmp_global) irsig_tmp_global = furi_string_alloc();
+    FuriString* tmp = irsig_tmp_global;
 
     InfraredErrorCode error = InfraredErrorCodeNone;
 
@@ -288,8 +292,6 @@ InfraredErrorCode infrared_signal_read_body(InfraredSignal* signal, FlipperForma
             break;
         }
     } while(false);
-
-    furi_string_free(tmp);
 
     return error;
 }
