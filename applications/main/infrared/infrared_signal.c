@@ -231,19 +231,32 @@ static inline InfraredErrorCode
             break;
         }
 
-        // allocate buffer for timings and read directly into it
-        uint32_t* timings = malloc(sizeof(uint32_t) * timings_size);
-        if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_DATA_KEY, timings, timings_size)) {
+        uint32_t* timings_ptr = NULL;
+
+        if(signal->is_raw && signal->payload.raw.timings) {
+            /* reuse existing buffer if it is large enough, else grow it */
+            if(signal->payload.raw.timings_size >= timings_size) {
+                timings_ptr = signal->payload.raw.timings;
+            } else {
+                timings_ptr = realloc(signal->payload.raw.timings, sizeof(uint32_t) * timings_size);
+            }
+        } else {
+            timings_ptr = malloc(sizeof(uint32_t) * timings_size);
+        }
+
+        if(!timings_ptr) {
             error = InfraredErrorCodeSignalRawUnableToReadData;
-            free(timings);
             break;
         }
 
-        // take ownership of the timings buffer without extra copy to save ram and time
-        infrared_signal_clear_timings(signal);
+        if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_DATA_KEY, timings_ptr, timings_size)) {
+            error = InfraredErrorCodeSignalRawUnableToReadData;
+            /* do not free timings_ptr here, it is owned by signal or will be on next iteration */
+            break;
+        }
 
         signal->is_raw = true;
-        signal->payload.raw.timings = timings;
+        signal->payload.raw.timings = timings_ptr;
         signal->payload.raw.timings_size = timings_size;
         signal->payload.raw.frequency = frequency;
         signal->payload.raw.duty_cycle = duty_cycle;
