@@ -231,6 +231,7 @@ static inline InfraredErrorCode
             break;
         }
 
+        // allocate buffer for timings and read directly into it
         uint32_t* timings = malloc(sizeof(uint32_t) * timings_size);
         if(!flipper_format_read_uint32(ff, INFRARED_SIGNAL_DATA_KEY, timings, timings_size)) {
             error = InfraredErrorCodeSignalRawUnableToReadData;
@@ -238,8 +239,14 @@ static inline InfraredErrorCode
             break;
         }
 
-        infrared_signal_set_raw_signal(signal, timings, timings_size, frequency, duty_cycle);
-        free(timings);
+        // take ownership of the timings buffer without extra copy to save ram and time
+        infrared_signal_clear_timings(signal);
+
+        signal->is_raw = true;
+        signal->payload.raw.timings = timings;
+        signal->payload.raw.timings_size = timings_size;
+        signal->payload.raw.frequency = frequency;
+        signal->payload.raw.duty_cycle = duty_cycle;
 
         error = InfraredErrorCodeNone;
     } while(false);
