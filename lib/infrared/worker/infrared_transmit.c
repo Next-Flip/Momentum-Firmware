@@ -11,6 +11,9 @@ static uint32_t infrared_tx_raw_timings_number = 0;
 static uint32_t infrared_tx_raw_start_from_mark = 0;
 static bool infrared_tx_raw_add_silence = false;
 
+// cache encoder handler to avoid malloc/free on every infrared_send call
+static InfraredEncoderHandler* infrared_encoder_cached = NULL;
+
 FuriHalInfraredTxGetDataState
     infrared_get_raw_data_callback(void* context, uint32_t* duration, bool* level) {
     furi_assert(duration);
@@ -99,7 +102,12 @@ void infrared_send(const InfraredMessage* message, int times) {
     furi_check(times);
     furi_check(infrared_is_protocol_valid(message->protocol));
 
-    InfraredEncoderHandler* handler = infrared_alloc_encoder();
+    if(!infrared_encoder_cached) {
+        infrared_encoder_cached = infrared_alloc_encoder();
+    }
+
+    InfraredEncoderHandler* handler = infrared_encoder_cached;
+
     infrared_reset_encoder(handler, message);
     infrared_tx_number_of_transmissions =
         MAX((int)infrared_get_protocol_min_repeat_count(message->protocol), times);
@@ -111,7 +119,7 @@ void infrared_send(const InfraredMessage* message, int times) {
     furi_hal_infrared_async_tx_start(frequency, duty_cycle);
     furi_hal_infrared_async_tx_wait_termination();
 
-    infrared_free_encoder(handler);
+    /* keep handler for reuse to save heap churn */
 
     furi_check(!furi_hal_infrared_is_busy());
 }

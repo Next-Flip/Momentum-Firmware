@@ -65,6 +65,8 @@ typedef struct {
         tx_timing_rest_duration; /** if timing is too long (> 0xFFFF), send it in few iterations */
     bool tx_timing_rest_level;
     FuriHalInfraredTxGetDataState tx_timing_rest_status;
+    uint32_t freq;
+    uint32_t micro_remainder;
 } InfraredTimTx;
 
 typedef enum {
@@ -81,6 +83,9 @@ static FuriHalInfraredTxPin infrared_tx_output = FuriHalInfraredTxPinInternal;
 static volatile InfraredState furi_hal_infrared_state = InfraredStateIdle;
 static InfraredTimTx infrared_tim_tx;
 static InfraredTimRx infrared_tim_rx;
+
+static uint16_t infrared_tx_dma_buffer_data[2][INFRARED_TIM_TX_DMA_BUFFER_SIZE];
+static uint8_t infrared_tx_dma_buffer_polarity[2][INFRARED_TIM_TX_DMA_BUFFER_SIZE + INFRARED_POLARITY_SHIFT];
 
 static const GpioPin* infrared_tx_pins[FuriHalInfraredTxPinMax] = {
     [FuriHalInfraredTxPinInternal] = &gpio_infrared_tx,
@@ -253,9 +258,9 @@ static void furi_hal_infrared_tx_dma_terminate(void) {
 static uint8_t furi_hal_infrared_get_current_dma_tx_buffer(void) {
     uint8_t buf_num = 0;
     uint32_t buffer_adr = LL_DMA_GetMemoryAddress(INFRARED_DMA_CH2_DEF);
-    if(buffer_adr == (uint32_t)infrared_tim_tx.buffer[0].data) {
+    if(buffer_adr == (uint32_t)infrared_tx_dma_buffer_data[0]) {
         buf_num = 0;
-    } else if(buffer_adr == (uint32_t)infrared_tim_tx.buffer[1].data) {
+    } else if(buffer_adr == (uint32_t)infrared_tx_dma_buffer_data[1]) {
         buf_num = 1;
     } else {
         furi_crash();
@@ -513,11 +518,9 @@ static void furi_hal_infrared_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_s
 
         status = infrared_tim_tx.data_callback(infrared_tim_tx.data_context, &duration, &level);
 
-        const float num_of_impulses_f =
-            duration / infrared_tim_tx.cycle_duration + infrared_tim_tx.cycle_remainder;
-        const uint32_t num_of_impulses = roundf(num_of_impulses_f);
-        // Save the remainder (in carrier periods) for later use
-        infrared_tim_tx.cycle_remainder = num_of_impulses_f - num_of_impulses;
+        uint64_t product = (uint64_t)duration * infrared_tim_tx.freq + infrared_tim_tx.micro_remainder;
+        uint32_t num_of_impulses = product / 1000000;
+        infrared_tim_tx.micro_remainder = product - ((uint64_t)num_of_impulses * 1000000);
 
         if(num_of_impulses == 0) {
             if((*size == 0) && (status == FuriHalInfraredTxGetDataStateDone)) {
@@ -602,11 +605,6 @@ static void furi_hal_infrared_async_tx_free_resources(void) {
     furi_hal_bus_disable(INFRARED_DMA_TIMER_BUS);
 
     furi_semaphore_free(infrared_tim_tx.stop_semaphore);
-    free(infrared_tim_tx.buffer[0].data);
-    free(infrared_tim_tx.buffer[1].data);
-    free(infrared_tim_tx.buffer[0].polarity);
-    free(infrared_tim_tx.buffer[1].polarity);
-
     infrared_tim_tx.buffer[0].data = NULL;
     infrared_tim_tx.buffer[1].data = NULL;
     infrared_tim_tx.buffer[0].polarity = NULL;
@@ -625,16 +623,15 @@ void furi_hal_infrared_async_tx_start(uint32_t freq, float duty_cycle) {
     furi_check(infrared_tim_tx.buffer[0].polarity == NULL);
     furi_check(infrared_tim_tx.buffer[1].polarity == NULL);
 
-    size_t alloc_size_data = INFRARED_TIM_TX_DMA_BUFFER_SIZE * sizeof(uint16_t);
-    infrared_tim_tx.buffer[0].data = malloc(alloc_size_data);
-    infrared_tim_tx.buffer[1].data = malloc(alloc_size_data);
+    infrared_tim_tx.buffer[0].data = infrared_tx_dma_buffer_data[0];
+    infrared_tim_tx.buffer[1].data = infrared_tx_dma_buffer_data[1];
 
-    size_t alloc_size_polarity =
-        (INFRARED_TIM_TX_DMA_BUFFER_SIZE + INFRARED_POLARITY_SHIFT) * sizeof(uint8_t);
-    infrared_tim_tx.buffer[0].polarity = malloc(alloc_size_polarity);
-    infrared_tim_tx.buffer[1].polarity = malloc(alloc_size_polarity);
+    infrared_tim_tx.buffer[0].polarity = infrared_tx_dma_buffer_polarity[0];
+    infrared_tim_tx.buffer[1].polarity = infrared_tx_dma_buffer_polarity[1];
 
     infrared_tim_tx.stop_semaphore = furi_semaphore_alloc(1, 0);
+    infrared_tim_tx.freq = freq;
+    infrared_tim_tx.micro_remainder = 0;
     infrared_tim_tx.cycle_duration = 1000000.0 / freq;
     infrared_tim_tx.tx_timing_rest_duration = 0;
     infrared_tim_tx.cycle_remainder = 0;
