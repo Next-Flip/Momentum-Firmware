@@ -6,6 +6,7 @@
 #include <flipper_format/flipper_format.h>
 
 #include "infrared_signal.h"
+#include <furi.h>
 
 #define TAG "InfraredBruteforce"
 
@@ -232,6 +233,8 @@ bool infrared_brute_force_send(InfraredBruteForce* brute_force, uint32_t signal_
     furi_check(brute_force);
     furi_assert(brute_force->is_started);
 
+    uint32_t start_tick = furi_get_tick();
+
     if(signal_index >= SignalPositionArray_size(brute_force->current_record.signals)) return false;
 
     size_t signal_start =
@@ -243,7 +246,20 @@ bool infrared_brute_force_send(InfraredBruteForce* brute_force, uint32_t signal_
            infrared_signal_read_body(brute_force->current_signal, brute_force->ff)))
         return false;
 
+    uint32_t read_tick = furi_get_tick();
+
     infrared_signal_transmit(brute_force->current_signal);
+
+    uint32_t end_tick = furi_get_tick();
+
+    FURI_LOG_D(
+        TAG,
+        "send %lu r%lums t%lums total%lums",
+        (unsigned long)signal_index,
+        (unsigned long)(read_tick - start_tick),
+        (unsigned long)(end_tick - read_tick),
+        (unsigned long)(end_tick - start_tick));
+
     return true;
 }
 
