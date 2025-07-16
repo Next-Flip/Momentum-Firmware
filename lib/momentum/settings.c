@@ -96,6 +96,8 @@ static const struct {
     {setting_bool(lockscreen_statusbar)},
     {setting_bool(lockscreen_prompt)},
     {setting_bool(lockscreen_transparent)},
+    {setting_bool(lockscreen_fast_unlock)},
+    {setting_bool(lockscreen_fast_lock)},
     {setting_enum(battery_icon, BatteryIconCount)},
     {setting_bool(status_icons)},
     {setting_bool(bar_borders)},
