@@ -289,7 +289,7 @@ void desktop_view_locked_close_cover(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     furi_assert(model->view_state == DesktopViewLockedStateLocked);
 
-    if(momentum_settings.lockscreen_fast_lock) {
+    if(momentum_settings.lockscreen_skip_animation) {
         locked_view->callback(DesktopLockedEventCoversClosed, locked_view->context);
         model->cover_offset = COVER_OFFSET_END;
         view_commit_model(locked_view->view, true);
@@ -313,7 +313,7 @@ void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
     locked_view->lock_count = 0;
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
 
-    if(momentum_settings.lockscreen_fast_unlock) {
+    if(momentum_settings.lockscreen_skip_animation) {
         model->view_state = DesktopViewLockedStateUnlocked;
         model->cover_offset = COVER_OFFSET_START;
         model->pin_locked = false;

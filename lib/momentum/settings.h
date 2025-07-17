@@ -80,8 +80,7 @@ typedef struct {
     bool lockscreen_statusbar;
     bool lockscreen_prompt;
     bool lockscreen_transparent;
-    bool lockscreen_fast_unlock;
-    bool lockscreen_fast_lock;
+    bool lockscreen_skip_animation;
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;

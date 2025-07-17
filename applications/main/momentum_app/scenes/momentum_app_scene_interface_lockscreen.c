@@ -111,20 +111,11 @@ static void
 }
 
 static void
-    momentum_app_scene_interface_lockscreen_lockscreen_fast_unlock_changed(VariableItem* item) {
+    momentum_app_scene_interface_lockscreen_lockscreen_skip_animation_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    momentum_settings.lockscreen_fast_unlock = value;
-    app->save_settings = true;
-}
-
-static void
-    momentum_app_scene_interface_lockscreen_lockscreen_fast_lock_changed(VariableItem* item) {
-    MomentumApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
-    momentum_settings.lockscreen_fast_lock = value;
+    momentum_settings.lockscreen_skip_animation = value;
     app->save_settings = true;
 }
 
@@ -240,23 +231,13 @@ void momentum_app_scene_interface_lockscreen_on_enter(void* context) {
 
     item = variable_item_list_add(
         var_item_list,
-        "Fast Unlock",
+        "Skip Sliding Animation",
         2,
-        momentum_app_scene_interface_lockscreen_lockscreen_fast_unlock_changed,
+        momentum_app_scene_interface_lockscreen_lockscreen_skip_animation_changed,
         app);
-    variable_item_set_current_value_index(item, momentum_settings.lockscreen_fast_unlock);
+    variable_item_set_current_value_index(item, momentum_settings.lockscreen_skip_animation);
     variable_item_set_current_value_text(
-        item, momentum_settings.lockscreen_fast_unlock ? "ON" : "OFF");
-
-    item = variable_item_list_add(
-        var_item_list,
-        "Fast Lock",
-        2,
-        momentum_app_scene_interface_lockscreen_lockscreen_fast_lock_changed,
-        app);
-    variable_item_set_current_value_index(item, momentum_settings.lockscreen_fast_lock);
-    variable_item_set_current_value_text(
-        item, momentum_settings.lockscreen_fast_lock ? "ON" : "OFF");
+        item, momentum_settings.lockscreen_skip_animation ? "ON" : "OFF");
 
     variable_item_list_set_enter_callback(
         var_item_list, momentum_app_scene_interface_lockscreen_var_item_list_callback, app);
