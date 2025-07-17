@@ -18,6 +18,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
+#include <gui/modules/text_input.h>
 #include "views/hid_keynote.h"
 #include "views/hid_keyboard.h"
 #include "views/hid_numpad.h"
@@ -40,6 +41,7 @@ typedef struct Hid Hid;
 
 struct Hid {
     FuriHalBleProfileBase* ble_hid_profile;
+    BleProfileHidParams* ble_hid_params;
     Bt* bt;
     Gui* gui;
     NotificationApp* notifications;
@@ -47,6 +49,8 @@ struct Hid {
     SceneManager* scene_manager;
     Submenu* submenu;
     DialogEx* dialog;
+    TextInput* text_input;
+    char text_input_buffer[20];
     Popup* popup;
     HidKeynote* hid_keynote;
     HidKeyboard* hid_keyboard;

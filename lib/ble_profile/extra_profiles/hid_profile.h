@@ -13,6 +13,7 @@ extern "C" {
 typedef struct {
     const char* device_name_prefix; /**< Prefix for device name. Length must be less than 8 */
     uint16_t mac_xor; /**< XOR mask for device address, for uniqueness */
+    bool skip_device_name; /**< Enable to make the device_name_prefix the entire name */
 } BleProfileHidParams;
 
 /** Hid Keyboard Profile descriptor */

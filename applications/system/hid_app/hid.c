@@ -89,6 +89,10 @@ Hid* hid_alloc() {
     app->dialog = dialog_ex_alloc();
     view_dispatcher_add_view(app->view_dispatcher, HidViewDialog, dialog_ex_get_view(app->dialog));
 
+    // Text input
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, HidViewTextInput, text_input_get_view(app->text_input));
+
     // Popup view
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, HidViewPopup, popup_get_view(app->popup));
@@ -177,6 +181,8 @@ void hid_free(Hid* app) {
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewDialog);
     dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewTextInput);
+    text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewPopup);
     popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeynote);
@@ -215,6 +221,14 @@ void hid_free(Hid* app) {
     app->notifications = NULL;
     furi_record_close(RECORD_BT);
     app->bt = NULL;
+    
+    if(app->ble_hid_params != NULL) {
+        if(app->ble_hid_params->device_name_prefix != NULL) {
+            free((char*)app->ble_hid_params->device_name_prefix);
+        }
+        
+        free(app->ble_hid_params);
+    }
 
     // Free rest
     free(app);
