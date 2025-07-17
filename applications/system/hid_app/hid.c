@@ -91,7 +91,8 @@ Hid* hid_alloc() {
 
     // Text input
     app->text_input = text_input_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, HidViewTextInput, text_input_get_view(app->text_input));
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewTextInput, text_input_get_view(app->text_input));
 
     // Popup view
     app->popup = popup_alloc();
@@ -221,12 +222,12 @@ void hid_free(Hid* app) {
     app->notifications = NULL;
     furi_record_close(RECORD_BT);
     app->bt = NULL;
-    
+
     if(app->ble_hid_params != NULL) {
         if(app->ble_hid_params->device_name_prefix != NULL) {
             free((char*)app->ble_hid_params->device_name_prefix);
         }
-        
+
         free(app->ble_hid_params);
     }
 

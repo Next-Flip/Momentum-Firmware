@@ -11,7 +11,7 @@ static void hid_scene_rename_text_input_callback(void* context) {
     if(app->ble_hid_params == NULL) {
         app->ble_hid_params = malloc(sizeof(BleProfileHidParams));
     }
-    
+
     if(app->ble_hid_params->device_name_prefix != NULL) {
         free((char*)app->ble_hid_params->device_name_prefix);
     }
