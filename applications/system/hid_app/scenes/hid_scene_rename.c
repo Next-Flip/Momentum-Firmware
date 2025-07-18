@@ -2,6 +2,7 @@
 #include "../views.h"
 #include "hid_icons.h"
 
+#ifdef HID_TRANSPORT_BLE
 #include <ble/ble.h>
 
 // AN5289: 4.7, in order to use flash controller interval must be at least 25ms + advertisement, which is 30 ms
@@ -46,6 +47,7 @@ static void custom_get_gap_config(GapConfig* config, FuriHalBleProfileParams pro
         furi_hal_version_get_ble_local_device_name_ptr()[0],
         (char*)profile_params);
 }
+#endif
 
 static void hid_scene_rename_text_input_callback(void* context) {
     Hid* app = context;
