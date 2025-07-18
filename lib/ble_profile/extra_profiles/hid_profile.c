@@ -417,22 +417,13 @@ static void ble_profile_hid_get_config(GapConfig* config, FuriHalBleProfileParam
     if(hid_profile_params && hid_profile_params->device_name_prefix) {
         clicker_str = hid_profile_params->device_name_prefix;
     }
-    if (hid_profile_params && hid_profile_params->skip_device_name) {
-        snprintf(
-            config->adv_name,
-            sizeof(config->adv_name),
-            "%c%s",
-            furi_hal_version_get_ble_local_device_name_ptr()[0],
-            clicker_str);
-    } else {
-        snprintf(
-            config->adv_name,
-            sizeof(config->adv_name),
-            "%c%s %s",
-            furi_hal_version_get_ble_local_device_name_ptr()[0],
-            clicker_str,
-            furi_hal_version_get_name_ptr());
-    }
+    snprintf(
+        config->adv_name,
+        sizeof(config->adv_name),
+        "%c%s %s",
+        furi_hal_version_get_ble_local_device_name_ptr()[0],
+        clicker_str,
+        furi_hal_version_get_name_ptr());
 }
 
 static const FuriHalBleProfileTemplate profile_callbacks = {

@@ -223,14 +223,6 @@ void hid_free(Hid* app) {
     furi_record_close(RECORD_BT);
     app->bt = NULL;
 
-    if(app->ble_hid_params != NULL) {
-        if(app->ble_hid_params->device_name_prefix != NULL) {
-            free((char*)app->ble_hid_params->device_name_prefix);
-        }
-
-        free(app->ble_hid_params);
-    }
-
     // Free rest
     free(app);
 }

@@ -41,7 +41,6 @@ typedef struct Hid Hid;
 
 struct Hid {
     FuriHalBleProfileBase* ble_hid_profile;
-    BleProfileHidParams* ble_hid_params;
     Bt* bt;
     Gui* gui;
     NotificationApp* notifications;

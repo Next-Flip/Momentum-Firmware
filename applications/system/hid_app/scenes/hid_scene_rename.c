@@ -2,24 +2,66 @@
 #include "../views.h"
 #include "hid_icons.h"
 
+#include <ble/ble.h>
+
+// AN5289: 4.7, in order to use flash controller interval must be at least 25ms + advertisement, which is 30 ms
+// Since we don't use flash controller anymore interval can be lowered to 7.5ms
+#define CONNECTION_INTERVAL_MIN (0x0006)
+// Up to 45 ms
+#define CONNECTION_INTERVAL_MAX (0x24)
+
+static GapConfig template_config = {
+    .adv_service =
+        {
+            .UUID_Type = UUID_TYPE_16,
+            .Service_UUID_16 = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+        },
+    .appearance_char = GAP_APPEARANCE_KEYBOARD,
+    .bonding_mode = true,
+    .pairing_method = GapPairingPinCodeVerifyYesNo,
+    .conn_param =
+        {
+            .conn_int_min = CONNECTION_INTERVAL_MIN,
+            .conn_int_max = CONNECTION_INTERVAL_MAX,
+            .slave_latency = 0,
+            .supervisor_timeout = 0,
+        },
+};
+
+// Uses the profile_params as a char* for the advertised device name
+static void custom_get_gap_config(GapConfig* config, FuriHalBleProfileParams profile_params) {
+    furi_check(config);
+    memcpy(config, &template_config, sizeof(GapConfig));
+    // Set mac address
+    memcpy(config->mac_address, furi_hal_version_get_ble_mac(), sizeof(config->mac_address));
+
+    // Change MAC address for HID profile
+    config->mac_address[2]++;
+
+    // Set advertise name
+    snprintf(
+        config->adv_name,
+        sizeof(config->adv_name),
+        "%c%s",
+        furi_hal_version_get_ble_local_device_name_ptr()[0],
+        (char*)profile_params);
+}
+
 static void hid_scene_rename_text_input_callback(void* context) {
     Hid* app = context;
 
 #ifdef HID_TRANSPORT_BLE
     furi_hal_bt_stop_advertising();
 
-    if(app->ble_hid_params == NULL) {
-        app->ble_hid_params = malloc(sizeof(BleProfileHidParams));
-    }
+    // Reuse existing start and stop methods from default profile,
+    //  but use modified get_gap_config (to set custom name)
+    FuriHalBleProfileTemplate profile = {
+        .start = ble_profile_hid->start,
+        .stop = ble_profile_hid->stop,
+        .get_gap_config = custom_get_gap_config,
+    };
 
-    if(app->ble_hid_params->device_name_prefix != NULL) {
-        free((char*)app->ble_hid_params->device_name_prefix);
-    }
-
-    app->ble_hid_params->device_name_prefix = strdup(app->text_input_buffer);
-    app->ble_hid_params->skip_device_name = true;
-
-    app->ble_hid_profile = bt_profile_start(app->bt, ble_profile_hid, app->ble_hid_params);
+    app->ble_hid_profile = bt_profile_start(app->bt, &profile, app->text_input_buffer);
     furi_check(app->ble_hid_profile);
 
     furi_hal_bt_start_advertising();
