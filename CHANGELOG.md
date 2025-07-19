@@ -19,6 +19,7 @@
 
 ### Fixed:
 - Bad KB: Fix modifier keys with HOLD/RELEASE commands (by @WillyJL)
+- Desktop: Fix lock screen hang (#438 by @aaronjamt & @WillyJL)
 
 ### Removed:
 - Nothing
