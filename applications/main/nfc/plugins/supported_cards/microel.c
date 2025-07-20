@@ -1,14 +1,14 @@
 #include "nfc_supported_card_plugin.h"
 #include <flipper_application.h>
-
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
-
 #include <bit_lib.h>
 
 #define TAG "Microel"
 
 #define KEY_LENGTH 6
 #define UID_LENGTH 4
+// Offset per la conversione dell'anno (5 bit: da 0 a 31, quindi range 2010–2041)
+#define BASE_YEAR 2010
 
 typedef struct {
     uint64_t a;
@@ -62,19 +62,19 @@ void generateKeyA(const uint8_t* uid, uint8_t uidSize, uint8_t keyA[]) {
 
     if(firstCharacter == 0x2 || firstCharacter == 0x3 || firstCharacter == 0xA ||
        firstCharacter == 0xB) {
-        // XOR WITH 0x40
+        // XOR con 0x40
         for(size_t i = 0; i < sizeof(sumHex); i++) {
             keyA[i] = 0x40 ^ sumHex[i];
         }
     } else if(
         firstCharacter == 0x6 || firstCharacter == 0x7 || firstCharacter == 0xE ||
         firstCharacter == 0xF) {
-        // XOR WITH 0xC0
+        // XOR con 0xC0
         for(size_t i = 0; i < sizeof(sumHex); i++) {
             keyA[i] = 0xC0 ^ sumHex[i];
         }
     } else {
-        //Key a is the same as sumHex
+        // KeyA uguale a sumHex
         for(size_t i = 0; i < sizeof(sumHex); i++) {
             keyA[i] = sumHex[i];
         }
@@ -187,22 +187,99 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
         uint64_t key_for_check_from_array = bit_lib_bytes_to_num_be(keyA, KEY_LENGTH);
         if(key != key_for_check_from_array) break;
 
-        //Get credit in block number 8
-        const uint8_t* temp_ptr = data->block[4].data;
-        uint16_t balance = (temp_ptr[6] << 8) | (temp_ptr[5]);
-        uint16_t previous_balance = (data->block[5].data[6] << 8) | (data->block[5].data[5]);
-        furi_string_cat_printf(parsed_data, "\e#Microel Card\n");
-        furi_string_cat_printf(parsed_data, "UID:");
-        for(size_t i = 0; i < UID_LENGTH; i++) {
-            furi_string_cat_printf(parsed_data, " %02X", uid[i]);
+        // Header info (UID, ATQA, SAK)
+	furi_string_cat_printf(parsed_data, "\e#Microel Card\n");
+
+	// UID
+	furi_string_cat_printf(parsed_data, "UID:");
+	for(size_t i = 0; i < UID_LENGTH; i++) {
+    	    furi_string_cat_printf(parsed_data, " %02X", data->block[0].data[i]);
+	}
+	furi_string_cat_printf(parsed_data, "\n");
+
+	uint8_t atqa_lsb = data->block[0].data[6];
+	uint8_t atqa_msb = data->block[0].data[7];
+	uint8_t sak = data->block[0].data[5];
+	furi_string_cat_printf(parsed_data, "ATQA: %02X %02X   SAK: %02X\n", atqa_msb, atqa_lsb, sak);
+	
+	furi_string_cat_printf(parsed_data, "--------------------\n");
+	
+	// Vendor ID - Block 1 (entire block)
+        furi_string_cat_printf(parsed_data, "VENDOR ID:");
+        for(size_t i = 0; i < 16; i++) {
+            furi_string_cat_printf(parsed_data, " %02X", data->block[1].data[i]);
         }
-        furi_string_cat_printf(
-            parsed_data, "\nCurrent Credit: %d.%02d E \n", balance / 100, balance % 100);
-        furi_string_cat_printf(
-            parsed_data,
-            "Previous Credit: %d.%02d E \n",
-            previous_balance / 100,
-            previous_balance % 100);
+        furi_string_cat_printf(parsed_data, "\n");
+        
+        furi_string_cat_printf(parsed_data, "--------------------\n");
+	
+	// Credito disponibile
+        uint16_t credito_raw = (data->block[4].data[6] << 8) | data->block[4].data[5];
+
+	// Data e ora (Block 4, bytes 7-10) in formato MicroEL
+	uint32_t raw_data_op = (data->block[4].data[10] << 24) | (data->block[4].data[9] << 16) | (data->block[4].data[8] << 8) | data->block[4].data[7];
+
+	// Ricava tutti i campi (scarta i primi 5 bit)
+	uint32_t useful_bits = raw_data_op & 0x07FFFFFF; // ultimi 27 bit
+
+	uint8_t minuti     = (useful_bits >> 21) & 0x3F; // 6 bit
+	uint8_t ore        = (useful_bits >> 16) & 0x1F; // 5 bit
+	uint8_t tipo_op    = (useful_bits >> 14) & 0x03; // 2 bit
+	uint16_t anno      = ((useful_bits >> 9) & 0x1F) + BASE_YEAR; // 5 bit + offset
+	uint8_t mese       = (useful_bits >> 5) & 0x0F;  // 4 bit
+	uint8_t giorno     = useful_bits & 0x1F;         // ultimi 5 bit
+
+	// Conversione tipo operazione in stringa
+	const char* tipo_op_str;
+	if(tipo_op == 0) tipo_op_str = "Firts operation"; // 00
+	else if(tipo_op == 1) tipo_op_str = "Recharge";   // 01
+	else tipo_op_str = "Payment";  // 10
+
+        // Numero operazione (Block 4, bytes 0-1)
+        uint16_t num_op = (data->block[4].data[1] << 8) | data->block[4].data[0];
+
+        // Saldo punti (Block 4, bytes 11-12)
+        uint16_t saldo_punti = (data->block[4].data[11] << 8) | data->block[4].data[12];
+
+        // Ultima transazione (Block 4, bytes 13-14)
+        uint16_t transazione_raw = (data->block[4].data[14] << 8) | data->block[4].data[13];
+
+        // Somma in ingresso e cauzione (Block 4)
+	uint16_t somma_raw = data->block[4].data[2] | (data->block[4].data[3] << 8);
+	float somma = somma_raw / 10.0f;
+	bool cauzione = data->block[4].data[4] != 0;
+
+        furi_string_cat_printf(parsed_data, "Credit available: %d.%02d\n", credito_raw / 100, credito_raw % 100);
+        furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d %02d:%02d\n", giorno, mese, anno, ore, minuti);
+        furi_string_cat_printf(parsed_data, "Operation nr.: %d\n", num_op);
+        furi_string_cat_printf(parsed_data, "Last transaction: %d.%02d\n", transazione_raw / 100, transazione_raw % 100);
+        furi_string_cat_printf(parsed_data, "Type of operation: %s\n", tipo_op_str);
+        
+        furi_string_cat_printf(parsed_data, "--------------------\n");
+        
+        furi_string_cat_printf(parsed_data, "Admission credit: %d.%02d\n", (int)somma, (int)(somma * 100) % 100);
+	furi_string_cat_printf(parsed_data, "Deposit: %s\n", cauzione ? "SI" : "NO");
+	furi_string_cat_printf(parsed_data, "Points balance: %d pt.\n", saldo_punti);
+	
+	furi_string_cat_printf(parsed_data, "--------------------\n");
+
+        // Dati credito precedente (Block 5)
+        uint16_t credito_precedente = (data->block[5].data[6] << 8) | data->block[5].data[5];
+        
+        // Data e ora operazione precedente (Block 5, bytes 7-10)
+	uint32_t raw_data_prec = (data->block[5].data[10] << 24) | (data->block[5].data[9] << 16) | (data->block[5].data[8] << 8) | data->block[5].data[7];
+
+	// Ricava tutti i campi (27 bit utili)
+	uint32_t useful_bits_prec = raw_data_prec & 0x07FFFFFF;
+
+	uint8_t minuti_prec     = (useful_bits_prec >> 21) & 0x3F; // 6 bit
+	uint8_t ore_prec        = (useful_bits_prec >> 16) & 0x1F; // 5 bit
+	uint16_t anno_prec      = ((useful_bits_prec >> 9) & 0x1F) + BASE_YEAR; // 5 bit + offset
+	uint8_t mese_prec       = (useful_bits_prec >> 5) & 0x0F;  // 4 bit
+	uint8_t giorno_prec     = useful_bits_prec & 0x1F;         // ultimi 5 bit
+	
+        furi_string_cat_printf(parsed_data, "Previous credit: %d.%02d\n", credito_precedente / 100, credito_precedente % 100);
+        furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d %02d:%02d\n", giorno_prec, mese_prec, anno_prec, ore_prec, minuti_prec);
 
         parsed = true;
     } while(false);
@@ -213,8 +290,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin microel_plugin = {
     .protocol = NfcProtocolMfClassic,
-    .verify =
-        NULL, // the verification I need is based on verifying the keys generated via uid and try to authenticate not like on mizip that there is default b0 but added verify in read function
+    .verify = NULL,
     .read = microel_read,
     .parse = microel_parse,
 };
