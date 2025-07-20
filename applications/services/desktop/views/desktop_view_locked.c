@@ -288,10 +288,17 @@ void desktop_view_locked_free(DesktopViewLocked* locked_view) {
 void desktop_view_locked_close_cover(DesktopViewLocked* locked_view) {
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
     furi_assert(model->view_state == DesktopViewLockedStateLocked);
-    model->view_state = DesktopViewLockedStateCoverClosing;
-    model->cover_offset = COVER_OFFSET_START;
-    view_commit_model(locked_view->view, true);
-    furi_timer_start(locked_view->timer, COVER_MOVING_INTERVAL_MS);
+
+    if(momentum_settings.lockscreen_skip_animation) {
+        locked_view->callback(DesktopLockedEventCoversClosed, locked_view->context);
+        model->cover_offset = COVER_OFFSET_END;
+        view_commit_model(locked_view->view, true);
+    } else {
+        model->view_state = DesktopViewLockedStateCoverClosing;
+        model->cover_offset = COVER_OFFSET_START;
+        view_commit_model(locked_view->view, true);
+        furi_timer_start(locked_view->timer, COVER_MOVING_INTERVAL_MS);
+    }
 }
 
 void desktop_view_locked_lock(DesktopViewLocked* locked_view, bool pin_locked) {
@@ -305,11 +312,19 @@ void desktop_view_locked_lock(DesktopViewLocked* locked_view, bool pin_locked) {
 void desktop_view_locked_unlock(DesktopViewLocked* locked_view) {
     locked_view->lock_count = 0;
     DesktopViewLockedModel* model = view_get_model(locked_view->view);
-    model->view_state = DesktopViewLockedStateCoverOpening;
-    model->cover_offset = COVER_OFFSET_END;
-    model->pin_locked = false;
-    view_commit_model(locked_view->view, true);
-    furi_timer_start(locked_view->timer, COVER_MOVING_INTERVAL_MS);
+
+    if(momentum_settings.lockscreen_skip_animation) {
+        model->view_state = DesktopViewLockedStateUnlocked;
+        model->cover_offset = COVER_OFFSET_START;
+        model->pin_locked = false;
+        view_commit_model(locked_view->view, true);
+    } else {
+        model->view_state = DesktopViewLockedStateCoverOpening;
+        model->cover_offset = COVER_OFFSET_END;
+        model->pin_locked = false;
+        view_commit_model(locked_view->view, true);
+        furi_timer_start(locked_view->timer, COVER_MOVING_INTERVAL_MS);
+    }
 }
 
 bool desktop_view_locked_is_locked_hint_visible(DesktopViewLocked* locked_view) {
