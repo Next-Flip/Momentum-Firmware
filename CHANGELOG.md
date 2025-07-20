@@ -6,6 +6,8 @@
   - UL: Nero Radio static parse and display more data (by @xMasterX)
   - UL: Marantec protocol implement CRC verification display and add manually support (by @xMasterX & @li0ard, original code by @Skorpionm)
   - UL: Keeloq Comunello add manually support (by @xMasterX)
+- BT Remote: Add Rename Option, simplify Bad KB BLE profile (by @aaronjamt & @WillyJL)
+- MNTM Settings: Add Skip Sliding Animations option for Lockscreen (by @aaronjamt)
 
 ### Updated:
 - Apps:
