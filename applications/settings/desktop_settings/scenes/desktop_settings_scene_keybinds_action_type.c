@@ -56,7 +56,7 @@ static void
             .select_right = true,
         };
         FuriString* temp_path = furi_string_alloc_set_str(base_path);
-        if(storage_file_exists(furi_record_open(RECORD_STORAGE), furi_string_get_cstr(keybind))) {
+        if(storage_common_exists(furi_record_open(RECORD_STORAGE), furi_string_get_cstr(keybind))) {
             furi_string_set(temp_path, keybind);
         }
         furi_record_close(RECORD_STORAGE);
@@ -132,12 +132,15 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
             }
         }
 
-        if(storage_file_exists(furi_record_open(RECORD_STORAGE), furi_string_get_cstr(keybind))) {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        if(storage_file_exists(storage, furi_string_get_cstr(keybind))) {
             if(furi_string_end_with_str(keybind, ".fap")) {
                 selected = DesktopSettingsAppKeybindActionTypeExternalApp;
             } else {
                 selected = DesktopSettingsAppKeybindActionTypeOpenFileOrDirectory;
             }
+        } else if(storage_dir_exists(storage, furi_string_get_cstr(keybind))) {
+            selected = DesktopSettingsAppKeybindActionTypeOpenFileOrDirectory;
         }
         furi_record_close(RECORD_STORAGE);
 
