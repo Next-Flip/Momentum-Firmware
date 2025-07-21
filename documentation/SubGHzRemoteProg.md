@@ -76,13 +76,20 @@ Watch this video to learn more and see how different boards can be programmed (v
 ## Doorhan
 
 With access to the receiver box:
-1. Create new remote with randomly generated serial: Go to SubGHz -> Add Manually -> KL: Doorhan 433Mhz or 315Mhz depends on your receiver (find out by reading your existing remote)
-2. Open your new remote file
-3. Push `P` button for ~2 sec, led will start flashing
-4. Press `Send` on your flipper for ~2 seconds
-5. Led on the receiver board will flash and turn off
-6. Done!
+1. Create new remote with randomly generated serial: Go to SubGHz -> Add Manually -> KL: Doorhan 433Mhz or 315Mhz depends on your receiver (find out by reading your existing remote or follow guide below)
+- Finding frequency
 
+There are 2 frequencies for DoorHan: 315.00 / 433.92. To determine them it is enough to create a DoorHan remote control with one of the frequencies via Sub-GHz -> Add manually, press the button and watch the receiver's reaction. If you have guessed the frequency, the light bulb will turn on when we press the button on the FZ and turn off when we release it.
+
+2. Binding the remote control
+
+Once you have access to the receiver (removed the protective cover), look at the buttons:
+- If there are 4 buttons (Radio, Reverse, Auto, ...) then press and hold Radio until the LED lights up, then press the FZ button 2 times and the LED goes out;
+- If there are 4 buttons (R, P, +, -) and display, press R, then press 2 times the button on FZ and wait +/- 10 seconds;
+- If there are 4 buttons (+, -, F, TR) and display, press TR, then press 2 times the button on FZ and wait +/- 10 seconds;
+- In other cases there is a “universal” instruction: Press and hold the button “P” +/- 2 seconds until the LED flashes, then press 2 times the button on the FZ and the LED goes out.
+
+In all cases it is recommended to wait until the receiver returns to normal mode.
 
 With existing remote:
 1. Create new remote with randomly generated serial: Go to SubGHz -> Add Manually -> KL: Doorhan 433Mhz or 315Mhz depends on your receiver (find out by reading your existing remote)

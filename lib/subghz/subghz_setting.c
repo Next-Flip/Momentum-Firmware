@@ -14,6 +14,7 @@ static const uint32_t subghz_frequency_list[] = {
     /* 300 - 348 */
     300000000,
     302757000,
+    303000000,
     303875000,
     303900000,
     304250000,
@@ -70,6 +71,7 @@ static const uint32_t subghz_frequency_list[] = {
     779000000,
     868350000,
     868400000,
+    868460000,
     868800000,
     868950000,
     906400000,
@@ -80,11 +82,9 @@ static const uint32_t subghz_frequency_list[] = {
 };
 
 static const uint32_t subghz_hopper_frequency_list[] = {
-    310000000,
     315000000,
-    318000000,
-    418000000,
     433920000,
+    434420000,
     868350000,
     0,
 };

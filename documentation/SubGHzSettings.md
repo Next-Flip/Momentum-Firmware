@@ -24,6 +24,7 @@ if you need your custom one, make sure it doesn't listed here
     /* 300 - 348 */
     300000000,
     302757000,
+    303000000,
     303875000,
     303900000,
     304250000,
@@ -80,6 +81,7 @@ if you need your custom one, make sure it doesn't listed here
     779000000,
     868350000,
     868400000,
+    868460000,
     868800000,
     868950000,
     906400000,
@@ -111,10 +113,8 @@ Your frequencies will be added after default ones
 
 ### Default hopper list
 ```
-    310000000,
     315000000,
-    318000000,
-    418000000,
     433920000,
+    434420000,
     868350000,
 ```

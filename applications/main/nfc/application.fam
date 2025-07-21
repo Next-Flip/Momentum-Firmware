@@ -22,31 +22,6 @@ App(
 # Protocol support plugins
 
 App(
-    appid="nfc_emv",
-    targets=["f7"],
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="nfc_emv_ep",
-    requires=["nfc"],
-    sources=[
-        "helpers/protocol_support/emv/*.c",
-    ],
-    fal_embedded=True,
-)
-
-App(
-    appid="nfc_felica",
-    targets=["f7"],
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="nfc_felica_ep",
-    requires=["nfc"],
-    sources=[
-        "helpers/protocol_support/felica/*.c",
-        "helpers/felica_*.c",
-    ],
-    fal_embedded=True,
-)
-
-App(
     appid="nfc_iso14443_3a",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
@@ -109,6 +84,34 @@ App(
 )
 
 App(
+    appid="nfc_felica",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_felica_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/felica/*.c",
+        "helpers/felica_*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_mf_ultralight",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_mf_ultralight_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/mf_ultralight/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+        "helpers/mf_ultralight_*.c",
+    ],
+    fap_libs=["mbedtls"],
+    fal_embedded=True,
+)
+
+App(
     appid="nfc_mf_classic",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
@@ -118,20 +121,6 @@ App(
         "helpers/protocol_support/mf_classic/*.c",
         "helpers/protocol_support/iso14443_3a/*.c",
         "helpers/mf_classic_*.c",
-    ],
-    fal_embedded=True,
-)
-
-App(
-    appid="nfc_mf_desfire",
-    targets=["f7"],
-    apptype=FlipperAppType.PLUGIN,
-    entry_point="nfc_mf_desfire_ep",
-    requires=["nfc"],
-    sources=[
-        "helpers/protocol_support/mf_desfire/*.c",
-        "helpers/protocol_support/iso14443_4a/*.c",
-        "helpers/protocol_support/iso14443_3a/*.c",
     ],
     fal_embedded=True,
 )
@@ -151,17 +140,16 @@ App(
 )
 
 App(
-    appid="nfc_mf_ultralight",
+    appid="nfc_mf_desfire",
     targets=["f7"],
     apptype=FlipperAppType.PLUGIN,
-    entry_point="nfc_mf_ultralight_ep",
+    entry_point="nfc_mf_desfire_ep",
     requires=["nfc"],
     sources=[
-        "helpers/protocol_support/mf_ultralight/*.c",
+        "helpers/protocol_support/mf_desfire/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
         "helpers/protocol_support/iso14443_3a/*.c",
-        "helpers/mf_ultralight_*.c",
     ],
-    fap_libs=["mbedtls"],
     fal_embedded=True,
 )
 
@@ -186,6 +174,46 @@ App(
     requires=["nfc"],
     sources=[
         "helpers/protocol_support/st25tb/*.c",
+    ],
+    fal_embedded=True,
+)
+
+
+App(
+    appid="nfc_ntag4xx",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_ntag4xx_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/ntag4xx/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+App(
+    appid="nfc_type_4_tag",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_type_4_tag_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/type_4_tag/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_emv",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_emv_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/emv/*.c",
     ],
     fal_embedded=True,
 )
@@ -450,6 +478,16 @@ App(
     appid="ndef_slix_parser",
     apptype=FlipperAppType.PLUGIN,
     cdefines=[("NDEF_PROTO", "NDEF_PROTO_SLIX")],
+    entry_point="ndef_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ndef.c"],
+)
+
+App(
+    appid="ndef_t4t_parser",
+    apptype=FlipperAppType.PLUGIN,
+    cdefines=[("NDEF_PROTO", "NDEF_PROTO_T4T")],
     entry_point="ndef_plugin_ep",
     targets=["f7"],
     requires=["nfc"],

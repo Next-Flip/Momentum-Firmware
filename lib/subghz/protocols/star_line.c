@@ -86,7 +86,7 @@ const SubGhzProtocol subghz_protocol_star_line = {
     .decoder = &subghz_protocol_star_line_decoder,
     .encoder = &subghz_protocol_star_line_encoder,
 
-    .filter = SubGhzProtocolFilter_StarLine,
+    .filter = SubGhzProtocolFilter_Cars,
 };
 
 /** 
