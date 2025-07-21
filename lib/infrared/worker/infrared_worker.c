@@ -79,6 +79,8 @@ struct InfraredWorker {
             bool overrun;
         } rx;
     };
+
+    bool decode_force;
 };
 
 typedef struct {
@@ -143,7 +145,7 @@ static void
         if(instance->rx.received_signal_callback)
             instance->rx.received_signal_callback(
                 instance->rx.received_signal_context, &instance->signal);
-    } else {
+    } else if(!instance->decode_force) {
         /* Skip first timing if it starts from Space */
         if((instance->signal.timings_cnt == 0) && !level) {
             return;
@@ -236,6 +238,7 @@ InfraredWorker* infrared_worker_alloc(void) {
     instance->infrared_encoder = infrared_alloc_encoder();
     instance->blink_enable = false;
     instance->decode_enable = true;
+    instance->decode_force = false;
     instance->notification = furi_record_open(RECORD_NOTIFICATION);
     instance->state = InfraredWorkerStateIdle;
 
@@ -324,6 +327,12 @@ void infrared_worker_rx_enable_signal_decoding(InfraredWorker* instance, bool en
     furi_check(instance);
 
     instance->decode_enable = enable;
+}
+
+void infrared_worker_rx_force_signal_decoding(InfraredWorker* instance, bool force) {
+    furi_check(instance);
+
+    instance->decode_force = force;
 }
 
 void infrared_worker_tx_start(InfraredWorker* instance) {

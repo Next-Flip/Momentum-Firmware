@@ -1,5 +1,5 @@
 #include "bad_usb_hid.h"
-#include "ble_hid_profile.h"
+#include "ble_hid_ext_profile.h"
 #include <bt/bt_service/bt.h>
 #include <bt/bt_service/bt_i.h>
 #include <storage/storage.h>
@@ -173,7 +173,7 @@ void* hid_ble_init(BadUsbHidConfig* hid_cfg) {
     bt_keys_storage_set_storage_path(ble_hid->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
     hid_ble_adjust_config(hid_cfg);
-    ble_hid->profile = bt_profile_start(ble_hid->bt, ble_profile_hid, &hid_cfg->ble);
+    ble_hid->profile = bt_profile_start(ble_hid->bt, ble_profile_hid_ext, &hid_cfg->ble);
     furi_check(ble_hid->profile);
 
     furi_hal_bt_start_advertising();

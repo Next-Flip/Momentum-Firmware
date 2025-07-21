@@ -567,7 +567,7 @@ void cli_main_commands_init(CliRegistry* registry) {
 
 CLI_COMMAND_INTERFACE(src, cli_command_src, CliCommandFlagParallelSafe, 768, CLI_APPID);
 CLI_COMMAND_INTERFACE(uptime, cli_command_uptime, CliCommandFlagDefault, 768, CLI_APPID);
-CLI_COMMAND_INTERFACE(date, cli_command_date, CliCommandFlagParallelSafe, 768, CLI_APPID);
+CLI_COMMAND_INTERFACE(date, cli_command_date, CliCommandFlagParallelSafe, 2048, CLI_APPID);
 CLI_COMMAND_INTERFACE(sysctl, cli_command_sysctl, CliCommandFlagDefault, 1024, CLI_APPID);
 CLI_COMMAND_INTERFACE(top, cli_command_top, CliCommandFlagParallelSafe, 1024, CLI_APPID);
 CLI_COMMAND_INTERFACE(vibro, cli_command_vibro, CliCommandFlagDefault, 1024, CLI_APPID);

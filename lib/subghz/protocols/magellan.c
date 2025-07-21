@@ -71,7 +71,7 @@ const SubGhzProtocol subghz_protocol_magellan = {
     .decoder = &subghz_protocol_magellan_decoder,
     .encoder = &subghz_protocol_magellan_encoder,
 
-    .filter = SubGhzProtocolFilter_Magellan,
+    .filter = SubGhzProtocolFilter_Sensors,
 };
 
 void* subghz_protocol_encoder_magellan_alloc(SubGhzEnvironment* environment) {

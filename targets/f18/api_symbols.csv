@@ -2283,6 +2283,8 @@ Function,+,onewire_host_reset,_Bool,OneWireHost*
 Function,+,onewire_host_reset_search,void,OneWireHost*
 Function,+,onewire_host_search,_Bool,"OneWireHost*, uint8_t*, OneWireHostSearchMode"
 Function,+,onewire_host_set_overdrive,void,"OneWireHost*, _Bool"
+Function,+,onewire_host_set_timings_default,void,OneWireHost*
+Function,+,onewire_host_set_timings_tm01x,void,OneWireHost*
 Function,+,onewire_host_start,void,OneWireHost*
 Function,+,onewire_host_stop,void,OneWireHost*
 Function,+,onewire_host_target_search,void,"OneWireHost*, uint8_t"
@@ -2735,6 +2737,7 @@ Function,+,submenu_change_item_label,void,"Submenu*, uint32_t, const char*"
 Function,+,submenu_free,void,Submenu*
 Function,+,submenu_get_selected_item,uint32_t,Submenu*
 Function,+,submenu_get_view,View*,Submenu*
+Function,+,submenu_remove_item,void,"Submenu*, uint32_t"
 Function,+,submenu_reset,void,Submenu*
 Function,+,submenu_set_header,void,"Submenu*, const char*"
 Function,+,submenu_set_selected_item,void,"Submenu*, uint32_t"

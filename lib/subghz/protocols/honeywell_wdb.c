@@ -80,6 +80,8 @@ const SubGhzProtocol subghz_protocol_honeywell_wdb = {
 
     .decoder = &subghz_protocol_honeywell_wdb_decoder,
     .encoder = &subghz_protocol_honeywell_wdb_encoder,
+
+    .filter = SubGhzProtocolFilter_Sensors,
 };
 
 void* subghz_protocol_encoder_honeywell_wdb_alloc(SubGhzEnvironment* environment) {

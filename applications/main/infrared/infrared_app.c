@@ -159,6 +159,7 @@ static InfraredApp* infrared_alloc(void) {
     app_state->is_otg_enabled = false;
     app_state->is_easy_mode = false;
     app_state->is_decode_enabled = true;
+    app_state->is_decode_forced = false;
     app_state->edit_target = InfraredEditTargetNone;
     app_state->edit_mode = InfraredEditModeNone;
     app_state->current_button_index = InfraredButtonIndexNone;

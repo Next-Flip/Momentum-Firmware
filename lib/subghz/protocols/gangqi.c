@@ -68,6 +68,8 @@ const SubGhzProtocol subghz_protocol_gangqi = {
 
     .decoder = &subghz_protocol_gangqi_decoder,
     .encoder = &subghz_protocol_gangqi_encoder,
+
+    .filter = SubGhzProtocolFilter_Alarms,
 };
 
 void* subghz_protocol_encoder_gangqi_alloc(SubGhzEnvironment* environment) {

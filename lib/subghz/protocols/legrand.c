@@ -73,6 +73,8 @@ const SubGhzProtocol subghz_protocol_legrand = {
 
     .decoder = &subghz_protocol_legrand_decoder,
     .encoder = &subghz_protocol_legrand_encoder,
+
+    .filter = SubGhzProtocolFilter_Sensors,
 };
 
 void* subghz_protocol_encoder_legrand_alloc(SubGhzEnvironment* environment) {

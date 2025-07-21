@@ -146,9 +146,12 @@ void infrared_scene_learn_on_enter(void* context) {
     }
 
     dialog_ex_set_left_button_text(
-        dialog_ex, infrared->app_state.is_easy_mode ? "Manual" : "Easy");
+        dialog_ex, infrared->app_state.is_easy_mode ? "Easy" : "Manual");
     dialog_ex_set_right_button_text(
-        dialog_ex, infrared->app_state.is_decode_enabled ? "RAW" : "Decode");
+        dialog_ex,
+        infrared->app_state.is_decode_forced  ? "Decode" :
+        infrared->app_state.is_decode_enabled ? "Auto" :
+                                                "RAW");
 
     dialog_ex_set_context(dialog_ex, context);
     dialog_ex_set_result_callback(dialog_ex, infrared_scene_learn_dialog_result_callback);
@@ -179,11 +182,26 @@ bool infrared_scene_learn_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == DialogExResultRight) {
             // Toggle signal decoding
-            infrared->app_state.is_decode_enabled = !infrared->app_state.is_decode_enabled;
+            if(infrared->app_state.is_decode_forced) {
+                // Decode -> RAW
+                infrared->app_state.is_decode_enabled = false;
+                infrared->app_state.is_decode_forced = false;
+            } else if(infrared->app_state.is_decode_enabled) {
+                // Auto -> Decode
+                infrared->app_state.is_decode_forced = true;
+            } else {
+                // RAW -> Auto
+                infrared->app_state.is_decode_enabled = true;
+            }
             infrared_worker_rx_enable_signal_decoding(
                 infrared->worker, infrared->app_state.is_decode_enabled);
+            infrared_worker_rx_force_signal_decoding(
+                infrared->worker, infrared->app_state.is_decode_forced);
             dialog_ex_set_right_button_text(
-                infrared->dialog_ex, infrared->app_state.is_decode_enabled ? "RAW" : "Decode");
+                infrared->dialog_ex,
+                infrared->app_state.is_decode_forced  ? "Decode" :
+                infrared->app_state.is_decode_enabled ? "Auto" :
+                                                        "RAW");
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {

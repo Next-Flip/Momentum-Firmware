@@ -52,7 +52,8 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
  */
 InfraredErrorCode infrared_brute_force_calculate_messages(
     InfraredBruteForce* brute_force,
-    bool auto_detect_buttons);
+    bool auto_detect_buttons,
+    bool ignore_unknown_buttons);
 
 /**
  * @brief Start transmitting signals from a category stored in an InfraredBruteForce's instance dictionary.
