@@ -14,5 +14,5 @@ App(
     appid="clock_settings_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="clock_settings_start",
-    order=1000,
+    order=1001,
 )
