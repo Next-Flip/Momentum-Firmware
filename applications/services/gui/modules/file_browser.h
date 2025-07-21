@@ -41,14 +41,14 @@ void file_browser_start(FileBrowser* browser, FuriString* path);
 
 void file_browser_stop(FileBrowser* browser);
 
-void file_browser_set_select_right(FileBrowser* browser, bool select_right);
-
 void file_browser_set_callback(FileBrowser* browser, FileBrowserCallback callback, void* context);
 
 void file_browser_set_item_callback(
     FileBrowser* browser,
     FileBrowserLoadItemCallback callback,
     void* context);
+
+void file_browser_set_select_right(FileBrowser* browser, bool select_right);
 
 #ifdef __cplusplus
 }

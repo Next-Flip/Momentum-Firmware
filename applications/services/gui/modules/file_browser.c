@@ -283,11 +283,6 @@ void file_browser_stop(FileBrowser* browser) {
         false);
 }
 
-void file_browser_set_select_right(FileBrowser* browser, bool select_right) {
-    furi_check(browser);
-    browser->select_right = select_right;
-}
-
 void file_browser_set_callback(FileBrowser* browser, FileBrowserCallback callback, void* context) {
     furi_check(browser);
     browser->context = context;
@@ -302,6 +297,11 @@ void file_browser_set_item_callback(
 
     browser->item_context = context;
     browser->item_callback = callback;
+}
+
+void file_browser_set_select_right(FileBrowser* browser, bool select_right) {
+    furi_check(browser);
+    browser->select_right = select_right;
 }
 
 static bool browser_is_item_in_array(FileBrowserModel* model, uint32_t idx) {
