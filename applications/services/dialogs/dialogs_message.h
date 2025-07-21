@@ -11,7 +11,6 @@ typedef struct {
     const char* extension;
     bool skip_assets;
     bool hide_dot_files;
-    bool select_right;
     bool hide_ext;
     const Icon* file_icon;
     FuriString* result_path;
@@ -19,6 +18,8 @@ typedef struct {
     FileBrowserLoadItemCallback item_callback;
     void* item_callback_context;
     const char* base_path;
+
+    bool select_right;
 } DialogsAppMessageDataFileBrowser;
 
 typedef struct {

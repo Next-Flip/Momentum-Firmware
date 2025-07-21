@@ -50,10 +50,10 @@ static void
             .hide_dot_files = true,
             .skip_assets = true,
             .hide_ext = hide_ext,
-            .select_right = true,
             .item_loader_callback = keybinds_fap_selector_item_callback,
             .item_loader_context = app,
             .base_path = base_path,
+            .select_right = true,
         };
         FuriString* temp_path = furi_string_alloc_set_str(base_path);
         if(storage_file_exists(furi_record_open(RECORD_STORAGE), furi_string_get_cstr(keybind))) {

@@ -12,11 +12,11 @@ void dialog_file_browser_set_basic_options(
     options->base_path = NULL;
     options->skip_assets = true;
     options->hide_dot_files = true;
-    options->select_right = false;
     options->icon = icon;
     options->hide_ext = true;
     options->item_loader_callback = NULL;
     options->item_loader_context = NULL;
+    options->select_right = false;
 }
 
 static DialogsApp* dialogs_app_alloc(void) {

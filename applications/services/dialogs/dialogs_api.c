@@ -39,11 +39,11 @@ bool dialog_file_browser_show(
             .skip_assets = options ? options->skip_assets : true,
             .hide_dot_files =
                 (options ? options->hide_dot_files : true && !momentum_settings.show_hidden_files),
-            .select_right = options ? options->select_right : false,
             .preselected_filename = path,
             .item_callback = options ? options->item_loader_callback : NULL,
             .item_callback_context = options ? options->item_loader_context : NULL,
             .base_path = furi_string_get_cstr(base_path),
+            .select_right = options ? options->select_right : false,
         }};
 
     DialogsAppReturn return_data;

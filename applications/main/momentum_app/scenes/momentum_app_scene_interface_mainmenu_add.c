@@ -35,10 +35,10 @@ static void
             .icon = &I_unknown_10px,
             .skip_assets = true,
             .hide_ext = !is_file_dir,
-            .select_right = is_file_dir,
             .item_loader_callback = fap_selector_item_callback,
             .item_loader_context = app,
             .base_path = is_file_dir ? STORAGE_EXT_PATH_PREFIX : EXT_PATH("apps"),
+            .select_right = is_file_dir,
         };
         FuriString* temp_path =
             furi_string_alloc_set_str(is_file_dir ? STORAGE_EXT_PATH_PREFIX : EXT_PATH("apps"));

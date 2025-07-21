@@ -117,7 +117,6 @@ struct FileBrowser {
     const char* base_path;
     bool skip_assets;
     bool hide_dot_files;
-    bool select_right;
     bool hide_ext;
 
     FileBrowserCallback callback;
@@ -128,6 +127,8 @@ struct FileBrowser {
 
     FuriString* result_path;
     FuriTimer* scroll_timer;
+
+    bool select_right;
 };
 
 typedef struct {
@@ -238,8 +239,8 @@ void file_browser_configure(
     browser->base_path = base_path;
     browser->skip_assets = skip_assets;
     browser->hide_dot_files = hide_dot_files;
-    browser->select_right = false;
     browser->hide_ext = hide_ext;
+    browser->select_right = false;
 
     with_view_model(
         browser->view,
