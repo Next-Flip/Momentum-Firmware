@@ -9,6 +9,7 @@
 - RFID: Support writing Securakey, Jablotron and FDX-B to EM4305 cards (#434 by @jamisonderek)
 - BT Remote: Add Rename Option, simplify Bad KB BLE profile (#439 by @aaronjamt & @WillyJL)
 - MNTM Settings: Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
+- Input Settings: Add Vibro Trigger option (#429 by @956MB)
 
 ### Updated:
 - Apps:
