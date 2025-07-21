@@ -370,4 +370,5 @@ const SubGhzProtocol subghz_protocol_honeywell = {
     .encoder = &subghz_protocol_honeywell_encoder,
     .decoder = &subghz_protocol_honeywell_decoder,
 
+    .filter = SubGhzProtocolFilter_Sensors,
 };

@@ -231,10 +231,6 @@ float furi_hal_bt_get_rssi(void);
  */
 uint32_t furi_hal_bt_get_transmitted_packets(void);
 
-uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi);
-
-bool furi_hal_bt_is_connected(void);
-
 /** Check & switch C2 to given mode
  *
  * @param[in]  mode  mode to switch into

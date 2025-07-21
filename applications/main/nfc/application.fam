@@ -16,7 +16,206 @@ App(
     fap_libs=["assets", "mbedtls"],
     fap_icon="icon.png",
     fap_category="NFC",
-    flags=["UnloadAssetPacks"],
+    # flags=["UnloadAssetPacks"],
+)
+
+# Protocol support plugins
+
+App(
+    appid="nfc_iso14443_3a",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_iso14443_3a_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_iso14443_3b",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_iso14443_3b_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/iso14443_3b/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_iso14443_4a",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_iso14443_4a_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_iso14443_4b",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_iso14443_4b_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/iso14443_4b/*.c",
+        "helpers/protocol_support/iso14443_3b/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_iso15693_3",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_iso15693_3_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/iso15693_3/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_felica",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_felica_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/felica/*.c",
+        "helpers/felica_*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_mf_ultralight",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_mf_ultralight_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/mf_ultralight/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+        "helpers/mf_ultralight_*.c",
+    ],
+    fap_libs=["mbedtls"],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_mf_classic",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_mf_classic_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/mf_classic/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+        "helpers/mf_classic_*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_mf_plus",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_mf_plus_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/mf_plus/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_mf_desfire",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_mf_desfire_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/mf_desfire/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_slix",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_slix_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/slix/*.c",
+        "helpers/protocol_support/iso15693_3/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_st25tb",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_st25tb_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/st25tb/*.c",
+    ],
+    fal_embedded=True,
+)
+
+
+App(
+    appid="nfc_ntag4xx",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_ntag4xx_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/ntag4xx/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+App(
+    appid="nfc_type_4_tag",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_type_4_tag_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/type_4_tag/*.c",
+        "helpers/protocol_support/iso14443_4a/*.c",
+        "helpers/protocol_support/iso14443_3a/*.c",
+    ],
+    fal_embedded=True,
+)
+
+App(
+    appid="nfc_emv",
+    targets=["f7"],
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_emv_ep",
+    requires=["nfc"],
+    sources=[
+        "helpers/protocol_support/emv/*.c",
+    ],
+    fal_embedded=True,
 )
 
 # Parser plugins
@@ -286,6 +485,16 @@ App(
 )
 
 App(
+    appid="ndef_t4t_parser",
+    apptype=FlipperAppType.PLUGIN,
+    cdefines=[("NDEF_PROTO", "NDEF_PROTO_T4T")],
+    entry_point="ndef_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ndef.c"],
+)
+
+App(
     appid="itso_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="itso_plugin_ep",
@@ -322,6 +531,16 @@ App(
 )
 
 App(
+    appid="disney_infinity_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="disney_infinity_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    fap_libs=["mbedtls"],
+    sources=["plugins/supported_cards/disney_infinity.c"],
+)
+
+App(
     appid="sonicare_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="sonicare_plugin_ep",
@@ -340,19 +559,19 @@ App(
 )
 
 App(
-    appid="nfc_cli",
-    targets=["f7"],
+    appid="ventra_parser",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="nfc_cli_plugin_ep",
-    requires=["cli"],
-    sources=["nfc_cli.c"],
+    entry_point="ventra_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/ventra.c"],
 )
 
 App(
-    appid="nfc_start",
+    appid="cli_nfc",
     targets=["f7"],
-    apptype=FlipperAppType.STARTUP,
-    entry_point="nfc_on_system_start",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="cli_nfc_ep",
+    requires=["cli"],
     sources=["nfc_cli.c"],
-    order=30,
 )

@@ -6,6 +6,8 @@
 #include <gui/icon_i.h>
 #include <stdint.h>
 
+#include <momentum/asset_packs_i.h>
+
 typedef void (*OneShotInteractCallback)(void*);
 
 struct OneShotView {
@@ -116,7 +118,7 @@ void one_shot_view_start_animation(OneShotView* view, const Icon* icon) {
 
     OneShotViewModel* model = view_get_model(view->view);
     model->index = 0;
-    model->icon = icon;
+    model->icon = asset_packs_swap_icon(icon);
     model->block_input = true;
     view_commit_model(view->view, true);
     furi_timer_start(view->update_timer, 1000 / model->icon->frame_rate);

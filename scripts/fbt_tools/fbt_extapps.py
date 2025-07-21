@@ -291,50 +291,111 @@ def _validate_app_imports(target, source, env):
         for line in f:
             app_syms.add(line.split()[0])
     unresolved_syms = app_syms - sdk_cache.get_valid_names()
-    ignore_syms = [
-        sym
-        for sym in unresolved_syms
-        if sym.startswith(
-            (
-                # advanced_plugin
-                "app_api_accumulator_",
-                # gallagher
-                "GALLAGHER_CARDAX_ASCII",
-                "gallagher_deobfuscate_and_parse_credential",
-                # js_
-                "js_delay_with_flags",
-                "js_event_loop_get_loop",
-                "js_flags_set",
-                "js_flags_wait",
-                "js_gui_make_view_factory",
-                "js_module_get",
-                # test_js
-                "js_thread_run",
-                "js_thread_stop",
-                # totp_
-                "totp_",
-                "token_info_",
-                "memset_s",
-                # social_moscow, troika
-                "mosgortrans_parse_transport_block",
-                "render_section_header",
-            )
-        )
-        and any(
-            prefix in source[0].path
-            for prefix in [
-                "advanced_plugin",
-                "gallagher",
-                "js_",  # js_app and all js_ modules
-                "social_moscow",
-                "test_js",
-                "totp_",
-                "troika",
+    known_syms = {
+        # example_advanced_plugins app_api_table
+        ("advanced_plugin",): (
+            "app_api_accumulator_set",
+            "app_api_accumulator_get",
+            "app_api_accumulator_add",
+            "app_api_accumulator_sub",
+            "app_api_accumulator_mul",
+        ),
+        # js_app app_api_table, js_event_loop_api_table, js_gui_api_table
+        ("js_",): (
+            "js_delay_with_flags",
+            "js_flags_set",
+            "js_flags_wait",
+            "js_module_get",
+            "js_value_buffer_size",
+            "js_value_parse",
+            "js_event_loop_get_loop",
+            "js_gui_make_view_factory",
+        ),
+        # metroflip_api_table
+        (
+            "bip_plugin",
+            "calypso_plugin",
+            "charliecard_plugin",
+            "clipper_plugin",
+            "gocard_plugin",
+            "itso_plugin",
+            "metromoney_plugin",
+            "myki_plugin",
+            "opal_plugin",
+            "smartrider_plugin",
+            "suica_plugin",
+            "troika_plugin",
+        ): (
+            "metroflip_",
+            "bit_slice_to_dec",
+            "byte_to_binary",
+            "read_calypso_data",
+            "read_file",
+            "apdu_success",
+            "select_app",
+            "mf_classic_key_cache_",
+            "manage_keyfiles",
+            "uid_to_string",
+            "handle_keyfile_case",
+            "get_calypso_",
+            "get_network_",
+            "is_calypso_",
+            "free_calypso_",
+            "guess_card_type",
+            "get_intercode_",
+            "show_navigo_",
+            "get_opus_",
+            "show_opus_",
+            "get_ravkav_",
+            "show_ravkav_",
+            "mosgortrans_parse_transport_block",
+            "render_section_header",
+            "I_Suica_",
+        ),
+        # nfc_app_api_table
+        (
+            "nfc_",
+            "gallagher",
+            "social_moscow",
+            "troika",
+        ): (
+            "gallagher_deobfuscate_and_parse_credential",
+            "GALLAGHER_CARDAX_ASCII",
+            "mosgortrans_parse_transport_block",
+            "render_section_header",
+            "nfc_append_filename_string_when_present",
+            "nfc_protocol_support_common_submenu_callback",
+            "nfc_protocol_support_common_widget_callback",
+            "nfc_protocol_support_common_on_enter_empty",
+            "nfc_protocol_support_common_on_event_empty",
+            "nfc_unlock_helper_setup_from_state",
+            "nfc_unlock_helper_card_detected_handler",
+        ),
+        # totp app_api_table
+        ("totp_",): (
+            "totp_",
+            "memset_s",
+            "token_info_",
+        ),
+        # unit_tests_api_table
+        ("test_js",): (
+            "js_thread_run",
+            "js_thread_stop",
+            "js_value_buffer_size",
+            "js_value_parse",
+        ),
+    }
+    ignore_syms = []
+    for source_names, sym_prefixes in known_syms.items():
+        if any(source_name in source[0].path for source_name in source_names):
+            ignore_syms = [
+                unresolved_sym
+                for unresolved_sym in unresolved_syms
+                if unresolved_sym.startswith(sym_prefixes)
             ]
-        )
-    ]
-    for sym in ignore_syms:
-        unresolved_syms.remove(sym)
+            break
+    for ignore_sym in ignore_syms:
+        unresolved_syms.remove(ignore_sym)
     if unresolved_syms:
         warning_msg = fg.brightyellow(
             f"{source[0].path}: app may not be runnable. Symbols not resolved using firmware's API: "

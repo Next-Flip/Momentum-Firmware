@@ -14,13 +14,13 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexRemoveDuplicates,
     SubGhzSettingIndexDeleteOldSignals,
     SubGhzSettingIndexAutosave,
-    SubGhzSettingIndexIgnoreStarline,
     SubGhzSettingIndexIgnoreCars,
-    SubGhzSettingIndexIgnoreMagellan,
+    SubGhzSettingIndexIgnoreAlarms,
+    SubGhzSettingIndexIgnoreSensors,
     SubGhzSettingIndexIgnorePrinceton,
     SubGhzSettingIndexIgnoreNiceFlorS,
-    SubGhzSettingIndexIgnoreWeather,
-    SubGhzSettingIndexIgnoreTPMS,
+    // SubGhzSettingIndexIgnoreWeather,
+    // SubGhzSettingIndexIgnoreTPMS,
     SubGhzSettingIndexSound,
     SubGhzSettingIndexResetToDefault,
     SubGhzSettingIndexLock,
@@ -411,16 +411,16 @@ static inline bool subghz_scene_receiver_config_ignore_filter_get_index(
     return READ_BIT(filter, flag) > 0;
 }
 
-static void subghz_scene_receiver_config_set_starline(VariableItem* item) {
-    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_StarLine);
+static void subghz_scene_receiver_config_set_cars(VariableItem* item) {
+    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Cars);
 }
 
-static void subghz_scene_receiver_config_set_auto_alarms(VariableItem* item) {
-    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_AutoAlarms);
+static void subghz_scene_receiver_config_set_alarms(VariableItem* item) {
+    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Alarms);
 }
 
-static void subghz_scene_receiver_config_set_magellan(VariableItem* item) {
-    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Magellan);
+static void subghz_scene_receiver_config_set_sensors(VariableItem* item) {
+    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Sensors);
 }
 
 static void subghz_scene_receiver_config_set_princeton(VariableItem* item) {
@@ -431,12 +431,13 @@ static void subghz_scene_receiver_config_set_niceflors(VariableItem* item) {
     subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_NiceFlorS);
 }
 
-static void subghz_scene_receiver_config_set_weather(VariableItem* item) {
-    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Weather);
-}
-static void subghz_scene_receiver_config_set_tpms(VariableItem* item) {
-    subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_TPMS);
-}
+// static void subghz_scene_receiver_config_set_weather(VariableItem* item) {
+//     subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_Weather);
+// }
+
+// static void subghz_scene_receiver_config_set_tpms(VariableItem* item) {
+//     subghz_scene_receiver_config_set_ignore_filter(item, SubGhzProtocolFilter_TPMS);
+// }
 
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -606,37 +607,37 @@ void subghz_scene_receiver_config_on_enter(void* context) {
 
         item = variable_item_list_add(
             subghz->variable_item_list,
-            "Ignore Starline",
-            COMBO_BOX_COUNT,
-            subghz_scene_receiver_config_set_starline,
-            subghz);
-
-        value_index = subghz_scene_receiver_config_ignore_filter_get_index(
-            subghz->ignore_filter, SubGhzProtocolFilter_StarLine);
-        variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, combobox_text[value_index]);
-
-        item = variable_item_list_add(
-            subghz->variable_item_list,
             "Ignore Cars",
             COMBO_BOX_COUNT,
-            subghz_scene_receiver_config_set_auto_alarms,
+            subghz_scene_receiver_config_set_cars,
             subghz);
 
         value_index = subghz_scene_receiver_config_ignore_filter_get_index(
-            subghz->ignore_filter, SubGhzProtocolFilter_AutoAlarms);
+            subghz->ignore_filter, SubGhzProtocolFilter_Cars);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
 
         item = variable_item_list_add(
             subghz->variable_item_list,
-            "Ignore Magellan",
+            "Ignore Alarms",
             COMBO_BOX_COUNT,
-            subghz_scene_receiver_config_set_magellan,
+            subghz_scene_receiver_config_set_alarms,
             subghz);
 
         value_index = subghz_scene_receiver_config_ignore_filter_get_index(
-            subghz->ignore_filter, SubGhzProtocolFilter_Magellan);
+            subghz->ignore_filter, SubGhzProtocolFilter_Alarms);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, combobox_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Sensors",
+            COMBO_BOX_COUNT,
+            subghz_scene_receiver_config_set_sensors,
+            subghz);
+
+        value_index = subghz_scene_receiver_config_ignore_filter_get_index(
+            subghz->ignore_filter, SubGhzProtocolFilter_Sensors);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
 
@@ -664,29 +665,29 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, combobox_text[value_index]);
 
-        item = variable_item_list_add(
-            subghz->variable_item_list,
-            "Ignore Weather",
-            COMBO_BOX_COUNT,
-            subghz_scene_receiver_config_set_weather,
-            subghz);
+        // item = variable_item_list_add(
+        //     subghz->variable_item_list,
+        //     "Ignore Weather",
+        //     COMBO_BOX_COUNT,
+        //     subghz_scene_receiver_config_set_weather,
+        //     subghz);
 
-        value_index = subghz_scene_receiver_config_ignore_filter_get_index(
-            subghz->ignore_filter, SubGhzProtocolFilter_Weather);
-        variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, combobox_text[value_index]);
+        // value_index = subghz_scene_receiver_config_ignore_filter_get_index(
+        //     subghz->ignore_filter, SubGhzProtocolFilter_Weather);
+        // variable_item_set_current_value_index(item, value_index);
+        // variable_item_set_current_value_text(item, combobox_text[value_index]);
 
-        item = variable_item_list_add(
-            subghz->variable_item_list,
-            "Ignore TPMS",
-            COMBO_BOX_COUNT,
-            subghz_scene_receiver_config_set_tpms,
-            subghz);
+        // item = variable_item_list_add(
+        //     subghz->variable_item_list,
+        //     "Ignore TPMS",
+        //     COMBO_BOX_COUNT,
+        //     subghz_scene_receiver_config_set_tpms,
+        //     subghz);
 
-        value_index = subghz_scene_receiver_config_ignore_filter_get_index(
-            subghz->ignore_filter, SubGhzProtocolFilter_TPMS);
-        variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, combobox_text[value_index]);
+        // value_index = subghz_scene_receiver_config_ignore_filter_get_index(
+        //     subghz->ignore_filter, SubGhzProtocolFilter_TPMS);
+        // variable_item_set_current_value_index(item, value_index);
+        // variable_item_set_current_value_text(item, combobox_text[value_index]);
     }
 
     // Enable speaker, will send all incoming noises and signals to speaker so you can listen how your remote sounds like :)

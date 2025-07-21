@@ -14,6 +14,7 @@ static const uint32_t subghz_frequency_list[] = {
     /* 300 - 348 */
     300000000,
     302757000,
+    303000000,
     303875000,
     303900000,
     304250000,
@@ -62,6 +63,7 @@ static const uint32_t subghz_frequency_list[] = {
     434775000, /* LPD433 last channels */
     438900000,
     440175000,
+    462750000,
     464000000,
     467750000,
 
@@ -69,6 +71,7 @@ static const uint32_t subghz_frequency_list[] = {
     779000000,
     868350000,
     868400000,
+    868460000,
     868800000,
     868950000,
     906400000,
@@ -79,11 +82,9 @@ static const uint32_t subghz_frequency_list[] = {
 };
 
 static const uint32_t subghz_hopper_frequency_list[] = {
-    310000000,
     315000000,
-    318000000,
-    418000000,
     433920000,
+    434420000,
     868350000,
     0,
 };
@@ -282,6 +283,7 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
                 FURI_LOG_E(TAG, "Rewind error");
                 break;
             }
+            furi_string_reset(temp_str);
             while(flipper_format_read_string(fff_data_file, "Custom_preset_name", temp_str)) {
                 FURI_LOG_I(TAG, "Custom preset loaded %s", furi_string_get_cstr(temp_str));
                 subghz_setting_load_custom_preset(

@@ -1,5 +1,7 @@
 #include "mf_desfire_i.h"
 
+#include <bit_lib/bit_lib.h>
+
 #define TAG "MfDesfire"
 
 #define BITS_IN_BYTE (8U)
@@ -47,6 +49,10 @@
 #define MF_DESFIRE_FFF_FILE_MAX_KEY "Max"
 #define MF_DESFIRE_FFF_FILE_CUR_KEY "Cur"
 
+#define MF_DESFIRE_FFF_FILE_KEY_OPTION_KEY    "Key Option"
+#define MF_DESFIRE_FFF_FILE_KEY_VERSION_KEY   "Key Version"
+#define MF_DESFIRE_FFF_FILE_COUNTER_LIMIT_KEY "Counter Limit"
+
 bool mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
     const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireVersion);
 
@@ -54,7 +60,7 @@ bool mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
         bit_buffer_write_bytes(buf, data, sizeof(MfDesfireVersion));
     }
 
-    return can_parse;
+    return can_parse && (data->hw_type & 0x0F) == 0x01;
 }
 
 bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* buf) {
@@ -75,17 +81,17 @@ bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* bu
     return can_parse;
 }
 
-bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
-    typedef struct FURI_PACKED {
-        bool is_master_key_changeable : 1;
-        bool is_free_directory_list   : 1;
-        bool is_free_create_delete    : 1;
-        bool is_config_changeable     : 1;
-        uint8_t change_key_id         : 4;
-        uint8_t max_keys              : 4;
-        uint8_t flags                 : 4;
-    } MfDesfireKeySettingsLayout;
+typedef struct FURI_PACKED {
+    bool is_master_key_changeable : 1;
+    bool is_free_directory_list   : 1;
+    bool is_free_create_delete    : 1;
+    bool is_config_changeable     : 1;
+    uint8_t change_key_id         : 4;
+    uint8_t max_keys              : 4;
+    uint8_t flags                 : 4;
+} MfDesfireKeySettingsLayout;
 
+bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
     const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeySettingsLayout);
 
     if(can_parse) {
@@ -103,6 +109,21 @@ bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
     }
 
     return can_parse;
+}
+
+void mf_desfire_key_settings_dump(const MfDesfireKeySettings* data, BitBuffer* buf) {
+    MfDesfireKeySettingsLayout layout;
+
+    layout.is_master_key_changeable = data->is_master_key_changeable;
+    layout.is_free_directory_list = data->is_free_directory_list;
+    layout.is_free_create_delete = data->is_free_create_delete;
+    layout.is_config_changeable = data->is_config_changeable;
+
+    layout.change_key_id = data->change_key_id;
+    layout.max_keys = data->max_keys;
+    layout.flags = data->flags;
+
+    bit_buffer_append_bytes(buf, (uint8_t*)&layout, sizeof(MfDesfireKeySettingsLayout));
 }
 
 bool mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* buf) {
@@ -169,11 +190,18 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
     } MfDesfireFileSettingsRecord;
 
     typedef struct FURI_PACKED {
+        uint8_t key_option;
+        uint8_t key_version;
+        uint8_t counter_limit[];
+    } MfDesfireFileSettingsTransactionMac;
+
+    typedef struct FURI_PACKED {
         MfDesfireFileSettingsHeader header;
         union {
             MfDesfireFileSettingsData data;
             MfDesfireFileSettingsValue value;
             MfDesfireFileSettingsRecord record;
+            MfDesfireFileSettingsTransactionMac transaction_mac;
         };
     } MfDesfireFileSettingsLayout;
 
@@ -182,7 +210,7 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
         const size_t data_size = bit_buffer_get_size_bytes(buf);
         const uint8_t* data_ptr = bit_buffer_get_data(buf);
         const size_t min_data_size =
-            sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsData);
+            sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsTransactionMac);
 
         if(data_size < min_data_size) {
             FURI_LOG_E(
@@ -202,17 +230,11 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
 
         if(file_settings_temp.type == MfDesfireFileTypeStandard ||
            file_settings_temp.type == MfDesfireFileTypeBackup) {
-            memcpy(
-                &layout.data,
-                &data_ptr[sizeof(MfDesfireFileSettingsHeader)],
-                sizeof(MfDesfireFileSettingsData));
+            memcpy(&layout.data, &data_ptr[bytes_processed], sizeof(MfDesfireFileSettingsData));
             file_settings_temp.data.size = layout.data.size;
             bytes_processed += sizeof(MfDesfireFileSettingsData);
         } else if(file_settings_temp.type == MfDesfireFileTypeValue) {
-            memcpy(
-                &layout.value,
-                &data_ptr[sizeof(MfDesfireFileSettingsHeader)],
-                sizeof(MfDesfireFileSettingsValue));
+            memcpy(&layout.value, &data_ptr[bytes_processed], sizeof(MfDesfireFileSettingsValue));
             file_settings_temp.value.lo_limit = layout.value.lo_limit;
             file_settings_temp.value.hi_limit = layout.value.hi_limit;
             file_settings_temp.value.limited_credit_value = layout.value.limited_credit_value;
@@ -222,13 +244,34 @@ bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
             file_settings_temp.type == MfDesfireFileTypeLinearRecord ||
             file_settings_temp.type == MfDesfireFileTypeCyclicRecord) {
             memcpy(
-                &layout.record,
-                &data_ptr[sizeof(MfDesfireFileSettingsHeader)],
-                sizeof(MfDesfireFileSettingsRecord));
+                &layout.record, &data_ptr[bytes_processed], sizeof(MfDesfireFileSettingsRecord));
             file_settings_temp.record.size = layout.record.size;
             file_settings_temp.record.max = layout.record.max;
             file_settings_temp.record.cur = layout.record.cur;
             bytes_processed += sizeof(MfDesfireFileSettingsRecord);
+        } else if(file_settings_temp.type == MfDesfireFileTypeTransactionMac) {
+            const bool has_counter_limit = (layout.header.comm & 0x20) != 0;
+            memcpy(
+                &layout.transaction_mac,
+                &data_ptr[bytes_processed],
+                sizeof(MfDesfireFileSettingsTransactionMac));
+            file_settings_temp.transaction_mac.key_option = layout.transaction_mac.key_option;
+            file_settings_temp.transaction_mac.key_version = layout.transaction_mac.key_version;
+            if(!has_counter_limit) {
+                file_settings_temp.transaction_mac.counter_limit = 0;
+            } else {
+                // AES (4b) or LRP (2b)
+                const size_t counter_limit_size = (layout.transaction_mac.key_option & 0x02) ? 4 :
+                                                                                               2;
+                memcpy(
+                    &layout.transaction_mac,
+                    &data_ptr[bytes_processed],
+                    sizeof(MfDesfireFileSettingsTransactionMac) + counter_limit_size);
+                file_settings_temp.transaction_mac.counter_limit = bit_lib_bytes_to_num_be(
+                    layout.transaction_mac.counter_limit, counter_limit_size);
+                bytes_processed += counter_limit_size;
+            }
+            bytes_processed += sizeof(MfDesfireFileSettingsTransactionMac);
         } else {
             FURI_LOG_W(TAG, "Unknown file type: %02x", file_settings_temp.type);
             break;
@@ -467,6 +510,21 @@ bool mf_desfire_file_settings_load(
 
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_CUR_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.cur, 1))
+                break;
+        } else if(data->type == MfDesfireFileTypeTransactionMac) {
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_KEY_OPTION_KEY);
+            if(!flipper_format_read_hex(
+                   ff, furi_string_get_cstr(key), &data->transaction_mac.key_option, 1))
+                break;
+
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_KEY_VERSION_KEY);
+            if(!flipper_format_read_hex(
+                   ff, furi_string_get_cstr(key), &data->transaction_mac.key_version, 1))
+                break;
+
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_COUNTER_LIMIT_KEY);
+            if(!flipper_format_read_uint32(
+                   ff, furi_string_get_cstr(key), &data->transaction_mac.counter_limit, 1))
                 break;
         }
 
@@ -715,6 +773,21 @@ bool mf_desfire_file_settings_save(
 
             furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_CUR_KEY);
             if(!flipper_format_write_uint32(ff, furi_string_get_cstr(key), &data->record.cur, 1))
+                break;
+        } else if(data->type == MfDesfireFileTypeTransactionMac) {
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_KEY_OPTION_KEY);
+            if(!flipper_format_write_hex(
+                   ff, furi_string_get_cstr(key), &data->transaction_mac.key_option, 1))
+                break;
+
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_KEY_VERSION_KEY);
+            if(!flipper_format_write_hex(
+                   ff, furi_string_get_cstr(key), &data->transaction_mac.key_version, 1))
+                break;
+
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_COUNTER_LIMIT_KEY);
+            if(!flipper_format_write_uint32(
+                   ff, furi_string_get_cstr(key), &data->transaction_mac.counter_limit, 1))
                 break;
         }
 

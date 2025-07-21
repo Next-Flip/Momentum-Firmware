@@ -1,7 +1,6 @@
-# js_gui__byte_input {#js_gui__byte_input}
+# Byte input GUI view {#js_gui__byte_input}
 
-# Byte input GUI view
-Displays a keyboard.
+Displays a hexadecimal keyboard.
 
 <img src="byte_input.png" width="200" alt="Sample screenshot of the view" />
 
@@ -12,30 +11,22 @@ let byteInputView = require("gui/byte_input");
 ```
 
 This module depends on the `gui` module, which in turn depends on the
-`event_loop` module, so they _must_ be imported in this order. It is also
+`event_loop` module, so they **must** be imported in this order. It is also
 recommended to conceptualize these modules first before using this one.
 
-# Example
+## Example
 For an example refer to the `gui.js` example script.
 
-# View props
-## `length`
-Data buffer length
+## View props
 
-Type: `number`
+| Prop        | Type   | Description                                      |
+|-------------|--------|--------------------------------------------------|
+| `length`      | `number` | The length in bytes of the buffer to modify.           |
+| `header`      | `string` | A single line of text that appears above the keyboard. |
+| `defaultData` | `string` | Data to show by default.                               |
 
-## `header`
-Single line of text that appears above the keyboard
+## View events
 
-Type: `string`
-
-## `defaultData`
-Data to show in byte input by default
-
-Type: `Uint8Array | ArrayBuffer`
-
-# View events
-## `input`
-Fires when the user selects the "save" button.
-
-Item type: `ArrayBuffer`
+| Item        | Type   | Description                                      |
+|-------------|--------|--------------------------------------------------|
+| `input`     | `ArrayBuffer` | Fires when the user selects the "Save" button. |

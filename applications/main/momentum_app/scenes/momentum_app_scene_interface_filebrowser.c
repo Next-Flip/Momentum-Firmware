@@ -7,6 +7,13 @@ enum VarItemListIndex {
     VarItemListIndexFavoriteTimeout,
 };
 
+const char* const browser_path_names[BrowserPathModeCount] = {
+    "OFF",
+    "Current",
+    "Brief",
+    "Full",
+};
+
 void momentum_app_scene_interface_filebrowser_var_item_list_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -35,6 +42,15 @@ static void
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "ON" : "OFF");
     momentum_settings.show_internal_tab = value;
+    app->save_settings = true;
+}
+
+static void
+    momentum_app_scene_interface_filebrowser_browser_path_mode_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, browser_path_names[index]);
+    momentum_settings.browser_path_mode = index;
     app->save_settings = true;
 }
 
@@ -79,6 +95,16 @@ void momentum_app_scene_interface_filebrowser_on_enter(void* context) {
         app);
     variable_item_set_current_value_index(item, momentum_settings.show_internal_tab);
     variable_item_set_current_value_text(item, momentum_settings.show_internal_tab ? "ON" : "OFF");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Show Path",
+        BrowserPathModeCount,
+        momentum_app_scene_interface_filebrowser_browser_path_mode_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.browser_path_mode);
+    variable_item_set_current_value_text(
+        item, browser_path_names[momentum_settings.browser_path_mode]);
 
     item = variable_item_list_add(
         var_item_list,

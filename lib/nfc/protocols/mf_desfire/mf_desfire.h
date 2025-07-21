@@ -17,6 +17,13 @@ extern "C" {
 #define MF_DESFIRE_CMD_GET_FILE_IDS        (0x6F)
 #define MF_DESFIRE_CMD_GET_FILE_SETTINGS   (0xF5)
 
+#define MF_DESFIRE_CMD_CREATE_APPLICATION        (0xCA)
+#define MF_DESFIRE_CMD_CREATE_STD_DATA_FILE      (0xCD)
+#define MF_DESFIRE_CMD_CREATE_BACKUP_DATA_FILE   (0xCB)
+#define MF_DESFIRE_CMD_CREATE_VALUE_FILE         (0xCC)
+#define MF_DESFIRE_CMD_CREATE_LINEAR_RECORD_FILE (0xC1)
+#define MF_DESFIRE_CMD_CREATE_CYCLIC_RECORD_FILE (0xC0)
+
 #define MF_DESFIRE_CMD_READ_DATA    (0xBD)
 #define MF_DESFIRE_CMD_GET_VALUE    (0x6C)
 #define MF_DESFIRE_CMD_READ_RECORDS (0xBB)
@@ -28,6 +35,28 @@ extern "C" {
 #define MF_DESFIRE_BATCH_SIZE  (5)
 #define MF_DESFIRE_APP_ID_SIZE (3)
 #define MF_DESFIRE_VALUE_SIZE  (4)
+
+typedef enum {
+    MfDesfireTypeMF3ICD40,
+    MfDesfireTypeEV1,
+    MfDesfireTypeEV2,
+    MfDesfireTypeEV2XL,
+    MfDesfireTypeEV3,
+
+    MfDesfireTypeUnknown,
+    MfDesfireTypeNum,
+} MfDesfireType;
+
+typedef enum {
+    MfDesfireSize2k,
+    MfDesfireSize4k,
+    MfDesfireSize8k,
+    MfDesfireSize16k,
+    MfDesfireSize32k,
+
+    MfDesfireSizeUnknown,
+    MfDesfireSizeNum,
+} MfDesfireSize;
 
 typedef struct {
     uint8_t hw_vendor;
@@ -75,6 +104,7 @@ typedef enum {
     MfDesfireFileTypeValue = 2,
     MfDesfireFileTypeLinearRecord = 3,
     MfDesfireFileTypeCyclicRecord = 4,
+    MfDesfireFileTypeTransactionMac = 5,
 } MfDesfireFileType;
 
 typedef enum {
@@ -106,6 +136,11 @@ typedef struct {
             uint32_t max;
             uint32_t cur;
         } record;
+        struct {
+            uint8_t key_option;
+            uint8_t key_version;
+            uint32_t counter_limit;
+        } transaction_mac;
     };
 } MfDesfireFileSettings;
 
@@ -131,6 +166,7 @@ typedef enum {
     MfDesfireErrorProtocol,
     MfDesfireErrorTimeout,
     MfDesfireErrorAuthentication,
+    MfDesfireErrorCommandNotSupported,
 } MfDesfireError;
 
 typedef struct {
@@ -141,6 +177,7 @@ typedef struct {
     SimpleArray* master_key_versions;
     SimpleArray* application_ids;
     SimpleArray* applications;
+    FuriString* device_name;
 } MfDesfireData;
 
 extern const NfcDeviceBase nfc_device_mf_desfire;

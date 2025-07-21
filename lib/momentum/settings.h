@@ -29,6 +29,7 @@ typedef enum {
     MenuStyleC64,
     MenuStyleCompact,
     MenuStyleMNTM,
+    MenuStyleCoverFlow,
     MenuStyleCount,
 } MenuStyle;
 
@@ -54,6 +55,14 @@ typedef union __attribute__((packed)) {
     uint32_t value;
 } ScreenFrameColor;
 
+typedef enum {
+    BrowserPathOff,
+    BrowserPathCurrent,
+    BrowserPathBrief,
+    BrowserPathFull,
+    BrowserPathModeCount,
+} BrowserPathMode;
+
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
     uint32_t anim_speed;
@@ -62,7 +71,8 @@ typedef struct {
     MenuStyle menu_style;
     bool lock_on_boot;
     bool bad_pins_format;
-    bool allow_locked_rpc_commands;
+    bool allow_locked_rpc_usb;
+    bool allow_locked_rpc_ble;
     bool lockscreen_poweroff;
     bool lockscreen_time;
     bool lockscreen_seconds;
@@ -70,6 +80,7 @@ typedef struct {
     bool lockscreen_statusbar;
     bool lockscreen_prompt;
     bool lockscreen_transparent;
+    bool lockscreen_skip_animation;
     BatteryIcon battery_icon;
     bool status_icons;
     bool bar_borders;
@@ -77,11 +88,14 @@ typedef struct {
     bool sort_dirs_first;
     bool show_hidden_files;
     bool show_internal_tab;
+    BrowserPathMode browser_path_mode;
     uint32_t favorite_timeout;
+    bool scroll_marquee;
     bool dark_mode;
     bool rgb_backlight;
     uint32_t butthurt_timer;
-    uint32_t charge_cap;
+    bool midnight_format_00;
+    bool popup_overlay;
     SpiHandle spi_cc1101_handle;
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;

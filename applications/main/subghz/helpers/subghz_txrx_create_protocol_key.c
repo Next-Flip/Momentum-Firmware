@@ -6,6 +6,7 @@
 #include <lib/subghz/protocols/secplus_v1.h>
 #include <lib/subghz/protocols/secplus_v2.h>
 #include <lib/subghz/protocols/nice_flor_s.h>
+#include <lib/subghz/protocols/marantec.h>
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
@@ -383,34 +384,67 @@ bool subghz_txrx_gen_secplus_v1_protocol(
     return ret;
 }
 
+bool subghz_txrx_gen_phoenix_v2_protocol(
+    void* context,
+    const char* preset_name,
+    uint32_t frequency,
+    uint32_t serial,
+    uint16_t cnt) {
+    SubGhzTxRx* txrx = context;
+
+    bool res = false;
+
+    txrx->transmitter =
+        subghz_transmitter_alloc_init(txrx->environment, SUBGHZ_PROTOCOL_PHOENIX_V2_NAME);
+    subghz_txrx_set_preset(txrx, preset_name, frequency, NAN, NAN, NULL, 0);
+
+    if(txrx->transmitter && subghz_protocol_phoenix_v2_create_data(
+                                subghz_transmitter_get_protocol_instance(txrx->transmitter),
+                                txrx->fff_data,
+                                serial,
+                                cnt,
+                                txrx->preset)) {
+        res = true;
+    }
+
+    subghz_transmitter_free(txrx->transmitter);
+
+    return res;
+}
+
 void subghz_txrx_gen_serial_gangqi(uint64_t* result_key) {
-    uint64_t randkey;
-    uint64_t only_required_bytes;
-    uint16_t sum_of_3bytes;
-    uint8_t xorbytes;
+    uint64_t randkey = (uint64_t)rand();
+    uint16_t serial = (uint16_t)((randkey) & 0xFFFF);
+    uint8_t const_and_button = (uint8_t)(0xD0 | 0xD);
+    uint8_t serial_high = (uint8_t)(serial >> 8);
+    uint8_t serial_low = (uint8_t)(serial & 0xFF);
+    uint8_t bytesum = (uint8_t)(0xC8 - serial_high - serial_low - const_and_button);
 
-    do {
-        randkey = (uint64_t)rand();
-        only_required_bytes = (randkey & 0x0FFFF0000) | 0x200000000;
-        sum_of_3bytes = ((only_required_bytes >> 32) & 0xFF) +
-                        ((only_required_bytes >> 24) & 0xFF) +
-                        ((only_required_bytes >> 16) & 0xFF);
-        xorbytes = ((only_required_bytes >> 32) & 0xFF) ^ ((only_required_bytes >> 24) & 0xFF) ^
-                   ((only_required_bytes >> 16) & 0xFF);
-    } while(
-        !((((!(sum_of_3bytes & 0x3)) && ((0xB < sum_of_3bytes) && (sum_of_3bytes < 0x141))) &&
-           ((((only_required_bytes >> 32) & 0xFF) == 0x2) ||
-            (((only_required_bytes >> 32) & 0xFF) == 0x3))) &&
-          ((((xorbytes == 0xBA) || (xorbytes == 0xE2)) ||
-            ((xorbytes == 0x3A) || (xorbytes == 0xF2))) ||
-           (xorbytes == 0xB2))));
+    // Add bytesum to the end
+    // serial | const_and_button
+    *result_key = (serial << 18) | (const_and_button << 10) | (bytesum << 2);
+}
 
-    //                       Serial             01             button          01
-    uint64_t new_key = only_required_bytes | (0b01 << 14) | (0xD << 10) | (0b01 << 8);
+void subghz_txrx_gen_key_marantec(uint64_t* result_key) {
+    uint64_t randkey = (uint64_t)rand();
+    uint32_t serial = (uint32_t)((randkey) & 0xFFFFF);
+    // 0x130 is the constant
+    // 0x4 is the button code
+    // 0x86 is the serial constant
+    // serial is random value that we pre generate above
+    // At the end we will put the crc sum
+    uint64_t full_key_no_crc = (uint64_t)((uint64_t)0x130 << 40 | (uint64_t)serial << 20 |
+                                          (uint64_t)0x4 << 16 | (uint64_t)0x86 << 8);
 
-    uint8_t crc = -0xD7 - ((new_key >> 32) & 0xFF) - ((new_key >> 24) & 0xFF) -
-                  ((new_key >> 16) & 0xFF) - ((new_key >> 8) & 0xFF);
+    uint8_t tdata[6] = {
+        full_key_no_crc >> 48,
+        full_key_no_crc >> 40,
+        full_key_no_crc >> 32,
+        full_key_no_crc >> 24,
+        full_key_no_crc >> 16,
+        full_key_no_crc >> 8};
 
-    // Add crc sum to the end
-    *result_key = (new_key | crc);
+    uint8_t crc = subghz_protocol_marantec_crc8(tdata, sizeof(tdata));
+
+    *result_key = ((full_key_no_crc >> 8) << 8) | crc;
 }

@@ -2,6 +2,8 @@
 
 #include "mf_plus.h"
 
+#include <nfc/helpers/nxp_native_command.h>
+
 #define MF_PLUS_FFF_PICC_PREFIX "PICC"
 
 MfPlusError mf_plus_get_type_from_version(

@@ -31,15 +31,8 @@ env = ENV.Clone(
         Dir("applications"),
         # Not C code
         Dir("!applications/system/js_app/packages"),
-        # Frequently updated and very different formatting, painful to merge
-        Dir("!applications/external/nfc_playlist"),
-        Dir("!applications/external/flip_library"),
-        Dir("!applications/external/flip_social"),
-        Dir("!applications/external/flip_store"),
-        Dir("!applications/external/flip_trader"),
-        Dir("!applications/external/flip_weather"),
-        Dir("!applications/external/flip_wifi"),
-        Dir("!applications/external/web_crawler"),
+        # Avoid merge conflicts
+        Dir("!applications/external"),
     ],
     LIBPATH=[
         "${LIB_DIST_DIR}",

@@ -2,14 +2,7 @@
 
 void momentum_app_scene_interface_graphics_pack_submenu_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
-    strlcpy(
-        momentum_settings.asset_pack,
-        index == 0 ? "" : *CharList_get(app->asset_pack_names, index - 1),
-        ASSET_PACKS_NAME_LEN);
-    app->asset_pack_index = index;
-    app->save_settings = true;
-    app->apply_pack = true;
-    scene_manager_previous_scene(app->scene_manager);
+    view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void momentum_app_scene_interface_graphics_pack_on_enter(void* context) {
@@ -36,11 +29,19 @@ void momentum_app_scene_interface_graphics_pack_on_enter(void* context) {
 }
 
 bool momentum_app_scene_interface_graphics_pack_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
+    MomentumApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
+        strlcpy(
+            momentum_settings.asset_pack,
+            event.event == 0 ? "" : *CharList_get(app->asset_pack_names, event.event - 1),
+            ASSET_PACKS_NAME_LEN);
+        app->asset_pack_index = event.event;
+        app->save_settings = true;
+        app->apply_pack = true;
+        scene_manager_previous_scene(app->scene_manager);
     }
 
     return consumed;

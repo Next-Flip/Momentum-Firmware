@@ -16,7 +16,7 @@ static int32_t infrared_scene_universal_from_file_task_callback(void* context) {
     ButtonMenu* button_menu = infrared->button_menu;
     InfraredBruteForce* brute_force = infrared->brute_force;
     const InfraredErrorCode error =
-        infrared_brute_force_calculate_messages(infrared->brute_force, true);
+        infrared_brute_force_calculate_messages(infrared->brute_force, true, false);
 
     if(!INFRARED_ERROR_PRESENT(error)) {
         // add btns

@@ -1,41 +1,33 @@
 ### Added:
-- Apps:
-  - Games: Pinball0 (by @rdefeo)
-  - NFC: Metroflip (by @luu176)
-- UL: Sub-GHz: Jolly Motors support with add manually (by @pkooiman & @xMasterX)
-- OFW: Add VCP break support (by @gsurkov)
+- SubGHz:
+  - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
+  - UL: V2 Phoenix full support (button switch, add manually, counter decrypt/encrypt) (by @xMasterX & @RocketGod-git, original code by @Skorpionm)
+  - UL: Add Keeloq support for - Motorline (with add manually support), Rosh, Pecinin, Rossi, Merlin, Steelmate (by @xMasterX & @RocketGod-git)
+  - UL: Nero Radio static parse and display more data (by @xMasterX)
+  - UL: Marantec protocol implement CRC verification display and add manually support (by @xMasterX & @li0ard, original code by @Skorpionm)
+  - UL: Keeloq Comunello add manually support (by @xMasterX)
+- RFID: Support writing Securakey, Jablotron and FDX-B to EM4305 cards (#434 by @jamisonderek)
+- BT Remote: Add Rename Option, simplify Bad KB BLE profile (#439 by @aaronjamt & @WillyJL)
+- MNTM Settings: Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
 
 ### Updated:
 - Apps:
-  - BT/USB Remote: Add PTT support for Gather (by @SapphicCode)
-  - Chess: Fix illegal move bug (by @956MB)
-  - ESP Flasher: Add c3 and c6 to s3 option (by @jaylikesbunda), update Marauder bins to 1.1.0 (by @justcallmekoko)
-  - FlipBIP: Refactor to make adding coins easier (by @xtruan)
-  - FlipLibrary: Wikipedia, dog facts, random quotes, weather, asset price, predictions, trivia, advice, uuid and many more, bug fixes (by @jblanked), holidays, improvements to connectivity and progress (by @jamisonderek)
-  - FlipSocial: Improved authentication, loading screens, memory fixes, bio and friend counts, search contacts (by @jblanked), RPC_KEYBOAARD support (by @jamisonderek)
-  - FlipStore: Many bugfixes, support ESP32 firmware downloads, allow deleting apps, memory fixes, update Marauder (by @jblanked), more improvements (by @jamisonderek)
-  - FlipTrader: Improved progress display, added connectivity check on startup (by @jamisonderek)
-  - FlipWeather: Stability improvements (by @jblanked), improved progress display, added connectivity check on startup (by @jamisonderek)
-  - FlipWiFi: Improve error handling, update scan loading and parsing, fix crash when saving networks manually (by @jblanked), add connectivity check on startup (by @jamisonderek)
-  - Pokemon Trade Tool: Update to gblink v0.63 which includes saving/loading of pin configurations for the EXT link interface (by @kbembedded)
-  - Snake 2.0: Progress saving, endless mode, game timer, fruit positioning bugfixes (by @Willzvul)
-  - uPython: Enabled extra functions for the `random` module (by @ofabel)
-  - WebCrawler: Improved progress display, added connectivity check on startup (by @jamisonderek)
-  - WiFi Marauder: AirTag Spoof, flipper blespam, sniff airtag and flipper, list airtag (by @0xchocolate)
-  - UL: NFC Magic: Added possibility to write 7b MFC to Gen1 tags (by @mishamyte)
-  - UL: Unitemp: Fixed handling of hPa units (by @shininghero)
-  - UL: Fixed apps for firmware USB CDC callback changes (by @xMasterX)
-- NFC:
-  - OFW: Replace mf_classic_dict.nfc with Proxmark3 version (by @onovy)
-  - OFW: More station IDs for Clipper plugin (by @ted-logan)
-- OFW: Infrared: Add IR command for NAD DR2 D7050 D3020 (by @nikos9742)
+  - Asteroids: Bugfixes, title screen, Drone Buddy power-up (by @SimplyMinimal)
+  - Combo Cracker: Allow press and hold to change values, add tutorial (by @TAxelAnderson)
+  - FlipDownloader: Added a new option to download GitHub repositories (by @jblanked)
+  - Flipper Blackhat: Add Deauth Broadcast command (by @o7-machinehum)
+  - KeyCopier: Added Weiser WR3 key format (by @lightos)
+  - NFC Playlist: Refactor playlist worker, new settings layout, loop setting, controls to move between items (by @acegoal07)
+  - Sentry Safe: New interface, settings & help page (by @H4ckd4ddy)
+- Sub-GHz:
+  - UL: Add 868.46 MHz to default subghz freqs list (by @xMasterX)
+  - UL: Reduce less popular freqs in default hopper preset, make it faster (by @xMasterX)
+- UL: Docs: Update Sub-GHz DoorHan programming instructions (by @li0ard)
 
 ### Fixed:
-- Desktop: Fixed Wardriving animation design (by @Davim09)
-- OFW: GPIO: Fix USB UART Bridge Crash by increasing system stack size (by @Astrrra)
-- NFC:
-  - OFW: Plantain parser Last payment amount fix (by @mxcdoam)
-  - OFW: Fix typo for mf_classic_key_cahce_get_next_key() function (by @luu176)
+- Bad KB: Fix modifier keys with HOLD/RELEASE commands (by @WillyJL)
+- Desktop: Fix lock screen hang (#438 by @aaronjamt)
+- NFC: Fix incorrect Saflok year formula (#433 by @Eltrick)
 
 ### Removed:
 - Nothing

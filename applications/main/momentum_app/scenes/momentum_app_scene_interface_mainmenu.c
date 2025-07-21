@@ -23,6 +23,7 @@ const char* const menu_style_names[MenuStyleCount] = {
     "C64",
     "Compact",
     "MNTM",
+    "CoverFlow",
 };
 static void momentum_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     MomentumApp* app = variable_item_get_context(item);
@@ -76,8 +77,8 @@ void momentum_app_scene_interface_mainmenu_on_enter(void* context) {
         MenuStyleCount,
         momentum_app_scene_interface_mainmenu_menu_style_changed,
         app);
-    variable_item_set_current_value_index(item, momentum_settings.menu_style);
     variable_item_set_current_value_text(item, menu_style_names[momentum_settings.menu_style]);
+    variable_item_set_current_value_index(item, momentum_settings.menu_style);
 
     variable_item_list_add(var_item_list, "Reset Menu", 0, NULL, app);
 
@@ -126,6 +127,9 @@ bool momentum_app_scene_interface_mainmenu_on_event(void* context, SceneManagerE
             app->scene_manager, MomentumAppSceneInterfaceMainmenu, event.event);
         consumed = true;
         switch(event.event) {
+        case VarItemListIndexMenuStyle:
+            scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceMainmenuStyle);
+            break;
         case VarItemListIndexResetMenu:
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceMainmenuReset);
             break;

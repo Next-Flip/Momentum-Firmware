@@ -28,7 +28,7 @@ typedef enum {
     ArchiveTabNFC,
     ArchiveTabInfrared,
     ArchiveTabIButton,
-    ArchiveTabBadKb,
+    ArchiveTabBadUsb,
     ArchiveTabU2f,
     ArchiveTabApplications,
     ArchiveTabSearch,
@@ -89,6 +89,8 @@ struct ArchiveBrowserView {
     ArchiveBrowserViewCallback callback;
     void* context;
     FuriString* path;
+    FuriString* formatted_path;
+    bool path_changed;
     InputKey last_tab_switch_dir;
     bool is_root;
     FuriTimer* scroll_timer;

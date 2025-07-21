@@ -7,14 +7,14 @@
 #define TAB_DEFAULT       ArchiveTabFavorites // Start tab
 #define FILE_LIST_BUF_LEN 50
 
-static const char* tab_default_paths[] = {
+static const char* const tab_default_paths[] = {
     [ArchiveTabFavorites] = "/app:favorites",
     [ArchiveTabIButton] = EXT_PATH("ibutton"),
     [ArchiveTabNFC] = EXT_PATH("nfc"),
     [ArchiveTabSubGhz] = EXT_PATH("subghz"),
     [ArchiveTabLFRFID] = EXT_PATH("lfrfid"),
     [ArchiveTabInfrared] = EXT_PATH("infrared"),
-    [ArchiveTabBadKb] = EXT_PATH("badusb"),
+    [ArchiveTabBadUsb] = EXT_PATH("badusb"),
     [ArchiveTabU2f] = "/app:u2f",
     [ArchiveTabApplications] = EXT_PATH("apps"),
     [ArchiveTabSearch] = "/app:search",
@@ -23,8 +23,7 @@ static const char* tab_default_paths[] = {
     [ArchiveTabBrowser] = STORAGE_EXT_PATH_PREFIX,
 };
 
-static const char* known_ext[] = {
-    // clang-format off
+static const char* const known_ext[] = {
     [ArchiveFileTypeIButton] = ".ibtn",
     [ArchiveFileTypeNFC] = ".nfc",
     [ArchiveFileTypeSubGhz] = ".sub",
@@ -33,9 +32,10 @@ static const char* known_ext[] = {
     [ArchiveFileTypeSubghzPlaylist] = ".txt",
     [ArchiveFileTypeSubghzRemote] = ".txt",
     [ArchiveFileTypeInfraredRemote] = ".txt",
-    [ArchiveFileTypeBadKb] = ".txt",
+    [ArchiveFileTypeBadUsb] = ".txt",
     [ArchiveFileTypeWAV] = ".wav",
     [ArchiveFileTypeMag] = ".mag",
+    [ArchiveFileTypeCrossRemote] = ".xr",
     [ArchiveFileTypeU2f] = "?",
     [ArchiveFileTypeApplication] = ".fap",
     [ArchiveFileTypeJS] = ".js",
@@ -45,7 +45,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeFolder] = "?",
     [ArchiveFileTypeUnknown] = "*",
     [ArchiveFileTypeAppOrJs] = ".fap|.js",
-    // clang-format on
+    [ArchiveFileTypeSetting] = "?",
 };
 
 static const ArchiveFileTypeEnum known_type[] = {
@@ -55,7 +55,7 @@ static const ArchiveFileTypeEnum known_type[] = {
     [ArchiveTabSubGhz] = ArchiveFileTypeSubGhz,
     [ArchiveTabLFRFID] = ArchiveFileTypeLFRFID,
     [ArchiveTabInfrared] = ArchiveFileTypeInfrared,
-    [ArchiveTabBadKb] = ArchiveFileTypeBadKb,
+    [ArchiveTabBadUsb] = ArchiveFileTypeBadUsb,
     [ArchiveTabU2f] = ArchiveFileTypeU2f,
     [ArchiveTabApplications] = ArchiveFileTypeAppOrJs,
     [ArchiveTabSearch] = ArchiveFileTypeSearch,
