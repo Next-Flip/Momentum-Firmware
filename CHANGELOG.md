@@ -8,7 +8,10 @@
   - UL: Keeloq Comunello add manually support (by @xMasterX)
 - RFID: Support writing Securakey, Jablotron and FDX-B to EM4305 cards (#434 by @jamisonderek)
 - BT Remote: Add Rename Option, simplify Bad KB BLE profile (#439 by @aaronjamt & @WillyJL)
-- MNTM Settings: Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
+- MNTM Settings:
+  - Add Main Menu support for directories and generic files (including JS files) (#331 by @956MB & @WillyJL)
+  - Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
+- Desktop: Add Keybinds support for directories (#331 by @956MB & @WillyJL)
 
 ### Updated:
 - Apps:
