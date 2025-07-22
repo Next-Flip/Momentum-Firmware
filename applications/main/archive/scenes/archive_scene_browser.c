@@ -6,6 +6,8 @@
 #include "../views/archive_browser_view.h"
 #include "archive/scenes/archive_scene.h"
 
+#include <desktop/desktop_i.h>
+
 #define TAG "ArchiveSceneBrowser"
 
 #define SCENE_STATE_DEFAULT      (0)
@@ -182,6 +184,12 @@ static void
         }
     } else if(selected->type == ArchiveFileTypeApplication) {
         loader_start_detached_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
+    } else if(selected->type == ArchiveFileTypeFolder) {
+        // Folders are handled by archive, so we should only get here with run_with_default_app() outside archive
+        furi_check(browser == NULL, "What you doin?");
+        Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+        desktop_launch_archive(desktop, furi_string_get_cstr(selected->path));
+        furi_record_close(RECORD_DESKTOP);
     } else {
         archive_show_file(loader, furi_string_get_cstr(selected->path));
     }

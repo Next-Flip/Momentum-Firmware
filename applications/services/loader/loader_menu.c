@@ -1,11 +1,10 @@
-#include "archive/helpers/archive_helpers_ext.h"
-#include "desktop/desktop_i.h"
 #include <gui/modules/menu.h>
 #include <gui/modules/submenu.h>
 #include <assets_icons.h>
 #include <applications.h>
 #include <archive/helpers/archive_favorites.h>
 #include <toolbox/run_parallel.h>
+#include <archive/helpers/archive_helpers_ext.h>
 
 #include "loader.h"
 #include "loader_i.h"
@@ -134,17 +133,7 @@ static void loader_menu_apps_callback(void* context, uint32_t index) {
     const char* name = menu_app->path ? menu_app->path : menu_app->name;
 
     if(menu_app->path && !strstr(menu_app->path, ".fap")) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        bool is_dir = storage_dir_exists(storage, menu_app->path);
-        furi_record_close(RECORD_STORAGE);
-
-        if(is_dir) {
-            Desktop* desktop = furi_record_open(RECORD_DESKTOP);
-            desktop_launch_archive(desktop, menu_app->path);
-            furi_record_close(RECORD_DESKTOP);
-        } else {
-            run_with_default_app(menu_app->path);
-        }
+        run_with_default_app(menu_app->path);
     } else {
         loader_menu_start(name);
     }
