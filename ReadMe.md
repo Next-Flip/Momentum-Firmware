@@ -103,6 +103,7 @@ Note that this repo is always updated with the great work from our friends at [U
 - Wardriver App
 - File Search across SD Card
 - Additional NFC parsers and protocols
+- NFC Type 4 protocol and NTAG4xx support
 - Subdriving (saving GPS coordinates for Sub-GHz)
 - Easy spoofing (Name, MAC address, Serial number)
 - Video Game Module color configuration right from Flipper
