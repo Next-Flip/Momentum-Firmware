@@ -12,6 +12,7 @@
   - Add Main Menu support for directories and generic files (including JS files) (#331 by @956MB & @WillyJL)
   - Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
 - Desktop: Add Keybinds support for directories (#331 by @956MB & @WillyJL)
+- Input Settings: Add Vibro Trigger option (#429 by @956MB)
 
 ### Updated:
 - Apps:
