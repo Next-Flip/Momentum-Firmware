@@ -139,15 +139,12 @@ static void loader_menu_apps_callback(void* context, uint32_t index) {
         furi_record_close(RECORD_STORAGE);
 
         if(is_dir) {
-            Desktop* desktop = furi_record_open(RECORD_DESKTOP);
-            desktop->archive_dir = furi_string_alloc_set(menu_app->path);
-            furi_record_close(RECORD_DESKTOP);
-
             furi_thread_flags_set(furi_thread_get_id(app->loader_menu->thread), 0);
             if(app->loader_menu->closed_cb) app->loader_menu->closed_cb(app->loader_menu->context);
 
-            view_dispatcher_send_custom_event(
-                desktop->view_dispatcher, DesktopMainEventOpenArchive);
+            Desktop* desktop = furi_record_open(RECORD_DESKTOP);
+            desktop_launch_archive(desktop, menu_app->path);
+            furi_record_close(RECORD_DESKTOP);
         } else {
             run_with_default_app(menu_app->path);
         }

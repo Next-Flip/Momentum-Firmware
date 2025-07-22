@@ -203,7 +203,7 @@ void desktop_run_keybind(Desktop* desktop, InputType _type, InputKey _key) {
     } else if(furi_string_equal(keybind, "Apps Menu")) {
         loader_start_detached_with_gui_error(desktop->loader, LOADER_APPLICATIONS_NAME, NULL);
     } else if(furi_string_equal(keybind, "Archive")) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventOpenArchive);
+        desktop_launch_archive(desktop, NULL);
     } else if(furi_string_equal(keybind, "Clock")) {
         loader_start_detached_with_gui_error(
             desktop->loader, EXT_PATH("apps/Tools/nightstand.fap"), "");
@@ -218,20 +218,16 @@ void desktop_run_keybind(Desktop* desktop, InputType _type, InputKey _key) {
     } else if(furi_string_equal(keybind, "Wipe Device")) {
         loader_start_detached_with_gui_error(desktop->loader, "Storage", "Wipe Device");
     } else {
-        if(storage_common_exists(desktop->storage, furi_string_get_cstr(keybind))) {
-            const char* path = furi_string_get_cstr(keybind);
-            bool is_dir = storage_dir_exists(desktop->storage, path);
-
-            if(is_dir) {
-                desktop->archive_dir = furi_string_alloc_set(path);
-                view_dispatcher_send_custom_event(
-                    desktop->view_dispatcher, DesktopMainEventOpenArchive);
+        FileInfo file_info;
+        const char* str = furi_string_get_cstr(keybind);
+        if(storage_common_stat(desktop->storage, str, &file_info) == FSE_OK) {
+            if(file_info_is_dir(&file_info)) {
+                desktop_launch_archive(desktop, str);
             } else {
-                run_with_default_app(path);
+                run_with_default_app(str);
             }
         } else {
-            loader_start_detached_with_gui_error(
-                desktop->loader, furi_string_get_cstr(keybind), NULL);
+            loader_start_detached_with_gui_error(desktop->loader, str, NULL);
         }
     }
 

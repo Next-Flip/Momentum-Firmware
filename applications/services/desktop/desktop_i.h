@@ -97,3 +97,4 @@ void desktop_lock(Desktop* desktop, bool pin_lock);
 void desktop_unlock(Desktop* desktop);
 int32_t desktop_shutdown(void* context);
 void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled);
+void desktop_launch_archive(Desktop* desktop, const char* open_dir);

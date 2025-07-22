@@ -144,9 +144,9 @@ int32_t archive_app(void* p) {
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
 
     // If we are sent a path from context, set it in the browser
-    if(path) {
+    if(path && !furi_string_empty(path)) {
         archive_set_tab(archive->browser, ArchiveTabBrowser);
-        furi_string_set(archive->browser->path, furi_string_get_cstr(path));
+        furi_string_set(archive->browser->path, path);
         archive->browser->is_root = false;
         archive_file_browser_set_path(
             archive->browser,
