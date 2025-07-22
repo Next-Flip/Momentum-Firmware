@@ -87,7 +87,7 @@ void momentum_app_scene_interface_mainmenu_on_enter(void* context) {
         var_item_list, "Item", count, momentum_app_scene_interface_mainmenu_app_changed, app);
     if(count) {
         app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
-        char label[20];
+        char label[21];
         snprintf(label, sizeof(label), "Item  %u/%u", 1 + app->mainmenu_app_index, count);
         variable_item_set_item_label(item, label);
         variable_item_set_current_value_text(
@@ -149,7 +149,7 @@ bool momentum_app_scene_interface_mainmenu_on_event(void* context, SceneManagerE
             VariableItem* item = variable_item_list_get(app->var_item_list, VarItemListIndexItem);
             if(count) {
                 app->mainmenu_app_index = CLAMP(app->mainmenu_app_index, count - 1, 0U);
-                char label[20];
+                char label[21];
                 snprintf(label, sizeof(label), "Item  %u/%u", 1 + app->mainmenu_app_index, count);
                 variable_item_set_item_label(item, label);
                 variable_item_set_current_value_text(
