@@ -40,12 +40,11 @@ static void
             .base_path = is_file_dir ? STORAGE_EXT_PATH_PREFIX : EXT_PATH("apps"),
             .select_right = is_file_dir,
         };
-        FuriString* temp_path =
-            furi_string_alloc_set_str(is_file_dir ? STORAGE_EXT_PATH_PREFIX : EXT_PATH("apps"));
+        FuriString* temp_path = furi_string_alloc_set_str(browser_options.base_path);
 
         if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
             CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(temp_path)));
-            if(is_file_dir || !furi_string_end_with(temp_path, ".fap")) {
+            if(is_file_dir) {
                 const char* path = furi_string_get_cstr(temp_path);
                 const char* end = strrchr(path, '/');
                 furi_string_set_str(temp_path, end ? end + 1 : path);

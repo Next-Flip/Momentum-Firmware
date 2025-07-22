@@ -278,12 +278,10 @@ static void loader_menu_find_add_app(LoaderMenuApp* app, Storage* storage, FuriS
     const char* path = NULL;
     if(furi_string_start_with(line, "/")) {
         path = strdup(furi_string_get_cstr(line));
-        if(loader_menu_load_fap_meta(storage, line, line, &icon)) {
-            name = strdup(furi_string_get_cstr(line));
-        } else {
-            name = strdup(furi_string_get_cstr(line));
+        if(!loader_menu_load_fap_meta(storage, line, line, &icon)) {
             icon = loader_menu_get_ext_icon(storage, path);
         }
+        name = strdup(furi_string_get_cstr(line));
     } else {
         for(size_t i = 0; !name && i < FLIPPER_APPS_COUNT; i++) {
             if(furi_string_equal(line, FLIPPER_APPS[i].name)) {
