@@ -80,7 +80,7 @@ void momentum_app_scene_interface_mainmenu_add_on_enter(void* context) {
     MomentumApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_set_header(submenu, "Add Menu App:");
+    submenu_set_header(submenu, "Add Menu Item:");
 
     submenu_add_item(
         submenu,
