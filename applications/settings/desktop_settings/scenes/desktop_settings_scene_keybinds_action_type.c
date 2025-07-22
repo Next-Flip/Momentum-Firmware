@@ -99,7 +99,7 @@ void desktop_settings_scene_keybinds_action_type_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Open File/Directory",
+        "File / Directory (right btn)",
         DesktopSettingsAppKeybindActionTypeOpenFileOrDirectory,
         desktop_settings_scene_keybinds_action_type_submenu_callback,
         app);

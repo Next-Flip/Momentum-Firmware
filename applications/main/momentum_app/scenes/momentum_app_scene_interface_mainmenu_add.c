@@ -98,7 +98,7 @@ void momentum_app_scene_interface_mainmenu_add_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "File/Directory",
+        "File / Directory (right btn)",
         SubmenuIndexFileDirectory,
         momentum_app_scene_interface_mainmenu_add_submenu_callback,
         app);
