@@ -189,6 +189,8 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         // Header info (UID, ATQA, SAK)
 	furi_string_cat_printf(parsed_data, "\e#Microel Card\n");
+	furi_string_cat_printf(parsed_data, "(Mifare Classic 1k)\n");
+	furi_string_cat_printf(parsed_data, "====================\n");
 
 	// UID
 	furi_string_cat_printf(parsed_data, "UID:");
@@ -200,25 +202,16 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 	uint8_t atqa_lsb = data->block[0].data[6];
 	uint8_t atqa_msb = data->block[0].data[7];
 	uint8_t sak = data->block[0].data[5];
-	furi_string_cat_printf(parsed_data, "ATQA: %02X %02X   SAK: %02X\n", atqa_msb, atqa_lsb, sak);
+	furi_string_cat_printf(parsed_data, "ATQA: %02X %02X ~ SAK: %02X\n", atqa_msb, atqa_lsb, sak);
 	
 	furi_string_cat_printf(parsed_data, "--------------------\n");
 	
-	// Vendor ID - Block 1 (entire block)
-        furi_string_cat_printf(parsed_data, "VENDOR ID:");
-        for(size_t i = 0; i < 16; i++) {
-            furi_string_cat_printf(parsed_data, " %02X", data->block[1].data[i]);
-        }
-        furi_string_cat_printf(parsed_data, "\n");
-        
-        furi_string_cat_printf(parsed_data, "--------------------\n");
-	
 	// Credito disponibile
         uint16_t credito_raw = (data->block[4].data[6] << 8) | data->block[4].data[5];
-
+	// Dati credito precedente (Block 5)
+        uint16_t credito_precedente = (data->block[5].data[6] << 8) | data->block[5].data[5];
 	// Data e ora (Block 4, bytes 7-10) in formato MicroEL
 	uint32_t raw_data_op = (data->block[4].data[10] << 24) | (data->block[4].data[9] << 16) | (data->block[4].data[8] << 8) | data->block[4].data[7];
-
 	// Ricava tutti i campi (scarta i primi 5 bit)
 	uint32_t useful_bits = raw_data_op & 0x07FFFFFF; // ultimi 27 bit
 
@@ -237,50 +230,45 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         // Numero operazione (Block 4, bytes 0-1)
         uint16_t num_op = (data->block[4].data[1] << 8) | data->block[4].data[0];
-
         // Saldo punti (Block 4, bytes 11-12)
         uint16_t saldo_punti = (data->block[4].data[11] << 8) | data->block[4].data[12];
-
         // Ultima transazione (Block 4, bytes 13-14)
         uint16_t transazione_raw = (data->block[4].data[14] << 8) | data->block[4].data[13];
-
         // Somma in ingresso e cauzione (Block 4)
 	uint16_t somma_raw = data->block[4].data[2] | (data->block[4].data[3] << 8);
 	float somma = somma_raw / 10.0f;
 	bool cauzione = data->block[4].data[4] != 0;
 
-        furi_string_cat_printf(parsed_data, "Credit available: %d.%02d\n", credito_raw / 100, credito_raw % 100);
-        furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d %02d:%02d\n", giorno, mese, anno, ore, minuti);
-        furi_string_cat_printf(parsed_data, "Operation nr.: %d\n", num_op);
-        furi_string_cat_printf(parsed_data, "Last transaction: %d.%02d\n", transazione_raw / 100, transazione_raw % 100);
-        furi_string_cat_printf(parsed_data, "Type of operation: %s\n", tipo_op_str);
+        furi_string_cat_printf(parsed_data, "-> Credit Available: %d.%02d\n", credito_raw / 100, credito_raw % 100);
+	furi_string_cat_printf(parsed_data, "-> Previous Credit: %d.%02d\n", credito_precedente / 100, credito_precedente % 100);
+	furi_string_cat_printf(parsed_data, "--------------------\n");
+	furi_string_cat_printf(parsed_data, "Last transaction: %d.%02d\n", transazione_raw / 100, transazione_raw % 100);
+        furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d ~ %02d:%02d\n", giorno, mese, anno, ore, minuti);
+        furi_string_cat_printf(parsed_data, "Operation Nr: %d\n", num_op);
+        furi_string_cat_printf(parsed_data, "Operation Type: [%s]\n", tipo_op_str);       
+        furi_string_cat_printf(parsed_data, "====================\n");
+
+	// Vendor ID - Block 1 (entire block)
+        furi_string_cat_printf(parsed_data, "Vendor Univocal ID:\n");
+	for (size_t i = 0; i < 12; i++) {
+    	    furi_string_cat_printf(parsed_data, "%02X", data->block[1].data[i]);
+    	    if (i % 8 == 7) {
+                // Dopo ogni 8 byte, vai a capo
+                furi_string_cat_printf(parsed_data, "\n");
+    	    } else {
+        	// Altrimenti, aggiungi uno spazio
+        	furi_string_cat_printf(parsed_data, " ");
+    	    }
+        }
         
         furi_string_cat_printf(parsed_data, "--------------------\n");
         
-        furi_string_cat_printf(parsed_data, "Admission credit: %d.%02d\n", (int)somma, (int)(somma * 100) % 100);
-	furi_string_cat_printf(parsed_data, "Deposit: %s\n", cauzione ? "SI" : "NO");
-	furi_string_cat_printf(parsed_data, "Points balance: %d pt.\n", saldo_punti);
+        furi_string_cat_printf(parsed_data, "Points balance: %d pt.\n", saldo_punti);
+	furi_string_cat_printf(parsed_data, "Admission credit: %d.%02d\n", (int)somma, (int)(somma * 100) % 100);
+	furi_string_cat_printf(parsed_data, "Deposit: %s\n", cauzione ? "[SI]" : "[NO]");
 	
 	furi_string_cat_printf(parsed_data, "--------------------\n");
-
-        // Dati credito precedente (Block 5)
-        uint16_t credito_precedente = (data->block[5].data[6] << 8) | data->block[5].data[5];
-        
-        // Data e ora operazione precedente (Block 5, bytes 7-10)
-	uint32_t raw_data_prec = (data->block[5].data[10] << 24) | (data->block[5].data[9] << 16) | (data->block[5].data[8] << 8) | data->block[5].data[7];
-
-	// Ricava tutti i campi (27 bit utili)
-	uint32_t useful_bits_prec = raw_data_prec & 0x07FFFFFF;
-
-	uint8_t minuti_prec     = (useful_bits_prec >> 21) & 0x3F; // 6 bit
-	uint8_t ore_prec        = (useful_bits_prec >> 16) & 0x1F; // 5 bit
-	uint16_t anno_prec      = ((useful_bits_prec >> 9) & 0x1F) + BASE_YEAR; // 5 bit + offset
-	uint8_t mese_prec       = (useful_bits_prec >> 5) & 0x0F;  // 4 bit
-	uint8_t giorno_prec     = useful_bits_prec & 0x1F;         // ultimi 5 bit
 	
-        furi_string_cat_printf(parsed_data, "Previous credit: %d.%02d\n", credito_precedente / 100, credito_precedente % 100);
-        furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d %02d:%02d\n", giorno_prec, mese_prec, anno_prec, ore_prec, minuti_prec);
-
         parsed = true;
     } while(false);
 
