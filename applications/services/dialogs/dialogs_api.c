@@ -43,6 +43,7 @@ bool dialog_file_browser_show(
             .item_callback = options ? options->item_loader_callback : NULL,
             .item_callback_context = options ? options->item_loader_context : NULL,
             .base_path = furi_string_get_cstr(base_path),
+            .select_right = options ? options->select_right : false,
         }};
 
     DialogsAppReturn return_data;

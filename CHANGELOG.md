@@ -8,7 +8,11 @@
   - UL: Keeloq Comunello add manually support (by @xMasterX)
 - RFID: Support writing Securakey, Jablotron and FDX-B to EM4305 cards (#434 by @jamisonderek)
 - BT Remote: Add Rename Option, simplify Bad KB BLE profile (#439 by @aaronjamt & @WillyJL)
-- MNTM Settings: Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
+- MNTM Settings:
+  - Add Main Menu support for directories and generic files (including JS files) (#331 by @956MB & @WillyJL)
+  - Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
+- Desktop: Add Keybinds support for directories (#331 by @956MB & @WillyJL)
+- Input Settings: Add Vibro Trigger option (#429 by @956MB)
 
 ### Updated:
 - Apps:
@@ -22,9 +26,11 @@
 - Sub-GHz:
   - UL: Add 868.46 MHz to default subghz freqs list (by @xMasterX)
   - UL: Reduce less popular freqs in default hopper preset, make it faster (by @xMasterX)
+- JS: Expose button event type in `gui/widget` button callback (by @WillyJL)
 - UL: Docs: Update Sub-GHz DoorHan programming instructions (by @li0ard)
 
 ### Fixed:
+- CLI: Fix long delay with quick connect/disconnect, qFlipper should connect faster as expected again (by @WillyJL)
 - Bad KB: Fix modifier keys with HOLD/RELEASE commands (by @WillyJL)
 - Desktop: Fix lock screen hang (#438 by @aaronjamt)
 - NFC: Fix incorrect Saflok year formula (#433 by @Eltrick)

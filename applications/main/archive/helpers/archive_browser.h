@@ -80,6 +80,12 @@ inline bool archive_is_known_app(ArchiveFileTypeEnum type) {
     return type < ArchiveFileTypeUnknown;
 }
 
+void archive_file_browser_set_path(
+    ArchiveBrowserView* browser,
+    FuriString* path,
+    const char* filter_ext,
+    bool skip_assets,
+    bool hide_dot_files);
 bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx);
 bool archive_is_file_list_load_required(ArchiveBrowserViewModel* model);
 void archive_update_offset(ArchiveBrowserView* browser);
@@ -104,6 +110,7 @@ void archive_add_file_item(ArchiveBrowserView* browser, bool is_folder, const ch
 void archive_show_file_menu(ArchiveBrowserView* browser, bool show, bool manage);
 void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active);
 
+void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab);
 void archive_switch_tab(ArchiveBrowserView* browser, InputKey key);
 void archive_enter_dir(ArchiveBrowserView* browser, FuriString* name);
 void archive_leave_dir(ArchiveBrowserView* browser);

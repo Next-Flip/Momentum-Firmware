@@ -48,6 +48,8 @@ void file_browser_set_item_callback(
     FileBrowserLoadItemCallback callback,
     void* context);
 
+void file_browser_set_select_right(FileBrowser* browser, bool select_right);
+
 #ifdef __cplusplus
 }
 #endif

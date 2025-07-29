@@ -461,6 +461,9 @@ static void cli_shell_deinit(CliShell* shell) {
 static int32_t cli_shell_thread(void* context) {
     CliShell* shell = context;
 
+    // Give qFlipper a chance to close and re-open the session
+    furi_delay_ms(100);
+
     // Sometimes, the other side closes the pipe even before our thread is started. Although the
     // rest of the code will eventually find this out if this check is removed, there's no point in
     // wasting time.

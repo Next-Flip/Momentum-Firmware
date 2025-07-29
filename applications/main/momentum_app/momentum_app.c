@@ -201,22 +201,23 @@ void momentum_app_load_mainmenu_apps(MomentumApp* app) {
             if(furi_string_start_with(line, "/")) {
                 if(!flipper_application_load_name_and_icon(
                        line, app->storage, &unused_icon, label)) {
-                    furi_string_reset(label);
+                    const char* end = strrchr(furi_string_get_cstr(line), '/');
+                    furi_string_set(label, end ? end + 1 : furi_string_get_cstr(line));
                 }
-            } else {
-                furi_string_reset(label);
-                bool found = false;
-                for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
-                        furi_string_set(label, FLIPPER_APPS[i].name);
-                        found = true;
-                    }
+                momentum_app_push_mainmenu_app(app, label, line);
+                continue;
+            }
+            bool found = false;
+            for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
+                if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
+                    furi_string_set(label, FLIPPER_APPS[i].name);
+                    found = true;
                 }
-                for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
-                        furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
-                        found = true;
-                    }
+            }
+            for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+                if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
+                    furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
+                    found = true;
                 }
             }
             if(furi_string_empty(label)) {

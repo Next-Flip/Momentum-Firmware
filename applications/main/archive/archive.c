@@ -1,4 +1,5 @@
 #include "archive_i.h"
+#include "helpers/archive_browser.h"
 
 static bool archive_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -136,11 +137,25 @@ void archive_show_loading_popup(ArchiveApp* context, bool show) {
 }
 
 int32_t archive_app(void* p) {
-    UNUSED(p);
+    FuriString* path = (FuriString*)p;
 
     ArchiveApp* archive = archive_alloc();
     view_dispatcher_attach_to_gui(
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
+
+    // If we are sent a path from context, set it in the browser
+    if(path && !furi_string_empty(path)) {
+        archive_set_tab(archive->browser, ArchiveTabBrowser);
+        furi_string_set(archive->browser->path, path);
+        archive->browser->is_root = false;
+        archive_file_browser_set_path(
+            archive->browser,
+            archive->browser->path,
+            archive_get_tab_ext(ArchiveTabBrowser),
+            false,
+            !momentum_settings.show_hidden_files);
+    }
+
     scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneBrowser);
     view_dispatcher_run(archive->view_dispatcher);
 

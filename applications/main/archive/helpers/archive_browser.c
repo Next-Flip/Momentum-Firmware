@@ -116,7 +116,7 @@ static void archive_long_load_cb(void* context) {
         browser->view, ArchiveBrowserViewModel * model, { model->folder_loading = true; }, true);
 }
 
-static void archive_file_browser_set_path(
+void archive_file_browser_set_path(
     ArchiveBrowserView* browser,
     FuriString* path,
     const char* filter_ext,

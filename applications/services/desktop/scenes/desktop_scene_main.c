@@ -34,8 +34,10 @@ static void desktop_scene_main_interact_animation_callback(void* context) {
 }
 
 #ifdef APP_ARCHIVE
-static void
-    desktop_switch_to_app(Desktop* desktop, const FlipperInternalApplication* flipper_app) {
+static void desktop_switch_to_app(
+    Desktop* desktop,
+    const FlipperInternalApplication* flipper_app,
+    void* context) {
     furi_assert(desktop);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
@@ -56,6 +58,7 @@ static void
     furi_thread_set_name(desktop->scene_thread, flipper_app->name);
     furi_thread_set_stack_size(desktop->scene_thread, flipper_app->stack_size);
     furi_thread_set_callback(desktop->scene_thread, flipper_app->app);
+    furi_thread_set_context(desktop->scene_thread, context);
 
     furi_thread_start(desktop->scene_thread);
 }
@@ -114,7 +117,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
         case DesktopMainEventOpenArchive:
 #ifdef APP_ARCHIVE
-            desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
+            desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE, desktop->archive_dir);
 #endif
             consumed = true;
             break;
