@@ -238,13 +238,14 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 	uint16_t somma_raw = data->block[4].data[2] | (data->block[4].data[3] << 8);
 	float somma = somma_raw / 10.0f;
 	bool cauzione = data->block[4].data[4] != 0;
+	uint8_t cauzione_raw = data->block[4].data[4];
 
         furi_string_cat_printf(parsed_data, "-> Credit Available: %d.%02d\n", credito_raw / 100, credito_raw % 100);
 	furi_string_cat_printf(parsed_data, "-> Previous Credit: %d.%02d\n", credito_precedente / 100, credito_precedente % 100);
 	furi_string_cat_printf(parsed_data, "--------------------\n");
 	furi_string_cat_printf(parsed_data, "Last transaction: %d.%02d\n", transazione_raw / 100, transazione_raw % 100);
         furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d ~ %02d:%02d\n", giorno, mese, anno, ore, minuti);
-        furi_string_cat_printf(parsed_data, "Operation Nr: %d\n", num_op);
+        furi_string_cat_printf(parsed_data, "Operation Nr: (%d)\n", num_op);
         furi_string_cat_printf(parsed_data, "Operation Type: [%s]\n", tipo_op_str);       
         furi_string_cat_printf(parsed_data, "====================\n");
 
@@ -256,16 +257,23 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
                 // Dopo ogni 6 byte, vai a capo
                 furi_string_cat_printf(parsed_data, "\n");
     	    } else {
-        	// Altrimenti, aggiungi uno spazio tra un byte el'altro
+        	// Altrimenti, aggiungi uno spazio
         	furi_string_cat_printf(parsed_data, " ");
     	    }
         }
         
         furi_string_cat_printf(parsed_data, "--------------------\n");
         
-        furi_string_cat_printf(parsed_data, "Points balance: %d pt.\n", saldo_punti);
+        furi_string_cat_printf(parsed_data, "Points balance: (%d pt.)\n", saldo_punti);
 	furi_string_cat_printf(parsed_data, "Admission credit: %d.%02d\n", (int)somma, (int)(somma * 100) % 100);
-	furi_string_cat_printf(parsed_data, "Deposit: %s\n", cauzione ? "[SI]" : "[NO]");
+	
+	// Gestione deposito aggiornata
+	if (cauzione) {
+	    furi_string_cat_printf(parsed_data, "Deposit: [Yes] ~ (%d.%02d)\n", 
+	                          cauzione_raw / 100, cauzione_raw % 100);
+	} else {
+	    furi_string_cat_printf(parsed_data, "Deposit: [No]\n");
+	}
 	
 	furi_string_cat_printf(parsed_data, "--------------------\n");
 	
@@ -275,7 +283,6 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
     return parsed;
 }
 
-/* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin microel_plugin = {
     .protocol = NfcProtocolMfClassic,
     .verify = NULL,
@@ -283,14 +290,12 @@ static const NfcSupportedCardsPlugin microel_plugin = {
     .parse = microel_parse,
 };
 
-/* Plugin descriptor to comply with basic plugin specification */
 static const FlipperAppPluginDescriptor microel_plugin_descriptor = {
     .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
     .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
     .entry_point = &microel_plugin,
 };
 
-/* Plugin entry point - must return a pointer to const descriptor  */
 const FlipperAppPluginDescriptor* microel_plugin_ep(void) {
     return &microel_plugin_descriptor;
 }
