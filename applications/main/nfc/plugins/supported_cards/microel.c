@@ -246,7 +246,7 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 	furi_string_cat_printf(parsed_data, "Last transaction: %d.%02d\n", transazione_raw / 100, transazione_raw % 100);
         furi_string_cat_printf(parsed_data, "Date: %02d/%02d/%04d ~ %02d:%02d\n", giorno, mese, anno, ore, minuti);
         furi_string_cat_printf(parsed_data, "Operation Nr: (%d)\n", num_op);
-        furi_string_cat_printf(parsed_data, "Operation Type: [%s]\n", tipo_op_str);       
+        furi_string_cat_printf(parsed_data, "Op. Type: [%s]\n", tipo_op_str);       
         furi_string_cat_printf(parsed_data, "====================\n");
 
 	// Vendor ID - Block 1 (entire block)
