@@ -251,9 +251,9 @@ static bool microel_parse(const NfcDevice* device, FuriString* parsed_data) {
 
 	// Vendor ID - Block 1 (entire block)
         furi_string_cat_printf(parsed_data, "Vendor Univocal ID:\n");
-	for (size_t i = 0; i < 12; i++) {
+	for (size_t i = 0; i < 16; i++) {
     	    furi_string_cat_printf(parsed_data, "%02X", data->block[1].data[i]);
-    	    if (i % 6 == 5) {
+    	    if (i % 8 == 7) {
                 // Dopo ogni 6 byte, vai a capo
                 furi_string_cat_printf(parsed_data, "\n");
     	    } else {
