@@ -118,32 +118,32 @@ static bool subghz_protocol_encoder_linear_get_upload(SubGhzProtocolEncoderLinea
         if(bit_read(instance->generic.data, i - 1)) {
             //send bit 1
             instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_linear_const.te_short);
-            instance->encoder.upload[index++] =
-                level_duration_make(false, (uint32_t)subghz_protocol_linear_const.te_long);
-        } else {
-            //send bit 0
-            instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_linear_const.te_long);
             instance->encoder.upload[index++] =
                 level_duration_make(false, (uint32_t)subghz_protocol_linear_const.te_short);
+        } else {
+            //send bit 0
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)subghz_protocol_linear_const.te_short);
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)subghz_protocol_linear_const.te_long);
         }
     }
     //Send end bit
     if(bit_read(instance->generic.data, 0)) {
         //send bit 1
         instance->encoder.upload[index++] =
-            level_duration_make(true, (uint32_t)subghz_protocol_linear_const.te_short);
-        //Send gap
-        instance->encoder.upload[index++] =
-            level_duration_make(false, (uint32_t)subghz_protocol_linear_const.te_short * 44);
-    } else {
-        //send bit 0
-        instance->encoder.upload[index++] =
             level_duration_make(true, (uint32_t)subghz_protocol_linear_const.te_long);
         //Send gap
         instance->encoder.upload[index++] =
             level_duration_make(false, (uint32_t)subghz_protocol_linear_const.te_short * 42);
+    } else {
+        //send bit 0
+        instance->encoder.upload[index++] =
+            level_duration_make(true, (uint32_t)subghz_protocol_linear_const.te_short);
+        //Send gap
+        instance->encoder.upload[index++] =
+            level_duration_make(false, (uint32_t)subghz_protocol_linear_const.te_short * 44);
     }
 
     return true;
@@ -251,11 +251,11 @@ void subghz_protocol_decoder_linear_feed(void* context, bool level, uint32_t dur
                 }
                 if(DURATION_DIFF(instance->decoder.te_last, subghz_protocol_linear_const.te_short) <
                    subghz_protocol_linear_const.te_delta) {
-                    subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 } else if(
                     DURATION_DIFF(instance->decoder.te_last, subghz_protocol_linear_const.te_long) <
                     subghz_protocol_linear_const.te_delta) {
-                    subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 }
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_linear_const.min_count_bit_for_found) {
@@ -275,14 +275,14 @@ void subghz_protocol_decoder_linear_feed(void* context, bool level, uint32_t dur
                 subghz_protocol_linear_const.te_delta) &&
                (DURATION_DIFF(duration, subghz_protocol_linear_const.te_long) <
                 subghz_protocol_linear_const.te_delta)) {
-                subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 instance->decoder.parser_step = LinearDecoderStepSaveDuration;
             } else if(
                 (DURATION_DIFF(instance->decoder.te_last, subghz_protocol_linear_const.te_long) <
                  subghz_protocol_linear_const.te_delta) &&
                 (DURATION_DIFF(duration, subghz_protocol_linear_const.te_short) <
                  subghz_protocol_linear_const.te_delta)) {
-                subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = LinearDecoderStepSaveDuration;
             } else {
                 instance->decoder.parser_step = LinearDecoderStepReset;
