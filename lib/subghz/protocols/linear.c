@@ -323,12 +323,15 @@ void subghz_protocol_decoder_linear_get_string(void* context, FuriString* output
     furi_assert(context);
     SubGhzProtocolDecoderLinear* instance = context;
 
-    uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
+    // Protocol is actually implemented wrong way around, bits are inverted.
+    // Instead of fixing it and breaking old saved remotes,
+    // only the display here is inverted to show correct values.
+    uint32_t code_found_reverse_lo = instance->generic.data & 0x00000000ffffffff;
 
-    uint64_t code_found_reverse = subghz_protocol_blocks_reverse_key(
+    uint64_t code_found = subghz_protocol_blocks_reverse_key(
         instance->generic.data, instance->generic.data_count_bit);
 
-    uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
+    uint32_t code_found_lo = code_found & 0x00000000ffffffff;
 
     furi_string_cat_printf(
         output,
