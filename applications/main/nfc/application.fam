@@ -238,6 +238,7 @@ App(
     sources=["plugins/supported_cards/smartrider.c"],
 )
 
+#Microel
 App(
     appid="microel_parser",
     apptype=FlipperAppType.PLUGIN,
@@ -245,6 +246,16 @@ App(
     targets=["f7"],
     requires=["nfc"],
     sources=["plugins/supported_cards/microel.c"],
+)
+
+#TreaA
+App(
+    appid="trea_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="trea_plugin_ep",
+    targets=["f7"],
+    requires=["nfc"],
+    sources=["plugins/supported_cards/trea.c"],
 )
 
 App(
