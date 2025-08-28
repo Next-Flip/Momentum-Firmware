@@ -19,7 +19,7 @@ static MfClassicKeyPair trea_1k_keys[] = {
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, // 003
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, // 004
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, // 005
-    {.a = 0x000000000000, .b = 0x000000000000}, // 006 - Blocco da calcolare
+    {.a = 0x000000000000, .b = 0x000000000000}, // 006 VALUE BLOCK
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, // 007
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, // 008
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, // 009
@@ -39,10 +39,11 @@ static const char* trea_identify_service_type(const MfClassicData* data) {
     
     switch(service_indicator) {
         case 0x04:
-            return "Autolavaggio";
-        // Altri tipi da aggiungere con nuovi dump:
-        // case 0xXX: return "Distributore";
-        // case 0xYY: return "Parcheggio";
+            return "CarWash";
+        // others kind of services:
+        // case 0xXX: return "Snacks Machine";
+        // case 0xYY: return "Parking";
+        // ecc......
         default:
             return "Generic Service";
     }
@@ -65,7 +66,7 @@ void trea_calculateKeys(
     uint8_t* chiaveA,
     uint8_t* chiaveB) {
     
-    // calcolo della chiave A
+    // key a calc
     chiaveA[0] = codiceGestore[0];
     chiaveA[1] = (codiceGestore[0] + 0x02) & 0xFF;
     chiaveA[2] = trea_calculateByte(uid, codiceGestore, 0, 0);
@@ -73,7 +74,7 @@ void trea_calculateKeys(
     chiaveA[4] = trea_calculateByte(uid, codiceGestore, 2, 0x04);
     chiaveA[5] = trea_calculateByte(uid, codiceGestore, 3, 0x06);
 
-    // calcolo della chiave B
+    // key b calc
     chiaveB[0] = chiaveA[2];
     chiaveB[1] = chiaveA[3];
     chiaveB[2] = chiaveA[4];
@@ -177,7 +178,7 @@ static bool trea_parse(const NfcDevice* device, FuriString* parsed_data) {
         const uint8_t* uid = mf_classic_get_uid(data, &uid_len);
         if(uid_len != UID_LENGTH) break;
 
-        // verifica treA
+        // verify trea
         bool is_trea = false;
         uint8_t vendor_code = 0;
         uint8_t chiaveA[6], chiaveB[6];
@@ -199,12 +200,10 @@ static bool trea_parse(const NfcDevice* device, FuriString* parsed_data) {
 
         if(!is_trea) break;
 
-        // UID, ATQA, SAK
         furi_string_cat_printf(parsed_data, "\e#TREA/Washtec Card\n");
         furi_string_cat_printf(parsed_data, "(Mifare Classic 1k)\n");
         furi_string_cat_printf(parsed_data, "====================\n");
 
-        // UID
         furi_string_cat_printf(parsed_data, "UID:");
         for(size_t i = 0; i < UID_LENGTH; i++) {
             furi_string_cat_printf(parsed_data, " %02X", uid[i]);
@@ -218,23 +217,20 @@ static bool trea_parse(const NfcDevice* device, FuriString* parsed_data) {
         
         furi_string_cat_printf(parsed_data, "--------------------\n");
 
-        // credito attuale
         const uint8_t* block_24_data = data->block[24].data;
         uint16_t balance_from_block_24 = (block_24_data[0] << 8) | block_24_data[1];
 
         furi_string_cat_printf(parsed_data, "-> Credit Available: %d.00\n", balance_from_block_24);
         furi_string_cat_printf(parsed_data, "--------------------\n");
 
-        // vendor code
         furi_string_cat_printf(parsed_data, "Vendor Code: 0x%02X\n", vendor_code);
 
-        // ttipo di servizio
         const char* service_type = trea_identify_service_type(data);
         furi_string_cat_printf(parsed_data, "Service Type: %s\n", service_type);
 
         furi_string_cat_printf(parsed_data, "--------------------\n");
 
-        // chiavi A e B generate
+        // generated keys a & b
         furi_string_cat_printf(parsed_data, "Key A: ");
         for(size_t i = 0; i < KEY_LENGTH; i++) {
             furi_string_cat_printf(parsed_data, "%02X", chiaveA[i]);
