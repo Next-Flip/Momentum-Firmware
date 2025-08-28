@@ -238,6 +238,7 @@ App(
     sources=["plugins/supported_cards/smartrider.c"],
 )
 
+#Microel
 App(
     appid="microel_parser",
     apptype=FlipperAppType.PLUGIN,
@@ -247,6 +248,7 @@ App(
     sources=["plugins/supported_cards/microel.c"],
 )
 
+#TreaA
 App(
     appid="trea_parser",
     apptype=FlipperAppType.PLUGIN,
