@@ -12,7 +12,7 @@ void momentum_app_scene_interface_mainmenu_reset_on_enter(void* context) {
     MomentumApp* app = context;
     DialogEx* dialog_ex = app->dialog_ex;
 
-    dialog_ex_set_header(dialog_ex, "Reset Menu Apps?", 64, 10, AlignCenter, AlignCenter);
+    dialog_ex_set_header(dialog_ex, "Reset Menu Items?", 64, 10, AlignCenter, AlignCenter);
     dialog_ex_set_text(dialog_ex, "Your edits will be lost!", 64, 32, AlignCenter, AlignCenter);
     dialog_ex_set_left_button_text(dialog_ex, "Cancel");
     dialog_ex_set_right_button_text(dialog_ex, "Reset");

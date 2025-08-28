@@ -5,8 +5,9 @@ static void
     MomentumApp* app = context;
     const char* name = (const char*)index;
 
-    CharList_push_back(app->mainmenu_app_exes, strdup(name));
-    CharList_push_back(app->mainmenu_app_labels, strdup(name));
+    FuriString* exe = furi_string_alloc_set(name);
+    momentum_app_push_mainmenu_app(app, exe);
+    furi_string_free(exe);
     app->mainmenu_app_index = CharList_size(app->mainmenu_app_labels) - 1;
     app->save_mainmenu_apps = true;
     scene_manager_search_and_switch_to_previous_scene(

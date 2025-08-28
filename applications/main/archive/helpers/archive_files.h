@@ -22,6 +22,7 @@ typedef enum {
     ArchiveFileTypeWAV,
     ArchiveFileTypeMag,
     ArchiveFileTypeCrossRemote,
+    ArchiveFileTypePicopass,
     ArchiveFileTypeU2f,
     ArchiveFileTypeUpdateManifest,
     ArchiveFileTypeApplication,

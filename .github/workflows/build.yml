@@ -76,6 +76,29 @@ jobs:
             exit 1
           fi
 
+      - name: "Configure for Devbuild/PR/Upload"
+        run: |
+          if ${{ secrets.INDEXER_URL == '' }} ; then
+            exit
+          fi
+          if ${{ github.event_name == 'push' }} ; then
+            if ${{ github.ref_name == 'dev' }} ; then
+              SHOULD_DEVBUILD=${{ !contains(github.event.head_commit.message, '--nobuild') }}
+              SHOULD_UPLOAD=$SHOULD_DEVBUILD
+            elif ${{ startsWith(github.ref, 'refs/tags/') }} ; then
+              SHOULD_UPLOAD=true
+            fi
+          elif ${{ !!github.event.pull_request }} ; then
+            SHOULD_PRCOMMENT=${{ matrix.target == env.DEFAULT_TARGET }}
+            SHOULD_UPLOAD=true
+          else
+            echo "What?"
+            exit 1
+          fi
+          echo "SHOULD_DEVBUILD=$SHOULD_DEVBUILD" >> $GITHUB_ENV
+          echo "SHOULD_PRCOMMENT=$SHOULD_PRCOMMENT" >> $GITHUB_ENV
+          echo "SHOULD_UPLOAD=$SHOULD_UPLOAD" >> $GITHUB_ENV
+
       - name: "Build the firmware and apps"
         id: build-fw
         run: |
@@ -94,9 +117,7 @@ jobs:
             dist/${{ env.TARGET }}-*/flipper-z-${{ env.TARGET }}-sdk-*
 
       - name: "Copy build output"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && (github.event.pull_request || (github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')))) }}
+        if: ${{ env.SHOULD_UPLOAD == 'true' }}
         run: |
           set -e
           rm -rf artifacts || true
@@ -112,17 +133,37 @@ jobs:
           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
 
       - name: "Copy universal artifacts"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && (github.event.pull_request || (github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')))) }}
+        if: ${{ env.SHOULD_UPLOAD == 'true' }}
         run: |
           tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
+      - name: "Upload artifacts to update server"
+        if: ${{ env.SHOULD_UPLOAD == 'true' }}
+        run: |
+          curl "${{ secrets.INDEXER_URL }}"/firmware/directory.json > previndex.json
+          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              -F "branch=${BRANCH_NAME}" \
+              -F "version_token=${COMMIT_SHA}" \
+              ${FILES[@]} \
+              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
+
+      - name: "Force deploy website to refresh devbuilds"
+        if: ${{ env.SHOULD_DEVBUILD == 'true' }}
+        uses: Codex-/return-dispatch@v2
+        id: force-deploy
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          ref: dev
+          repo: v2.momentum-fw.dev
+          owner: Next-Flip
+          workflow: force-deploy.yml
+          workflow_timeout_seconds: 300
+          workflow_job_steps_retry_seconds: 5
+
       - name: "Calculate DFU sizes"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
+        if: ${{ env.SHOULD_PRCOMMENT == 'true' }}
         run: |
           curl -L "${{ secrets.INDEXER_URL }}"/firmware/development/f7/full_dfu -o dev.dfu
           dfu_size_new=$(du --apparent-size -B 1 artifacts/flipper-z-${TARGET}-full-*.dfu | cut -f1)
@@ -144,23 +185,8 @@ jobs:
           echo "FLASH_FREE=$FLASH_FREE" >> $GITHUB_ENV
           echo "FLASH_USABLE=$FLASH_USABLE" >> $GITHUB_ENV
 
-      - name: "Upload artifacts to update server"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && (github.event.pull_request || (github.event_name == 'push' && ((github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild')) || startsWith(github.ref, 'refs/tags/')))) }}
-        run: |
-          curl "${{ secrets.INDEXER_URL }}"/firmware/directory.json > previndex.json
-          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
-          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
-              -F "branch=${BRANCH_NAME}" \
-              -F "version_token=${COMMIT_SHA}" \
-              ${FILES[@]} \
-              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
-
       - name: "Find previous comment"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
+        if: ${{ env.SHOULD_PRCOMMENT == 'true' }}
         uses: peter-evans/find-comment@v3
         id: find-comment
         with:
@@ -169,9 +195,7 @@ jobs:
           body-includes: "Compiled ${{ matrix.target }} firmware for commit"
 
       - name: "Create or update comment"
-        env:
-          INDEXER_URL: ${{ secrets.INDEXER_URL }}
-        if: ${{ env.INDEXER_URL != '' && github.event.pull_request && matrix.target == env.DEFAULT_TARGET }}
+        if: ${{ env.SHOULD_PRCOMMENT == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
@@ -184,10 +208,21 @@ jobs:
             - Free Flash: `${{ env.FLASH_FREE }}` (`${{ env.FLASH_USABLE }}` usable)
           edit-mode: replace
 
-      - name: Send devbuild webhook
+      - name: "Wait for deploy (Run ID ${{ steps.force-deploy.outputs.run_id }})"
+        if: ${{ env.SHOULD_DEVBUILD == 'true' }}
+        uses: Codex-/await-remote-run@v1
+        with:
+          token: ${{ github.token }}
+          repo: v2.momentum-fw.dev
+          owner: Next-Flip
+          run_id: ${{ steps.force-deploy.outputs.run_id }}
+          run_timeout_seconds: 300
+          poll_interval_ms: 5000
+
+      - name: "Send devbuild webhook"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
           BUILD_WEBHOOK: ${{ secrets.BUILD_WEBHOOK }}
-        if: ${{ env.INDEXER_URL != '' && github.event_name == 'push' && github.ref_name == 'dev' && !contains(github.event.head_commit.message, '--nobuild') }}
+        if: ${{ env.SHOULD_DEVBUILD == 'true' }}
         run: |
           python .github/workflow_data/devbuild.py

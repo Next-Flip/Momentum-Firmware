@@ -177,6 +177,7 @@ class Main(App):
             symbols /= "sdk_headers/f7_sdk"
         symbols = (symbols / "targets/f7/api_symbols.csv").read_text()
         api_has_icon = lambda name: f"Variable,+,{name},const Icon," in symbols
+        api_has_icon_disabled = lambda name: f"Variable,-,{name},const Icon," in symbols
         # Traverse icons tree, append image data to source file
         for dirpath, dirnames, filenames in os.walk(self.args.input_directory):
             self.logger.debug(f"Processing directory {dirpath}")
@@ -294,6 +295,11 @@ class Main(App):
         )
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
+            if self.args.add_include and api_has_icon_disabled(name):
+                self.logger.info(
+                    f"{self.args.filename}: skipping duplicate decl {icon_name}"
+                )
+                continue
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
         if self.args.fw_bundle:
             icons_h.write(ICONS_TEMPLATE_H_ICON_PATHS)

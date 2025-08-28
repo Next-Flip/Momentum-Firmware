@@ -18,6 +18,8 @@ typedef struct {
     FileBrowserLoadItemCallback item_callback;
     void* item_callback_context;
     const char* base_path;
+
+    bool select_right;
 } DialogsAppMessageDataFileBrowser;
 
 typedef struct {

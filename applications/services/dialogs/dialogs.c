@@ -16,6 +16,7 @@ void dialog_file_browser_set_basic_options(
     options->hide_ext = true;
     options->item_loader_callback = NULL;
     options->item_loader_context = NULL;
+    options->select_right = false;
 }
 
 static DialogsApp* dialogs_app_alloc(void) {

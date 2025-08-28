@@ -158,7 +158,8 @@ static bool momentum_app_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* label, FuriString* exe) {
+static void
+    momentum_app_push_mainmenu_app_raw(MomentumApp* app, FuriString* label, FuriString* exe) {
     CharList_push_back(app->mainmenu_app_exes, strdup(furi_string_get_cstr(exe)));
     // Display logic mimics applications/services/gui/modules/menu.c
     if(furi_string_equal(label, "Momentum")) {
@@ -174,6 +175,38 @@ static void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* label, 
         }
     }
     CharList_push_back(app->mainmenu_app_labels, strdup(furi_string_get_cstr(label)));
+}
+
+void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* exe) {
+    FuriString* label = furi_string_alloc();
+    if(furi_string_start_with(exe, "/")) {
+        uint8_t unused_icon[FAP_MANIFEST_MAX_ICON_SIZE];
+        uint8_t* unused_icon_ptr = unused_icon;
+        if(!flipper_application_load_name_and_icon(exe, app->storage, &unused_icon_ptr, label)) {
+            const char* end = strrchr(furi_string_get_cstr(exe), '/');
+            furi_string_set(label, end ? end + 1 : furi_string_get_cstr(exe));
+        }
+        momentum_app_push_mainmenu_app_raw(app, label, exe);
+    } else {
+        bool found = false;
+        for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
+            if(!strcmp(furi_string_get_cstr(exe), FLIPPER_APPS[i].name)) {
+                furi_string_set(label, FLIPPER_APPS[i].name);
+                found = true;
+            }
+        }
+        for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+            if(!strcmp(furi_string_get_cstr(exe), FLIPPER_EXTERNAL_APPS[i].name)) {
+                furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
+                found = true;
+            }
+        }
+        // Ignore unknown apps just like in main menu, prevents "ghost" apps when saving
+        if(!furi_string_empty(label)) {
+            momentum_app_push_mainmenu_app_raw(app, label, exe);
+        }
+    }
+    furi_string_free(label);
 }
 
 void momentum_app_load_mainmenu_apps(MomentumApp* app) {
@@ -198,44 +231,19 @@ void momentum_app_load_mainmenu_apps(MomentumApp* app) {
                     furi_string_set(line, "Momentum");
                 }
             }
-            if(furi_string_start_with(line, "/")) {
-                if(!flipper_application_load_name_and_icon(
-                       line, app->storage, &unused_icon, label)) {
-                    furi_string_reset(label);
-                }
-            } else {
-                furi_string_reset(label);
-                bool found = false;
-                for(size_t i = 0; !found && i < FLIPPER_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
-                        furi_string_set(label, FLIPPER_APPS[i].name);
-                        found = true;
-                    }
-                }
-                for(size_t i = 0; !found && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
-                        furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
-                        found = true;
-                    }
-                }
-            }
-            if(furi_string_empty(label)) {
-                // Ignore unknown apps just like in main menu, prevents "ghost" apps when saving
-                continue;
-            }
-            momentum_app_push_mainmenu_app(app, label, line);
+            momentum_app_push_mainmenu_app(app, line);
         }
     } else {
         for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
             furi_string_set(label, FLIPPER_APPS[i].name);
             furi_string_set(line, FLIPPER_APPS[i].name);
-            momentum_app_push_mainmenu_app(app, label, line);
+            momentum_app_push_mainmenu_app_raw(app, label, line);
         }
         // Until count - 1 because last app is hardcoded below
         for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT - 1; i++) {
             furi_string_set(label, FLIPPER_EXTERNAL_APPS[i].name);
             furi_string_set(line, FLIPPER_EXTERNAL_APPS[i].name);
-            momentum_app_push_mainmenu_app(app, label, line);
+            momentum_app_push_mainmenu_app_raw(app, label, line);
         }
     }
     free(unused_icon);

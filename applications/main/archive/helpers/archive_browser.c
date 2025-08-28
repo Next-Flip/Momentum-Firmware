@@ -116,12 +116,13 @@ static void archive_long_load_cb(void* context) {
         browser->view, ArchiveBrowserViewModel * model, { model->folder_loading = true; }, true);
 }
 
-static void archive_file_browser_set_path(
+void archive_file_browser_set_path(
     ArchiveBrowserView* browser,
     FuriString* path,
     const char* filter_ext,
     bool skip_assets,
-    bool hide_dot_files) {
+    bool hide_dot_files,
+    const char* override_home_path) {
     furi_assert(browser);
     if(!browser->worker_running) {
         browser->worker =
@@ -137,6 +138,7 @@ static void archive_file_browser_set_path(
         file_browser_worker_set_config(
             browser->worker, path, filter_ext, skip_assets, hide_dot_files);
     }
+    browser->override_home_path = override_home_path;
 }
 
 bool archive_is_item_in_array(ArchiveBrowserViewModel* model, uint32_t idx) {
@@ -385,7 +387,9 @@ bool archive_is_home(ArchiveBrowserView* browser) {
         return true;
     }
 
-    const char* default_path = archive_get_default_path(archive_get_tab(browser));
+    const char* default_path = browser->override_home_path ?
+                                   browser->override_home_path :
+                                   archive_get_default_path(archive_get_tab(browser));
     return furi_string_cmp_str(browser->path, default_path) == 0;
 }
 
@@ -589,7 +593,12 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
                                   tab == ArchiveTabInternal ? false :
                                                               !momentum_settings.show_hidden_files;
             archive_file_browser_set_path(
-                browser, browser->path, archive_get_tab_ext(tab), skip_assets, hide_dot_files);
+                browser,
+                browser->path,
+                archive_get_tab_ext(tab),
+                skip_assets,
+                hide_dot_files,
+                NULL);
             tab_empty = false; // Empty check will be performed later
         }
     }

@@ -379,6 +379,8 @@ static Desktop* desktop_alloc(void) {
 
     furi_record_create(RECORD_DESKTOP, desktop);
 
+    desktop->archive_dir = furi_string_alloc();
+
     return desktop;
 }
 
@@ -492,6 +494,15 @@ void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
 
     desktop->in_transition = false;
+}
+
+void desktop_launch_archive(Desktop* desktop, const char* open_dir) {
+    if(open_dir) {
+        furi_string_set(desktop->archive_dir, open_dir);
+    } else {
+        furi_string_reset(desktop->archive_dir);
+    }
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventOpenArchive);
 }
 
 /*
