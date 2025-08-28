@@ -15,9 +15,11 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
+#include <gui/modules/variable_item_list.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/date_time_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 #include "views/dict_attack.h"
@@ -123,6 +125,22 @@ typedef struct {
     size_t dict_keys_current;
 } NfcMfUltralightCDictContext;
 
+typedef struct {
+    uint32_t card_level;
+    uint32_t card_type;
+    uint32_t card_id;
+    uint32_t opening_key;
+    uint32_t lock_id;
+    uint32_t pass_number;
+    uint32_t sequence_and_combination;
+    uint32_t deadbolt_override;
+    uint32_t restricted_days;
+    uint32_t property_id;
+
+    DateTime creation;
+    DateTime expire;
+} NfcSaflokData;
+
 struct NfcApp {
     DialogsApp* dialogs;
     Storage* storage;
@@ -144,9 +162,11 @@ struct NfcApp {
     Submenu* submenu;
     DialogEx* dialog_ex;
     Popup* popup;
+    VariableItemList* variable_item_list;
     Loading* loading;
     TextInput* text_input;
     ByteInput* byte_input;
+    DateTimeInput* date_time_input;
     TextBox* text_box;
     Widget* widget;
     DetectReader* detect_reader;
@@ -171,6 +191,8 @@ struct NfcApp {
 
     NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;
+    MfClassicData* mf_classic_edit_data;
+    NfcSaflokData* nfc_saflok_data;
     FuriString* file_path;
     FuriString* file_name;
     FuriTimer* timer;
@@ -182,9 +204,11 @@ typedef enum {
     NfcViewMenu,
     NfcViewDialogEx,
     NfcViewPopup,
+    NfcViewVariableItemList,
     NfcViewLoading,
     NfcViewTextInput,
     NfcViewByteInput,
+    NfcViewDateTimeInput,
     NfcViewTextBox,
     NfcViewWidget,
     NfcViewDictAttack,
@@ -195,6 +219,17 @@ typedef enum {
     NfcSceneSaveConfirmStateDetectReader,
     NfcSceneSaveConfirmStateCrackNonces,
 } NfcSceneSaveConfirmState;
+
+typedef enum {
+    // NfcSceneSaflokStateNewCard = 0 << 0,
+    NfcSceneSaflokStateEditCard = 1 << 0,
+
+    // NfcSceneSaflokStateInMainView = 0 << 1,
+    NfcSceneSaflokStateInSubView = 1 << 1,
+
+    // NfcSceneSaflokStateEditingDateCreation = 0 << 2,
+    NfcSceneSaflokStateEditingDateExpire = 1 << 2,
+} NfcSceneSaflokState;
 
 #ifdef __cplusplus
 extern "C" {

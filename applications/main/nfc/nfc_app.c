@@ -94,6 +94,13 @@ NfcApp* nfc_app_alloc(void) {
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewPopup, popup_get_view(instance->popup));
 
+    // Variable Item List
+    instance->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        NfcViewVariableItemList,
+        variable_item_list_get_view(instance->variable_item_list));
+
     // Loading
     instance->loading = loading_alloc();
     view_dispatcher_add_view(
@@ -108,6 +115,13 @@ NfcApp* nfc_app_alloc(void) {
     instance->byte_input = byte_input_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewByteInput, byte_input_get_view(instance->byte_input));
+
+    // Date Time Input
+    instance->date_time_input = date_time_input_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        NfcViewDateTimeInput,
+        date_time_input_get_view(instance->date_time_input));
 
     // TextBox
     instance->text_box = text_box_alloc();
@@ -135,6 +149,8 @@ NfcApp* nfc_app_alloc(void) {
     instance->iso14443_3a_edit_data = iso14443_3a_alloc();
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
+
+    instance->nfc_saflok_data = malloc(sizeof(NfcSaflokData));
 
     return instance;
 }
@@ -174,6 +190,10 @@ void nfc_app_free(NfcApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewPopup);
     popup_free(instance->popup);
 
+    // Variable Item List
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewVariableItemList);
+    variable_item_list_free(instance->variable_item_list);
+
     // Loading
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewLoading);
     loading_free(instance->loading);
@@ -185,6 +205,10 @@ void nfc_app_free(NfcApp* instance) {
     // ByteInput
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewByteInput);
     byte_input_free(instance->byte_input);
+
+    // DateTimeInput
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewDateTimeInput);
+    date_time_input_free(instance->date_time_input);
 
     // TextBox
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewTextBox);
@@ -221,6 +245,9 @@ void nfc_app_free(NfcApp* instance) {
     iso14443_3a_free(instance->iso14443_3a_edit_data);
     furi_string_free(instance->file_path);
     furi_string_free(instance->file_name);
+
+    free(instance->nfc_saflok_data);
+    instance->nfc_saflok_data = NULL;
 
     free(instance);
 }

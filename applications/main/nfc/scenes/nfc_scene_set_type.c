@@ -6,6 +6,8 @@ enum SubmenuIndex {
     SubmenuIndexGeneratorsStart,
     SubmenuIndexNFCA4 = NfcDataGeneratorTypeNum,
     SubmenuIndexNFCA7,
+
+    SubmenuIndexSaflokMfClassic,
 };
 
 static void nfc_scene_set_type_init_edit_data(Iso14443_3aData* data, size_t uid_len) {
@@ -32,6 +34,13 @@ void nfc_scene_set_type_on_enter(void* context) {
         nfc_protocol_support_common_submenu_callback,
         instance);
 
+    submenu_add_item(
+        submenu,
+        "Saflok on Mifare Classic",
+        SubmenuIndexSaflokMfClassic,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+
     for(size_t i = 0; i < NfcDataGeneratorTypeNum; i++) {
         const char* name = nfc_data_generator_get_name(i);
         submenu_add_item(submenu, name, i, nfc_protocol_support_common_submenu_callback, instance);
@@ -52,6 +61,11 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexNFCA4) {
             nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, 4);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetSak);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSaflokMfClassic) {
+            nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, 4);
+            scene_manager_set_scene_state(instance->scene_manager, NfcSceneSaflokInput, 0);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSaflokInput);
             consumed = true;
         } else {
             nfc_data_generator_fill_data(event.event, instance->nfc_device);

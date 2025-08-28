@@ -64,6 +64,8 @@ ADD_SCENE(nfc, set_sak, SetSak)
 ADD_SCENE(nfc, set_atqa, SetAtqa)
 ADD_SCENE(nfc, set_uid, SetUid)
 
+ADD_SCENE(nfc, saflok_input, SaflokInput)
+
 ADD_SCENE(nfc, slix_unlock_menu, SlixUnlockMenu)
 ADD_SCENE(nfc, slix_key_input, SlixKeyInput)
 ADD_SCENE(nfc, slix_unlock, SlixUnlock)
