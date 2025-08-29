@@ -4,6 +4,7 @@
 #include <applications.h>
 #include <archive/helpers/archive_favorites.h>
 #include <toolbox/run_parallel.h>
+#include <archive/helpers/archive_helpers_ext.h>
 
 #include "loader.h"
 #include "loader_i.h"
@@ -130,7 +131,12 @@ static void loader_menu_apps_callback(void* context, uint32_t index) {
     LoaderMenuApp* app = context;
     const MenuApp* menu_app = MenuAppList_get(app->apps_list, index);
     const char* name = menu_app->path ? menu_app->path : menu_app->name;
-    loader_menu_start(name);
+
+    if(menu_app->path && !strstr(menu_app->path, ".fap")) {
+        run_with_default_app(menu_app->path);
+    } else {
+        loader_menu_start(name);
+    }
 }
 
 static void loader_menu_last_callback(void* context, uint32_t index) {
@@ -225,6 +231,14 @@ static void loader_menu_add_app_entry(
         app);
 }
 
+static const Icon* loader_menu_get_ext_icon(Storage* storage, const char* path) {
+    if(storage_dir_exists(storage, path)) return &I_dir_10px;
+    const char* ext = strrchr(path, '.');
+    if(ext && strcasecmp(ext, ".js") == 0) return &I_js_script_10px;
+
+    return &I_file_10px;
+}
+
 bool loader_menu_load_fap_meta(
     Storage* storage,
     FuriString* path,
@@ -254,11 +268,9 @@ static void loader_menu_find_add_app(LoaderMenuApp* app, Storage* storage, FuriS
     if(furi_string_start_with(line, "/")) {
         path = strdup(furi_string_get_cstr(line));
         if(!loader_menu_load_fap_meta(storage, line, line, &icon)) {
-            free((void*)path);
-            path = NULL;
-        } else {
-            name = strdup(furi_string_get_cstr(line));
+            icon = loader_menu_get_ext_icon(storage, path);
         }
+        name = strdup(furi_string_get_cstr(line));
     } else {
         for(size_t i = 0; !name && i < FLIPPER_APPS_COUNT; i++) {
             if(furi_string_equal(line, FLIPPER_APPS[i].name)) {

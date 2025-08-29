@@ -15,6 +15,8 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
     file->is_app = is_app;
     if(is_app) {
         file->type = archive_get_app_filetype(archive_get_app_type(path));
+    } else if(is_folder) {
+        file->type = ArchiveFileTypeFolder;
     } else {
         for(size_t i = 0; i < COUNT_OF(known_ext); i++) {
             if((known_ext[i][0] == '?') || (known_ext[i][0] == '*')) continue;
@@ -53,11 +55,7 @@ void archive_set_file_type(ArchiveFile_t* file, const char* path, bool is_folder
             }
         }
 
-        if(is_folder) {
-            file->type = ArchiveFileTypeFolder;
-        } else {
-            file->type = ArchiveFileTypeUnknown;
-        }
+        file->type = ArchiveFileTypeUnknown;
     }
 }
 

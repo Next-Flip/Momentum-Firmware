@@ -73,9 +73,6 @@ typedef enum {
 } SubGhzCustomEvent;
 
 typedef enum {
-    SetTypeFaacSLH_Manual_868,
-    SetTypeFaacSLH_Manual_433,
-    SetTypeBFTClone,
     SetTypeFaacSLH_868,
     SetTypeFaacSLH_433,
     SetTypeBFTMitto,
@@ -131,6 +128,7 @@ typedef enum {
     SetTypeCAMESpace,
     SetTypePricenton315,
     SetTypePricenton433,
+    SetTypeZKTeco430,
     SetTypeBETT_433,
     SetTypeGangQi_433,
     SetTypeHollarm_433,

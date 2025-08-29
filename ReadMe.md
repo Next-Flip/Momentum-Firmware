@@ -86,7 +86,7 @@ In USB mode it also enables additional functionality to spoof the manufacturer a
 
 <h2 align="center">List of changes</h2>
 
-There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**. For a more detailed list, you can read through the [**changelogs**](https://github.com/Next-Flip/Momentum-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://momentum-fw.dev/#features).
+There are too many to name them all, this is a **non-comprehensive** list of the **most notable from an end-user perspective**. For a more detailed list, you can read through the [**changelogs**](https://github.com/Next-Flip/Momentum-Firmware/releases) and commits/code. Also, you can find a **feature comparison with other firmwares** on [our website](https://momentum-fw.dev/).
 
 Note that this repo is always updated with the great work from our friends at [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and the latest changes from [OFW](https://github.com/flipperdevices/flipperzero-firmware). Below are mentioned only **our** changes that we can actually be credited for, so make sure to check their fantastic additions aswell. And a huge thank you to both teams!
 
@@ -143,7 +143,8 @@ There are 4 methods to install Momentum, we recommend you use the **Web Updater*
 >   <li>Make sure qFlipper is closed</li>
 >   <li>Open the <a href="https://momentum-fw.dev/update">Web Updater</a></li>
 >   <li>Click <code>Connect</code> and select your Flipper from the list</li>
->   <li>Click <code>Flash</code> and wait for the update to complete</li>
+>   <li>Select which update <code>Channel</code> you prefer from the dropdown</li>
+>   <li>Click <code>Install</code> and wait for the update to complete</li>
 > </ul></details>
 
 > <details><summary><code>Flipper Lab/App (chrome/mobile)</code></summary><ul>

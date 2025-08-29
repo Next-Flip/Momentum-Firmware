@@ -111,5 +111,6 @@ typedef enum {
 
 bool momentum_app_apply(MomentumApp* app);
 
+void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* exe);
 void momentum_app_load_mainmenu_apps(MomentumApp* app);
 void momentum_app_empty_mainmenu_apps(MomentumApp* app);

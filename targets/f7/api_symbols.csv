@@ -1146,6 +1146,7 @@ Function,+,file_browser_free,void,FileBrowser*
 Function,+,file_browser_get_view,View*,FileBrowser*
 Function,+,file_browser_set_callback,void,"FileBrowser*, FileBrowserCallback, void*"
 Function,+,file_browser_set_item_callback,void,"FileBrowser*, FileBrowserLoadItemCallback, void*"
+Function,+,file_browser_set_select_right,void,"FileBrowser*, _Bool"
 Function,+,file_browser_start,void,"FileBrowser*, FuriString*"
 Function,+,file_browser_stop,void,FileBrowser*
 Function,+,file_browser_worker_alloc,BrowserWorker*,"FuriString*, const char*, const char*, _Bool, _Bool"

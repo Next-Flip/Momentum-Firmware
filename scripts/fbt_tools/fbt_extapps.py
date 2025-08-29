@@ -322,6 +322,7 @@ def _validate_app_imports(target, source, env):
             "metromoney_plugin",
             "myki_plugin",
             "opal_plugin",
+            "renfe_sum10_plugin",
             "smartrider_plugin",
             "suica_plugin",
             "troika_plugin",

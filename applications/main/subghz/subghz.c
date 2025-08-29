@@ -235,7 +235,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
 
     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
 
-    subghz->secure_data = malloc(sizeof(SecureData));
+    subghz->gen_info = malloc(sizeof(GenInfo));
 
     if(!alloc_for_tx_only) {
         subghz->remove_duplicates = subghz->last_settings->remove_duplicates;
@@ -346,7 +346,7 @@ void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
         subghz_history_free(subghz->history);
     }
 
-    free(subghz->secure_data);
+    free(subghz->gen_info);
 
     //TxRx
     subghz_txrx_free(subghz->txrx);

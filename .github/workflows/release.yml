@@ -45,6 +45,13 @@ jobs:
           curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
               "${{ secrets.INDEXER_URL }}"/firmware/reindex;
 
+      - name: "Force deploy website to refresh releases"
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: Next-Flip/v2.momentum-fw.dev
+          event-type: force-deploy
+
       - name: "Send release notification"
         env:
           RELEASE_WEBHOOK: ${{ secrets.RELEASE_WEBHOOK }}

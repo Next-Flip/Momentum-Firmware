@@ -20,13 +20,15 @@ if __name__ == "__main__":
             webhook = "BUILD_WEBHOOK"
             count = len(event["commits"])
             if count == 20:
-                count = int(requests.get(
-                    event["compare"].replace("github.com", "api.github.com/repos"),
-                    headers={
-                        "Accept": "application/vnd.github.v3+json",
-                        "Authorization": f"token {os.environ['GITHUB_TOKEN']}"
-                    }
-                ).json()["total_commits"])
+                count = int(
+                    requests.get(
+                        event["compare"].replace("github.com", "api.github.com/repos"),
+                        headers={
+                            "Accept": "application/vnd.github.v3+json",
+                            "Authorization": f"token {os.environ['GITHUB_TOKEN']}",
+                        },
+                    ).json()["total_commits"]
+                )
             branch = event["ref"].removeprefix("refs/heads/")
             change = (
                 "Force Push"
@@ -35,7 +37,12 @@ if __name__ == "__main__":
             )
             desc = f"[**{change}**]({event['compare']}) | [{branch}]({event['repository']['html_url']}/tree/{branch})\n"
             for i, commit in enumerate(event["commits"]):
-                msg = commit['message'].splitlines()[0].replace("`", "").replace("_", "\_")
+                msg = (
+                    commit["message"]
+                    .splitlines()[0]
+                    .replace("`", "")
+                    .replace("_", "\_")
+                )
                 msg = msg[:50] + ("..." if len(msg) > 50 else "")
                 desc += f"\n[`{commit['id'][:8]}`]({commit['url']}): {msg} - [__{commit['author'].get('username')}__](https://github.com/{commit['author'].get('username')})"
                 if len(desc) > 2020:
@@ -47,9 +54,9 @@ if __name__ == "__main__":
         case "release":
             webhook = "RELEASE_WEBHOOK"
             color = 9471191
-            version_tag = event['release']['tag_name']
+            version_tag = event["release"]["tag_name"]
             title = f"New Release: `{version_tag}`!"
-            desc += f"> 💻 [**Web Installer**](https://momentum-fw.dev/update)\n\n"
+            desc += f"> 💻 [**Web Installer**](https://momentum-fw.dev/update?version={version_tag})\n\n"
             desc += f"> 🐬 [**Changelog & Download**](https://github.com/Next-Flip/Momentum-Firmware/releases/tag/{version_tag})\n\n"
             desc += f"> 🛞 [**Project Page**](https://github.com/Next-Flip/Momentum-Firmware)"
 
@@ -75,7 +82,11 @@ if __name__ == "__main__":
             title = f"Issue {event['action'].title()}: {name}"
             match event["action"]:
                 case "opened":
-                    desc = (issue["body"][:2045] + "...") if len(issue["body"]) > 2048 else issue["body"]
+                    desc = (
+                        (issue["body"][:2045] + "...")
+                        if len(issue["body"]) > 2048
+                        else issue["body"]
+                    )
                     color = 3669797
                 case "closed":
                     color = 16723712
@@ -90,7 +101,11 @@ if __name__ == "__main__":
             url = comment["html_url"]
             title = f"New Comment on Issue: {issue['title']}"
             color = 3669797
-            desc = (comment["body"][:2045] + "...") if len(comment["body"]) > 2048 else comment["body"]
+            desc = (
+                (comment["body"][:2045] + "...")
+                if len(comment["body"]) > 2048
+                else comment["body"]
+            )
 
         case _:
             sys.exit(1)
@@ -112,7 +127,7 @@ if __name__ == "__main__":
                         "url": event["sender"]["html_url"],
                         "icon_url": event["sender"]["avatar_url"],
                     },
-                    "timestamp": dt.datetime.utcnow().isoformat()
+                    "timestamp": dt.datetime.utcnow().isoformat(),
                 }
             ],
             "attachments": [],

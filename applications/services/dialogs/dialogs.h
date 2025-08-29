@@ -26,6 +26,7 @@ typedef struct DialogsApp DialogsApp;
  * @param hide_ext true - hide extensions for files
  * @param item_loader_callback callback function for providing custom icon & entry name
  * @param hide_ext callback context
+ * @param select_right true - select with right key, allows selecting directories
  */
 typedef struct {
     const char* extension;
@@ -36,6 +37,8 @@ typedef struct {
     bool hide_ext;
     FileBrowserLoadItemCallback item_loader_callback;
     void* item_loader_context;
+
+    bool select_right;
 } DialogsFileBrowserOptions;
 
 /**

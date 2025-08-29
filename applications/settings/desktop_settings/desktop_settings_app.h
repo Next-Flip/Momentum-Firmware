@@ -31,7 +31,7 @@ typedef enum {
 typedef enum {
     DesktopSettingsAppKeybindActionTypeMainApp,
     DesktopSettingsAppKeybindActionTypeExternalApp,
-    DesktopSettingsAppKeybindActionTypeOpenFile,
+    DesktopSettingsAppKeybindActionTypeOpenFileOrDirectory,
     DesktopSettingsAppKeybindActionTypeMoreActions,
     DesktopSettingsAppKeybindActionTypeRemoveKeybind,
 } DesktopSettingsAppKeybindActionType;

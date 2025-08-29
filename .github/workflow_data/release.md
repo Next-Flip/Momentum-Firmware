@@ -1,5 +1,5 @@
 ## ⬇️ Download
->### [🖥️ Web Updater (chrome)](https://momentum-fw.dev/update) [recommended]
+>### [🖥️ Web Updater (chrome)](https://momentum-fw.dev/update?version={VERSION_TAG}) [recommended]
 
 >### [☁️ Flipper Lab/App (chrome/mobile)](https://lab.flipper.net/?url=https://up.momentum-fw.dev/builds/firmware/{VERSION_TAG}/flipper-z-f7-update-{VERSION_TAG}.tgz&channel=release-cfw&version={VERSION_TAG})
 
