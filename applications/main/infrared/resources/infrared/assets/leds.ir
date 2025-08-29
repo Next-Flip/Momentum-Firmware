@@ -2931,8 +2931,155 @@ protocol: NEC
 address: 00 00 00 00
 command: 43 00 00 00
 #
+# Model: ADJ UC-IR
+#
 name: Brightness_dn
 type: parsed
 protocol: NEC
 address: 00 00 00 00
 command: 0C 00 00 00
+#
+# Model: AIRIVO NorthernLights
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 47 00 00 00
+#
+# Model: Amazon LED_Lights
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 45 00 00 00
+#
+# Model: American Lighting_LED
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 40 00 00 00
+#
+# Model: Europa 21in_chrome
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 03 FC 00 00
+#
+# Model: AuraLED ColorStrip
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 01 EF 00 00
+command: 00 FF 00 00
+#
+# Model: 44 LED_Strip
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 41 00 00 00
+#
+# Model: Practical Series_2
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 1E E1 00 00
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 84 E0 00 00
+command: 20 DF 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 84 E0 00 00
+command: 60 9F 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 84 E0 00 00
+command: 61 9E 00 00
+#
+# Model: Feron AL5000_Starlight
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 84 E0 00 00
+command: 64 9B 00 00
+#
+# Model: Govee Striplights
+#
+name: Power
+type: parsed
+protocol: NECext
+address: A0 B7 00 00
+command: E9 16 00 00
+#
+# Model: MonsterIlluminessence LED
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 02 FE 00 00
+command: 01 FE 00 00
+#
+# Model: Neuhaus Leuchten_Direkt_sparkle_LED
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 00 FF 00 00
+#
+# Model: Nexillumi LED
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 04 AC 00 00
+command: 4A B5 00 00
+#
+# Model: Qtx led_par
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 00 EF 00 00
+command: 02 FD 00 00
+#
+# Model: Sylvania 24_Button_LED
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 46 00 00 00
+#
+# Model: LED Disco_Light
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 0D 00 00 00
+#
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 00 00 00 00
+#
