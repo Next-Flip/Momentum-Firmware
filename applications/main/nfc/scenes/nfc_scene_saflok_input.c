@@ -222,6 +222,7 @@ void variable_item_list_update_value(NfcApp* app, VariableItem* item, uint32_t v
         else
             value = app->nfc_saflok_data->deadbolt_override;
 
+        variable_item_set_current_value_index(item, value);
         variable_item_set_values_count(item, 2);
 
         if(value) {

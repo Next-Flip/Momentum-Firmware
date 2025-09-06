@@ -1,5 +1,6 @@
 #include "gallagher/gallagher_util.h"
 #include "mosgortrans/mosgortrans_util.h"
+#include "saflok/saflok_util.h"
 #include "../nfc_app_i.h"
 #include "../helpers/protocol_support/nfc_protocol_support_gui_common.h"
 #include "../helpers/protocol_support/nfc_protocol_support_unlock_helper.h"
@@ -41,4 +42,16 @@ static constexpr auto nfc_app_api_table = sort(create_array_t<sym_entry>(
         bool,
         (NfcApp * instance, SceneManagerEvent event)),
     API_METHOD(nfc_unlock_helper_setup_from_state, void, (NfcApp * instance)),
-    API_METHOD(nfc_unlock_helper_card_detected_handler, void, (NfcApp * instance))));
+    API_METHOD(nfc_unlock_helper_card_detected_handler, void, (NfcApp * instance)),
+    API_METHOD(saflok_calculate_checksum, uint8_t, (uint8_t data[BASIC_ACCESS_BYTE_NUM])),
+    API_METHOD(saflok_generate_key, void, (const uint8_t* uid, uint8_t* key)),
+    API_METHOD(
+        saflok_decrypt_card,
+        void,
+        (uint8_t strCard[BASIC_ACCESS_BYTE_NUM],
+         int length,
+         uint8_t decryptedCard[BASIC_ACCESS_BYTE_NUM])),
+    API_METHOD(
+        saflok_encrypt_card,
+        void,
+        (unsigned char* keyCard, int length, unsigned char* encryptedCard))));

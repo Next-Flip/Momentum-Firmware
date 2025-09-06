@@ -354,12 +354,7 @@ def _validate_app_imports(target, source, env):
             "I_Suica_",
         ),
         # nfc_app_api_table
-        (
-            "nfc_",
-            "gallagher",
-            "social_moscow",
-            "troika",
-        ): (
+        ("nfc_", "gallagher", "social_moscow", "troika", "saflok"): (
             "gallagher_deobfuscate_and_parse_credential",
             "GALLAGHER_CARDAX_ASCII",
             "mosgortrans_parse_transport_block",
@@ -371,6 +366,9 @@ def _validate_app_imports(target, source, env):
             "nfc_protocol_support_common_on_event_empty",
             "nfc_unlock_helper_setup_from_state",
             "nfc_unlock_helper_card_detected_handler",
+            "saflok_calculate_checksum",
+            "saflok_generate_key",
+            "saflok_decrypt_card",
         ),
         # totp app_api_table
         ("totp_",): (

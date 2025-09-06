@@ -1,99 +1,13 @@
+// Based on: https://github.com/RfidResearchGroup/proxmark3/blob/master/client/src/cmdhfsaflok.c
+// Generation written by Aaron Tulino <me@aaronjamt.com>
+
 #include "saflok.h"
 
 #include <lib/bit_lib/bit_lib.h>
 
-#define BASIC_ACCESS_BYTE_NUM 17
-#define SAFLOK_YEAR_OFFSET    1980
-
-void generate_saflok_key(const uint8_t* uid, uint8_t* key) {
-    static const uint8_t magic_table[192] = {
-        0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0xF0, 0x57, 0xB3, 0x9E, 0xE3, 0xD8, 0x00, 0x00, 0xAA,
-        0x00, 0x00, 0x00, 0x96, 0x9D, 0x95, 0x4A, 0xC1, 0x57, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00,
-        0x8F, 0x43, 0x58, 0x0D, 0x2C, 0x9D, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0xFF, 0xCC, 0xE0,
-        0x05, 0x0C, 0x43, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x34, 0x1B, 0x15, 0xA6, 0x90, 0xCC,
-        0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x89, 0x58, 0x56, 0x12, 0xE7, 0x1B, 0x00, 0x00, 0xAA,
-        0x00, 0x00, 0x00, 0xBB, 0x74, 0xB0, 0x95, 0x36, 0x58, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00,
-        0xFB, 0x97, 0xF8, 0x4B, 0x5B, 0x74, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0xC9, 0xD1, 0x88,
-        0x35, 0x9F, 0x92, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x8F, 0x92, 0xE9, 0x7F, 0x58, 0x97,
-        0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x16, 0x6C, 0xA2, 0xB0, 0x9F, 0xD1, 0x00, 0x00, 0xAA,
-        0x00, 0x00, 0x00, 0x27, 0xDD, 0x93, 0x10, 0x1C, 0x6C, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00,
-        0xDA, 0x3E, 0x3F, 0xD6, 0x49, 0xDD, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x58, 0xDD, 0xED,
-        0x07, 0x8E, 0x3E, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x5C, 0xD0, 0x05, 0xCF, 0xD9, 0x07,
-        0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x11, 0x8D, 0xD0, 0x01, 0x87, 0xD0};
-
-    uint8_t magic_byte = (uid[3] >> 4) + (uid[2] >> 4) + (uid[0] & 0x0F);
-    uint8_t magickal_index = (magic_byte & 0x0F) * 12 + 11;
-
-    uint8_t temp_key[6] = {magic_byte, uid[0], uid[1], uid[2], uid[3], magic_byte};
-    uint8_t carry_sum = 0;
-
-    for(int i = 6 - 1; i >= 0; i--, magickal_index--) {
-        uint16_t keysum = temp_key[i] + magic_table[magickal_index] + carry_sum;
-        temp_key[i] = (keysum & 0xFF);
-        carry_sum = keysum >> 8;
-    }
-
-    memcpy(key, temp_key, 6);
-}
-
-unsigned char c_aEncode[256] = {
-    236, 116, 192, 99,  86,  153, 105, 100, 159, 23,  38,  198, 240, 1,   16,  77,  202, 82,  138,
-    75,  122, 175, 173, 32,  115, 162, 15,  194, 80,  120, 54,  68,  25,  30,  114, 210, 50,  183,
-    107, 248, 5,   174, 199, 28,  85,  113, 89,  19,  17,  73,  250, 252, 127, 43,  52,  102, 69,
-    165, 185, 21,  169, 163, 134, 150, 219, 45,  218, 208, 33,  84,  189, 227, 131, 141, 110, 155,
-    83,  149, 4,   228, 42,  112, 39,  94,  35,  133, 135, 36,  209, 237, 34,  27,  214, 98,  118,
-    67,  48,  193, 66,  132, 91,  253, 95,  40,  254, 58,  20,  55,  176, 184, 26,  61,  171, 72,
-    251, 152, 3,   166, 119, 201, 11,  117, 97,  8,   241, 245, 217, 121, 101, 172, 229, 164, 223,
-    191, 235, 10,  204, 249, 125, 195, 136, 13,  142, 232, 220, 247, 143, 156, 47,  109, 161, 65,
-    9,   188, 92,  60,  57,  144, 124, 197, 46,  212, 51,  78,  206, 213, 88,  79,  200, 216, 31,
-    130, 22,  62,  215, 255, 190, 146, 157, 196, 211, 14,  29,  181, 93,  24,  7,   126, 106, 243,
-    37,  128, 108, 203, 70,  140, 246, 231, 242, 177, 187, 41,  145, 158, 205, 233, 148, 224, 170,
-    137, 221, 234, 230, 81,  168, 71,  63,  2,   59,  87,  96,  12,  207, 238, 154, 160, 179, 123,
-    225, 147, 186, 178, 182, 222, 0,   226, 167, 139, 76,  53,  74,  111, 239, 18,  129, 44,  180,
-    56,  90,  244, 151, 64,  104, 6,   49,  103};
-
-void EncryptCard(unsigned char* keyCard, int length, unsigned char* encryptedCard) {
-    int b = 0;
-    memcpy(encryptedCard, keyCard, length);
-    for(int i = 0; i < length; i++) {
-        int b2 = encryptedCard[i];
-        int num2 = i;
-        for(int j = 0; j < 8; j++) {
-            num2 += 1;
-            if(num2 >= length) {
-                num2 -= length;
-            }
-            int b3 = encryptedCard[num2];
-            int b4 = b2 & 1;
-            b2 = (b2 >> 1) | (b << 7);
-            b = b3 & 1;
-            b3 = (b3 >> 1) | (b4 << 7);
-            encryptedCard[num2] = b3;
-        }
-        encryptedCard[i] = b2;
-    }
-    if(length == 17) {
-        int b2 = encryptedCard[10];
-        b2 |= b;
-        encryptedCard[10] = b2;
-    }
-    for(int i = 0; i < length; i++) {
-        int j = encryptedCard[i] + (i + 1);
-        if(j > 255) {
-            j -= 256;
-        }
-        encryptedCard[i] = c_aEncode[j];
-    }
-}
-
-uint8_t CalculateCheckSum(uint8_t data[BASIC_ACCESS_BYTE_NUM]) {
-    int sum = 0;
-    for(int i = 0; i < BASIC_ACCESS_BYTE_NUM - 1; i++) {
-        sum += data[i];
-    }
-    sum = 255 - (sum & 0xFF);
-    return sum & 0xFF;
-}
+#define ULC_DATA_START_PAGE 34
+#define ULC_3DES_START_PAGE 44
+#define ULC_DATA_NUM_PAGES  5
 
 static void insert_bits(uint8_t* data, size_t start_bit, size_t num_bits, uint32_t value) {
     for(size_t i = 0; i < num_bits; i++) {
@@ -183,8 +97,8 @@ void saflok_generate_data(NfcSaflokData* saflok_data, uint8_t* buffer) {
     basicAccess[10] |= saflok_data->expire.minute & 0x3F;
 
     // Add checksum and encrypt
-    basicAccess[16] = CalculateCheckSum(basicAccess);
-    EncryptCard(basicAccess, BASIC_ACCESS_BYTE_NUM, buffer);
+    basicAccess[16] = saflok_calculate_checksum(basicAccess);
+    saflok_encrypt_card(basicAccess, BASIC_ACCESS_BYTE_NUM, buffer);
 }
 
 void saflok_generate_mf_classic(NfcDevice* nfc_device, NfcSaflokData* saflok_data) {
@@ -199,7 +113,7 @@ void saflok_generate_mf_classic(NfcDevice* nfc_device, NfcSaflokData* saflok_dat
 
     // Generate diversified key from UID
     uint8_t key[6];
-    generate_saflok_key(uid, key);
+    saflok_generate_key(uid, key);
     uint64_t diversified_key = bit_lib_bytes_to_num_be(key, 6);
 
     // Set up manufacturer block
