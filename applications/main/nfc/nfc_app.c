@@ -116,6 +116,13 @@ NfcApp* nfc_app_alloc(void) {
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewByteInput, byte_input_get_view(instance->byte_input));
 
+    // Number Input
+    instance->number_input = number_input_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        NfcViewNumberInput,
+        number_input_get_view(instance->number_input));
+
     // Date Time Input
     instance->date_time_input = date_time_input_alloc();
     view_dispatcher_add_view(
@@ -205,6 +212,10 @@ void nfc_app_free(NfcApp* instance) {
     // ByteInput
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewByteInput);
     byte_input_free(instance->byte_input);
+
+    // NumberInput
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewNumberInput);
+    number_input_free(instance->number_input);
 
     // DateTimeInput
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewDateTimeInput);

@@ -191,13 +191,10 @@ void saflok_generate_mf_classic(NfcDevice* nfc_device, NfcSaflokData* saflok_dat
     MfClassicData* mfc_data = mf_classic_alloc();
 
     uint8_t uid[ISO14443_3A_MAX_UID_SIZE];
-    // Generate a new, random UID
-    // The actual value doesn't matter, since the KDF is public.
-    // Maybe there should be a way to enter a UID from the GUI?
-    uid[0] = random() & 0xFF;
-    uid[1] = random() & 0xFF;
-    uid[2] = random() & 0xFF;
-    uid[3] = random() & 0xFF;
+    uid[0] = 0xEB;
+    uid[1] = 0xC7;
+    uid[2] = 0x04;
+    uid[3] = 0x4B;
     mf_classic_set_uid(mfc_data, uid, 4);
 
     // Generate diversified key from UID
@@ -215,49 +212,36 @@ void saflok_generate_mf_classic(NfcDevice* nfc_device, NfcSaflokData* saflok_dat
 
     // Fill the remaining blocks
     uint16_t block_num = mf_classic_get_total_block_num(MfClassicType1k);
-    for(uint16_t i = 1; i < block_num; i++) {
-        if(mf_classic_is_sector_trailer(i)) {
-            MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)mfc_data->block[i].data;
+    for(uint16_t block = 1; block < block_num; block++) {
+        if(mf_classic_is_sector_trailer(block)) {
+            MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)mfc_data->block[block].data;
             sec_tr->access_bits.data[0] = 0xFF;
             sec_tr->access_bits.data[1] = 0x07;
             sec_tr->access_bits.data[2] = 0x80;
             sec_tr->access_bits.data[3] = 0x69; // Nice
 
-            uint64_t sector_key;
-            switch(mf_classic_get_sector_by_block(i)) {
-            case 1:
-                // Sector 1 = Saflok standard key
+            uint64_t sector_key = diversified_key;
+            if(mf_classic_get_sector_by_block(block) == 1) {
+                // Only for sector 1: use the Saflok standard key instead of the diversified key
                 sector_key = 0x2a2c13cc242a;
-                break;
-            case 2:
-            case 3:
-                // Sector 2 and 3 = 0xFFFFFFFFFFFF
-                sector_key = 0xFFFFFFFFFFFF;
-                break;
-            default:
-                // All other sectors use per-UID diversified key
-                sector_key = diversified_key;
             }
 
-            mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
+            mf_classic_set_block_read(mfc_data, block, &mfc_data->block[block]);
             mf_classic_set_key_found(
-                mfc_data, mf_classic_get_sector_by_block(i), MfClassicKeyTypeA, sector_key);
+                mfc_data, mf_classic_get_sector_by_block(block), MfClassicKeyTypeA, sector_key);
             mf_classic_set_key_found(
-                mfc_data, mf_classic_get_sector_by_block(i), MfClassicKeyTypeB, 0xFFFFFFFFFFFF);
+                mfc_data, mf_classic_get_sector_by_block(block), MfClassicKeyTypeB, 0xFFFFFFFFFFFF);
 
         } else {
-            memset(&mfc_data->block[i].data, 0x00, MF_CLASSIC_BLOCK_SIZE);
+            memset(&mfc_data->block[block].data, 0x00, MF_CLASSIC_BLOCK_SIZE);
         }
 
-        mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
+        mf_classic_set_block_read(mfc_data, block, &mfc_data->block[block]);
 
         // This is the default log header for cards with no log data
-        // All other bytes in these blocks are zero (see memset above)
-        if(i == 4) {
-            mfc_data->block[i].data[11] = 0xC1;
-        } else if(i == 5) {
-            mfc_data->block[i].data[11] = 0xC1;
-            mfc_data->block[i].data[15] = 0xC1;
+        // 00 00 00 00 00 00 00 00   00 00 00 C1 00 00 00 00
+        if(block == 4) {
+            mfc_data->block[block].data[11] = 0xC1;
         }
     }
 

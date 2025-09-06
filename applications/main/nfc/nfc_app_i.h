@@ -19,6 +19,7 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
+#include <gui/modules/number_input.h>
 #include <gui/modules/date_time_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
@@ -166,6 +167,7 @@ struct NfcApp {
     Loading* loading;
     TextInput* text_input;
     ByteInput* byte_input;
+    NumberInput* number_input;
     DateTimeInput* date_time_input;
     TextBox* text_box;
     Widget* widget;
@@ -208,6 +210,7 @@ typedef enum {
     NfcViewLoading,
     NfcViewTextInput,
     NfcViewByteInput,
+    NfcViewNumberInput,
     NfcViewDateTimeInput,
     NfcViewTextBox,
     NfcViewWidget,

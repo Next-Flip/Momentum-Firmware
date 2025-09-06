@@ -55,8 +55,7 @@ static const char* days_of_the_week[] = {
 };
 
 void set_state_flag(NfcApp* app, NfcSceneSaflokState flag, bool new_state);
-void byte_input_change_callback(void* context);
-void byte_input_enter_callback(void* context);
+void number_input_callback(void* context, int32_t number);
 void submenu_item_callback(void* context, uint32_t index);
 void variable_item_list_update_value(NfcApp* app, VariableItem* item, uint32_t value, bool apply);
 void variable_item_list_enter_callback(void* context, uint32_t index);
@@ -101,56 +100,13 @@ void set_state_flag(NfcApp* app, NfcSceneSaflokState flag, bool new_state) {
     scene_manager_set_scene_state(app->scene_manager, NfcSceneSaflokInput, state);
 }
 
-void byte_input_change_callback(void* context) {
+void number_input_callback(void* context, int32_t number) {
     NfcApp* app = context;
 
     // Find the selected item and trigger the callback to update its label
     uint8_t item_index = variable_item_list_get_selected_item_index(app->variable_item_list);
     VariableItem* item = variable_item_list_get(app->variable_item_list, item_index);
-
-    uint8_t length = 1;
-    switch(item_index) {
-    case 4: // Lock ID
-    case 5: // Pass #
-    case 6: // Seq & Comb
-    case 9: // Property ID
-        length = 2;
-    }
-    uint32_t number = bit_lib_bytes_to_num_be(app->byte_input_store, length);
-
-    uint8_t length_bits = 0;
-    switch(item_index) {
-    case 1: // Card Type
-        length_bits = 4;
-        break;
-    case 2: // Card ID
-        length_bits = 8;
-        break;
-    case 3: // Opening Key
-        length_bits = 2;
-        break;
-    case 4: // Lock ID
-        length_bits = 14;
-        break;
-    case 5: // Pass #
-        length_bits = 12;
-        break;
-    case 6: // Seq & Comb
-        length_bits = 12;
-        break;
-    case 9: // Property ID
-        length_bits = 12;
-        break;
-    }
-
-    // Clamp value to range and store new value
-    number &= (uint32_t)(1 << length_bits) - 1;
-    bit_lib_num_to_bytes_be(number, length, app->byte_input_store);
     variable_item_list_update_value(app, item, number, true);
-}
-
-void byte_input_enter_callback(void* context) {
-    NfcApp* app = context;
 
     set_state_flag(app, NfcSceneSaflokStateInSubView, false);
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcViewVariableItemList);
@@ -220,14 +176,14 @@ void variable_item_list_update_value(NfcApp* app, VariableItem* item, uint32_t v
             value = app->nfc_saflok_data->card_type;
         variable_item_set_current_value_index(item, value);
         variable_item_set_values_count(item, 16); // 4-bit value
-        furi_string_printf(value_text, "%01lX", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
     case 2: // Card ID
         if(apply)
             app->nfc_saflok_data->card_id = value;
         else
             value = app->nfc_saflok_data->card_id;
-        furi_string_printf(value_text, "%02lX", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
     case 3: // Opening Key
         if(apply)
@@ -236,28 +192,28 @@ void variable_item_list_update_value(NfcApp* app, VariableItem* item, uint32_t v
             value = app->nfc_saflok_data->opening_key;
         variable_item_set_current_value_index(item, value);
         variable_item_set_values_count(item, 4); // 2-bit value
-        furi_string_printf(value_text, "%01lx", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
     case 4: // Lock ID
         if(apply)
             app->nfc_saflok_data->lock_id = value;
         else
             value = app->nfc_saflok_data->lock_id;
-        furi_string_printf(value_text, "%04lX", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
     case 5: // Pass #
         if(apply)
             app->nfc_saflok_data->pass_number = value;
         else
             value = app->nfc_saflok_data->pass_number;
-        furi_string_printf(value_text, "%03lX", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
     case 6: // Seq & Comb
         if(apply)
             app->nfc_saflok_data->sequence_and_combination = value;
         else
             value = app->nfc_saflok_data->sequence_and_combination;
-        furi_string_printf(value_text, "%03lX", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
 
     case 7: // Deadbolt Overide
@@ -290,7 +246,7 @@ void variable_item_list_update_value(NfcApp* app, VariableItem* item, uint32_t v
         else
             value = app->nfc_saflok_data->property_id;
 
-        furi_string_printf(value_text, "%03lX", value);
+        furi_string_printf(value_text, "%ld", value);
         break;
 
     case 10: // Creation
@@ -327,9 +283,10 @@ void variable_item_list_enter_callback(void* context, uint32_t index) {
     // Reset submenu
     submenu_reset(app->submenu);
 
-    // Some options use a Submenu, others use a ByteInput
-    bool byte_input = false;
-    uint8_t byte_input_length = 0;
+    // Some options use a Submenu, others use a NumberInput
+    bool number_input = false;
+    int32_t number_input_max = 0;
+    int32_t number_input_current = 0;
 
     switch(index) {
     case 0: // Card Level
@@ -341,37 +298,34 @@ void variable_item_list_enter_callback(void* context, uint32_t index) {
         break;
 
     case 1: // Card Type
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->card_type;
-        byte_input_length = 1;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->card_type;
+        number_input_max = 15;
         break;
     case 2: // Card ID
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->card_id;
-        byte_input_length = 1;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->card_id;
+        number_input_max = 255;
         break;
     case 3: // Opening Key
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->opening_key;
-        byte_input_length = 1;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->opening_key;
+        number_input_max = 3;
         break;
     case 4: // Lock ID
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->lock_id >> 8;
-        app->byte_input_store[1] = app->nfc_saflok_data->lock_id & 0xFF;
-        byte_input_length = 2;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->lock_id;
+        number_input_max = 16383;
         break;
     case 5: // Pass #
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->pass_number >> 8;
-        app->byte_input_store[1] = app->nfc_saflok_data->pass_number & 0xFF;
-        byte_input_length = 2;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->pass_number;
+        number_input_max = 4095;
         break;
     case 6: // Seq & Comb
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->sequence_and_combination >> 8;
-        app->byte_input_store[1] = app->nfc_saflok_data->sequence_and_combination & 0xFF;
-        byte_input_length = 2;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->sequence_and_combination;
+        number_input_max = 4095;
         break;
 
     case 7: // Deadbolt Override
@@ -397,10 +351,9 @@ void variable_item_list_enter_callback(void* context, uint32_t index) {
         break;
 
     case 9: // Property ID
-        byte_input = true;
-        app->byte_input_store[0] = app->nfc_saflok_data->property_id >> 8;
-        app->byte_input_store[1] = app->nfc_saflok_data->property_id & 0xFF;
-        byte_input_length = 2;
+        number_input = true;
+        number_input_current = app->nfc_saflok_data->property_id;
+        number_input_max = 4095;
         break;
 
     case 10: // Creation
@@ -433,17 +386,17 @@ void variable_item_list_enter_callback(void* context, uint32_t index) {
     }
 
     // Switch to the appropriate view
-    if(byte_input) {
-        byte_input_set_header_text(app->byte_input, options[index]);
-        byte_input_set_result_callback(
-            app->byte_input,
-            byte_input_enter_callback,
-            byte_input_change_callback,
+    if(number_input) {
+        number_input_set_header_text(app->number_input, options[index]);
+        number_input_set_result_callback(
+            app->number_input,
+            number_input_callback,
             context,
-            app->byte_input_store,
-            byte_input_length);
+            number_input_current,
+            0,
+            number_input_max);
         set_state_flag(app, NfcSceneSaflokStateInSubView, true);
-        view_dispatcher_switch_to_view(app->view_dispatcher, NfcViewByteInput);
+        view_dispatcher_switch_to_view(app->view_dispatcher, NfcViewNumberInput);
     } else {
         submenu_set_header(app->submenu, options[index]);
         set_state_flag(app, NfcSceneSaflokStateInSubView, true);
