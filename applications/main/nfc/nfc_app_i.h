@@ -193,7 +193,6 @@ struct NfcApp {
 
     NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;
-    MfClassicData* mf_classic_edit_data;
     NfcSaflokData* nfc_saflok_data;
     FuriString* file_path;
     FuriString* file_name;
