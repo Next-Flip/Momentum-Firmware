@@ -1812,12 +1812,6 @@ protocol: NECext
 address: 86 6B 00 00
 command: 09 F6 00 00
 #
-name: Vol_dn
-type: parsed
-protocol: NECext
-address: 4F 50 00 00
-command: 0B F4 00 00
-#
 # Model: RIF6-cube-projector-raw
 #
 name: Power
