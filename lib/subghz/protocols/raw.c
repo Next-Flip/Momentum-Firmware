@@ -292,10 +292,12 @@ void* subghz_protocol_encoder_raw_alloc(SubGhzEnvironment* environment) {
 void subghz_protocol_encoder_raw_stop(void* context) {
     furi_check(context);
     SubGhzProtocolEncoderRAW* instance = context;
+    furi_check(instance->file_worker_encoder);
     instance->is_running = false;
     if(subghz_file_encoder_worker_is_running(instance->file_worker_encoder)) {
         subghz_file_encoder_worker_stop(instance->file_worker_encoder);
         subghz_file_encoder_worker_free(instance->file_worker_encoder);
+        instance->file_worker_encoder = NULL;
     }
 }
 
@@ -320,6 +322,7 @@ void subghz_protocol_raw_file_encoder_worker_set_callback_end(
 
 static bool subghz_protocol_encoder_raw_worker_init(SubGhzProtocolEncoderRAW* instance) {
     furi_assert(instance);
+    furi_check(!instance->file_worker_encoder);
 
     instance->file_worker_encoder = subghz_file_encoder_worker_alloc();
     if(subghz_file_encoder_worker_start(

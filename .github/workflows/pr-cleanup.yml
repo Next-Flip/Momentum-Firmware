@@ -1,0 +1,53 @@
+name: "PR Cleanup"
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  pr-cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Configure for Reindex"
+        run: |
+          if ${{ secrets.INDEXER_URL == '' }} ; then
+            exit
+          fi
+          if ${{ !!github.event.pull_request }} ; then
+            SHOULD_REINDEX=${{ github.event.pull_request.action == 'closed' }}
+          else
+            echo "What?"
+            exit 1
+          fi
+          echo "SHOULD_REINDEX=$SHOULD_REINDEX" >> $GITHUB_ENV
+
+      - name: "Trigger reindex"
+        if: ${{ env.SHOULD_REINDEX == 'true' }}
+        run: |
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              "${{ secrets.INDEXER_URL }}"/firmware/reindex
+
+      - name: "Force deploy website to refresh branches"
+        if: ${{ env.SHOULD_REINDEX == 'true' }}
+        uses: Codex-/return-dispatch@v2
+        id: force-deploy
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          ref: dev
+          repo: v2.momentum-fw.dev
+          owner: Next-Flip
+          workflow: force-deploy.yml
+          workflow_timeout_seconds: 300
+          workflow_job_steps_retry_seconds: 5
+
+      - name: "Wait for deploy (Run ID ${{ steps.force-deploy.outputs.run_id }})"
+        if: ${{ env.SHOULD_REINDEX == 'true' }}
+        uses: Codex-/await-remote-run@v1
+        with:
+          token: ${{ github.token }}
+          repo: v2.momentum-fw.dev
+          owner: Next-Flip
+          run_id: ${{ steps.force-deploy.outputs.run_id }}
+          run_timeout_seconds: 300
+          poll_interval_ms: 5000

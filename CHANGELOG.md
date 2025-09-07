@@ -46,6 +46,11 @@
   - USB:
     - LEGO Dimensions Toy Pad (by @SegerEnd)
     - USB-MIDI (by @kribesk, original by @DrZlo13)
+- NFC:
+  - XERO: MIFARE Ultralight C feature parity with MIFARE Classic in native NFC app (by @noproto)
+    - Dictionary attack: Uses system and user dictionaries stored under /nfc/assets/ to unlock Ultralight C tags
+    - Key management: Extra Actions → MIFARE Ultralight C Keys in the NFC app allows you to add, list, and remove Ultralight C keys from your Flipper
+    - UI: Dictionary attack scene and menu options
 - SubGHz:
   - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
   - UL: V2 Phoenix full support (button switch, add manually, counter decrypt/encrypt) (by @xMasterX & @RocketGod-git, original code by @Skorpionm)
@@ -63,9 +68,12 @@
 - Desktop: Add Keybinds support for directories (#331 by @956MB & @WillyJL)
 - Input Settings: Add Vibro Trigger option (#429 by @956MB)
 - Archive: Support opening and favoriting Picopass files (by @WillyJL)
+- OFW: GUI: Add date/time input module (by @aaronjamt)
 
 ### Updated:
 - Apps:
+  - XERO: MFKey: Key recovery is 20% faster, new write buffering of Static Encrypted Nested key candidates performs recovery 70x faster (by @noproto)
+  - UL: Sub-GHz Remote: Add possibility to use custom buttons (by @MrLego8-9)
   - Asteroids: Bugfixes, title screen, Drone Buddy power-up (by @SimplyMinimal)
   - Combo Cracker: Allow press and hold to change values, add tutorial (by @TAxelAnderson), support alphabetic combination locks (by @henrygab)
   - ESP Flasher: Bump Marauder 1.8.4 (by @justcallmekoko), add C5 support (by @Play2BReal)
@@ -74,18 +82,19 @@
   - FlipWiFi: Minor bugfixes (by @jblanked)
   - Flipper Blackhat: Add Deauth Broadcast command (by @o7-machinehum)
   - KeyCopier: Added Weiser WR3 key format (by @lightos), added Suzuki SUZ18 key format (by @RIcePatrol)
+  - Mass Storage: Add ability to spoof USB identity values (by @xtruan)
   - Metroflip: Fix unsupported card crash, RENFE Suma 10 support, GEG Connect AID added, Top Up log parsing and animations, 16 new rail lines, support for parsing area codes, saving function for Suica/Japan Rail IC, bugfixes (by @luu176)
   - NFC Maker: Support making empty/blank NDEF payloads (by @WillyJL)
-  - NFC Playlist: Refactor playlist worker, new settings layout, loop setting, controls to move between items (by @acegoal07)
+  - NFC Playlist: Refactor playlist worker, new settings layout and management, loop setting, controls to move between items (by @acegoal07)
+  - NMEA GPS: Moved to GPIO/GPS subfolder (by @WillyJL)
   - Passy: Misc memory management bugfixes, misc UI improvements (by @qistoph)
   - Seader: Fix ATS handling (by @NVX), reset SAM on error (by @bettse)
   - Sentry Safe: New interface, settings & help page (by @H4ckd4ddy)
   - Seos Compatible: Add keys v2 support with per-device encryption (by @bettse)
   - Sub-GHz Playlist: Fix crash on disallowed frequencies (by @WillyJL)
   - Weather Station: Added support for solight TE44 (by @fersingb)
-  - Weebo: Prevent 0x88 in UID[3] (by @bettse)
+  - Weebo: Prevent 0x88 in UID[3], add more figures to the database (by @bettse)
   - WiFi Marauder: Support for ESP32Marauder 1.8.4 (by @justcallmekoko)
-  - UL: Sub-GHz Remote: Add possibility to use custom buttons (by @MrLego8-9)
 - Sub-GHz:
   - UL: Add 868.46 MHz to default subghz freqs list (by @xMasterX)
   - UL: Reduce less popular freqs in default hopper preset, make it faster (by @xMasterX)
