@@ -1,7 +1,7 @@
 Filetype: IR library file
 Version: 1
-# Last Updated 5th Oct, 2024
-# Last Checked 5th Oct, 2024
+# Last Updated 7th Sept, 2025
+# Last Checked 7th Sept, 2025
 #
 # TEMP FIX FOR POWER: Power signals are duplicated, since projectors require second confirm to poweroff
 #
