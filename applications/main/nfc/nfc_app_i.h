@@ -127,16 +127,16 @@ typedef struct {
 } NfcMfUltralightCDictContext;
 
 typedef struct {
-    uint32_t card_level;
-    uint32_t card_type;
-    uint32_t card_id;
-    uint32_t opening_key;
-    uint32_t lock_id;
-    uint32_t pass_number;
-    uint32_t sequence_and_combination;
-    uint32_t deadbolt_override;
-    uint32_t restricted_days;
-    uint32_t property_id;
+    uint8_t card_level;
+    uint8_t card_type;
+    uint8_t card_id;
+    bool opening_key;
+    uint16_t lock_id;
+    uint16_t pass_number;
+    uint16_t sequence_and_combination;
+    bool deadbolt_override;
+    uint8_t restricted_days;
+    uint16_t property_id;
 
     DateTime creation;
     DateTime expire;

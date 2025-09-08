@@ -29,8 +29,8 @@ void saflok_generate_data(NfcSaflokData* saflok_data, uint8_t* buffer) {
     insert_bits(basicAccess, 0, 4, saflok_data->card_level);
     insert_bits(basicAccess, 4, 4, saflok_data->card_type);
     insert_bits(basicAccess, 8, 8, saflok_data->card_id);
-    insert_bits(basicAccess, 16, 2, saflok_data->opening_key);
-    insert_bits(basicAccess, 18, 14, saflok_data->lock_id);
+    insert_bits(basicAccess, 16, 1, saflok_data->opening_key);
+    insert_bits(basicAccess, 17, 15, saflok_data->lock_id);
     insert_bits(basicAccess, 32, 12, saflok_data->pass_number);
     insert_bits(basicAccess, 44, 12, saflok_data->sequence_and_combination);
     insert_bits(basicAccess, 56, 1, saflok_data->deadbolt_override);
