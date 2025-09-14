@@ -1,7 +1,11 @@
 #include "subghz_txrx_i.h" // IWYU pragma: keep
 #include "subghz_txrx_create_protocol_key.h"
 #include <lib/subghz/transmitter.h>
-#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/protocols/faac_slh.h>
+#include <lib/subghz/protocols/alutech_at_4n.h>
+#include <lib/subghz/protocols/came_atomo.h>
+#include <lib/subghz/protocols/somfy_telis.h>
+#include <lib/subghz/protocols/phoenix_v2.h>
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/secplus_v1.h>
 #include <lib/subghz/protocols/secplus_v2.h>

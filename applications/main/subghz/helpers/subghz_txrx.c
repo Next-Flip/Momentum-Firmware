@@ -1,6 +1,7 @@
 #include "subghz_txrx_i.h" // IWYU pragma: keep
 
-#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/subghz_protocol_registry.h>
+#include <lib/subghz/protocols/public_api.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <lib/subghz/blocks/custom_btn.h>

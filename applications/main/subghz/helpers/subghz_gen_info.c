@@ -1,6 +1,19 @@
 #include "subghz_gen_info.h"
 #include "../helpers/subghz_txrx_create_protocol_key.h"
-#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/protocols/princeton.h>
+#include <lib/subghz/protocols/nice_flo.h>
+#include <lib/subghz/protocols/came.h>
+#include <lib/subghz/protocols/roger.h>
+#include <lib/subghz/protocols/linear.h>
+#include <lib/subghz/protocols/bett.h>
+#include <lib/subghz/protocols/came_twee.h>
+#include <lib/subghz/protocols/gate_tx.h>
+#include <lib/subghz/protocols/gangqi.h>
+#include <lib/subghz/protocols/hollarm.h>
+#include <lib/subghz/protocols/revers_rb2.h>
+#include <lib/subghz/protocols/marantec24.h>
+#include <lib/subghz/protocols/marantec.h>
+#include <lib/subghz/blocks/math.h>
 
 void subghz_gen_info_reset(GenInfo* gen_info) {
     furi_assert(gen_info);
