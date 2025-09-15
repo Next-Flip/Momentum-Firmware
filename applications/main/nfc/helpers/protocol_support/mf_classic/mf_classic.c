@@ -15,6 +15,7 @@ enum {
     SubmenuIndexDictAttack,
     SubmenuIndexCrackNonces,
     SubmenuIndexUpdate,
+    SubmenuIndexShowKeys,
 };
 
 static void nfc_scene_info_on_enter_mf_classic(NfcApp* instance) {
@@ -138,6 +139,13 @@ static void nfc_scene_read_menu_on_enter_mf_classic(NfcApp* instance) {
             SubmenuIndexCrackNonces,
             nfc_protocol_support_common_submenu_callback,
             instance);
+
+        submenu_add_item(
+            submenu,
+            "Show Keys",
+            SubmenuIndexShowKeys,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
     }
 }
 
@@ -176,6 +184,13 @@ static void nfc_scene_saved_menu_on_enter_mf_classic(NfcApp* instance) {
             submenu,
             "Unlock with Dictionary",
             SubmenuIndexDictAttack,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+
+        submenu_add_item(
+            submenu,
+            "Show Keys",
+            SubmenuIndexShowKeys,
             nfc_protocol_support_common_submenu_callback,
             instance);
     }
@@ -218,6 +233,9 @@ static bool nfc_scene_read_menu_on_event_mf_classic(NfcApp* instance, SceneManag
                 instance->scene_manager, NfcSceneSaveConfirm, NfcSceneSaveConfirmStateCrackNonces);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSaveConfirm);
             consumed = true;
+        } else if(event.event == SubmenuIndexShowKeys) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicShowKeys);
+            consumed = true;
         }
     }
 
@@ -239,6 +257,9 @@ static bool nfc_scene_saved_menu_on_event_mf_classic(NfcApp* instance, SceneMana
             consumed = true;
         } else if(event.event == SubmenuIndexUpdate) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicUpdateInitial);
+            consumed = true;
+        } else if(event.event == SubmenuIndexShowKeys) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicShowKeys);
             consumed = true;
         }
     }
