@@ -85,19 +85,22 @@ jobs:
             if ${{ github.ref_name == 'dev' }} ; then
               SHOULD_DEVBUILD=${{ !contains(github.event.head_commit.message, '--nobuild') }}
               SHOULD_UPLOAD=$SHOULD_DEVBUILD
+              SHOULD_DEPLOY=$SHOULD_DEVBUILD
             elif ${{ startsWith(github.ref, 'refs/tags/') }} ; then
               SHOULD_UPLOAD=true
             fi
           elif ${{ !!github.event.pull_request }} ; then
-            SHOULD_PRCOMMENT=${{ matrix.target == env.DEFAULT_TARGET }}
-            SHOULD_UPLOAD=true
+            SHOULD_PRBUILD=${{ matrix.target == env.DEFAULT_TARGET }}
+            SHOULD_UPLOAD=$SHOULD_PRBUILD
+            SHOULD_DEPLOY=$SHOULD_PRBUILD
           else
             echo "What?"
             exit 1
           fi
           echo "SHOULD_DEVBUILD=$SHOULD_DEVBUILD" >> $GITHUB_ENV
-          echo "SHOULD_PRCOMMENT=$SHOULD_PRCOMMENT" >> $GITHUB_ENV
+          echo "SHOULD_PRBUILD=$SHOULD_PRBUILD" >> $GITHUB_ENV
           echo "SHOULD_UPLOAD=$SHOULD_UPLOAD" >> $GITHUB_ENV
+          echo "SHOULD_DEPLOY=$SHOULD_DEPLOY" >> $GITHUB_ENV
 
       - name: "Build the firmware and apps"
         id: build-fw
@@ -150,7 +153,7 @@ jobs:
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: "Force deploy website to refresh devbuilds"
-        if: ${{ env.SHOULD_DEVBUILD == 'true' }}
+        if: ${{ env.SHOULD_DEPLOY == 'true' }}
         uses: Codex-/return-dispatch@v2
         id: force-deploy
         with:
@@ -163,7 +166,7 @@ jobs:
           workflow_job_steps_retry_seconds: 5
 
       - name: "Calculate DFU sizes"
-        if: ${{ env.SHOULD_PRCOMMENT == 'true' }}
+        if: ${{ env.SHOULD_PRBUILD == 'true' }}
         run: |
           curl -L "${{ secrets.INDEXER_URL }}"/firmware/development/f7/full_dfu -o dev.dfu
           dfu_size_new=$(du --apparent-size -B 1 artifacts/flipper-z-${TARGET}-full-*.dfu | cut -f1)
@@ -186,7 +189,7 @@ jobs:
           echo "FLASH_USABLE=$FLASH_USABLE" >> $GITHUB_ENV
 
       - name: "Find previous comment"
-        if: ${{ env.SHOULD_PRCOMMENT == 'true' }}
+        if: ${{ env.SHOULD_PRBUILD == 'true' }}
         uses: peter-evans/find-comment@v3
         id: find-comment
         with:
@@ -195,7 +198,7 @@ jobs:
           body-includes: "Compiled ${{ matrix.target }} firmware for commit"
 
       - name: "Create or update comment"
-        if: ${{ env.SHOULD_PRCOMMENT == 'true' }}
+        if: ${{ env.SHOULD_PRBUILD == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
@@ -209,7 +212,7 @@ jobs:
           edit-mode: replace
 
       - name: "Wait for deploy (Run ID ${{ steps.force-deploy.outputs.run_id }})"
-        if: ${{ env.SHOULD_DEVBUILD == 'true' }}
+        if: ${{ env.SHOULD_DEPLOY == 'true' }}
         uses: Codex-/await-remote-run@v1
         with:
           token: ${{ github.token }}
