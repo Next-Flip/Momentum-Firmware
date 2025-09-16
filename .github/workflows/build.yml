@@ -197,20 +197,6 @@ jobs:
           comment-author: "github-actions[bot]"
           body-includes: "Compiled ${{ matrix.target }} firmware for commit"
 
-      - name: "Create or update comment"
-        if: ${{ env.SHOULD_PRBUILD == 'true' }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
-            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=${{secrets.INDEXER_URL}}/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
-            - [📦 qFlipper Package](${{secrets.INDEXER_URL}}/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
-            - DFU Size: `${{ env.DFU_SIZE }}` (`${{ env.DFU_DIFF }}` from dev)
-            - Free Flash: `${{ env.FLASH_FREE }}` (`${{ env.FLASH_USABLE }}` usable)
-          edit-mode: replace
-
       - name: "Wait for deploy (Run ID ${{ steps.force-deploy.outputs.run_id }})"
         if: ${{ env.SHOULD_DEPLOY == 'true' }}
         uses: Codex-/await-remote-run@v1
@@ -221,6 +207,21 @@ jobs:
           run_id: ${{ steps.force-deploy.outputs.run_id }}
           run_timeout_seconds: 300
           poll_interval_ms: 5000
+
+      - name: "Create or update comment"
+        if: ${{ env.SHOULD_PRBUILD == 'true' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [🖥️ Web Updater](https://momentum-fw.dev/update?branch=${{steps.names.outputs.branch_name_urlencoded}})
+            - [☁️ Flipper Lab/App](https://lab.flipper.net/?url=${{secrets.INDEXER_URL}}/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=mntm-${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
+            - [📦 qFlipper Package](${{secrets.INDEXER_URL}}/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
+            - DFU Size: `${{ env.DFU_SIZE }}` (`${{ env.DFU_DIFF }}` from dev)
+            - Free Flash: `${{ env.FLASH_FREE }}` (`${{ env.FLASH_USABLE }}` usable)
+          edit-mode: replace
 
       - name: "Send devbuild webhook"
         env:
