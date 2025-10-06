@@ -13,7 +13,7 @@
 #define INFRARED_LIBRARY_HEADER  "IR library file"
 #define INFRARED_LIBRARY_VERSION (1)
 
-ARRAY_DEF(SignalPositionArray, size_t, M_DEFAULT_OPLIST);
+ARRAY_DEF(SignalPositionArray, size_t, M_DEFAULT_OPLIST); //-V658
 
 typedef struct {
     size_t index;

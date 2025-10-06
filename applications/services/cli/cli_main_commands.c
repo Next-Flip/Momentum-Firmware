@@ -409,11 +409,13 @@ void cli_command_led(PipeSide* pipe, FuriString* args, void* context) {
 static void cli_command_top(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(context);
 
-    int interval = 1000;
-    args_read_int_and_trim(args, &interval);
+    uint32_t interval;
+    if(!args_read_duration(args, &interval, NULL)) {
+        interval = 1000;
+    }
 
     FuriThreadList* thread_list = furi_thread_list_alloc();
-    while(!cli_is_pipe_broken_or_is_etx_next_char(pipe)) {
+    do {
         uint32_t tick = furi_get_tick();
         furi_thread_enumerate(thread_list);
 
@@ -469,12 +471,8 @@ static void cli_command_top(PipeSide* pipe, FuriString* args, void* context) {
         printf(ANSI_ERASE_DISPLAY(ANSI_ERASE_FROM_CURSOR_TO_END));
         fflush(stdout);
 
-        if(interval > 0) {
-            furi_delay_ms(interval);
-        } else {
-            break;
-        }
-    }
+    } while(interval > 0 && cli_sleep(pipe, interval));
+
     furi_thread_list_free(thread_list);
 }
 
@@ -544,6 +542,37 @@ void cli_command_echo(PipeSide* pipe, FuriString* args, void* context) {
     }
 }
 
+/**
+ * @brief Pause for a specified duration or until Ctrl+C is pressed or the
+ * session is terminated.
+ *
+ * The duration can be specified in various units such as milliseconds (ms),
+ * seconds (s), minutes (m), or hours (h). If the unit is not specified, the
+ * second is used by default.
+ *
+ * Example:
+ *   sleep 5s
+ */
+void cli_command_sleep(PipeSide* pipe, FuriString* args, void* context) {
+    UNUSED(context);
+    FuriString* duration_string;
+    duration_string = furi_string_alloc();
+
+    do {
+        uint32_t duration_in_ms = 0;
+        if(!args_read_string_and_trim(args, duration_string) ||
+           !args_read_duration(duration_string, &duration_in_ms, "s")) {
+            cli_print_usage("sleep", "[<0-...>[<ms|s|m|h>]]", furi_string_get_cstr(args));
+            break;
+        }
+
+        cli_sleep(pipe, duration_in_ms);
+
+    } while(false);
+
+    furi_string_free(duration_string);
+}
+
 void cli_command_clear(PipeSide* pipe, FuriString* args, void* context) {
     UNUSED(pipe);
     UNUSED(args);
@@ -563,6 +592,8 @@ void cli_main_commands_init(CliRegistry* registry) {
     cli_registry_add_command(
         registry, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
     cli_registry_add_command(registry, "echo", CliCommandFlagParallelSafe, cli_command_echo, NULL);
+    cli_registry_add_command(
+        registry, "sleep", CliCommandFlagParallelSafe, cli_command_sleep, NULL);
 }
 
 CLI_COMMAND_INTERFACE(src, cli_command_src, CliCommandFlagParallelSafe, 768, CLI_APPID);

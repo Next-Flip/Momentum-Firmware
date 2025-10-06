@@ -1,3 +1,13 @@
+### Breaking Changes:
+- OFW: JS: SDK 1.0:
+  - Scripts using these modules will need to be updated
+  - Module `gui/submenu`:
+    - The API now takes submenu items as view children, instead of as a view prop
+    - Effort required to update scripts using `gui/submenu`: very minimal
+  - Module `gui/widget`:
+    - The `button` event now returns an object with `key` and `type`, instead of just the key name
+    - Effort required to update scripts using `gui/widget`: very minimal
+
 ### Added:
 - Apps:
   - Games: Geometry Flip (by @goosedev72-projects)
@@ -51,6 +61,10 @@
     - Dictionary attack: Uses system and user dictionaries stored under /nfc/assets/ to unlock Ultralight C tags
     - Key management: Extra Actions → MIFARE Ultralight C Keys in the NFC app allows you to add, list, and remove Ultralight C keys from your Flipper
     - UI: Dictionary attack scene and menu options
+  - OFW: FeliCa Service Directory Traverse + Dump All Unencrypted-Readable Services' Blocks (by @zinongli)
+  - OFW: FeliCa Emulation Handle certain Polling commands in firmware (by @dogtopus)
+  - OFW: Amusement IC Card Parser for FeliCa Lite & Lite-S (by @zinongli)
+  - OFW: MFC 1k Banapass Parser (by @zinongli)
 - SubGHz:
   - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
   - UL: V2 Phoenix full support (button switch, add manually, counter decrypt/encrypt) (by @xMasterX & @RocketGod-git, original code by @Skorpionm)
@@ -60,11 +74,28 @@
   - UL: Keeloq Comunello add manually support (by @xMasterX)
   - UL: Add variant of 'Add Manually' menu with manual editing for each value (by @MrLego8-9)
   - UL: Add ZKTeco 430.5 MHz add manually support (by @xMasterX)
-- RFID: Support writing Securakey, Jablotron and FDX-B to EM4305 cards (#434 by @jamisonderek)
-- BT Remote: Add Rename Option, simplify Bad KB BLE profile (#439 by @aaronjamt & @WillyJL)
+  - UL: Add Elplast 18bit static code protocol (hello Hackcat ^_^)
+  - UL: Try to decode BFT (2 buttons remotes only) on the fly in regular Read mode (by @xMasterX)
+- RFID:
+  - Support writing Securakey, Jablotron and FDX-B to EM4305 cards (#434 by @jamisonderek)
+  - OFW: Show ISO-3166 Country Names For Pet Chips (by @zinongli)
+- BT Remote:
+  - Add Rename Option for BT Remote, simplify Bad KB BLE profile (#439 by @aaronjamt & @WillyJL)
+  - OFW: Make mouse clicker button selectable (by @LordMZTE)
 - MNTM Settings:
   - Add Main Menu support for directories and generic files (including JS files) (#331 by @956MB & @WillyJL)
   - Add Skip Sliding Animations option for Lockscreen (#436 by @aaronjamt)
+- CLI:
+  - OFW: NFC CLI commands (by @RebornedBrain)
+  - OFW: Buzzer command (by @ivanbarsukov)
+- JS: Added all missing GUI views for JS (by @portasynthinca3):
+  - Added `gui/button_menu`
+  - Added `gui/button_panel`
+  - Added `gui/menu`
+  - Added `gui/number_input`
+  - Added `gui/popup`
+  - Added `gui/vi_list`
+  - Changed API for `gui/submenu`, see breaking changes above
 - Desktop: Add Keybinds support for directories (#331 by @956MB & @WillyJL)
 - Input Settings: Add Vibro Trigger option (#429 by @956MB)
 - Archive: Support opening and favoriting Picopass files (by @WillyJL)
@@ -76,7 +107,7 @@
   - UL: Sub-GHz Remote: Add possibility to use custom buttons (by @MrLego8-9)
   - Asteroids: Bugfixes, title screen, Drone Buddy power-up (by @SimplyMinimal)
   - Combo Cracker: Allow press and hold to change values, add tutorial (by @TAxelAnderson), support alphabetic combination locks (by @henrygab)
-  - ESP Flasher: Bump Marauder 1.8.4 (by @justcallmekoko), add C5 support (by @Play2BReal)
+  - ESP Flasher: Bump Marauder 1.8.4 (by @justcallmekoko), add C5 support (by @Play2BReal), more reliable bootloader mode on SWCLK (by @WillyJL)
   - FlipDownloader: Added a new option to download GitHub repositories with dedicated keyboard, add auto updating (by @jblanked)
   - FlipSocial: C++ rewrite, comments on feed posts, simpler logic and registration (by @jblanked)
   - FlipWiFi: Minor bugfixes (by @jblanked)
@@ -99,18 +130,29 @@
   - UL: Add 868.46 MHz to default subghz freqs list (by @xMasterX)
   - UL: Reduce less popular freqs in default hopper preset, make it faster (by @xMasterX)
   - UL: Tune Linear (add better EZCode support), Dickert MAHS decoders (by @xMasterX)
-- JS: Expose button event type in `gui/widget` button callback (by @WillyJL)
+- Infrared:
+  - OFW: Add an old JVC model to universal remotes (by @zgracem)
+  - OFW: Add Daikin FTXN25LV1B9 and Toyotomi KTN22-12R32 to universal remotes (by @minchogaydarov)
+- OFW: BLE: Improved pairing security (by @hedger)
+- JS: Expose button event type in `gui/widget` button callback, see breaking changes above (by @WillyJL)
 - UL: Docs: Update Sub-GHz DoorHan programming instructions (by @li0ard)
 
 ### Fixed:
 - CLI: Fix long delay with quick connect/disconnect, qFlipper should connect faster as expected again (by @WillyJL)
-- Bad KB: Fix modifier keys with HOLD/RELEASE commands (by @WillyJL)
+- Storage: Dont send mount event if SD mounted at boot, fix SD card icon showing late on boot (by @WillyJL)
+- Bad KB:
+  - Fix modifier keys with HOLD/RELEASE commands (by @WillyJL)
+  - OFW: Fix demo_windows.txt for newer version of ai enabled Windows Notepad not able to keep up with default fast input text (by @ase1590)
 - Desktop: Fix lock screen hang (#438 by @aaronjamt)
 - NFC:
   - Fix incorrect Saflok year formula (#433 by @Eltrick)
   - Fix read crash with unexpectedly large MFC AUTH(0) response, eg with Chameleon Ultra NTAG emualtion (by @WillyJL)
   - Fix slashes in prefilled filename (by @WillyJL)
 - FBT: Fix redundant decl for apps using an icon disabled in API (by @WillyJL)
+- UL: Sub-GHz: Fix crash in add manually menu (by @xMasterX)
+- OFW: GUI: Fix Number Input Save Icon (by @zinongli)
+- OFW: JS: Stop PWM on exit (by @portasynthinca3)
+- OFW: Sub-GHz: Fix TIM17 config not applied immediately (by @Aerosnail)
 
 ### Removed:
-- Nothing
+- Disabled FURI_TRACE due to flash space constraints, `furi_check failed` crashes will no longer show the file path of the error for now

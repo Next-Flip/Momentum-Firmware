@@ -488,7 +488,6 @@ static int32_t cli_shell_thread(void* context) {
 // ==========
 // Public API
 // ==========
-
 CliShell* cli_shell_alloc(
     CliShellMotd motd,
     void* context,

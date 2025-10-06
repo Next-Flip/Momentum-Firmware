@@ -70,4 +70,6 @@ ADD_SCENE(nfc, slix_key_input, SlixKeyInput)
 ADD_SCENE(nfc, slix_unlock, SlixUnlock)
 ADD_SCENE(nfc, slix_unlock_success, SlixUnlockSuccess)
 
+ADD_SCENE(nfc, felica_more_info, FelicaMoreInfo)
+
 ADD_SCENE(nfc, generate_info, GenerateInfo)

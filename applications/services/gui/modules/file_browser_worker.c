@@ -32,8 +32,8 @@ typedef enum {
     (WorkerEvtStop | WorkerEvtLoad | WorkerEvtFolderEnter | WorkerEvtFolderExit | \
      WorkerEvtFolderRefresh | WorkerEvtConfigChange)
 
-ARRAY_DEF(_IdxLastArray, int32_t) // Unused, kept for compatibility
-ARRAY_DEF(ExtFilterArray, FuriString*, FURI_STRING_OPLIST)
+ARRAY_DEF(_IdxLastArray, int32_t) //-V658 // Unused, kept for compatibility
+ARRAY_DEF(ExtFilterArray, FuriString*, FURI_STRING_OPLIST) //-V658
 
 struct BrowserWorker {
     FuriThread* thread;
