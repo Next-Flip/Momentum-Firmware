@@ -139,14 +139,14 @@ static void nfc_scene_read_menu_on_enter_mf_classic(NfcApp* instance) {
             SubmenuIndexCrackNonces,
             nfc_protocol_support_common_submenu_callback,
             instance);
+        }
 
-        submenu_add_item(
-            submenu,
-            "Show Keys",
-            SubmenuIndexShowKeys,
-            nfc_protocol_support_common_submenu_callback,
-            instance);
-    }
+    submenu_add_item(
+        submenu,
+        "Show Keys",
+        SubmenuIndexShowKeys,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
 }
 
 static void nfc_scene_read_success_on_enter_mf_classic(NfcApp* instance) { //-V524
@@ -186,19 +186,19 @@ static void nfc_scene_saved_menu_on_enter_mf_classic(NfcApp* instance) {
             SubmenuIndexDictAttack,
             nfc_protocol_support_common_submenu_callback,
             instance);
-
-        submenu_add_item(
-            submenu,
-            "Show Keys",
-            SubmenuIndexShowKeys,
-            nfc_protocol_support_common_submenu_callback,
-            instance);
     }
 
     submenu_add_item(
         submenu,
         "Update from Initial Card",
         SubmenuIndexUpdate,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+
+    submenu_add_item(
+        submenu,
+        "Show Keys",
+        SubmenuIndexShowKeys,
         nfc_protocol_support_common_submenu_callback,
         instance);
 }
