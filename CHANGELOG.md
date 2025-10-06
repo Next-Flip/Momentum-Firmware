@@ -65,6 +65,7 @@
   - OFW: FeliCa Emulation Handle certain Polling commands in firmware (by @dogtopus)
   - OFW: Amusement IC Card Parser for FeliCa Lite & Lite-S (by @zinongli)
   - OFW: MFC 1k Banapass Parser (by @zinongli)
+  - Add MIFARE Classic "Show Keys" UI (#473 by @aaronjamt)
 - SubGHz:
   - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
   - UL: V2 Phoenix full support (button switch, add manually, counter decrypt/encrypt) (by @xMasterX & @RocketGod-git, original code by @Skorpionm)
