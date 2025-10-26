@@ -1,4 +1,5 @@
 #include "momentum_app.h"
+#include <string.h>
 
 static bool momentum_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -483,9 +484,17 @@ void momentum_app_free(MomentumApp* app) {
 }
 
 extern int32_t momentum_app(void* p) {
-    UNUSED(p);
     MomentumApp* app = momentum_app_alloc();
-    scene_manager_next_scene(app->scene_manager, MomentumAppSceneStart);
+    
+    // Check for command line arguments to navigate to specific scenes
+    uint32_t first_scene = MomentumAppSceneStart;
+    if(p && strlen(p)) {
+        if(!strcmp(p, "MiscScreen")) {
+            first_scene = MomentumAppSceneMiscScreen;
+        }
+    }
+    
+    scene_manager_next_scene(app->scene_manager, first_scene);
     view_dispatcher_run(app->view_dispatcher);
     momentum_app_free(app);
     return 0;

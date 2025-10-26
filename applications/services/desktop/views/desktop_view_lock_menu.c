@@ -307,6 +307,9 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
             case DesktopLockMenuIndexMomentum:
                 desktop_event = DesktopLockMenuEventMomentum;
                 break;
+            case DesktopLockMenuIndexBrightness:
+                desktop_event = DesktopLockMenuEventRgbSettings;
+                break;
             case DesktopLockMenuIndexVolume:
                 desktop_event = stealth_mode ? DesktopLockMenuEventStealthModeOff :
                                                DesktopLockMenuEventStealthModeOn;

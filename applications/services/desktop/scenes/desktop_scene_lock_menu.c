@@ -121,6 +121,11 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             loader_start_detached_with_gui_error(desktop->loader, "Momentum", NULL);
             consumed = true;
             break;
+        case DesktopLockMenuEventRgbSettings:
+            desktop_scene_lock_menu_save_settings(desktop);
+            loader_start_detached_with_gui_error(desktop->loader, "Momentum", "MiscScreen");
+            consumed = true;
+            break;
         case DesktopLockMenuEventStealthModeOn:
             desktop_set_stealth_mode_state(desktop, true);
             break;
