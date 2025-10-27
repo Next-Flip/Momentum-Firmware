@@ -25,7 +25,7 @@
 
 #define TAG "Saflok"
 
-#define MAGIC_TABLE_SIZE      192
+#define MAGIC_TABLE_SIZE 192
 #define SL_PROTO_INVALID (-1)
 #define SL_PROTO_MFC     (0)
 #define SL_PROTO_UL      (1)
