@@ -419,6 +419,71 @@ bool flipper_format_write_comment_cstr(FlipperFormat* flipper_format, const char
     return flipper_format_stream_write_comment_cstr(flipper_format->stream, data);
 }
 
+static bool
+    flipper_format_stream_read_comment_line(Stream* stream, const char* key, FuriString* data) {
+    furi_check(stream);
+    furi_check(key);
+    furi_check(data);
+
+    const size_t pos = stream_tell(stream);
+    if(!stream_rewind(stream)) return false;
+
+    furi_string_reset(data);
+    FuriString* line = furi_string_alloc();
+    bool found = false;
+
+    while(!found && !furi_string_empty(line)) {
+        // Read a complete line
+        furi_string_reset(line);
+        char c;
+        while(stream_read(stream, (uint8_t*)&c, 1) == 1) {
+            if(c == flipper_format_eolr) continue;
+            if(c == flipper_format_eoln) break;
+            furi_string_push_back(line, c);
+        }
+
+        // Check for metadata comment format: "# Key: Value"
+        if(furi_string_start_with_str(line, "# ")) {
+            size_t key_end = furi_string_search_str(line, ": ");
+            if(key_end != FURI_STRING_FAILURE) {
+                // Extract and compare key (skip "# " prefix)
+                FuriString* found_key = furi_string_alloc();
+                furi_string_set_n(found_key, line, 2, key_end - 2);
+
+                if(furi_string_equal_str(found_key, key)) {
+                    // Extract value (skip ": ")
+                    furi_string_set_n(
+                        data, line, key_end + 2, furi_string_size(line) - (key_end + 2));
+                    found = true;
+                }
+                furi_string_free(found_key);
+            }
+        }
+    }
+
+    furi_string_free(line);
+    stream_seek(stream, pos, StreamOffsetFromStart);
+    return found;
+}
+
+bool flipper_format_read_comment(FlipperFormat* flipper_format, const char* key, FuriString* data) {
+    furi_check(flipper_format);
+    furi_check(key);
+    furi_check(data);
+    return flipper_format_stream_read_comment_line(flipper_format->stream, key, data);
+}
+
+bool flipper_format_read_comment_cstr(FlipperFormat* flipper_format, const char* key, char* data) {
+    FuriString* string = furi_string_alloc();
+    bool result = flipper_format_read_comment(flipper_format, key, string);
+    if(result) {
+        strncpy(data, furi_string_get_cstr(string), strlen(furi_string_get_cstr(string)) + 1);
+    }
+    furi_string_free(string);
+    return result;
+
+}
+
 bool flipper_format_write_empty_line(FlipperFormat* flipper_format) {
     furi_check(flipper_format);
     return flipper_format_stream_write_eol(flipper_format->stream);

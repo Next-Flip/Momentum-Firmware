@@ -39,6 +39,8 @@
 #include "views/infrared_debug_view.h"
 #include "views/infrared_move_view.h"
 
+#include <gui/modules/widget.h>
+
 #define INFRARED_FILE_NAME_SIZE  100
 #define INFRARED_TEXT_STORE_NUM  2
 #define INFRARED_TEXT_STORE_SIZE 128
@@ -70,6 +72,12 @@ typedef enum {
     InfraredEditTargetNone, /**< No editing target is selected. */
     InfraredEditTargetRemote, /**< Whole remote is selected as editing target. */
     InfraredEditTargetButton, /**< Single button is selected as editing target. */
+    InfraredEditTargetMetadataBrand,
+    InfraredEditTargetMetadataDeviceType,
+    InfraredEditTargetMetadataModel,
+    InfraredEditTargetMetadataContributor,
+    InfraredEditTargetMetadataRemoteModel,
+    InfraredEditTargetSignal,
 } InfraredEditTarget;
 
 /**
@@ -89,6 +97,8 @@ typedef struct {
     bool is_debug_enabled; /**< Whether to enable or disable debugging features. */
     bool is_transmitting; /**< Whether a signal is currently being transmitted. */
     bool is_otg_enabled; /**< Whether OTG power (external 5V) is enabled. */
+    bool is_contributing_remote; /**< Whether we're in the contribute flow */
+    bool is_processing_contribute_exit; /**< Guard flag for contribute exit */
     bool is_easy_mode; /**< Whether easy learning mode is enabled. */
     bool is_decode_enabled; /**< Whether signal decoding is enabled. */
     bool is_decode_forced; /**< Whether signal decoding is forced. */
@@ -140,6 +150,7 @@ struct InfraredApp {
     InfraredAppState app_state; /**< Application state. */
 
     void* rpc_ctx; /**< Pointer to the RPC context object. */
+    Widget* widget;
 };
 
 /**
@@ -156,6 +167,7 @@ typedef enum {
     InfraredViewDebugView,
     InfraredViewMove,
     InfraredViewLoading,
+    InfraredViewWidget,
 } InfraredView;
 
 /**

@@ -1237,6 +1237,8 @@ Function,+,flipper_format_insert_or_update_string_cstr,_Bool,"FlipperFormat*, co
 Function,+,flipper_format_insert_or_update_uint32,_Bool,"FlipperFormat*, const char*, const uint32_t*, const uint16_t"
 Function,+,flipper_format_key_exist,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_read_bool,_Bool,"FlipperFormat*, const char*, _Bool*, const uint16_t"
+Function,+,flipper_format_read_comment,_Bool,"FlipperFormat*, const char*, FuriString*"
+Function,+,flipper_format_read_comment_cstr,_Bool,"FlipperFormat*, const char*, char*"
 Function,+,flipper_format_read_float,_Bool,"FlipperFormat*, const char*, float*, const uint16_t"
 Function,+,flipper_format_read_header,_Bool,"FlipperFormat*, FuriString*, uint32_t*"
 Function,+,flipper_format_read_hex,_Bool,"FlipperFormat*, const char*, uint8_t*, const uint16_t"
