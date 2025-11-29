@@ -36,7 +36,7 @@ const char* const gps_text[GPS_COUNT] = {
     "115200",
 };
 
-#define DEBUG_COUNTER_COUNT 16
+#define DEBUG_COUNTER_COUNT 17
 const char* const debug_counter_text[DEBUG_COUNTER_COUNT] = {
     "+1",
     "+2",
@@ -46,6 +46,7 @@ const char* const debug_counter_text[DEBUG_COUNTER_COUNT] = {
     "+10",
     "+50",
     "OVFL",
+    "OFEX",
     "No",
     "-1",
     "-2",
@@ -64,6 +65,7 @@ const int32_t debug_counter_val[DEBUG_COUNTER_COUNT] = {
     10,
     50,
     65535,
+    65534,
     0,
     -1,
     -2,

@@ -8,8 +8,8 @@
 #include <toolbox/pipe.h>
 #include <m-dict.h>
 
-#include "infrared_signal.h"
-#include "infrared_brute_force.h"
+#include <lib/infrared/signal/infrared_signal.h>
+#include <lib/infrared/signal/infrared_brute_force.h>
 
 #define INFRARED_CLI_BUF_SIZE            (10U)
 #define INFRARED_CLI_FILE_NAME_SIZE      (256U)
@@ -470,7 +470,7 @@ static void infrared_cli_brute_force_signals(
             printf("Missing signal name.\r\n");
             break;
         }
-        if(infrared_brute_force_calculate_messages(brute_force, false, true) !=
+        if(infrared_brute_force_calculate_messages_ex(brute_force, false, true) !=
            InfraredErrorCodeNone) {
             printf("Invalid remote name.\r\n");
             break;

@@ -33,7 +33,7 @@ if __name__ == "__main__":
             change = (
                 "Force Push"
                 if event["forced"] and not count
-                else f"{count} New Commit{'' if count == 1 else 's'}"
+                else f"{count} New Commit{'' if count == 1 else 's'}{' (Force Push)' if event['forced'] else ''}"
             )
             desc = f"[**{change}**]({event['compare']}) | [{branch}]({event['repository']['html_url']}/tree/{branch})\n"
             for i, commit in enumerate(event["commits"]):
@@ -49,7 +49,7 @@ if __name__ == "__main__":
                     desc = desc.rsplit("\n", 1)[0] + f"\n+ {count - i} more commits"
                     break
             url = event["compare"]
-            color = 16723712 if event["forced"] else 11761899
+            color = 11761899
 
         case "release":
             webhook = "RELEASE_WEBHOOK"

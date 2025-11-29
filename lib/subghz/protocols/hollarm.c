@@ -263,6 +263,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_hollarm_remote_controller(&instance->generic);
         subghz_protocol_encoder_hollarm_get_upload(instance);
+        instance->encoder.front = 0;
 
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -270,7 +271,7 @@ SubGhzProtocolStatus
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> i * 8) & 0xFF;
+            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> (i * 8)) & 0xFF;
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Unable to add Key");
@@ -286,6 +287,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_hollarm_stop(void* context) {
     SubGhzProtocolEncoderHollarm* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0;
 }
 
 LevelDuration subghz_protocol_encoder_hollarm_yield(void* context) {
