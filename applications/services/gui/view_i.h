@@ -33,6 +33,9 @@ struct View {
     ViewAsciiCallback ascii_callback;
 };
 
+/** Initialize View (for internal use) */
+void view_init(View* view);
+
 /** IconAnimation tie callback */
 void view_icon_animation_callback(IconAnimation* instance, void* context);
 

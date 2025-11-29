@@ -39,6 +39,7 @@ static const char* submenu_names[SetTypeMAX] = {
     [SetTypeSommer_FM238_868] = "KL: Sommer fm2 868Mhz",
     [SetTypeStilmatic] = "KL: Stilmatic 433MHz",
     [SetTypeIronLogic] = "KL: IronLogic 433MHz",
+    [SetTypeIronLogicSmart] = "KL: IronLogic SM 433MHz",
     [SetTypeDeaMio433] = "KL: DEA Mio 433MHz",
     [SetTypeDTMNeo433] = "KL: DTM Neo 433MHz",
     [SetTypeGibidi433] = "KL: Gibidi 433MHz",
@@ -223,6 +224,8 @@ bool subghz_scene_set_type_generate_protocol_from_infos(SubGhz* subghz) {
 
     if(generated_protocol) {
         subghz_file_name_clear(subghz);
+        scene_manager_set_scene_state(
+            subghz->scene_manager, SubGhzSceneSetType, SubGhzCustomEventManagerSet);
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
     } else {
         furi_string_set(subghz->error_str, "Function requires\nan SD card with\nfresh databases.");

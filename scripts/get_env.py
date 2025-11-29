@@ -9,6 +9,7 @@ import re
 import shlex
 import ssl
 import string
+import urllib.parse
 import urllib.request
 
 
@@ -63,6 +64,7 @@ def get_details(event, args):
         ref = event["ref"]
     data["commit_sha"] = data["commit_hash"][:8]
     data["branch_name"] = re.sub("refs/\w+/", "", ref)
+    data["branch_name_urlencoded"] = urllib.parse.quote_plus(data["branch_name"])
     data["suffix"] = (
         "mntm-"
         + data["branch_name"].removeprefix("mntm-").replace("/", "-")
@@ -94,6 +96,9 @@ def add_envs(data, gh_env_file, gh_out_file, args):
     add_env("DIST_SUFFIX", data["suffix"], gh_env_file)
     add_env("WORKFLOW_BRANCH_OR_TAG", data["branch_name"], gh_env_file)
     add_set_output_var("branch_name", data["branch_name"], gh_out_file)
+    add_set_output_var(
+        "branch_name_urlencoded", data["branch_name_urlencoded"], gh_out_file
+    )
     add_set_output_var("commit_sha", data["commit_sha"], gh_out_file)
     add_set_output_var("default_target", os.getenv("DEFAULT_TARGET"), gh_out_file)
     add_set_output_var("suffix", data["suffix"], gh_out_file)

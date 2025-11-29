@@ -80,7 +80,7 @@ void* subghz_protocol_encoder_gangqi_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = 256;
+    instance->encoder.size_upload = 1024;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
     return instance;
@@ -183,35 +183,40 @@ static void subghz_protocol_encoder_gangqi_get_upload(SubGhzProtocolEncoderGangQ
 
     size_t index = 0;
 
-    // Send key and GAP between parcels
-    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-        if(bit_read(instance->generic.data, i - 1)) {
-            // Send bit 1
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_gangqi_const.te_long);
-            if(i == 1) {
-                //Send gap if bit was last
-                instance->encoder.upload[index++] = level_duration_make(
-                    false,
-                    (uint32_t)subghz_protocol_gangqi_const.te_short * 4 +
-                        subghz_protocol_gangqi_const.te_delta);
-            } else {
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_long * 2);
+
+    for(size_t r = 0; r < 5; r++) {
+        // Send key and GAP between parcels
+        for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
+            if(bit_read(instance->generic.data, i - 1)) {
+                // Send bit 1
                 instance->encoder.upload[index++] =
-                    level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_short);
-            }
-        } else {
-            // Send bit 0
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_gangqi_const.te_short);
-            if(i == 1) {
-                //Send gap if bit was last
-                instance->encoder.upload[index++] = level_duration_make(
-                    false,
-                    (uint32_t)subghz_protocol_gangqi_const.te_short * 4 +
-                        subghz_protocol_gangqi_const.te_delta);
+                    level_duration_make(true, (uint32_t)subghz_protocol_gangqi_const.te_long);
+                if(i == 1) {
+                    //Send gap if bit was last
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false,
+                        (uint32_t)subghz_protocol_gangqi_const.te_short * 4 +
+                            subghz_protocol_gangqi_const.te_delta);
+                } else {
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false, (uint32_t)subghz_protocol_gangqi_const.te_short);
+                }
             } else {
+                // Send bit 0
                 instance->encoder.upload[index++] =
-                    level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_long);
+                    level_duration_make(true, (uint32_t)subghz_protocol_gangqi_const.te_short);
+                if(i == 1) {
+                    //Send gap if bit was last
+                    instance->encoder.upload[index++] = level_duration_make(
+                        false,
+                        (uint32_t)subghz_protocol_gangqi_const.te_short * 4 +
+                            subghz_protocol_gangqi_const.te_delta);
+                } else {
+                    instance->encoder.upload[index++] =
+                        level_duration_make(false, (uint32_t)subghz_protocol_gangqi_const.te_long);
+                }
             }
         }
     }
@@ -262,6 +267,7 @@ SubGhzProtocolStatus
 
         subghz_protocol_gangqi_remote_controller(&instance->generic);
         subghz_protocol_encoder_gangqi_get_upload(instance);
+        instance->encoder.front = 0;
 
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -269,7 +275,7 @@ SubGhzProtocolStatus
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> i * 8) & 0xFF;
+            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> (i * 8)) & 0xFF;
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Unable to add Key");
@@ -285,6 +291,7 @@ SubGhzProtocolStatus
 void subghz_protocol_encoder_gangqi_stop(void* context) {
     SubGhzProtocolEncoderGangQi* instance = context;
     instance->encoder.is_running = false;
+    instance->encoder.front = 0;
 }
 
 LevelDuration subghz_protocol_encoder_gangqi_yield(void* context) {
@@ -332,7 +339,7 @@ void subghz_protocol_decoder_gangqi_feed(void* context, bool level, volatile uin
     switch(instance->decoder.parser_step) {
     case GangQiDecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, subghz_protocol_gangqi_const.te_long * 2) <
-                        subghz_protocol_gangqi_const.te_delta * 3)) {
+                        subghz_protocol_gangqi_const.te_delta * 5)) {
             //Found GAP
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
@@ -366,19 +373,15 @@ void subghz_protocol_decoder_gangqi_feed(void* context, bool level, volatile uin
                 instance->decoder.parser_step = GangQiDecoderStepSaveDuration;
             } else if(
                 // End of the key
-                DURATION_DIFF(duration, subghz_protocol_gangqi_const.te_short * 4) <
-                subghz_protocol_gangqi_const.te_delta) {
+                DURATION_DIFF(duration, subghz_protocol_gangqi_const.te_long * 2) <
+                subghz_protocol_gangqi_const.te_delta * 5) {
                 //Found next GAP and add bit 0 or 1 (only bit 0 was found on the remotes)
                 if((DURATION_DIFF(
                         instance->decoder.te_last, subghz_protocol_gangqi_const.te_short) <
-                    subghz_protocol_gangqi_const.te_delta) &&
-                   (DURATION_DIFF(duration, subghz_protocol_gangqi_const.te_short * 4) <
                     subghz_protocol_gangqi_const.te_delta)) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                 }
                 if((DURATION_DIFF(instance->decoder.te_last, subghz_protocol_gangqi_const.te_long) <
-                    subghz_protocol_gangqi_const.te_delta) &&
-                   (DURATION_DIFF(duration, subghz_protocol_gangqi_const.te_short * 4) <
                     subghz_protocol_gangqi_const.te_delta)) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 }
