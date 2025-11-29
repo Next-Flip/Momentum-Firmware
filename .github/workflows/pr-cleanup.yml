@@ -15,6 +15,7 @@ jobs:
             exit
           fi
           if ${{ !!github.event.pull_request }} ; then
+            echo ${{ github.event.pull_request.action }}
             SHOULD_REINDEX=${{ github.event.pull_request.action == 'closed' }}
           else
             echo "What?"
