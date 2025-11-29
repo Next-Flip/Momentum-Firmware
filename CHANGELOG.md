@@ -147,7 +147,7 @@
   - UL: Tune Linear (add better EZCode support), Dickert MAHS decoders (by @xMasterX)
   - UL: Some fixes and improvements to Honeywell Sec protocol (by @xMasterX)
 - Infrared:
-  - Update universal remotes from IRDB (by @jaylikesbunda)
+  - Update universal remotes from IRDB (#465 by @jaylikesbunda)
   - OFW: Add an old JVC model to universal remotes (by @zgracem)
   - OFW: Add Daikin FTXN25LV1B9 and Toyotomi KTN22-12R32 to universal remotes (by @minchogaydarov)
   - OFW: Infrared Universal remote DBs unit test & move infrared_signal / infrared_brute_force into lib (by @xMasterX)
