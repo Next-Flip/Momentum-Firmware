@@ -19,7 +19,7 @@ struct VariableItem {
     FuriString* locked_message;
 };
 
-ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST);
+ARRAY_DEF(VariableItemArray, VariableItem, M_POD_OPLIST); //-V658
 
 struct VariableItemList {
     View* view;

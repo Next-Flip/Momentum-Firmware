@@ -1,6 +1,6 @@
 {
   "name": "@next-flip/create-fz-app-mntm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Template package for JS apps for Flipper Zero using Momentum Custom Firmware JS SDK",
   "bin": "index.js",
   "type": "module",

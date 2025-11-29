@@ -47,11 +47,11 @@ Storage* storage_app_alloc(void) {
 #endif
 
     // sd icon gui
-    app->sd_gui.enabled = false;
+    app->sd_gui.enabled = (app->storage[ST_EXT].status != StorageStatusNotReady);
     app->sd_gui.view_port = view_port_alloc();
     view_port_set_width(app->sd_gui.view_port, icon_get_width(ICON_SD_MOUNTED));
     view_port_draw_callback_set(app->sd_gui.view_port, storage_app_sd_icon_draw_callback, app);
-    view_port_enabled_set(app->sd_gui.view_port, false);
+    view_port_enabled_set(app->sd_gui.view_port, app->sd_gui.enabled);
 
     return app;
 }

@@ -58,12 +58,24 @@ void date_time_input_set_result_callback(
     void* callback_context,
     DateTime* datetime);
 
-/** Set date/time input header text
+/** Set date/time fields which can be edited
  *
  * @param      date_time_input  date/time input instance
- * @param      text             text to be shown
+ * @param      year             whether to allow editing the year
+ * @param      month            whether to allow editing the month
+ * @param      day              whether to allow editing the day
+ * @param      hour             whether to allow editing the hour
+ * @param      minute           whether to allow editing the minute
+ * @param      second           whether to allow editing the second
  */
-void date_time_input_set_header_text(DateTimeInput* date_time_input, const char* text);
+void date_time_input_set_editable_fields(
+    DateTimeInput* date_time_input,
+    bool year,
+    bool month,
+    bool day,
+    bool hour,
+    bool minute,
+    bool second);
 
 #ifdef __cplusplus
 }

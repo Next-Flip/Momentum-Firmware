@@ -62,14 +62,14 @@ jobs:
             exit 1
           fi
 
-      - name: "Check API version for consistency with OFW release-candidate"
+      - name: "Check API version for consistency with OFW release channel"
         run: |
           set -e
           symbols="targets/$TARGET/api_symbols.csv"
-          ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release-candidate/${symbols}" | head -n2)"
+          ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release/${symbols}" | head -n2)"
           our_api="$(head -n2 "${symbols}")"
           if [ "$our_api" != "$ofw_api" ] ; then
-            echo API versions aren\'t matching OFW. Please update!
+            echo API versions aren\'t matching OFW release channel. Please update!
             echo API versions are:
             echo "Official: $(tail -n1 <<< "$ofw_api")"
             echo "Momentum: $(tail -n1 <<< "$our_api")"
