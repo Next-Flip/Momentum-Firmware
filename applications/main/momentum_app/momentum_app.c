@@ -485,7 +485,7 @@ void momentum_app_free(MomentumApp* app) {
 
 extern int32_t momentum_app(void* p) {
     MomentumApp* app = momentum_app_alloc();
-    
+
     // Check for command line arguments to navigate to specific scenes
     uint32_t first_scene = MomentumAppSceneStart;
     if(p && strlen(p)) {
@@ -493,7 +493,7 @@ extern int32_t momentum_app(void* p) {
             first_scene = MomentumAppSceneMiscScreen;
         }
     }
-    
+
     scene_manager_next_scene(app->scene_manager, first_scene);
     view_dispatcher_run(app->view_dispatcher);
     momentum_app_free(app);
