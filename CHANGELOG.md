@@ -72,6 +72,7 @@
   - UL: Returning fix for reading PWD locked MFUL (by @mishamyte)
   - UL: Added UL-C keys to the dictionary (by @mishamyte)
   - Add MIFARE Classic "Show Keys" UI (#473 by @aaronjamt)
+  - Add MFUL counters to Info page (#472 by @aaronjamt)
 - SubGHz:
   - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
   - UL: V2 Phoenix full support (button switch, add manually, counter decrypt/encrypt) (by @xMasterX & @RocketGod-git, original code by @Skorpionm)
