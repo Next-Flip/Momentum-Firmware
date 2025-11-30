@@ -24,9 +24,7 @@
     - FlipBoard Keyboard (by @jamisonderek)
     - FlipBoard Signal (by @jamisonderek)
     - FlipBoard Simon (by @jamisonderek)
-  - GPIO/FlipperHTTP:
-    - FlipMap (by @jblanked)
-    - Free Roam (by @jblanked)
+  - GPIO/FlipperHTTP: Free Roam (by @jblanked)
   - GPIO/GPS: [NMEA] Nearby Files (by @Stichoza)
   - GPIO/Sensors: [MH-Z19] CO2 Logger (by @harryob2)
   - iButton: iButton Converter (by @Leptopt1los)
@@ -73,7 +71,9 @@
   - OFW: MFC 1k Banapass Parser (by @zinongli)
   - UL: Returning fix for reading PWD locked MFUL (by @mishamyte)
   - UL: Added UL-C keys to the dictionary (by @mishamyte)
+  - Add Saflok MFUL Parser Support (#474 by @aaronjamt)
   - Add MIFARE Classic "Show Keys" UI (#473 by @aaronjamt)
+  - Add MFUL counters to Info page (#472 by @aaronjamt)
 - SubGHz:
   - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
   - UL: V2 Phoenix full support (button switch, add manually, counter decrypt/encrypt) (by @xMasterX & @RocketGod-git, original code by @Skorpionm)
@@ -113,9 +113,8 @@
 - Desktop: Add Keybinds support for directories (#331 by @956MB & @WillyJL)
 - Input Settings: Add Vibro Trigger option (#429 by @956MB)
 - Archive: Support opening and favoriting Picopass files (by @WillyJL)
-- GUI:
-  - Add Sreen Settings shortcut to Control Center brightness click (#487 by @tototo31)
-  - OFW: Add date/time input module (by @aaronjamt)
+- Bad KB: Colemak keyboard layout (#466 by @Ashe-Sterling)
+- OFW: GUI: Add date/time input module (by @aaronjamt)
 
 ### Updated:
 - Apps:
@@ -151,6 +150,7 @@
   - UL: Tune Linear (add better EZCode support), Dickert MAHS decoders (by @xMasterX)
   - UL: Some fixes and improvements to Honeywell Sec protocol (by @xMasterX)
 - Infrared:
+  - Update universal remotes from IRDB (#465 by @jaylikesbunda)
   - OFW: Add an old JVC model to universal remotes (by @zgracem)
   - OFW: Add Daikin FTXN25LV1B9 and Toyotomi KTN22-12R32 to universal remotes (by @minchogaydarov)
   - OFW: Infrared Universal remote DBs unit test & move infrared_signal / infrared_brute_force into lib (by @xMasterX)
