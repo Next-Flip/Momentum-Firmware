@@ -310,6 +310,7 @@ def _validate_app_imports(target, source, env):
             "js_value_parse",
             "js_event_loop_get_loop",
             "js_gui_make_view_factory",
+            "js_gui_font_declaration",
         ),
         # metroflip_api_table
         (

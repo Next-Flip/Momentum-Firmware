@@ -93,7 +93,7 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
     brute_force->db_filename = db_filename;
 }
 
-InfraredErrorCode infrared_brute_force_calculate_messages(
+InfraredErrorCode infrared_brute_force_calculate_messages_ex(
     InfraredBruteForce* brute_force,
     bool auto_detect_buttons,
     bool ignore_unknown_buttons) {
@@ -173,6 +173,10 @@ InfraredErrorCode infrared_brute_force_calculate_messages(
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
     return error;
+}
+
+InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force) {
+    return infrared_brute_force_calculate_messages_ex(brute_force, false, false);
 }
 
 bool infrared_brute_force_start(
