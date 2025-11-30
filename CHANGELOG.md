@@ -71,6 +71,7 @@
   - OFW: MFC 1k Banapass Parser (by @zinongli)
   - UL: Returning fix for reading PWD locked MFUL (by @mishamyte)
   - UL: Added UL-C keys to the dictionary (by @mishamyte)
+  - Add Saflok MFUL Parser Support (#474 by @aaronjamt)
   - Add MIFARE Classic "Show Keys" UI (#473 by @aaronjamt)
 - SubGHz:
   - UL: Roger (static 28 bit) with add manually support (by @xMasterX & @mishamyte)
