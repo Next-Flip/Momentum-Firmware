@@ -65,5 +65,5 @@ typedef enum {
     DesktopLockMenuEventLockKeypad,
     DesktopLockMenuEventLockPinOff,
     DesktopLockMenuEventMomentum,
-    DesktopLockMenuEventRgbSettings,
+    DesktopLockMenuEventScreenSettings,
 } DesktopEvent;
