@@ -5,6 +5,7 @@ enum SubmenuIndex {
     SubmenuIndexEdit,
     SubmenuIndexDelete,
     SubmenuIndexGeo,
+    SubmenuIndexSignalSettings,
 };
 
 void subghz_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
@@ -45,6 +46,18 @@ void subghz_scene_saved_menu_on_enter(void* context) {
             subghz);
     }
 
+    submenu_add_lockable_item(
+        subghz->submenu,
+        "Signal Settings",
+        SubmenuIndexSignalSettings,
+        subghz_scene_saved_menu_submenu_callback,
+        subghz,
+        !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug),
+        "Enable\n"
+        "Settings >\n"
+        "System >\n"
+        "Debug");
+
     submenu_set_selected_item(
         subghz->submenu,
         scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneSavedMenu));
@@ -76,6 +89,11 @@ bool subghz_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexGeo);
             scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneShowGps, true);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowGps);
+            return true;
+        } else if(event.event == SubmenuIndexSignalSettings) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexSignalSettings);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSignalSettings);
             return true;
         }
     }

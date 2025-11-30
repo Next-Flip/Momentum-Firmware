@@ -13,6 +13,10 @@
 #include <stddef.h>
 #include "infrared_error_code.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief InfraredBruteForce opaque type declaration.
  */
@@ -48,19 +52,36 @@ void infrared_brute_force_set_db_filename(InfraredBruteForce* brute_force, const
  *
  * @param[in,out] brute_force pointer to the instance to be updated.
  * @param[in] auto_detect_buttons bool whether to automatically register newly discovered buttons.
+ * @param[in] ignore_unknown_buttons bool whether to ignore unknown buttons when auto_detect_buttons is false.
  * @returns InfraredErrorCodeNone on success, otherwise error code.
  */
-InfraredErrorCode infrared_brute_force_calculate_messages(
+InfraredErrorCode infrared_brute_force_calculate_messages_ex(
     InfraredBruteForce* brute_force,
     bool auto_detect_buttons,
     bool ignore_unknown_buttons);
 
 /**
- * @brief Start transmitting signals from a category stored in an InfraredBruteForce's instance dictionary.
+ * @brief Build a signal dictionary from a previously set database file.
+ *
+ * This function must be called each time after setting the database via
+ * a infrared_brute_force_set_db_filename() call.
+ *
+ * @param[in,out] brute_force pointer to the instance to be updated.
+ * @returns InfraredErrorCodeNone on success, otherwise error code.
+ */
+InfraredErrorCode infrared_brute_force_calculate_messages(InfraredBruteForce* brute_force);
+
+/**
+ * @brief Start transmitting signals from a category stored in the dictionary.
+ *
+ * The function locates the category identified by @p index, reports the number of
+ * records it contains via @p record_count, and prepares the brute-force instance
+ * to transmit those signals. On failure @p record_count is set to zero.
  *
  * @param[in,out] brute_force pointer to the instance to be started.
  * @param[in] index index of the signal category in the dictionary.
- * @returns true on success, false otherwise.
+ * @param[out] record_count pointer that receives the number of records in the category.
+ * @returns true if the category is found and the backing database file is opened, false otherwise.
  */
 bool infrared_brute_force_start(
     InfraredBruteForce* brute_force,
@@ -132,3 +153,7 @@ size_t infrared_brute_force_get_button_count(const InfraredBruteForce* brute_for
  */
 const char*
     infrared_brute_force_get_button_name(const InfraredBruteForce* brute_force, size_t index);
+
+#ifdef __cplusplus
+}
+#endif
