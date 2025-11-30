@@ -114,7 +114,9 @@
 - Input Settings: Add Vibro Trigger option (#429 by @956MB)
 - Archive: Support opening and favoriting Picopass files (by @WillyJL)
 - Bad KB: Colemak keyboard layout (#466 by @Ashe-Sterling)
-- OFW: GUI: Add date/time input module (by @aaronjamt)
+- GUI:
+  - GUI: Add Sreen Settings shortcut to Control Center brightness click (#487 by @tototo31)
+  - OFW: Add date/time input module (by @aaronjamt)
 
 ### Updated:
 - Apps:
