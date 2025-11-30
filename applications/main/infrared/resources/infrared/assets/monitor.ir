@@ -1,7 +1,7 @@
 Filetype: IR library file
 Version: 1
 #
-# Last Updated: 2nd October 2024
+# Last Updated: 7th Sept, 2025
 #
 name: POWER
 type: parsed
@@ -131,8 +131,28 @@ command: 43 BC 00 00
 #
 # Model: Monoprice 43305
 #
+# Model: Aorus FV43U
 name: POWER
 type: parsed
 protocol: NEC
 address: 20 00 00 00
 command: 41 00 00 00
+#
+name: POWER
+type: parsed
+protocol: RC6
+address: 00 00 00 00
+command: 0C 00 00 00
+#
+name: SOURCE
+type: parsed
+protocol: RC6
+address: 00 00 00 00
+command: 38 00 00 00
+#
+name: MENU
+type: parsed
+protocol: RC6
+address: 00 00 00 00
+command: 54 00 00 00
+#

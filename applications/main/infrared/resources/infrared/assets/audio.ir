@@ -1,7 +1,7 @@
 Filetype: IR library file
 Version: 1
-# Last Updated 21st Jan, 2025
-# Last Checked 21st Jan, 2025
+# Last Updated 29th Aug, 2025
+# Last Checked 29th Aug, 2025
 #
 name: Power
 type: parsed
@@ -5110,6 +5110,7 @@ address: 00 00 00 00
 command: 15 00 00 00
 #
 # Model: Sony MHC_GSX75
+#
 name: Pause
 type: parsed
 protocol: SIRC20
@@ -5117,6 +5118,7 @@ address: 3A 07 00 00
 command: 38 00 00 00
 #
 # Model: Philips FW750C
+#
 name: Pause
 type: parsed
 protocol: RC5
@@ -5160,6 +5162,7 @@ address: A2 00 00 00
 command: 1B 00 00 00
 #
 # Model: GPX cd_radio
+#
 name: Pause
 type: parsed
 protocol: Samsung32
@@ -5173,6 +5176,7 @@ address: 81 00 00 00
 command: 11 00 00 00
 #
 # Model: GPX HC221B
+#
 name: Prev
 type: parsed
 protocol: NEC
@@ -5216,6 +5220,7 @@ address: D2 2C 00 00
 command: 01 FE 00 00
 #
 # Model: Panasonic SC-HC58
+#
 name: Pause
 type: parsed
 protocol: Kaseikyo
@@ -5223,6 +5228,7 @@ address: AC 02 20 00
 command: 01 00 00 00
 #
 # Model: Philips CD_Player_723
+#
 name: Prev
 type: parsed
 protocol: RC5
@@ -5308,6 +5314,7 @@ address: 00 EF 00 00
 command: 17 E8 00 00
 #
 # Model: Winnes KC809
+#
 name: Pause
 type: parsed
 protocol: NECext
@@ -5321,6 +5328,7 @@ address: 41 54 32 00
 command: 22 00 00 00
 #
 # Model: Grundig CMS_5000
+#
 name: Pause
 type: parsed
 protocol: NECext
@@ -5328,6 +5336,7 @@ address: 30 FC 00 00
 command: 05 FA 00 00
 #
 # Model: DTR-7
+#
 name: Power
 type: parsed
 protocol: NECext
@@ -5407,6 +5416,7 @@ address: D2 14 00 00
 command: 8E 71 00 00
 #
 # Model: Panasonic N2QAYB000210
+#
 name: Pause
 type: parsed
 protocol: Kaseikyo
@@ -5438,6 +5448,7 @@ address: AA 00 00 00
 command: 5B 00 00 00
 #
 # Model: Portta Toslink_Audio_Switcher
+#
 name: Power
 type: parsed
 protocol: NEC
@@ -5445,6 +5456,7 @@ address: 00 00 00 00
 command: 17 00 00 00
 #
 # Model: Rega IO
+#
 name: Prev
 type: parsed
 protocol: NEC
@@ -5452,6 +5464,7 @@ address: 6E 00 00 00
 command: 08 00 00 00
 #
 # Model: Sony RMT-AA320U_AV
+#
 name: Pause
 type: parsed
 protocol: SIRC20
@@ -5465,6 +5478,7 @@ address: 10 01 00 00
 command: 7D 00 00 00
 #
 # Model: Sony STR-DH590
+#
 name: Prev
 type: parsed
 protocol: SIRC20
@@ -5496,6 +5510,7 @@ address: 00 00 00 00
 command: 1F 00 00 00
 #
 # Model: Hisense HS215
+#
 name: Power
 type: parsed
 protocol: NEC
@@ -5533,6 +5548,7 @@ address: 04 00 00 00
 command: 23 00 00 00
 #
 # Model: Hitachi HSB40B16
+#
 name: Power
 type: parsed
 protocol: NEC
@@ -5570,6 +5586,7 @@ address: 00 00 00 00
 command: 45 00 00 00
 #
 # Model: JVC THBY370A
+#
 name: Power
 type: parsed
 protocol: NEC
@@ -5607,6 +5624,7 @@ address: C8 91 00 00
 command: 26 D9 00 00
 #
 # Model: RCA RTS7110B2
+#
 name: Power
 type: parsed
 protocol: NEC
@@ -5650,6 +5668,7 @@ address: 80 00 00 00
 command: 0A 00 00 00
 #
 # Model: Toshiba SBX4250
+#
 name: Power
 type: parsed
 protocol: NECext
@@ -5687,6 +5706,7 @@ address: 45 BD 00 00
 command: 61 9E 00 00
 #
 # Model: Edifier R1280DB
+#
 name: Prev
 type: parsed
 protocol: NECext
@@ -5694,6 +5714,7 @@ address: 10 E7 00 00
 command: 06 F9 00 00
 #
 # Model: Edifier R1700BTs
+#
 name: Prev
 type: parsed
 protocol: NECext
@@ -5701,6 +5722,7 @@ address: 10 E7 00 00
 command: 44 BB 00 00
 #
 # Model: Quacker LED_Speaker
+#
 name: Prev
 type: parsed
 protocol: NECext
@@ -5762,6 +5784,7 @@ address: 78 00 00 00
 command: 01 00 00 00
 #
 # Model: Yamaha ZP45780
+#
 name: Prev
 type: parsed
 protocol: NECext
@@ -5781,6 +5804,7 @@ address: 87 7C 00 00
 command: 1A E5 00 00
 #
 # Model: AEG
+#
 name: Prev
 type: parsed
 protocol: NECext
@@ -5788,6 +5812,7 @@ address: 87 7C 00 00
 command: 1D E2 00 00
 #
 # Model: Panasonic RXDS750
+#
 name: Power
 type: parsed
 protocol: Kaseikyo
@@ -5825,18 +5850,20 @@ address: AA 02 20 00
 command: 60 00 00 00
 #
 # Model: YAMAHA CDC600
+#
 name: Pause
 type: raw
 frequency: 38400
 duty_cycle: 0.330000
 data: 9024 4512 564 1692 564 564 564 564 564 1692 564 1692 564 1692 564 1692 564 564 564 564 564 1692 564 1692 564 564 564 564 564 564 564 564 564 1692 564 1692 564 564 564 1692 564 564 564 1692 564 564 564 1692 564 564 564 564 564 1692 564 564 564 1692 564 564 564 1692 564 564 564 1692 564
 #
+# Model: Adastra WA215
+#
 name: Play
 type: raw
 frequency: 38400
 duty_cycle: 0.330000
 data: 9024 4512 564 1692 564 564 564 564 564 1692 564 1692 564 1692 564 1692 564 564 564 564 564 1692 564 1692 564 564 564 564 564 564 564 564 564 1692 564 564 564 1692 564 564 564 564 564 564 564 564 564 564 564 564 564 1692 564 564 564 1692 564 1692 564 1692 564 1692 564 1692 564 1692 564
-# Model: Adastra WA215
 #
 name: Prev
 type: raw
@@ -5845,6 +5872,7 @@ duty_cycle: 0.330000
 data: 1009 1483 514 482 516 479 509 486 512 1481 516 1478 509 487 511 484 514 480 508 1486 511 1483 514 1479 518 478 510 485 513 1480 517 1477 510 1485 512 50922 1011 1481 516 480 508 487 511 484 514 1479 518 1476 511 485 513 481 517 479 509 1484 513 1480 517 1477 510 486 512 483 515 1478 509 1485 512 1483 514 50920 1013 1479 518 478 510 485 513 482 516 1477 510 1484 513 483 515 480 508 487 511 1482 515 1479 518 1475 594 401 515 481 517 1476 511 1483 514 1481 516 50918 1015 1478 509 486 512 483 515 480 518 1475 512 1483 514 481 517 478 510 485 513 1480 517 1477 510 1484 513 482 516 479 509 1485 512 1482 515 1479 518 50916 1008 1485 512 483 515 480 518 477 511 1483 514 1479 518 478 510 485 513 482 516 1477 510 1484 513 1481 516 479 519 476 512 1482 515 1479 518 1477 510 50924 1009 1484 513 482 516 478 510 486 512 1481 516 1478 509 486 512 483 515 480 508 1486 511 1483 514 1480 507 487 511 510 488 1480 517 1477 510 1485 512
 #
 # Model: Bowers and_Wilkins_Zeppelin_Air_(with_30-pin_connector)
+#
 name: Power
 type: parsed
 protocol: RC6
@@ -5869,12 +5897,13 @@ protocol: RC6
 address: D2 00 00 00
 command: 10 00 00 00
 #
+# Model: Firetv EVG487
+#
 name: Vol_dn
 type: parsed
 protocol: RC6
 address: D2 00 00 00
 command: 11 00 00 00
-# Model: Firetv EVG487
 #
 name: Vol_dn
 type: parsed
@@ -5919,6 +5948,7 @@ duty_cycle: 0.330000
 data: 4552 4473 529 503 501 477 527 503 501 503 500 1481 527 1480 528 502 501 502 501 1506 502 1506 501 1506 526 1482 525 478 525 479 524 480 523 467 523 4484 522 481 522 481 523 481 523 481 523 481 523 481 523 1485 523 1485 523 481 523 481 522 481 523 1486 522 1485 522 1486 522 481 523 481 523 1486 522 1486 522 1486 522 481 522 55471 4548 4476 525 478 525 479 524 480 523 480 524 1485 523 1485 523 480 523 481 523 1485 523 1485 523 1485 523 1485 523 481 523 481 523 481 523 468 522 4484 522 481 523 481 522 481 523 481 522 481 523 481 523 1485 523 1486 522 481 523 481 523 481 523 1486 522 1486 522 1486 522 481 523 481 523 1486 522 1485 522 1486 521 481 523
 #
 # Model: Samsung AH59-02758A
+#
 name: Power
 type: raw
 frequency: 38000
@@ -5954,6 +5984,8 @@ type: raw
 frequency: 38000
 duty_cycle: 0.330000
 data: 4550 4464 585 420 584 420 584 420 612 392 529 1478 531 1479 555 451 554 452 552 1455 554 1479 529 1481 527 1482 526 478 526 479 525 478 526 479 525 4498 526 478 526 478 526 479 525 479 526 1484 525 479 525 479 525 479 525 1484 525 1483 526 1483 526 479 525 479 525 1484 525 1484 525 1483 526 479 525 479 525 479 525 1484 525 55494 4546 4495 525 478 526 479 525 479 525 479 526 1484 525 1483 526 479 526 479 525 1484 525 1484 525 1484 525 1484 525 479 525 479 525 479 525 479 526 4498 525 478 526 479 526 479 525 479 525 1484 526 479 525 479 526 479 525 1484 525 1484 525 1484 525 479 525 479 525 1484 525 1484 525 1484 525 479 525 479 526 479 525 1484 526
+#
+# Model: Adastra WA215
 #
 name: Prev
 type: raw
@@ -5992,4 +6024,176 @@ type: raw
 frequency: 38000
 duty_cycle: 0.333333
 data: 8400 4200 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 1578 526 526 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 25248 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 1578 526 526 526 1578 526 1578 526 1578 526 1578 526 1578 526 526 526 526 526 33664
+##
+name: Prev
+type: parsed
+protocol: Kaseikyo
+address: 41 54 32 00
+command: E3 03 00 00
+#
+# Model: Denon AVR-2113CI_Zone_2
+#
+name: Next
+type: parsed
+protocol: Kaseikyo
+address: 41 54 32 00
+command: E4 03 00 00
+#
+name: Power
+type: parsed
+protocol: Kaseikyo
+address: 43 54 32 00
+command: 05 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: Kaseikyo
+address: 43 54 32 00
+command: 70 01 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: Kaseikyo
+address: 43 54 32 00
+command: 71 01 00 00
+#
+name: Mute
+type: parsed
+protocol: Kaseikyo
+address: 43 54 32 00
+command: 72 01 00 00
+#
+name: Prev
+type: parsed
+protocol: Kaseikyo
+address: 43 54 32 00
+command: E3 03 00 00
+#
+# Model: Denon RC1253
+#
+name: Next
+type: parsed
+protocol: Kaseikyo
+address: 43 54 32 00
+command: E4 03 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: D1 2E 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: D2 2D 00 00
+#
+name: Mute
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: D3 2C 00 00
+#
+name: Power
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: B0 4F 00 00
+#
+name: Play
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: CA 35 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: CB 34 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: CD 32 00 00
+#
+# Model: Harman Kardon AVR130
+#
+name: Next
+type: parsed
+protocol: NECext
+address: 86 76 00 00
+command: CE 31 00 00
+#
+# Model: MCM Volume_Control_50-8394
+#
+name: Prev
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 1871 1673 983 791 1871 789 982 790 956 816 981 4470 981 1702 1837 1710 945 830 944 830 1833 828 944 829 944 1714 1832 829 943 76228 1868 1703 950 824 1832 831 941 832 940 833 939 4536 916 1741 1805 1741 915 858 916 858 1804 857 915 857 915 1742 1803 857 915
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 0D 00 00 00
+#
+name: Pause
+type: parsed
+protocol: NECext
+address: BA 4B 00 00
+command: 56 A9 00 00
+#
+# Model: Philips BTD2180
+#
+name: Next
+type: parsed
+protocol: NECext
+address: BA 4B 00 00
+command: 58 A7 00 00
+#
+name: Power
+type: parsed
+protocol: RC5
+address: 12 00 00 00
+command: 0C 00 00 00
+#
+name: Pause
+type: parsed
+protocol: RC5
+address: 12 00 00 00
+command: 30 00 00 00
+#
+name: Play
+type: parsed
+protocol: RC5
+address: 12 00 00 00
+command: 35 00 00 00
+#
+name: Power
+type: parsed
+protocol: RC6
+address: 15 00 00 00
+command: 0C 00 00 00
+#
+name: Pause
+type: parsed
+protocol: RC6
+address: 04 00 00 00
+command: 30 00 00 00
+#
+name: Prev
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 8504 4194 579 468 524 1584 584 469 523 1586 582 466 526 1585 583 491 501 1584 584 1536 502 540 583 1513 525 541 582 1512 526 539 638 1460 524 538 584 1512 526 540 637 1459 525 541 636 412 526 538 639 1459 524 540 637 417 521 1586 637 414 524 1585 638 1482 501 1583 640 414 524 1584 638 27293 8451 4243 638 436 625 1460 639 431 630 1461 638 436 623 1462 639 436 621 1463 640 1482 623 415 641 1481 625 414 640 1462 643 418 637 1482 621 420 638 1482 623 421 635 1478 628 416 638 437 622 419 637 1482 623 416 640 436 625 1464 635 436 624 1461 639 1462 643 1462 639 413 646 1462 639 27294 8566 4132 633 431 639 1458 526 539 637 1458 633 433 636 1458 633 432 637 1457 634 1477 638 411 527 1584 638 412 633 1477 638 411 634 1480 635 411 635 1476 639 412 526 1584 638 413 632 431 639 411 634 1478 637 411 634 432 638 1457 527 540 636 1458 633 1478 637 1456 635 432 638 1459 632
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 7A 00 00 00
+command: AA 00 00 00
 #
