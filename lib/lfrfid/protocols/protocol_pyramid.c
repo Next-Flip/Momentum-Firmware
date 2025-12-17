@@ -339,5 +339,6 @@ const ProtocolBase protocol_pyramid = {
             .yield = (ProtocolEncoderYield)protocol_pyramid_encoder_yield,
         },
     .render_data       = (ProtocolRenderData)protocol_pyramid_render_data,
-    .render_brief_data = (    .render_brief_data = (ProtocolRenderData)protocol_pyramid_render_data,
+    .render_brief_data = (ProtocolRenderData)protocol_pyramid_render_data,
     .write_data        = (ProtocolWriteData)protocol_pyramid_write_data,
+};
