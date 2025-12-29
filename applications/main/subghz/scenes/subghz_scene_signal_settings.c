@@ -149,22 +149,22 @@ void subghz_scene_signal_settings_on_enter(void* context) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
-    FuriString* tmp_string = furi_string_alloc();
+    FuriString* tmp_text = furi_string_alloc_set_str("");
 
     uint32_t tmp_counter_mode = 0;
     counter_mode = 0xff;
     uint8_t mode_count = 1;
 
-    // Open file and check is it contains allowed protocols and CounterMode variable - if not then CcounterMode will stay 0xff
+    // Open file and check is it contains allowed protocols and CounterMode variable - if not then CounterMode will stay 0xff
     // if file contain allowed protocol but not contain CounterMode value then setup default CounterMode value = 0 and available CounterMode count for this protocol
     // if file contain CounterMode value then load it
     if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
         FURI_LOG_E(TAG, "Error open file %s", file_path);
     } else {
-        flipper_format_read_string(fff_data_file, "Protocol", tmp_string);
+        flipper_format_read_string(fff_data_file, "Protocol", tmp_text);
         // compare available protocols names, load CounterMode value from file and setup variable_item_list values_count
         for(uint8_t i = 0; i < PROTOCOLS_COUNT i++) {
-            if(!strcmp(furi_string_get_cstr(tmp_string), protocols[i].name)) {
+            if(!strcmp(furi_string_get_cstr(tmp_text), protocols[i].name)) {
                 mode_count = protocols[i].mode_count;
                 if(flipper_format_read_uint32(fff_data_file, "CounterMode", &tmp_counter_mode, 1)) {
                     counter_mode = (uint8_t)tmp_counter_mode;
@@ -176,40 +176,14 @@ void subghz_scene_signal_settings_on_enter(void* context) {
     }
     FURI_LOG_D(TAG, "Current CounterMode value %li", counter_mode);
 
-    furi_string_free(tmp_string);
     flipper_format_file_close(fff_data_file);
     flipper_format_free(fff_data_file);
     furi_record_close(RECORD_STORAGE);
 
-    //Create and Enable/Disable variable_item_list depent from current CounterMode value
-    VariableItemList* variable_item_list = subghz->variable_item_list;
-    int32_t value_index;
-    VariableItem* item;
-
-    variable_item_list_set_selected_item(subghz->variable_item_list, 0);
-    variable_item_list_reset(subghz->variable_item_list);
-
-    variable_item_list_set_enter_callback(
-        variable_item_list,
-        subghz_scene_signal_settings_variable_item_list_enter_callback,
-        subghz);
-
-    item = variable_item_list_add(
-        variable_item_list,
-        "Counter Mode",
-        mode_count,
-        subghz_scene_signal_settings_counter_mode_changed,
-        subghz);
-    value_index = value_index_int32(counter_mode, counter_mode_value, mode_count);
-
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, counter_mode_text[value_index]);
-    variable_item_set_locked(item, (counter_mode == 0xff), "Not available\nfor this\nprotocol !");
-
     // ### Counter edit section ###
-    FuriString* tmp_text = furi_string_alloc_set_str("");
     FuriString* textCnt = furi_string_alloc_set_str("");
     byte_input_text = furi_string_alloc_set_str("Enter ");
+    furi_string_reset(tmp_text);
 
     bool counter_not_available = true;
     SubGhzProtocolDecoderBase* decoder = subghz_txrx_get_decoder(subghz->txrx);
@@ -228,11 +202,20 @@ void subghz_scene_signal_settings_on_enter(void* context) {
 
     int8_t place = furi_string_search_str(tmp_text, "Cnt:??", 0);
     if(place > 0) {
-        FURI_LOG_D(TAG, "Founded Cnt:???? - counter not available for this protocol");
+        counter_mode = 0xff;
+        FURI_LOG_D(
+            TAG, "Founded Cnt:???? - Counter mode and edit not available for this protocol");
     } else {
         place = furi_string_search_str(tmp_text, "Cnt:", 0);
         if(place > 0) {
-            furi_string_set_n(textCnt, tmp_text, place + 4, 8);
+            // defence from memory leaks. Check can we take 8 symbols after 'Cnt:' ?
+            // if from current place to end of stirngs more than 8 symbols - ok, if not - just take symbols from current place to end of string.
+            // +4 - its 'Cnt:' lenght
+            uint8_t n_symbols_taken = 8;
+            if(sizeof(tmp_text) - (place + 4) < 8) {
+                n_symbols_taken = sizeof(tmp_text) - (place + 4);
+            }
+            furi_string_set_n(textCnt, tmp_text, place + 4, n_symbols_taken);
             furi_string_trim(textCnt);
             FURI_LOG_D(
                 TAG,
@@ -278,12 +261,37 @@ void subghz_scene_signal_settings_on_enter(void* context) {
             };
 
         } else {
-            FURI_LOG_D(TAG, "Counter not available for this protocol");
+            FURI_LOG_D(TAG, "Counter editor not available for this protocol");
         }
     }
 
     furi_assert(byte_ptr);
     furi_assert(byte_count > 0);
+
+    //Create and Enable/Disable variable_item_list depent from current values
+    VariableItemList* variable_item_list = subghz->variable_item_list;
+    int32_t value_index;
+    VariableItem* item;
+
+    // variable_item_list_set_selected_item(subghz->variable_item_list, 0);
+    // variable_item_list_reset(subghz->variable_item_list);
+
+    variable_item_list_set_enter_callback(
+        variable_item_list,
+        subghz_scene_signal_settings_variable_item_list_enter_callback,
+        subghz);
+
+    item = variable_item_list_add(
+        variable_item_list,
+        "Counter Mode",
+        mode_count,
+        subghz_scene_signal_settings_counter_mode_changed,
+        subghz);
+    value_index = value_index_int32(counter_mode, counter_mode_value, mode_count);
+
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, counter_mode_text[value_index]);
+    variable_item_set_locked(item, (counter_mode == 0xff), "Not available\nfor this\nprotocol !");
 
     item = variable_item_list_add(variable_item_list, "Edit Counter", 1, NULL, subghz);
     variable_item_set_current_value_index(item, 0);
@@ -327,20 +335,19 @@ bool subghz_scene_signal_settings_on_event(void* context, SceneManagerEvent even
                 // convert back after byte_input and do one send with our new mult (counter16) - at end we must have signal Cnt = counter16
                 counter16 = __bswap16(counter16);
 
-                if(counter16 > 0) {
-                    furi_hal_subghz_set_rolling_counter_mult(counter16);
-                    subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
-                    subghz_txrx_stop(subghz->txrx);
-                }
+                furi_hal_subghz_set_rolling_counter_mult(counter16);
+                subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
+                subghz_txrx_stop(subghz->txrx);
 
                 // restore user definded counter increase value (mult)
                 furi_hal_subghz_set_rolling_counter_mult(tmp_counter);
+
                 break;
             case 4:
                 // the same for 32 bit Counter
                 tmp_counter = furi_hal_subghz_get_rolling_counter_mult();
 
-                furi_hal_subghz_set_rolling_counter_mult(0xFFFFFFFF);
+                furi_hal_subghz_set_rolling_counter_mult(0xFFFFFFF);
                 subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
                 subghz_txrx_stop(subghz->txrx);
 
@@ -352,11 +359,9 @@ bool subghz_scene_signal_settings_on_event(void* context, SceneManagerEvent even
 
                 counter32 = __bswap32(counter32);
 
-                if(counter32 > 0) {
-                    furi_hal_subghz_set_rolling_counter_mult(counter32);
-                    subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
-                    subghz_txrx_stop(subghz->txrx);
-                }
+                furi_hal_subghz_set_rolling_counter_mult((counter32 & 0xFFFFFFF));
+                subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
+                subghz_txrx_stop(subghz->txrx);
 
                 furi_hal_subghz_set_rolling_counter_mult(tmp_counter);
                 break;
@@ -405,6 +410,13 @@ void subghz_scene_signal_settings_on_exit(void* context) {
         flipper_format_file_close(fff_data_file);
         flipper_format_free(fff_data_file);
         furi_record_close(RECORD_STORAGE);
+
+        // we need reload file after editing when we exit from Signal Settings menu.
+        if(subghz_key_load(subghz, file_path, false)) {
+            FURI_LOG_D(TAG, "Subghz file was successfully reloaded");
+        } else {
+            FURI_LOG_E(TAG, "Error reloading subghz file");
+        }
     }
 
     // Clear views

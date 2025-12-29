@@ -280,16 +280,10 @@ static bool subghz_protocol_alutech_at_4n_gen_data(
     if(alutech_at4n_counter_mode == 0) {
         // Check for OFEX (overflow experimental) mode
         if(furi_hal_subghz_get_rolling_counter_mult() != -0x7FFFFFFF) {
-            if(instance->generic.cnt < 0xFFFF) {
-                if((instance->generic.cnt + furi_hal_subghz_get_rolling_counter_mult()) > 0xFFFF) {
-                    instance->generic.cnt = 0;
-                } else {
-                    instance->generic.cnt += furi_hal_subghz_get_rolling_counter_mult();
-                }
-            } else if(
-                (instance->generic.cnt >= 0xFFFF) &&
-                (furi_hal_subghz_get_rolling_counter_mult() != 0)) {
+            if((instance->generic.cnt + furi_hal_subghz_get_rolling_counter_mult()) > 0xFFFF) {
                 instance->generic.cnt = 0;
+            } else {
+                instance->generic.cnt += furi_hal_subghz_get_rolling_counter_mult();
             }
         } else {
             if((instance->generic.cnt + 0x1) > 0xFFFF) {
