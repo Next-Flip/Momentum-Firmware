@@ -4,6 +4,9 @@
 
 #define BITS_IN_BYTE (8U)
 
+// Same byte count as ISO15693_3_LISTENER_BUFFER_SIZE in bits + 2 for SOF and EOF
+#define ISO15693_SIGNAL_BUFFER_SIZE (259 * BITS_IN_BYTE + 2)
+
 #define ISO15693_SIGNAL_COEFF_HI (1U)
 #define ISO15693_SIGNAL_COEFF_LO (4U)
 
@@ -151,7 +154,7 @@ Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin) {
 
     Iso15693Signal* instance = malloc(sizeof(Iso15693Signal));
 
-    instance->tx_sequence = digital_sequence_alloc(BITS_IN_BYTE * 258 + 2, pin);
+    instance->tx_sequence = digital_sequence_alloc(ISO15693_SIGNAL_BUFFER_SIZE, pin);
 
     for(uint32_t i = 0; i < Iso15693SignalDataRateNum; ++i) {
         iso15693_signal_bank_fill(instance, i);

@@ -8,7 +8,18 @@
 
 #define TAG "Iso15693_3Listener"
 
-#define ISO15693_3_LISTENER_BUFFER_SIZE (258U)
+// Based on ISO15693_3_CMD_GET_BLOCKS_SECURITY, one of the commands with lengthier responses:
+// - 1 byte flags
+// - 1 byte security status * 256 max block count
+// - 2 byte crc
+// for a response size of 259 bytes.
+// There is also ISO15693_3_CMD_READ_MULTI_BLOCKS which has no explicit limit on requested block count
+// and ISO 15693-3 also does not specify a maximum overall response length, so this command could
+// theoretically result in a 8195 byte response (1 byte flags + 32 byte block * 256 blocks + 2 byte crc);
+// for practicality we use a sufficient buffer for a full ISO15693_3_CMD_GET_BLOCKS_SECURITY and
+// limit ISO15693_3_CMD_READ_MULTI_BLOCKS to how many blocks we can fit into that buffer size.
+// Note: ISO15693_SIGNAL_BUFFER_SIZE also needs changing to reflect this value.
+#define ISO15693_3_LISTENER_BUFFER_SIZE (259U)
 
 Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     furi_assert(nfc);
