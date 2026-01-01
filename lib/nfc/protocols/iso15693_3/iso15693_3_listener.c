@@ -8,7 +8,7 @@
 
 #define TAG "Iso15693_3Listener"
 
-#define ISO15693_3_LISTENER_BUFFER_SIZE (256U)
+#define ISO15693_3_LISTENER_BUFFER_SIZE (258U)
 
 Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     furi_assert(nfc);
