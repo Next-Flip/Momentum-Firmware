@@ -263,7 +263,7 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
 
         const uint32_t block_index_start = request->first_block_num;
         const uint32_t block_index_end =
-            MIN((block_index_start + request->block_count + 1),
+            MIN((block_index_start + request->block_count),
                 ((uint32_t)instance->data->system_info.block_count - 1));
 
         error = iso15693_3_listener_extension_handler(
@@ -341,7 +341,7 @@ static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
 
         if(error != Iso15693_3ErrorNone) break;
 
-        for(uint32_t i = block_index_start; i < block_count + request->first_block_num; ++i) {
+        for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
             const uint8_t* block_data = &request->block_data[block_size * i];
             iso15693_3_set_block_data(instance->data, i, block_data, block_size);
         }
