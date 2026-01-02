@@ -211,10 +211,8 @@ static void nfc_scene_read_and_saved_menu_on_enter_mf_ultralight(NfcApp* instanc
         nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
     bool is_locked = !mf_ultralight_is_all_data_read(data);
 
-    if(is_locked ||
-       (data->type != MfUltralightTypeNTAG213 && data->type != MfUltralightTypeNTAG215 &&
-        data->type != MfUltralightTypeNTAG216 && data->type != MfUltralightTypeUL11 &&
-        data->type != MfUltralightTypeUL21 && data->type != MfUltralightTypeOrigin)) {
+    // FIXME: need to test if writing works on ULC and NTAG I2C
+    if(is_locked) {
         submenu_remove_item(submenu, SubmenuIndexCommonWrite);
     }
 
