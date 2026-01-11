@@ -296,6 +296,12 @@ bool furi_hal_bt_extra_beacon_is_active(void);
  */
 const GapExtraBeaconConfig* furi_hal_bt_extra_beacon_get_config(void);
 
+/** Set central mode enabled
+ *
+ * @param[in]  enabled  true to enable central mode
+ */
+void furi_hal_bt_set_central_mode(bool enabled);
+
 #ifdef __cplusplus
 }
 #endif

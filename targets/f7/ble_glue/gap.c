@@ -53,6 +53,8 @@ typedef enum {
 
 static Gap* gap = NULL;
 
+void gap_force_include_central_symbols(void);
+
 static void gap_advertise_start(GapState new_state);
 static int32_t gap_app(void* context);
 
@@ -151,6 +153,15 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
     case HCI_LE_META_EVT_CODE:
         meta_evt = (evt_le_meta_event*)event_pckt->data;
         switch(meta_evt->subevent) {
+        case HCI_LE_ADVERTISING_REPORT_SUBEVT_CODE: {
+            GapEvent event = {
+                .type = GapEventTypeAdvReport,
+                .data.data = meta_evt->data,
+            };
+            gap->on_event_cb(event, gap->context);
+            break;
+        }
+
         case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE: {
             hci_le_connection_update_complete_event_rp0* event =
                 (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
@@ -193,10 +204,16 @@ BleEventFlowStatus ble_event_app_notification(void* pckt) {
             gap->service.connection_handle = event->Connection_Handle;
 
             gap_verify_connection_parameters(gap);
-            if(gap->config->pairing_method != GapPairingNone) {
+            if(gap->config->pairing_method != GapPairingNone && event->Role == 0x01) {
                 // Start pairing by sending security request
                 aci_gap_slave_security_req(event->Connection_Handle);
             }
+
+            GapEvent gap_event = {
+                .type = GapEventTypeConnectionComplete,
+                .data.data = event,
+            };
+            gap->on_event_cb(gap_event, gap->context);
         } break;
 
         default:
@@ -357,7 +374,8 @@ static void gap_init_svc(Gap* gap, const GapRootSecurityKeys* root_keys) {
     // Skip fist symbol AD_TYPE_COMPLETE_LOCAL_NAME
     char* name = gap->service.adv_name + 1;
     aci_gap_init(
-        GAP_PERIPHERAL_ROLE,
+        gap->config->central_mode ? (GAP_CENTRAL_ROLE | GAP_PERIPHERAL_ROLE) :
+                                    GAP_PERIPHERAL_ROLE,
         0,
         strlen(name),
         &gap->service.gap_svc_handle,
@@ -548,6 +566,7 @@ bool gap_init(
     // Initialization of GATT & GAP layer
     gap->service.adv_name = config->adv_name;
     gap_init_svc(gap, root_keys);
+    gap_force_include_central_symbols();
     ble_event_dispatcher_init();
     // Initialization of the GAP state
     gap->state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -659,4 +678,15 @@ void gap_emit_ble_beacon_status_event(bool active) {
     GapEvent event = {.type = active ? GapEventTypeBeaconStart : GapEventTypeBeaconStop};
     gap->on_event_cb(event, gap->context);
     FURI_LOG_I(TAG, "Beacon status event: %d", active);
+}
+
+// Dummy function to force linker to include Central/Observer functions
+// This is needed because fbt/checks might strip them if unused by firmware
+void __attribute__((used)) gap_force_include_central_symbols(void) {
+    volatile int i = 0;
+    if (i) {
+        aci_gap_start_general_discovery_proc(0, 0, 0, 0);
+        aci_gap_terminate_gap_proc(0);
+        // aci_gap_terminate is already used
+    }
 }

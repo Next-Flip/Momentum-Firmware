@@ -9,6 +9,7 @@ enum BtSetting {
 
 enum BtSettingIndex {
     BtSettingIndexSwitchBt,
+    BtSettingIndexCentralMode,
     BtSettingIndexForgetDev,
 };
 
@@ -23,6 +24,14 @@ static void bt_settings_scene_start_var_list_change_callback(VariableItem* item)
 
     variable_item_set_current_value_text(item, bt_settings_text[index]);
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+static void bt_settings_scene_start_central_mode_change_callback(VariableItem* item) {
+    BtSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, bt_settings_text[index]);
+    view_dispatcher_send_custom_event(app->view_dispatcher, BtSettingIndexCentralMode);
 }
 
 static void bt_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
@@ -53,6 +62,21 @@ void bt_settings_scene_start_on_enter(void* context) {
             variable_item_set_current_value_index(item, BtSettingOff);
             variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
         }
+
+        item = variable_item_list_add(
+            var_item_list,
+            "BLE Central",
+            BtSettingNum,
+            bt_settings_scene_start_central_mode_change_callback,
+            app);
+        if(app->settings.central_mode) {
+            variable_item_set_current_value_index(item, BtSettingOn);
+            variable_item_set_current_value_text(item, bt_settings_text[BtSettingOn]);
+        } else {
+            variable_item_set_current_value_index(item, BtSettingOff);
+            variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
+        }
+
         variable_item_list_add(var_item_list, "Unpair All Devices", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             var_item_list, bt_settings_scene_start_var_list_enter_callback, app);
@@ -74,6 +98,9 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == BtSettingOff) {
             app->settings.enabled = false;
+            consumed = true;
+        } else if(event.event == BtSettingIndexCentralMode) {
+            app->settings.central_mode = !app->settings.central_mode;
             consumed = true;
         } else if(event.event == BtSettingsCustomEventForgetDevices) {
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevConfirm);

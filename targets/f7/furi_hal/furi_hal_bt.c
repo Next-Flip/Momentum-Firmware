@@ -38,6 +38,7 @@ static FuriHalBt furi_hal_bt = {
 
 static FuriHalBleProfileBase* current_profile = NULL;
 static GapConfig current_config = {0};
+static bool furi_hal_bt_central_mode_enabled = false;
 
 void furi_hal_bt_init(void) {
     FURI_LOG_I(TAG, "Start BT initialization");
@@ -184,6 +185,7 @@ FuriHalBleProfileBase* furi_hal_bt_start_app(
         }
 
         profile_template->get_gap_config(&current_config, params);
+        current_config.central_mode = furi_hal_bt_central_mode_enabled;
 
         if(!gap_init(&current_config, root_keys, event_cb, context)) {
             gap_thread_stop();
@@ -439,4 +441,8 @@ bool furi_hal_bt_extra_beacon_stop(void) {
 
 bool furi_hal_bt_extra_beacon_is_active(void) {
     return gap_extra_beacon_get_state() == GapExtraBeaconStateStarted;
+}
+
+void furi_hal_bt_set_central_mode(bool enabled) {
+    furi_hal_bt_central_mode_enabled = enabled;
 }

@@ -26,11 +26,14 @@ typedef enum {
     GapEventTypeUpdateMTU,
     GapEventTypeBeaconStart,
     GapEventTypeBeaconStop,
+    GapEventTypeAdvReport,
+    GapEventTypeConnectionComplete,
 } GapEventType;
 
 typedef union {
     uint32_t pin_code;
     uint16_t max_packet_size;
+    void* data;
 } GapEventData;
 
 typedef struct {
@@ -83,6 +86,7 @@ typedef struct {
     uint8_t mac_address[GAP_MAC_ADDR_SIZE];
     char adv_name[FURI_HAL_VERSION_DEVICE_NAME_LENGTH];
     GapConnectionParamsRequest conn_param;
+    bool central_mode;
 } GapConfig;
 
 typedef struct {
