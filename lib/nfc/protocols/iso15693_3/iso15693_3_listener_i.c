@@ -281,7 +281,9 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
             bit_buffer_get_capacity_bytes(instance->tx_buffer) - 1 - 2; // Flags and CRC
         const uint32_t response_blocks_max = response_data_max / bytes_per_block;
         if(block_count > response_blocks_max) {
-            error = Iso15693_3ErrorBufferOverflow;
+            // Tested on SLIX2, if asked for more blocks than supported at once there is no reply
+            // Let's do the same
+            error = Iso15693_3ErrorIgnore;
             break;
         }
 
