@@ -2,6 +2,8 @@
 
 #include <digital_signal/digital_sequence.h>
 
+#include <nfc/protocols/iso15693_3/iso15693_3_listener_i.h>
+
 #define BITS_IN_BYTE (8U)
 
 #define ISO15693_SIGNAL_BUFFER_SIZE (ISO15693_3_LISTENER_BUFFER_SIZE * BITS_IN_BYTE + 2)
