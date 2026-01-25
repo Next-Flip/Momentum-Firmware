@@ -40,6 +40,7 @@
   - UL: Nice Flor S remove extra uint64 variable (by @xMasterX)
 - NFC:
   - Fix sending 32+ byte ISO 15693-3 commands (by @WillyJL)
+  - Fixes to `READ_MULTI` and `GET_BLOCK_SECURITY` commands in ISO 15693-3 emulation (#501 by @WillyJL & aaronjamt)
   - UL: Fix LED not blinking at SLIX unlock (by @xMasterX)
 - UL: UI: Some small changes (by @xMasterX)
 
