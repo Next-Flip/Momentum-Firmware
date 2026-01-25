@@ -31,6 +31,7 @@
   - UL: Alutech AT-4N & Nice Flor S turbo speedup (by @Dmitry422)
   - UL: Sommer fm2 in Add manually now uses FM12K modulation (Sommer without fm2 tag uses FM476) (try this if regular option doesn't work for you) (by @xMasterX)
   - UL: Replaced Cars ignore option with Revers RB2 protocol ignore option (by @xMasterX)
+- Archive: Support opening and pinning ProtoPirate files from Archive (#510 by @LeeroysHub)
 
 ### Fixed:
 - Sub-GHz:
