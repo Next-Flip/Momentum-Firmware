@@ -8,7 +8,7 @@
 
 /*
  * Help
- * https://www.holtek.com/documents/10179/116711/HT12A_Ev130.pdf
+ * https://www.holtek.com/webapi/116711/HT12A_Ev130.pdf
  *
  */
 
