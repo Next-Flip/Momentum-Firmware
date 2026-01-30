@@ -13,6 +13,7 @@ void momentum_app_scene_start_var_item_list_callback(void* context, uint32_t ind
 
 void momentum_app_scene_start_on_enter(void* context) {
     MomentumApp* app = context;
+    VariableItemList* var_item_list = app->var_item_list;
 
     variable_item_list_add(var_item_list, "Interface", 0, NULL, app);
 
