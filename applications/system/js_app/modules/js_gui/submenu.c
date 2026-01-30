@@ -84,9 +84,8 @@ static const JsViewDescriptor view_descriptor = {
     .reset_children = (JsViewResetChildren)js_submenu_reset_children,
     .prop_cnt = 1,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)header_assign},
     }};
 JS_GUI_VIEW_DEF(submenu, &view_descriptor);

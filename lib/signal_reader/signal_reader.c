@@ -241,7 +241,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     LL_DMA_SetMemoryAddress(
         SIGNAL_READER_DMA_CNT_SYNC_DEF, (uint32_t)&instance->tim_cnt_compensation);
     LL_DMA_SetPeriphAddress(
-        SIGNAL_READER_DMA_CNT_SYNC_DEF, (uint32_t) & (SIGNAL_READER_CAPTURE_TIM->CNT));
+        SIGNAL_READER_DMA_CNT_SYNC_DEF, (uint32_t)&(SIGNAL_READER_CAPTURE_TIM->CNT));
     LL_DMA_ConfigTransfer(
         SIGNAL_READER_DMA_CNT_SYNC_DEF,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
@@ -253,7 +253,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     // Configure DMA Sync
     LL_DMA_SetMemoryAddress(SIGNAL_READER_DMA_TRIGGER_DEF, (uint32_t)&instance->cnt_en);
     LL_DMA_SetPeriphAddress(
-        SIGNAL_READER_DMA_TRIGGER_DEF, (uint32_t) & (SIGNAL_READER_CAPTURE_TIM->CR1));
+        SIGNAL_READER_DMA_TRIGGER_DEF, (uint32_t)&(SIGNAL_READER_CAPTURE_TIM->CR1));
     LL_DMA_ConfigTransfer(
         SIGNAL_READER_DMA_TRIGGER_DEF,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_PERIPH_NOINCREMENT | LL_DMA_MEMORY_NOINCREMENT |
@@ -263,7 +263,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
 
     // Configure DMA Rx pin
     LL_DMA_SetMemoryAddress(SIGNAL_READER_DMA_GPIO_DEF, (uint32_t)instance->gpio_buffer);
-    LL_DMA_SetPeriphAddress(SIGNAL_READER_DMA_GPIO_DEF, (uint32_t) & (instance->pin->port->IDR));
+    LL_DMA_SetPeriphAddress(SIGNAL_READER_DMA_GPIO_DEF, (uint32_t)&(instance->pin->port->IDR));
     LL_DMA_ConfigTransfer(
         SIGNAL_READER_DMA_GPIO_DEF,
         LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |

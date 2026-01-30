@@ -160,10 +160,9 @@ static const JsViewDescriptor view_descriptor = {
     .reset_children = (JsViewResetChildren)js_button_menu_reset_children,
     .prop_cnt = 1,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)matrix_header_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)matrix_header_assign},
     }};
 
 JS_GUI_VIEW_DEF(button_menu, &view_descriptor);

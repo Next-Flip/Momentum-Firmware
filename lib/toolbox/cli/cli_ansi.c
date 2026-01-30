@@ -46,15 +46,14 @@ static CliKey cli_ansi_key_from_mnemonic(char c) {
     }
 }
 
-#define PARSER_RESET_AND_RETURN(parser, modifiers_val, key_val) \
-    do {                                                        \
-        parser->state = CliAnsiParserStateInitial;              \
-        return (CliAnsiParserResult){                           \
-            .is_done = true,                                    \
-            .result = (CliKeyCombo){                            \
-                .modifiers = modifiers_val,                     \
-                .key = key_val,                                 \
-            }};                                                 \
+#define PARSER_RESET_AND_RETURN(parser, modifiers_val, key_val)      \
+    do {                                                             \
+        parser->state = CliAnsiParserStateInitial;                   \
+        return (CliAnsiParserResult){.is_done = true,                \
+                                     .result = (CliKeyCombo){        \
+                                         .modifiers = modifiers_val, \
+                                         .key = key_val,             \
+                                     }};                             \
     } while(0);
 
 CliAnsiParserResult cli_ansi_parser_feed(CliAnsiParser* parser, char c) {

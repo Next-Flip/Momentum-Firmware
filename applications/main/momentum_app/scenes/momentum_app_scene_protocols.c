@@ -36,8 +36,7 @@ void momentum_app_scene_protocols_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
-    item = variable_item_list_add(var_item_list, "SubGHz Freqs", 0, NULL, app);
-    variable_item_set_current_value_text(item, ">");
+    variable_item_list_add(var_item_list, "SubGHz Freqs", 0, NULL, app);
 
     item = variable_item_list_add(
         var_item_list,
@@ -58,8 +57,7 @@ void momentum_app_scene_protocols_on_enter(void* context) {
     variable_item_set_current_value_text(item, app->subghz_extend ? "ON" : "OFF");
     variable_item_set_locked(item, !app->subghz_bypass, "Must bypass\nregion lock\nfirst!");
 
-    item = variable_item_list_add(var_item_list, "GPIO Pins", 0, NULL, app);
-    variable_item_set_current_value_text(item, ">");
+    variable_item_list_add(var_item_list, "GPIO Pins", 0, NULL, app);
 
     item = variable_item_list_add(
         var_item_list,

@@ -87,10 +87,7 @@
 #define TAG "CharlieCard"
 
 // starts Wednesday 2003/1/1 @ midnight
-#define CHARLIE_EPOCH          \
-    (DateTime) {               \
-        0, 0, 0, 1, 1, 2003, 4 \
-    }
+#define CHARLIE_EPOCH                 (DateTime){0, 0, 0, 1, 1, 2003, 4}
 // timestep is one minute
 #define CHARLIE_TIME_DELTA_SECS       60
 #define CHARLIE_END_VALID_DELTA_SECS  60 * 8
@@ -132,14 +129,8 @@ typedef struct {
     uint8_t cents;
 } Money;
 
-#define FARE_BUS \
-    (Money) {    \
-        1, 70    \
-    }
-#define FARE_SUB \
-    (Money) {    \
-        2, 40    \
-    }
+#define FARE_BUS (Money){1, 70}
+#define FARE_SUB (Money){2, 40}
 
 typedef struct {
     DateTime date;

@@ -143,9 +143,9 @@ typedef struct {
 
 #define JS_VALUE_PARSE_SOURCE_VALUE(declaration) \
     ((JsValueParseDeclaration){.source = JsValueParseSourceValue, .value_decl = declaration})
-#define JS_VALUE_PARSE_SOURCE_ARGS(declaration) \
-    ((JsValueParseDeclaration){                 \
-        .source = JsValueParseSourceArguments, .argument_decl = declaration})
+#define JS_VALUE_PARSE_SOURCE_ARGS(declaration)                       \
+    ((JsValueParseDeclaration){.source = JsValueParseSourceArguments, \
+                               .argument_decl = declaration})
 
 /**
  * @brief Determines the size of the buffer array of `mjs_val_t`s that needs to

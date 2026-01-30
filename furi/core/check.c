@@ -176,7 +176,7 @@ FURI_NORETURN void __furi_crash_implementation(void) {
     } else {
         uint32_t ptr = (uint32_t)__furi_check_message;
         if(ptr < FLASH_BASE || ptr > (FLASH_BASE + FLASH_SIZE)) {
-            ptr = (uint32_t) "Check serial logs";
+            ptr = (uint32_t)"Check serial logs";
         }
         furi_hal_rtc_set_fault_data(ptr);
         furi_log_puts("\r\nRebooting system.\r\n");

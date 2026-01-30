@@ -834,7 +834,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
     // Configure DMA  update timer
     LL_DMA_SetMemoryAddress(
         SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF, (uint32_t)subghz_device_cc1101_ext->async_tx.buffer);
-    LL_DMA_SetPeriphAddress(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF, (uint32_t) & (TIM17->ARR));
+    LL_DMA_SetPeriphAddress(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF, (uint32_t)&(TIM17->ARR));
     LL_DMA_ConfigTransfer(
         SUBGHZ_DEVICE_CC1101_EXT_DMA_CH3_DEF,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
@@ -876,7 +876,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
     LL_DMA_SetMemoryAddress(
         SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF,
         (uint32_t)subghz_device_cc1101_ext->async_tx.gpio_tx_buff);
-    LL_DMA_SetPeriphAddress(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF, (uint32_t) & (gpio->port->BSRR));
+    LL_DMA_SetPeriphAddress(SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF, (uint32_t)&(gpio->port->BSRR));
     LL_DMA_ConfigTransfer(
         SUBGHZ_DEVICE_CC1101_EXT_DMA_CH4_DEF,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
@@ -896,7 +896,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
             SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_DEF,
             (uint32_t)subghz_device_cc1101_ext->async_tx.debug_gpio_buff);
         LL_DMA_SetPeriphAddress(
-            SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_DEF, (uint32_t) & (gpio->port->BSRR));
+            SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_DEF, (uint32_t)&(gpio->port->BSRR));
         LL_DMA_ConfigTransfer(
             SUBGHZ_DEVICE_CC1101_EXT_DMA_CH5_DEF,
             LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |

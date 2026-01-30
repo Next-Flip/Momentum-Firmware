@@ -62,7 +62,7 @@ PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size) {
     pulse_reader_set_bittime(signal, 1);
 
     signal->dma_config_timer.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
-    signal->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->CNT);
+    signal->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->CNT);
     signal->dma_config_timer.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
     signal->dma_config_timer.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
     signal->dma_config_timer.MemoryOrM2MDstAddress = (uint32_t)signal->timer_buffer;
@@ -142,7 +142,7 @@ void pulse_reader_start(PulseReader* signal) {
     /* configure DMA to read from a timer peripheral */
     signal->dma_config_timer.NbData = signal->size;
 
-    signal->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) & (signal->gpio->port->IDR);
+    signal->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t)&(signal->gpio->port->IDR);
     signal->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t)signal->gpio_buffer;
     signal->dma_config_gpio.NbData = signal->size;
 

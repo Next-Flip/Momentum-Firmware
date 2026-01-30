@@ -93,7 +93,7 @@ static const APPD_GpioConfig_t aGpioConfigList[GPIO_CFG_NBR_OF_FEATURES] = {
  * New signals may be allocated at any location when requested by ST
  * The GPIO allocated to each signal depend on the BLE_DTB_CFG value and cannot be changed
  */
-#if(BLE_DTB_CFG == 7)
+#if (BLE_DTB_CFG == 7)
 static const APPD_GpioConfig_t aRfConfigList[GPIO_NBR_OF_RF_SIGNALS] = {
     {GPIOB, LL_GPIO_PIN_2, 0, 0}, /* DTB10 - Tx/Rx SPI */
     {GPIOB, LL_GPIO_PIN_7, 0, 0}, /* DTB11 - Tx/Tx SPI Clk */
@@ -207,7 +207,7 @@ static void APPD_SetCPU2GpioConfig(void) {
 }
 
 static void APPD_BleDtbCfg(void) {
-#if(BLE_DTB_CFG != 0)
+#if (BLE_DTB_CFG != 0)
     LL_GPIO_InitTypeDef gpio_config = {0};
     uint8_t local_loop;
     uint16_t gpioa_pin_list;

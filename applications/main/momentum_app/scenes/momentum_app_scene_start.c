@@ -13,17 +13,12 @@ void momentum_app_scene_start_var_item_list_callback(void* context, uint32_t ind
 
 void momentum_app_scene_start_on_enter(void* context) {
     MomentumApp* app = context;
-    VariableItemList* var_item_list = app->var_item_list;
-    VariableItem* item;
 
-    item = variable_item_list_add(var_item_list, "Interface", 0, NULL, app);
-    variable_item_set_current_value_text(item, ">");
+    variable_item_list_add(var_item_list, "Interface", 0, NULL, app);
 
-    item = variable_item_list_add(var_item_list, "Protocols", 0, NULL, app);
-    variable_item_set_current_value_text(item, ">");
+    variable_item_list_add(var_item_list, "Protocols", 0, NULL, app);
 
-    item = variable_item_list_add(var_item_list, "Misc", 0, NULL, app);
-    variable_item_set_current_value_text(item, ">");
+    variable_item_list_add(var_item_list, "Misc", 0, NULL, app);
 
     variable_item_list_set_header(var_item_list, furi_string_get_cstr(app->version_tag));
 

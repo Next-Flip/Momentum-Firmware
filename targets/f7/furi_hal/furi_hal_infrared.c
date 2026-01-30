@@ -426,7 +426,7 @@ static void furi_hal_infrared_configure_tim_cmgr2_dma_tx(void) {
 
 static void furi_hal_infrared_configure_tim_rcr_dma_tx(void) {
     LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (INFRARED_DMA_TIMER->RCR);
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(INFRARED_DMA_TIMER->RCR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)NULL;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_NORMAL;

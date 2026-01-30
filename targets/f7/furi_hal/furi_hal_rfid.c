@@ -356,7 +356,7 @@ void furi_hal_rfid_tim_emulate_dma_start(
 
     // configure DMA "mem -> ARR" channel
     LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (FURI_HAL_RFID_EMULATE_TIMER->ARR);
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(FURI_HAL_RFID_EMULATE_TIMER->ARR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)duration;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_CIRCULAR;
@@ -372,7 +372,7 @@ void furi_hal_rfid_tim_emulate_dma_start(
 
     // configure DMA "mem -> CCR3" channel
 #if FURI_HAL_RFID_EMULATE_TIMER_CHANNEL == LL_TIM_CHANNEL_CH3
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (FURI_HAL_RFID_EMULATE_TIMER->CCR3);
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(FURI_HAL_RFID_EMULATE_TIMER->CCR3);
 #else
 #error Update this code. Would you kindly?
 #endif
@@ -524,9 +524,8 @@ void furi_hal_rfid_field_detect_start(void) {
     furi_hal_rfid_field_tim_setup();
 
     // configure DMA "TIM_COUNTER_CNT -> counter"
-    LL_DMA_SetMemoryAddress(RFID_DMA_CH1_DEF, (uint32_t) & (furi_hal_rfid->field.counter));
-    LL_DMA_SetPeriphAddress(
-        RFID_DMA_CH1_DEF, (uint32_t) & (FURI_HAL_RFID_FIELD_COUNTER_TIMER->CNT));
+    LL_DMA_SetMemoryAddress(RFID_DMA_CH1_DEF, (uint32_t)&(furi_hal_rfid->field.counter));
+    LL_DMA_SetPeriphAddress(RFID_DMA_CH1_DEF, (uint32_t)&(FURI_HAL_RFID_FIELD_COUNTER_TIMER->CNT));
     LL_DMA_ConfigTransfer(
         RFID_DMA_CH1_DEF,
         LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
@@ -538,9 +537,8 @@ void furi_hal_rfid_field_detect_start(void) {
 
     // configure DMA "mem -> TIM_COUNTER_CNT"
     LL_DMA_SetMemoryAddress(
-        RFID_DMA_CH2_DEF, (uint32_t) & (furi_hal_rfid->field.set_tim_counter_cnt));
-    LL_DMA_SetPeriphAddress(
-        RFID_DMA_CH2_DEF, (uint32_t) & (FURI_HAL_RFID_FIELD_COUNTER_TIMER->CNT));
+        RFID_DMA_CH2_DEF, (uint32_t)&(furi_hal_rfid->field.set_tim_counter_cnt));
+    LL_DMA_SetPeriphAddress(RFID_DMA_CH2_DEF, (uint32_t)&(FURI_HAL_RFID_FIELD_COUNTER_TIMER->CNT));
     LL_DMA_ConfigTransfer(
         RFID_DMA_CH2_DEF,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |

@@ -58,7 +58,7 @@
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
-#if(configSUPPORT_DYNAMIC_ALLOCATION == 0)
+#if (configSUPPORT_DYNAMIC_ALLOCATION == 0)
 #error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
 #endif
 
@@ -111,7 +111,7 @@ typedef struct A_BLOCK_LINK {
  * protection using an application supplied canary value to catch heap
  * corruption should a heap buffer overflow occur.
  */
-#if(configENABLE_HEAP_PROTECTOR == 1)
+#if (configENABLE_HEAP_PROTECTOR == 1)
 
 /**
  * @brief Application provided function to get a random value to be used as canary.
@@ -451,7 +451,7 @@ void* pvPortMalloc(size_t xWantedSize) {
     }
     (void)xTaskResumeAll();
 
-#if(configUSE_MALLOC_FAILED_HOOK == 1)
+#if (configUSE_MALLOC_FAILED_HOOK == 1)
     {
         if(pvReturn == NULL) {
             vApplicationMallocFailedHook();
@@ -494,7 +494,7 @@ void vPortFree(void* pv) {
                 /* The block is being returned to the heap - it is no longer
                  * allocated. */
                 heapFREE_BLOCK(pxLink);
-#if(configHEAP_CLEAR_MEMORY_ON_FREE == 1)
+#if (configHEAP_CLEAR_MEMORY_ON_FREE == 1)
                 {
                     /* Check for underflow as this can occur if xBlockSize is
                      * overwritten in a heap block. */
@@ -579,8 +579,10 @@ static void prvHeapInit(void) /* PRIVILEGED_FUNCTION */
         xTotalHeapSize -= (size_t)(uxStartAddress - (portPOINTER_SIZE_TYPE)ucHeap);
     }
 
-#if(configENABLE_HEAP_PROTECTOR == 1)
-    { vApplicationGetRandomHeapCanary(&(xHeapCanary)); }
+#if (configENABLE_HEAP_PROTECTOR == 1)
+    {
+        vApplicationGetRandomHeapCanary(&(xHeapCanary));
+    }
 #endif
 
     /* xStart is used to hold a pointer to the first item in the list of free

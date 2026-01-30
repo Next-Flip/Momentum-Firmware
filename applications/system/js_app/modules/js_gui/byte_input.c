@@ -141,18 +141,15 @@ static const JsViewDescriptor view_descriptor = {
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
     .prop_cnt = 3,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)header_assign},
-        (JsViewPropDescriptor){
-            .name = "length",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)len_assign},
-        (JsViewPropDescriptor){
-            .name = "defaultData",
-            .type = JsViewPropTypeTypedArr,
-            .assign = (JsViewPropAssign)default_data_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){.name = "length",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)len_assign},
+        (JsViewPropDescriptor){.name = "defaultData",
+                               .type = JsViewPropTypeTypedArr,
+                               .assign = (JsViewPropAssign)default_data_assign},
     }};
 
 JS_GUI_VIEW_DEF(byte_input, &view_descriptor);

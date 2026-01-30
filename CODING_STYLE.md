@@ -1,20 +1,20 @@
 # Intro
 
-Nice to see you reading this document, we really appreciate it.
+It's nice to see you reading this document; we really appreciate it.
 
-As all documents of this kind it's unable to cover everything.
-But it will cover general rules that we are enforcing on PR review.
+As with all documents of this kind, it's impossible to cover everything.
+But this will cover general rules that we are enforcing on PR review.
 
 Also, we already have automatic rules checking and formatting,
-but it got its limitations and this guide is still mandatory.
+but it has its limitations and this guide is still mandatory.
 
-Some part of this project do have its own naming and coding guides.
+Some parts of this project do have their own naming and coding guides.
 For example: assets. Take a look into `ReadMe.md` in assets folder for more details.
 
 Also, 3rd party libraries are none of our concern.
 
 And yes, this set is not final and we are open to discussion.
-If you want to add/remove/change something here please feel free to open new ticket.
+If you want to add/remove/change something here please feel free to open a new ticket.
 
 # Inspiration
 
@@ -34,15 +34,15 @@ Try to make code self-explanatory and add comments if needed.
 Leave references to standards that you are implementing.
 Use project wiki to document new/reverse engineered standards.
 
-## Variable and function names must clearly define what it's doing
+## Variable and function names must clearly define what they're doing
 
-It's ok if it will be long, but it should clearly state what it's doing, without need to dive into code.
-This also applies to function/method's code.
+It's ok if a name is long, but it should clearly state what it's doing, without the need to dive into code.
+This also applies to function/method code.
 Try to avoid one letter variables.
 
 ## Encapsulation
 
-Don't expose raw data, provide methods to work with it.
+Don't expose raw data: provide methods to work with it.
 Almost everything in flipper firmware is built around this concept.
 
 # C coding style
@@ -67,7 +67,7 @@ Examples:
 	gui_add_view_port
 	subghz_keystore_read
 
-### File and Package name is a prefix for it's content
+### A file and package's name is a prefix for its content
 
 This rule makes easier to locate types, functions and sources.
 

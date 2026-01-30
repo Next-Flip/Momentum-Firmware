@@ -230,7 +230,7 @@ bool furi_hal_spi_bus_trx_dma(
         // Only TX mode, do not use RX channel
 
         LL_DMA_InitTypeDef dma_config = {0};
-        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (spi->DR);
+        dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(spi->DR);
         dma_config.MemoryOrM2MDstAddress = (uint32_t)tx_buffer;
         dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
         dma_config.Mode = LL_DMA_MODE_NORMAL;
@@ -291,7 +291,7 @@ bool furi_hal_spi_bus_trx_dma(
         }
 
         LL_DMA_InitTypeDef dma_config = {0};
-        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (spi->DR);
+        dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(spi->DR);
         dma_config.MemoryOrM2MDstAddress = (uint32_t)tx_buffer;
         dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
         dma_config.Mode = LL_DMA_MODE_NORMAL;
@@ -304,7 +304,7 @@ bool furi_hal_spi_bus_trx_dma(
         dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
         LL_DMA_Init(SPI_DMA_TX_DEF, &dma_config);
 
-        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (spi->DR);
+        dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(spi->DR);
         dma_config.MemoryOrM2MDstAddress = (uint32_t)rx_buffer;
         dma_config.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
         dma_config.Mode = LL_DMA_MODE_NORMAL;

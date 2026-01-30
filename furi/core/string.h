@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 /** Furi string failure constant. */
-#define FURI_STRING_FAILURE ((size_t) - 1)
+#define FURI_STRING_FAILURE ((size_t)-1)
 
 /** Furi string primitive. */
 typedef struct FuriString FuriString;

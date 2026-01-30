@@ -784,7 +784,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->ARR);
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->ARR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_subghz_async_tx.buffer;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_CIRCULAR;
@@ -842,7 +842,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
         furi_hal_subghz_debug_gpio_buff[1] = (uint32_t)gpio->pin << GPIO_NUMBER;
 
         dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_subghz_debug_gpio_buff;
-        dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
+        dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(gpio->port->BSRR);
         dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
         dma_config.Mode = LL_DMA_MODE_CIRCULAR;
         dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;

@@ -109,22 +109,18 @@ static const JsViewDescriptor view_descriptor = {
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
     .prop_cnt = 4,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)header_assign},
-        (JsViewPropDescriptor){
-            .name = "minValue",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)min_val_assign},
-        (JsViewPropDescriptor){
-            .name = "maxValue",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)max_val_assign},
-        (JsViewPropDescriptor){
-            .name = "defaultValue",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)default_val_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){.name = "minValue",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)min_val_assign},
+        (JsViewPropDescriptor){.name = "maxValue",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)max_val_assign},
+        (JsViewPropDescriptor){.name = "defaultValue",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)default_val_assign},
     }};
 
 JS_GUI_VIEW_DEF(number_input, &view_descriptor);

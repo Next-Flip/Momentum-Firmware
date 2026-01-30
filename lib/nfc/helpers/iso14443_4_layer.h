@@ -55,7 +55,7 @@ bool iso14443_4_layer_encode_response(
     const BitBuffer* input_data,
     BitBuffer* block_data);
 
-#define ISO14443_4_LAYER_CID_NOT_SUPPORTED ((uint8_t) - 1)
+#define ISO14443_4_LAYER_CID_NOT_SUPPORTED ((uint8_t)-1)
 void iso14443_4_layer_set_cid(Iso14443_4Layer* instance, uint8_t cid);
 
 void iso14443_4_layer_set_nad_supported(Iso14443_4Layer* instance, bool nad);

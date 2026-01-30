@@ -44,7 +44,7 @@ void SystemInit(void) {
     SCB->VTOR = 0x0;
 #endif
 
-#if(__FPU_PRESENT == 1) && (__FPU_USED == 1)
+#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     // Enable access to FPU
     SCB->CPACR |=
         ((3UL << (10UL * 2UL)) | (3UL << (11UL * 2UL))); /* set CP10 and CP11 Full Access */

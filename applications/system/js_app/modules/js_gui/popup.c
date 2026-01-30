@@ -85,18 +85,15 @@ static const JsViewDescriptor view_descriptor = {
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
     .prop_cnt = 3,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)header_assign},
-        (JsViewPropDescriptor){
-            .name = "text",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)text_assign},
-        (JsViewPropDescriptor){
-            .name = "timeout",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)timeout_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){.name = "text",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)text_assign},
+        (JsViewPropDescriptor){.name = "timeout",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)timeout_assign},
     }};
 
 JS_GUI_VIEW_DEF(popup, &view_descriptor);

@@ -82,7 +82,8 @@ typedef struct {
     bool CALMD  : 1; /**< Calibration mode enabled */
     uint8_t SEC : 2; /**< Current security access */
     bool EDV2   : 1; /**< EDV2 threshold exceeded */
-    bool VDQ : 1; /**< Indicates if Current discharge cycle is NOT qualified or qualified for an FCC updated */
+    bool VDQ
+        : 1; /**< Indicates if Current discharge cycle is NOT qualified or qualified for an FCC updated */
     bool INITCOMP  : 1; /**< gauge initialization is complete */
     bool SMTH      : 1; /**< RemainingCapacity is scaled by smooth engine */
     bool BTPINT    : 1; /**< BTP threshold has been crossed */

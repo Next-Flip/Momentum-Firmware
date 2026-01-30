@@ -259,8 +259,9 @@ void cli_shell_execute_command(CliShell* cli_shell, FuriString* command) {
         if(!(command_data.flags & CliCommandFlagParallelSafe)) {
             loader_locked = loader_lock(loader);
             if(!loader_locked) {
-                printf(ANSI_FG_RED
-                       "this command cannot be run while an application is open" ANSI_RESET);
+                printf(
+                    ANSI_FG_RED
+                    "this command cannot be run while an application is open" ANSI_RESET);
                 break;
             }
         }

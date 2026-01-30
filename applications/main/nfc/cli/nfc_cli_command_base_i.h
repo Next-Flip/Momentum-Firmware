@@ -65,9 +65,12 @@
  * @brief Used to decorate argument with some properties
  */
 typedef struct {
-    bool required : 1; /**< Command always needs this argument. Missing arguments with this set to true will result execution error.*/
-    bool parameter : 1; /**< Such argument requires value after its name, otherwise it is a simple on/off switch */
-    bool multivalue : 1; /**< Such argument can take multiple values after its name, like this "-key value1 value2 .. valueN" */
+    bool required
+        : 1; /**< Command always needs this argument. Missing arguments with this set to true will result execution error.*/
+    bool parameter
+        : 1; /**< Such argument requires value after its name, otherwise it is a simple on/off switch */
+    bool multivalue
+        : 1; /**< Such argument can take multiple values after its name, like this "-key value1 value2 .. valueN" */
 } FURI_PACKED NfcCliKeyFeatureSupport;
 
 /**

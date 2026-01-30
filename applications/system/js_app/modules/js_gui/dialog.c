@@ -104,26 +104,21 @@ static const JsViewDescriptor view_descriptor = {
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
     .prop_cnt = 5,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)header_assign},
-        (JsViewPropDescriptor){
-            .name = "text",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)text_assign},
-        (JsViewPropDescriptor){
-            .name = "left",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)left_assign},
-        (JsViewPropDescriptor){
-            .name = "center",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)center_assign},
-        (JsViewPropDescriptor){
-            .name = "right",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)right_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){.name = "text",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)text_assign},
+        (JsViewPropDescriptor){.name = "left",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)left_assign},
+        (JsViewPropDescriptor){.name = "center",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)center_assign},
+        (JsViewPropDescriptor){.name = "right",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)right_assign},
     }};
 
 JS_GUI_VIEW_DEF(dialog, &view_descriptor);

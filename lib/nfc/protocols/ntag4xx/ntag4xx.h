@@ -57,11 +57,11 @@ typedef struct {
     // Due to endianness, they appear swapped in the struct definition
     uint8_t batch[NTAG4XX_BATCH_SIZE];
     struct {
-        uint8_t fab_key_4b : NTAG4XX_FAB_KEY_SIZE_BITS_4;
+        uint8_t fab_key_4b  : NTAG4XX_FAB_KEY_SIZE_BITS_4;
         uint8_t batch_extra : NTAG4XX_BATCH_EXTRA_BITS;
     };
     struct {
-        uint8_t prod_week : NTAG4XX_PROD_WEEK_SIZE_BITS;
+        uint8_t prod_week  : NTAG4XX_PROD_WEEK_SIZE_BITS;
         uint8_t fab_key_1b : NTAG4XX_FAB_KEY_SIZE_BITS_1;
     };
     uint8_t prod_year;

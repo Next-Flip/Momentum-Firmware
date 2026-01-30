@@ -260,8 +260,8 @@ typedef struct {
 } REG12;
 
 typedef struct {
-    uint8_t
-        IDPM_LIM : 6; // Input Current Limit in effect while Input Current Optimizer (ICO) is enabled, offset: 100mA (default)
+    uint8_t IDPM_LIM
+        : 6; // Input Current Limit in effect while Input Current Optimizer (ICO) is enabled, offset: 100mA (default)
     bool IDPM_STAT : 1; // IINDPM Status
     bool VDPM_STAT : 1; // VINDPM Status
 } REG13;

@@ -62,17 +62,14 @@ static const JsViewDescriptor view_descriptor = {
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
     .prop_cnt = 3,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "text",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)text_assign},
-        (JsViewPropDescriptor){
-            .name = "font",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)font_assign},
-        (JsViewPropDescriptor){
-            .name = "focus",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)focus_assign},
+        (JsViewPropDescriptor){.name = "text",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)text_assign},
+        (JsViewPropDescriptor){.name = "font",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)font_assign},
+        (JsViewPropDescriptor){.name = "focus",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)focus_assign},
     }};
 JS_GUI_VIEW_DEF(text_box, &view_descriptor);

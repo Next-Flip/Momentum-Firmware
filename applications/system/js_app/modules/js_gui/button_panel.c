@@ -261,14 +261,12 @@ static const JsViewDescriptor view_descriptor = {
     .reset_children = (JsViewResetChildren)js_button_panel_reset_children,
     .prop_cnt = 2,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "matrixSizeX",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)matrix_size_x_assign},
-        (JsViewPropDescriptor){
-            .name = "matrixSizeY",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)matrix_size_y_assign},
+        (JsViewPropDescriptor){.name = "matrixSizeX",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)matrix_size_x_assign},
+        (JsViewPropDescriptor){.name = "matrixSizeY",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)matrix_size_y_assign},
     }};
 
 JS_GUI_VIEW_DEF(button_panel, &view_descriptor);

@@ -175,30 +175,24 @@ static const JsViewDescriptor view_descriptor = {
     .custom_destroy = (JsViewCustomDestroy)ctx_destroy,
     .prop_cnt = 6,
     .props = {
-        (JsViewPropDescriptor){
-            .name = "header",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)header_assign},
-        (JsViewPropDescriptor){
-            .name = "minLength",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)min_len_assign},
-        (JsViewPropDescriptor){
-            .name = "maxLength",
-            .type = JsViewPropTypeNumber,
-            .assign = (JsViewPropAssign)max_len_assign},
-        (JsViewPropDescriptor){
-            .name = "defaultText",
-            .type = JsViewPropTypeString,
-            .assign = (JsViewPropAssign)default_text_assign},
-        (JsViewPropDescriptor){
-            .name = "defaultTextClear",
-            .type = JsViewPropTypeBool,
-            .assign = (JsViewPropAssign)default_text_clear_assign},
-        (JsViewPropDescriptor){
-            .name = "illegalSymbols",
-            .type = JsViewPropTypeBool,
-            .assign = (JsViewPropAssign)illegal_symbols_assign},
+        (JsViewPropDescriptor){.name = "header",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)header_assign},
+        (JsViewPropDescriptor){.name = "minLength",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)min_len_assign},
+        (JsViewPropDescriptor){.name = "maxLength",
+                               .type = JsViewPropTypeNumber,
+                               .assign = (JsViewPropAssign)max_len_assign},
+        (JsViewPropDescriptor){.name = "defaultText",
+                               .type = JsViewPropTypeString,
+                               .assign = (JsViewPropAssign)default_text_assign},
+        (JsViewPropDescriptor){.name = "defaultTextClear",
+                               .type = JsViewPropTypeBool,
+                               .assign = (JsViewPropAssign)default_text_clear_assign},
+        (JsViewPropDescriptor){.name = "illegalSymbols",
+                               .type = JsViewPropTypeBool,
+                               .assign = (JsViewPropAssign)illegal_symbols_assign},
     }};
 
 JS_GUI_VIEW_DEF(text_input, &view_descriptor);
