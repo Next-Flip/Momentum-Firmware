@@ -1,0 +1,8 @@
+App(
+    appid="kiisu_sensor_hub",
+    name="Kiisu Sensor Hub",
+    apptype=FlipperAppType.SYSTEM,
+    entry_point="kiisu_sensor_hub_app",
+    icon="kitty.png",
+    stack_size=6 * 1024,
+)
