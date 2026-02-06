@@ -68,6 +68,8 @@ const SubGhzProtocol subghz_protocol_revers_rb2 = {
 
     .decoder = &subghz_protocol_revers_rb2_decoder,
     .encoder = &subghz_protocol_revers_rb2_encoder,
+
+    .filter = SubGhzProtocolFilter_ReversRB2,
 };
 
 void* subghz_protocol_encoder_revers_rb2_alloc(SubGhzEnvironment* environment) {
@@ -178,7 +180,7 @@ SubGhzProtocolStatus
         if(ret != SubGhzProtocolStatusOk) {
             break;
         }
-        //optional parameter parameter
+        // Optional value
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
