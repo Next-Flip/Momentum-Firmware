@@ -28,6 +28,7 @@ typedef enum {
     MfUltralightPollerEventTypeWriteSuccess, /**< Poller wrote card successfully. */
     MfUltralightPollerEventTypeWriteFail, /**< Poller failed to write card. */
     MfUltralightPollerEventTypeRequestKey, /**< Poller requests key for dict attack. */
+    MfUltralightPollerEventTypeWriteKeyRequest, /**< Poller asks user whether to overwrite 3DES key on target. */
 } MfUltralightPollerEventType;
 
 /**
@@ -56,6 +57,8 @@ typedef struct {
 typedef struct {
     MfUltralightC3DesAuthKey key; /**< Key to try. */
     bool key_provided; /**< Set to true if key was provided, false to stop attack. */
+    uint8_t target_uid[10]; /**< UID of the card being authenticated (for cache lookup/store). */
+    uint8_t target_uid_len; /**< Length of target_uid. */
 } MfUltralightPollerKeyRequestData;
 
 /**
@@ -67,6 +70,7 @@ typedef union {
     const MfUltralightData* write_data; /**< Data to be written to card. */
     MfUltralightPollerMode poller_mode; /**< Mode to operate in. */
     MfUltralightPollerKeyRequestData key_request_data; /**< Key request data. */
+    bool write_key_skip; /**< Set to true by callback to skip writing 3DES key pages. */
 } MfUltralightPollerEventData;
 
 /**
