@@ -15,8 +15,8 @@ enum {
     SubmenuIndexUnlockByReader,
     SubmenuIndexUnlockByPassword,
     SubmenuIndexDictAttack,
-    SubmenuIndexWriteKeepKey,  // ULC: write data pages, keep target card's existing key
-    SubmenuIndexWriteCopyKey,  // ULC: write all pages including key from source card
+    SubmenuIndexWriteKeepKey, // ULC: write data pages, keep target card's existing key
+    SubmenuIndexWriteCopyKey, // ULC: write all pages including key from source card
 };
 
 enum {
@@ -35,7 +35,7 @@ static bool s_ulc_write_copy_key = false;
 // keys_dict_free() on that dangling pointer it double-frees and crashes.
 //
 // Conversely, if write on_enter skips keys_dict_free() entirely, any dict we opened
-// during a previous write's RequestKey phase is leaked (file handle exhaust → crash).
+// during a previous write's RequestKey phase is leaked (file handle exhaust -> crash).
 //
 // Solution: set this flag whenever OUR RequestKey handler allocates a dict, and
 // clear it in write on_enter / RequestMode. We only call keys_dict_free in on_enter
@@ -230,7 +230,6 @@ static void nfc_scene_read_and_saved_menu_on_enter_mf_ultralight(NfcApp* instanc
     const MfUltralightData* data =
         nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
     bool is_locked = !mf_ultralight_is_all_data_read(data);
-    bool is_mfulc = (data->type == MfUltralightTypeMfulC);
 
     if(is_locked ||
        (data->type != MfUltralightTypeNTAG213 && data->type != MfUltralightTypeNTAG215 &&
@@ -238,7 +237,7 @@ static void nfc_scene_read_and_saved_menu_on_enter_mf_ultralight(NfcApp* instanc
         data->type != MfUltralightTypeUL21 && data->type != MfUltralightTypeOrigin &&
         data->type != MfUltralightTypeMfulC)) {
         submenu_remove_item(submenu, SubmenuIndexCommonWrite);
-    } else if(is_mfulc) {
+    } else if(data->type == MfUltralightTypeMfulC) {
         // Replace the generic Write item with two ULC-specific options so the user
         // can choose whether to keep or overwrite the target card's 3DES key.
         // This avoids any mid-write dialog/view-switching complexity entirely.
@@ -332,12 +331,10 @@ static bool nfc_scene_read_and_saved_menu_on_event_mf_ultralight(
             consumed = true;
         } else if(event.event == SubmenuIndexWriteKeepKey) {
             s_ulc_write_copy_key = false;
-            FURI_LOG_D("MfULC", "Write menu: KEEP KEY selected");
             scene_manager_next_scene(instance->scene_manager, NfcSceneWrite);
             consumed = true;
         } else if(event.event == SubmenuIndexWriteCopyKey) {
             s_ulc_write_copy_key = true;
-            FURI_LOG_D("MfULC", "Write menu: COPY KEY selected");
             scene_manager_next_scene(instance->scene_manager, NfcSceneWrite);
             consumed = true;
         }
@@ -370,99 +367,9 @@ static NfcCommand
         // against the target card in RequestWriteData using source key or dict attack
         mf_ultralight_event->data->auth_context.skip_auth = true;
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeRequestKey) {
-        // Dict attack key provider - checks cache first, then user dict, then system dict
+        // Dict attack key provider - user dict first, then system dict
         if(!instance->mf_ultralight_c_dict_context.dict &&
            instance->mf_ultralight_c_dict_context.dict_keys_current != 100) {
-            // First call - try cached key before opening dictionary
-            if(instance->mf_ultralight_c_dict_context.dict_keys_current == 0) {
-                // Use target_uid from event data - the poller sets this from instance->data
-                // (the actual target card), NOT from nfc_device which holds source card data.
-                uint8_t uid_len = mf_ultralight_event->data->key_request_data.target_uid_len;
-                const uint8_t* uid = mf_ultralight_event->data->key_request_data.target_uid;
-
-                if(uid_len > 0) {
-                    char uid_hex[32] = {0};
-                    for(uint8_t i = 0; i < uid_len && i < 10; i++) {
-                        snprintf(uid_hex + i * 2, sizeof(uid_hex) - i * 2, "%02X", uid[i]);
-                    }
-
-                    Storage* storage = furi_record_open(RECORD_STORAGE);
-                    File* file = storage_file_alloc(storage);
-                    if(storage_file_open(
-                           file,
-                           "/ext/nfc/assets/mf_ultralight_c_key_cache.nfc",
-                           FSAM_READ,
-                           FSOM_OPEN_EXISTING)) {
-                        FuriString* content = furi_string_alloc();
-                        char buf[128];
-                        size_t read;
-                        while((read = storage_file_read(file, buf, sizeof(buf) - 1)) > 0) {
-                            buf[read] = '\0';
-                            furi_string_cat_str(content, buf);
-                        }
-                        storage_file_close(file);
-
-                        // Parse "UID: <uid>\nKey: <key>" format.
-                        // Find the UID line, then grab the Key: on the very next line.
-                        FuriString* uid_tag = furi_string_alloc_printf("UID: %s", uid_hex);
-                        size_t uid_pos = furi_string_search(content, uid_tag, 0);
-                        if(uid_pos != FURI_STRING_FAILURE) {
-                            size_t key_tag_pos =
-                                furi_string_search_str(content, "Key: ", uid_pos);
-                            if(key_tag_pos != FURI_STRING_FAILURE) {
-                                size_t key_start = key_tag_pos + 5; // skip "Key: "
-                                const char* cstr = furi_string_get_cstr(content);
-                                MfUltralightC3DesAuthKey cached_key = {};
-                                bool parse_ok = true;
-                                for(int i = 0; i < 16 && parse_ok; i++) {
-                                    char hi = cstr[key_start + i * 2];
-                                    char lo = cstr[key_start + i * 2 + 1];
-                                    if(!hi || !lo || hi == '\n' || lo == '\n') {
-                                        parse_ok = false;
-                                    } else {
-                                        uint8_t val = 0;
-                                        if(hi >= '0' && hi <= '9')
-                                            val = (hi - '0') << 4;
-                                        else if(hi >= 'A' && hi <= 'F')
-                                            val = (hi - 'A' + 10) << 4;
-                                        else if(hi >= 'a' && hi <= 'f')
-                                            val = (hi - 'a' + 10) << 4;
-                                        else
-                                            parse_ok = false;
-                                        if(lo >= '0' && lo <= '9')
-                                            val |= (lo - '0');
-                                        else if(lo >= 'A' && lo <= 'F')
-                                            val |= (lo - 'A' + 10);
-                                        else if(lo >= 'a' && lo <= 'f')
-                                            val |= (lo - 'a' + 10);
-                                        else
-                                            parse_ok = false;
-                                        cached_key.data[i] = val;
-                                    }
-                                }
-                                if(parse_ok) {
-                                    FURI_LOG_D("MfULC", "Found cached key for UID %s", uid_hex);
-                                    mf_ultralight_event->data->key_request_data.key = cached_key;
-                                    mf_ultralight_event->data->key_request_data.key_provided = true;
-                                    furi_string_free(uid_tag);
-                                    furi_string_free(content);
-                                    storage_file_free(file);
-                                    furi_record_close(RECORD_STORAGE);
-                                    instance->mf_ultralight_c_dict_context.dict_keys_current = 99;
-                                    return NfcCommandContinue;
-                                }
-                            }
-                        }
-                        furi_string_free(uid_tag);
-                        furi_string_free(content);
-                    } else {
-                        storage_file_close(file);
-                    }
-                    storage_file_free(file);
-                    furi_record_close(RECORD_STORAGE);
-                }
-            }
-
             // Open user dict first if it exists, otherwise system dict
             if(keys_dict_check_presence(NFC_APP_MF_ULTRALIGHT_C_DICT_USER_PATH)) {
                 instance->mf_ultralight_c_dict_context.dict = keys_dict_alloc(
@@ -512,11 +419,24 @@ static NfcCommand
             mf_ultralight_event->data->key_request_data.key_provided = true;
             FURI_LOG_D(
                 "MfULC",
-                "Trying dict key: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-                key.data[0],  key.data[1],  key.data[2],  key.data[3],
-                key.data[4],  key.data[5],  key.data[6],  key.data[7],
-                key.data[8],  key.data[9],  key.data[10], key.data[11],
-                key.data[12], key.data[13], key.data[14], key.data[15]);
+                "Trying dict key: "
+                "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+                key.data[0],
+                key.data[1],
+                key.data[2],
+                key.data[3],
+                key.data[4],
+                key.data[5],
+                key.data[6],
+                key.data[7],
+                key.data[8],
+                key.data[9],
+                key.data[10],
+                key.data[11],
+                key.data[12],
+                key.data[13],
+                key.data[14],
+                key.data[15]);
         } else {
             mf_ultralight_event->data->key_request_data.key_provided = false;
             FURI_LOG_D("MfULC", "Dict exhausted - no more keys");
@@ -533,158 +453,41 @@ static NfcCommand
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeRequestWriteData) {
         mf_ultralight_event->data->write_data =
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-        // Reset dict context for write-phase key search (fresh start: cache check, then dicts)
+        // Reset dict context so RequestKey starts fresh for the write-phase auth
         if(instance->mf_ultralight_c_dict_context.dict) {
             keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
             instance->mf_ultralight_c_dict_context.dict = NULL;
         }
-        // Reset to 0 so cache lookup runs first (dict_keys_current==0 triggers cache check)
         instance->mf_ultralight_c_dict_context.dict_keys_current = 0;
+        s_ulc_dict_owned = false;
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeWriteKeyRequest) {
-        // ULC write: key_request_data has the successful auth key and target_uid.
-        // Cache under the TARGET card's UID (from event data, set by poller from instance->data).
-        // write_key_skip is in the same union - read key data FIRST, then write the skip flag.
-
-        // Snapshot key at top level so it's in scope for the log after the if block closes.
-        MfUltralightC3DesAuthKey found_key = {};
-        bool found_key_valid = false;
-
-        if(mf_ultralight_event->data->key_request_data.key_provided) {
-            found_key = mf_ultralight_event->data->key_request_data.key;
-            found_key_valid = true;
-            uint8_t uid_len = mf_ultralight_event->data->key_request_data.target_uid_len;
-            uint8_t uid_buf[10];
-            memcpy(uid_buf, mf_ultralight_event->data->key_request_data.target_uid, uid_len);
-
-            if(uid_len > 0) {
-                char uid_hex[32] = {0};
-                for(uint8_t i = 0; i < uid_len && i < 10; i++) {
-                    snprintf(uid_hex + i * 2, sizeof(uid_hex) - i * 2, "%02X", uid_buf[i]);
-                }
-
-                char key_hex[48] = {0};
-                for(uint8_t i = 0; i < 16; i++) {
-                    snprintf(
-                        key_hex + i * 2,
-                        sizeof(key_hex) - i * 2,
-                        "%02X",
-                        found_key.data[i]);
-                }
-
-                Storage* storage = furi_record_open(RECORD_STORAGE);
-                storage_common_mkdir(storage, "/ext/nfc/assets");
-                File* file = storage_file_alloc(storage);
-
-                FuriString* cache_content = furi_string_alloc();
-                FuriString* new_content = furi_string_alloc();
-
-                // Write header
-                furi_string_cat_str(
-                    new_content, "Filetype: Flipper NFC ULC Key Cache\nVersion: 1\n");
-
-                if(storage_file_open(
-                       file,
-                       "/ext/nfc/assets/mf_ultralight_c_key_cache.nfc",
-                       FSAM_READ,
-                       FSOM_OPEN_EXISTING)) {
-                    char buf[128];
-                    size_t read;
-                    while((read = storage_file_read(file, buf, sizeof(buf) - 1)) > 0) {
-                        buf[read] = '\0';
-                        furi_string_cat_str(cache_content, buf);
-                    }
-                    storage_file_close(file);
-
-                    // Re-emit all existing UID/Key pairs, skipping the one we're updating
-                    FuriString* line = furi_string_alloc();
-                    FuriString* uid_tag = furi_string_alloc_printf("UID: %s", uid_hex);
-                    bool skip_next_key = false;
-                    size_t pos = 0;
-                    while(pos < furi_string_size(cache_content)) {
-                        size_t nl = furi_string_search_char(cache_content, '\n', pos);
-                        if(nl == FURI_STRING_FAILURE) nl = furi_string_size(cache_content);
-                        furi_string_set_n(line, cache_content, pos, nl - pos);
-
-                        if(furi_string_start_with_str(line, "UID: ")) {
-                            skip_next_key = furi_string_equal(line, uid_tag);
-                            if(!skip_next_key) {
-                                furi_string_cat_str(new_content, "\n");
-                                furi_string_cat(new_content, line);
-                                furi_string_cat_str(new_content, "\n");
-                            }
-                        } else if(furi_string_start_with_str(line, "Key: ")) {
-                            if(!skip_next_key) {
-                                furi_string_cat(new_content, line);
-                                furi_string_cat_str(new_content, "\n");
-                            }
-                            skip_next_key = false;
-                        }
-                        // Skip header lines and blanks (re-emitted above)
-                        pos = nl + 1;
-                    }
-                    furi_string_free(uid_tag);
-                    furi_string_free(line);
-                } else {
-                    storage_file_close(file);
-                }
-
-                // Append new entry
-                furi_string_cat_printf(
-                    new_content, "\nUID: %s\nKey: %s\n", uid_hex, key_hex);
-
-                if(storage_file_open(
-                       file,
-                       "/ext/nfc/assets/mf_ultralight_c_key_cache.nfc",
-                       FSAM_WRITE,
-                       FSOM_CREATE_ALWAYS)) {
-                    storage_file_write(
-                        file,
-                        furi_string_get_cstr(new_content),
-                        furi_string_size(new_content));
-                    storage_file_close(file);
-                    FURI_LOG_D("MfULC", "Cached key for target UID %s", uid_hex);
-                }
-
-                furi_string_free(cache_content);
-                furi_string_free(new_content);
-                storage_file_free(file);
-                furi_record_close(RECORD_STORAGE);
-            }
-        }
-
         // Apply the user's key choice - read from static, not scene state (scene manager
         // resets state to 0 on scene entry, wiping any value set before next_scene).
-        // Set write_key_skip LAST - it shares the union with key_request_data above.
         bool keep_key = !s_ulc_write_copy_key;
         mf_ultralight_event->data->write_key_skip = keep_key;
 
-        // Log the found key and what's in source pages 44-47 so there's no mystery
-        if(found_key_valid) {
+        if(mf_ultralight_event->data->key_request_data.key_provided) {
+            MfUltralightC3DesAuthKey found_key = mf_ultralight_event->data->key_request_data.key;
             FURI_LOG_D(
                 "MfULC",
-                "WriteKeyRequest: target card auth key = %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-                found_key.data[0],  found_key.data[1],  found_key.data[2],  found_key.data[3],
-                found_key.data[4],  found_key.data[5],  found_key.data[6],  found_key.data[7],
-                found_key.data[8],  found_key.data[9],  found_key.data[10], found_key.data[11],
-                found_key.data[12], found_key.data[13], found_key.data[14], found_key.data[15]);
-        }
-
-        // Log what the source file has in pages 44-47
-        const MfUltralightData* src =
-            nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-        if(src) {
-            uint8_t src_key[16];
-            for(int i = 0; i < 4; i++) memcpy(&src_key[i * 4], src->page[44 + i].data, 4);
-            bool all_zero = true;
-            for(int i = 0; i < 16; i++) if(src_key[i]) { all_zero = false; break; }
-            FURI_LOG_D(
-                "MfULC",
-                "WriteKeyRequest: source file pages 44-47 = %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%s",
-                src_key[0],  src_key[1],  src_key[2],  src_key[3],
-                src_key[4],  src_key[5],  src_key[6],  src_key[7],
-                src_key[8],  src_key[9],  src_key[10], src_key[11],
-                src_key[12], src_key[13], src_key[14], src_key[15],
-                all_zero ? " [ALL ZEROS - Copy Key will be refused by poller]" : "");
+                "WriteKeyRequest: target key = "
+                "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+                found_key.data[0],
+                found_key.data[1],
+                found_key.data[2],
+                found_key.data[3],
+                found_key.data[4],
+                found_key.data[5],
+                found_key.data[6],
+                found_key.data[7],
+                found_key.data[8],
+                found_key.data[9],
+                found_key.data[10],
+                found_key.data[11],
+                found_key.data[12],
+                found_key.data[13],
+                found_key.data[14],
+                found_key.data[15]);
         }
         FURI_LOG_D(
             "MfULC",
@@ -714,15 +517,10 @@ static NfcCommand
 }
 
 static void nfc_scene_write_on_enter_mf_ultralight(NfcApp* instance) {
-    // Key choice (Keep/Copy) was set in scene state by the saved menu before
-    // scene_manager_next_scene(NfcSceneWrite) was called.
-    //
     // The framework stops and frees instance->poller when exiting the read/menu
-    // scenes, so we MUST allocate a fresh poller here. Do NOT skip this alloc --
-    // calling nfc_poller_start on a NULL pointer will furi_assert and hard-reset.
+    // scenes, so we MUST allocate a fresh poller here.
     //
     // Zero the dict context, freeing only if WE opened the dict.
-    //
     // After a DictAttack read, the stock scene's on_exit calls keys_dict_free() but
     // leaves the pointer non-NULL (dangling). Freeing it here would double-free.
     // After a previous write that needed a dict attack, the dict IS still open and
@@ -737,12 +535,6 @@ static void nfc_scene_write_on_enter_mf_ultralight(NfcApp* instance) {
     furi_string_set(instance->text_box_store, "\nApply the\ntarget\ncard now");
     instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfUltralight);
     nfc_poller_start(instance->poller, nfc_scene_write_poller_callback_mf_ultralight, instance);
-}
-
-static bool nfc_scene_write_on_event_mf_ultralight(NfcApp* instance, SceneManagerEvent event) {
-    UNUSED(instance);
-    UNUSED(event);
-    return false;
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
@@ -792,7 +584,7 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
     .scene_write =
         {
             .on_enter = nfc_scene_write_on_enter_mf_ultralight,
-            .on_event = nfc_scene_write_on_event_mf_ultralight,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };
 

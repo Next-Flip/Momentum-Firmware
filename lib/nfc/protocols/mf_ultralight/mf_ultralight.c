@@ -582,9 +582,7 @@ uint8_t mf_ultralight_get_write_end_page(MfUltralightType type) {
     if(type == MfUltralightTypeNTAG213 || type == MfUltralightTypeNTAG215 ||
        type == MfUltralightTypeNTAG216) {
         end_page -= 1;
-    } else if(type == MfUltralightTypeOrigin) {
-        end_page = mf_ultralight_features[type].total_pages;
-    } else if(type == MfUltralightTypeMfulC) {
+    } else if(type == MfUltralightTypeOrigin || type == MfUltralightTypeMfulC) {
         // ULC: 48 pages total, write pages 4-47 (includes auth config + 3DES key)
         end_page = mf_ultralight_features[type].total_pages;
     }

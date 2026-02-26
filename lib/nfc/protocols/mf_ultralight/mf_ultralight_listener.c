@@ -199,9 +199,9 @@ static MfUltralightCommand
 
         // PATCHED: For Ultralight-C, allow writes to pages 44-47 (3DES key area)
         // This enables "magic card" emulation for key grabbing
-        bool is_ulc_key_page = (instance->data->type == MfUltralightTypeMfulC) && 
+        bool is_ulc_key_page = (instance->data->type == MfUltralightTypeMfulC) &&
                                (start_page >= 44 && start_page <= 47);
-        
+
         if(!is_ulc_key_page) {
             // Normal access check for all other pages
             if(!mf_ultralight_listener_check_access(

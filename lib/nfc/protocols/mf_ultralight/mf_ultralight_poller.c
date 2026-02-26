@@ -756,16 +756,13 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
         }
 
         bool auth_ok = false;
-        bool card_dead = false;
 
-        while(!auth_ok && !card_dead) {
-            // Request next key from callback (it tries cache first, then dict entries)
+        while(!auth_ok) {
+            // Request next key from callback (tries dict entries)
             memset(instance->mfu_event.data, 0, sizeof(MfUltralightPollerEventData));
             instance->mfu_event.data->key_request_data.target_uid_len = target_uid_len;
             memcpy(
-                instance->mfu_event.data->key_request_data.target_uid,
-                target_uid,
-                target_uid_len);
+                instance->mfu_event.data->key_request_data.target_uid, target_uid, target_uid_len);
             instance->mfu_event.type = MfUltralightPollerEventTypeRequestKey;
             instance->callback(instance->general_event, instance->context);
 
@@ -773,15 +770,13 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
                 FURI_LOG_D(TAG, "ULC write: all keys exhausted");
                 break;
             }
-            instance->auth_context.tdes_key =
-                instance->mfu_event.data->key_request_data.key;
+            instance->auth_context.tdes_key = instance->mfu_event.data->key_request_data.key;
 
             // Halt+activate so the card is in a clean state for auth
             iso14443_3a_poller_halt(instance->iso14443_3a_poller);
             if(iso14443_3a_poller_activate(instance->iso14443_3a_poller, NULL) !=
                Iso14443_3aErrorNone) {
                 FURI_LOG_E(TAG, "ULC write: card not responding (locked out?)");
-                card_dead = true;
                 break;
             }
 
@@ -790,7 +785,6 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
             furi_hal_random_fill_buf(RndA, sizeof(RndA));
             if(mf_ultralight_poller_authenticate_start(instance, RndA, output) !=
                MfUltralightErrorNone) {
-                card_dead = true;
                 break;
             }
             uint8_t decoded_RndA[MF_ULTRALIGHT_C_AUTH_RND_BLOCK_SIZE] = {0};
@@ -811,9 +805,7 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
             instance->mfu_event.data->key_request_data.key_provided = true;
             instance->mfu_event.data->key_request_data.target_uid_len = target_uid_len;
             memcpy(
-                instance->mfu_event.data->key_request_data.target_uid,
-                target_uid,
-                target_uid_len);
+                instance->mfu_event.data->key_request_data.target_uid, target_uid, target_uid_len);
             instance->mfu_event.type = MfUltralightPollerEventTypeWriteKeyRequest;
             instance->callback(instance->general_event, instance->context);
             instance->write_skip_key = instance->mfu_event.data->write_key_skip;
@@ -865,8 +857,12 @@ static NfcCommand mf_ultralight_poller_handler_write_pages(MfUltralightPoller* i
            write_data->type == MfUltralightTypeMfulC) {
             const uint8_t* raw = (const uint8_t*)&write_data->page[44];
             uint8_t xformed[16];
-            for(int i = 0; i < 8; i++) xformed[i] = raw[7 - i];
-            for(int i = 0; i < 8; i++) xformed[8 + i] = raw[15 - i];
+            for(int i = 0; i < 8; i++) {
+                xformed[i] = raw[7 - i];
+            }
+            for(int i = 0; i < 8; i++) {
+                xformed[8 + i] = raw[15 - i];
+            }
             uint8_t page_offset = (instance->current_page - 44) * 4;
             memcpy(page_to_write.data, xformed + page_offset, 4);
             FURI_LOG_D(
