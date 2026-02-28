@@ -57,8 +57,6 @@ typedef struct {
 typedef struct {
     MfUltralightC3DesAuthKey key; /**< Key to try. */
     bool key_provided; /**< Set to true if key was provided, false to stop attack. */
-    uint8_t target_uid[10]; /**< UID of the card being authenticated (for cache lookup/store). */
-    uint8_t target_uid_len; /**< Length of target_uid. */
 } MfUltralightPollerKeyRequestData;
 
 /**

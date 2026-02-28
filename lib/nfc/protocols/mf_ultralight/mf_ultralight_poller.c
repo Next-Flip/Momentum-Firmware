@@ -747,22 +747,11 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
     // WriteKeyRequest so the callback can cache the found key and return the skip decision.
     if(check_passed &&
        mf_ultralight_support_feature(features, MfUltralightFeatureSupportAuthenticate)) {
-        uint8_t target_uid_len = 0;
-        uint8_t target_uid[10] = {0};
-        if(instance->data->iso14443_3a_data) {
-            target_uid_len = instance->data->iso14443_3a_data->uid_len;
-            if(target_uid_len > 10) target_uid_len = 10;
-            memcpy(target_uid, instance->data->iso14443_3a_data->uid, target_uid_len);
-        }
-
         bool auth_ok = false;
 
         while(!auth_ok) {
             // Request next key from callback (tries dict entries)
             memset(instance->mfu_event.data, 0, sizeof(MfUltralightPollerEventData));
-            instance->mfu_event.data->key_request_data.target_uid_len = target_uid_len;
-            memcpy(
-                instance->mfu_event.data->key_request_data.target_uid, target_uid, target_uid_len);
             instance->mfu_event.type = MfUltralightPollerEventTypeRequestKey;
             instance->callback(instance->general_event, instance->context);
 
@@ -803,9 +792,6 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
             memset(instance->mfu_event.data, 0, sizeof(MfUltralightPollerEventData));
             instance->mfu_event.data->key_request_data.key = found_key;
             instance->mfu_event.data->key_request_data.key_provided = true;
-            instance->mfu_event.data->key_request_data.target_uid_len = target_uid_len;
-            memcpy(
-                instance->mfu_event.data->key_request_data.target_uid, target_uid, target_uid_len);
             instance->mfu_event.type = MfUltralightPollerEventTypeWriteKeyRequest;
             instance->callback(instance->general_event, instance->context);
             instance->write_skip_key = instance->mfu_event.data->write_key_skip;
