@@ -21,6 +21,9 @@
 #define SUBGHZ_NICE_FLOR_S_RAINBOW_TABLE_SIZE_BYTES 32
 #define SUBGHZ_NO_NICE_FLOR_S_RAINBOW_TABLE         0
 
+//variable used to bypass CounterMode settings if user just change Counter or Button
+static bool bypass = false;
+
 static const SubGhzBlockConst subghz_protocol_nice_flor_s_const = {
     .te_short = 500,
     .te_long = 1000,
@@ -108,8 +111,8 @@ void* subghz_protocol_encoder_nice_flor_s_alloc(SubGhzEnvironment* environment) 
         FURI_LOG_D(
             TAG, "Loading rainbow table from %s", instance->nice_flor_s_rainbow_table_file_name);
     }
-    instance->encoder.repeat = 10;
-    instance->encoder.size_upload = 2400; //wrong!! upload 186*16 = 2976 - actual size about 1728
+    instance->encoder.repeat = 1;
+    instance->encoder.size_upload = 2400; // 2368 for Nice ONE
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_running = false;
     return instance;
@@ -151,15 +154,26 @@ static void subghz_protocol_encoder_nice_flor_s_get_upload(
 
     btn = subghz_protocol_nice_flor_s_get_btn_code();
 
+    // override button if we change it with signal settings button editor
+    if(subghz_block_generic_global_button_override_get(&btn)) {
+        bypass = true;
+        FURI_LOG_D(TAG, "Button sucessfully changed to 0x%X", btn);
+    }
+
     size_t size_upload = ((instance->generic.data_count_bit * 2) + ((37 + 2 + 2) * 2) * 16);
     if(size_upload > instance->encoder.size_upload) {
         FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
     } else {
         instance->encoder.size_upload = size_upload;
     }
-    if(nice_flors_counter_mode == 0) {
+
+    // if we change counter/button in SignalSettings menu then we must bypass counter_modes, just gen and save signal file.
+    if(subghz_block_generic_global.cnt_need_override) bypass = true;
+
+    if(nice_flors_counter_mode == 0 || bypass) {
         // Check for OFEX (overflow experimental) mode
-        if(furi_hal_subghz_get_rolling_counter_mult() != -0x7FFFFFFF) {
+        if(furi_hal_subghz_get_rolling_counter_mult() != -0x7FFFFFFF || bypass) {
+            bypass = false;
             // standart counter mode. PULL data from subghz_block_generic_global variables
             if(!subghz_block_generic_global_counter_override_get(&instance->generic.cnt)) {
                 // if counter_override_get return FALSE then counter was not changed and we increase counter by standart mult value
@@ -353,7 +367,7 @@ LevelDuration subghz_protocol_encoder_nice_flor_s_yield(void* context) {
     LevelDuration ret = instance->encoder.upload[instance->encoder.front];
 
     if(++instance->encoder.front == instance->encoder.size_upload) {
-        instance->encoder.repeat--;
+        if(!subghz_block_generic_global.endless_tx) instance->encoder.repeat--;
         instance->encoder.front = 0;
     }
 
@@ -940,6 +954,11 @@ void subghz_protocol_decoder_nice_flor_s_get_string(void* context, FuriString* o
     subghz_block_generic_global.cnt_is_available = true;
     subghz_block_generic_global.cnt_length_bit = 16;
     subghz_block_generic_global.current_cnt = instance->generic.cnt;
+
+    subghz_block_generic_global.btn_is_available = true;
+    subghz_block_generic_global.current_btn = instance->generic.btn;
+    subghz_block_generic_global.btn_length_bit = 4;
+    //
 
     if(instance->generic.data_count_bit == NICE_ONE_COUNT_BIT) {
         furi_string_cat_printf(

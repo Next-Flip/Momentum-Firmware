@@ -24,6 +24,7 @@
 #define SUBGHZ_LAST_SETTING_FIELD_ENABLE_SOUND      "Sound"
 #define SUBGHZ_LAST_SETTING_FIELD_AUTOSAVE          "Autosave"
 #define SUBGHZ_LAST_SETTING_FIELD_HOPPING_THRESHOLD "HoppingThreshold"
+#define SUBGHZ_LAST_SETTING_FIELD_TX_POWER          "TXPower"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -162,6 +163,12 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
                    1)) {
                 flipper_format_rewind(fff_data_file);
             }
+            uint32_t tx_power = 0;
+            if(!flipper_format_read_uint32(
+                   fff_data_file, SUBGHZ_LAST_SETTING_FIELD_TX_POWER, &tx_power, 1)) {
+                flipper_format_rewind(fff_data_file);
+            }
+            instance->tx_power = (uint8_t)(tx_power & 0xFF);
         } while(0);
     } else {
         FURI_LOG_E(TAG, "Error open file %s", SUBGHZ_LAST_SETTINGS_PATH);
@@ -279,6 +286,10 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                SUBGHZ_LAST_SETTING_FIELD_HOPPING_THRESHOLD,
                &instance->hopping_threshold,
                1)) {
+            break;
+        }
+        uint32_t tx_power = instance->tx_power;
+        if(!flipper_format_write_uint32(file, SUBGHZ_LAST_SETTING_FIELD_TX_POWER, &tx_power, 1)) {
             break;
         }
         saved = true;

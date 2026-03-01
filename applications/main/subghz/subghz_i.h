@@ -103,6 +103,7 @@ struct SubGhz {
     bool fav_timeout;
     FuriTimer* timer;
 
+    uint8_t tx_power;
     void* rpc_ctx;
 };
 

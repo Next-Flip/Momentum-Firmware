@@ -57,6 +57,7 @@ class AppBuilder:
             FAP_WORK_DIR=self.app_work_dir,
         )
         self.app_env.Append(
+            CCFLAGS=self.app.cflags,
             CPPDEFINES=[
                 ("FAP_VERSION", f'\\"{".".join(map(str, self.app.fap_version))}\\"'),
                 *self.app.cdefines,
@@ -89,7 +90,7 @@ class AppBuilder:
         fap_icons = self.app_env.CompileIcons(
             self.app_work_dir,
             self.app._appdir.Dir(self.app.fap_icon_assets),
-            icon_bundle_name=f"{self.app.fap_icon_assets_symbol or self.app.appid }_icons",
+            icon_bundle_name=f"{self.app.fap_icon_assets_symbol or self.app.appid}_icons",
             add_include=True,
         )
         self.app_env.Alias("_fap_icons", fap_icons)
@@ -420,7 +421,7 @@ def _validate_app_imports(target, source, env):
         if env.get("_CHECK_APP"):
             raise UserError(warning_msg)
         else:
-            SCons.Warnings.warn(SCons.Warnings.LinkWarning, warning_msg),
+            SCons.Warnings.warn(SCons.Warnings.LinkWarning, warning_msg)
 
 
 def GetExtAppByIdOrPath(env, app_dir):

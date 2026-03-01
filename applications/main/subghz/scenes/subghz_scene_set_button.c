@@ -36,6 +36,10 @@ void subghz_scene_set_button_on_enter(void* context) {
         byte_ptr = &subghz->gen_info->somfy_telis.btn;
         byte_count = sizeof(subghz->gen_info->somfy_telis.btn);
         break;
+    case GenSomfyKeytis:
+        byte_ptr = &subghz->gen_info->somfy_keytis.btn;
+        byte_count = sizeof(subghz->gen_info->somfy_keytis.btn);
+        break;
     case GenKingGatesStylo4k:
         byte_ptr = &subghz->gen_info->kinggates_stylo_4k.btn;
         byte_count = sizeof(subghz->gen_info->kinggates_stylo_4k.btn);
@@ -43,6 +47,14 @@ void subghz_scene_set_button_on_enter(void* context) {
     case GenBenincaARC:
         byte_ptr = &subghz->gen_info->beninca_arc.btn;
         byte_count = sizeof(subghz->gen_info->beninca_arc.btn);
+        break;
+    case GenJarolift:
+        byte_ptr = &subghz->gen_info->jarolift.btn;
+        byte_count = sizeof(subghz->gen_info->jarolift.btn);
+        break;
+    case GenDitecGOL4:
+        byte_ptr = &subghz->gen_info->ditec_gol4.btn;
+        byte_count = sizeof(subghz->gen_info->ditec_gol4.btn);
         break;
     case GenNiceFlorS:
         byte_ptr = &subghz->gen_info->nice_flor_s.btn;
@@ -92,7 +104,10 @@ bool subghz_scene_set_button_on_event(void* context, SceneManagerEvent event) {
             case GenSomfyTelis:
             case GenKingGatesStylo4k:
             case GenBenincaARC:
+            case GenJarolift:
+            case GenDitecGOL4:
             case GenNiceFlorS:
+            case GenSomfyKeytis:
             case GenSecPlus2:
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetCounter);
                 break;
