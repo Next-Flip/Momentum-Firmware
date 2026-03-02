@@ -42,6 +42,17 @@ static void nfc_app_rpc_command_callback(const RpcAppSystemEvent* event, void* c
 NfcApp* nfc_app_alloc(void) {
     NfcApp* instance = malloc(sizeof(NfcApp));
 
+    // malloc does not zero-initialize. Explicitly zero the ULC context structs so
+    // that any code reading them before the first write (e.g. prepare_view on first
+    // tap) sees clean NULL/false/Idle values rather than garbage heap data.
+    instance->mf_ultralight_c_dict_context.dict = NULL;
+    instance->mf_ultralight_c_dict_context.auth_success = false;
+    instance->mf_ultralight_c_dict_context.is_card_present = false;
+    instance->mf_ultralight_c_dict_context.dict_keys_total = 0;
+    instance->mf_ultralight_c_dict_context.dict_keys_current = 0;
+    instance->mf_ultralight_c_write_context.copy_key = false;
+    instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictIdle;
+
     instance->view_dispatcher = view_dispatcher_alloc();
     instance->scene_manager = scene_manager_alloc(&nfc_scene_handlers, instance);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);

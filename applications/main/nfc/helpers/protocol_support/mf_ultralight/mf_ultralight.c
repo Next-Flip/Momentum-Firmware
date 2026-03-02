@@ -24,24 +24,6 @@ enum {
     NfcSceneMoreInfoStateRawData,
 };
 
-// ULC write key choice - stored as a static so scene_manager_next_scene can't wipe it.
-// Only one write runs at a time so a single static is safe.
-static bool s_ulc_write_copy_key = false;
-
-// Tracks whether mf_ultralight_c_dict_context.dict was allocated by OUR write callback.
-//
-// The stock NfcSceneMfUltralightCDictAttack on_exit calls keys_dict_free() on the dict
-// but leaves the dict pointer non-NULL (dangling). If write on_enter blindly calls
-// keys_dict_free() on that dangling pointer it double-frees and crashes.
-//
-// Conversely, if write on_enter skips keys_dict_free() entirely, any dict we opened
-// during a previous write's RequestKey phase is leaked (file handle exhaust -> crash).
-//
-// Solution: set this flag whenever OUR RequestKey handler allocates a dict, and
-// clear it in write on_enter / RequestMode. We only call keys_dict_free in on_enter
-// when this flag is set, guaranteeing the pointer is always ours.
-static bool s_ulc_dict_owned = false;
-
 static void nfc_scene_info_on_enter_mf_ultralight(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
     const MfUltralightData* data = nfc_device_get_data(device, NfcProtocolMfUltralight);
@@ -330,11 +312,11 @@ static bool nfc_scene_read_and_saved_menu_on_event_mf_ultralight(
             }
             consumed = true;
         } else if(event.event == SubmenuIndexWriteKeepKey) {
-            s_ulc_write_copy_key = false;
+            instance->mf_ultralight_c_write_context.copy_key = false;
             scene_manager_next_scene(instance->scene_manager, NfcSceneWrite);
             consumed = true;
         } else if(event.event == SubmenuIndexWriteCopyKey) {
-            s_ulc_write_copy_key = true;
+            instance->mf_ultralight_c_write_context.copy_key = true;
             scene_manager_next_scene(instance->scene_manager, NfcSceneWrite);
             consumed = true;
         }
@@ -353,14 +335,11 @@ static NfcCommand
     if(mf_ultralight_event->type == MfUltralightPollerEventTypeRequestMode) {
         mf_ultralight_event->data->poller_mode = MfUltralightPollerModeWrite;
         furi_string_reset(instance->text_box_store);
-        // Free any dict handle left open by the read phase before resetting context.
-        // Without this, every write-scene entry leaks a file handle (one per card read).
         if(instance->mf_ultralight_c_dict_context.dict) {
             keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
         }
         instance->mf_ultralight_c_dict_context.dict = NULL;
-        instance->mf_ultralight_c_dict_context.dict_keys_current = 0;
-        s_ulc_dict_owned = false;
+        instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictIdle;
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardDetected);
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthRequest) {
         // Skip auth during the read phase of write - we'll authenticate
@@ -369,23 +348,21 @@ static NfcCommand
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeRequestKey) {
         // Dict attack key provider - user dict first, then system dict
         if(!instance->mf_ultralight_c_dict_context.dict &&
-           instance->mf_ultralight_c_dict_context.dict_keys_current != 100) {
-            // Open user dict first if it exists, otherwise system dict
+           instance->mf_ultralight_c_write_context.dict_state == NfcMfUltralightCWriteDictIdle) {
             if(keys_dict_check_presence(NFC_APP_MF_ULTRALIGHT_C_DICT_USER_PATH)) {
                 instance->mf_ultralight_c_dict_context.dict = keys_dict_alloc(
                     NFC_APP_MF_ULTRALIGHT_C_DICT_USER_PATH,
                     KeysDictModeOpenExisting,
                     sizeof(MfUltralightC3DesAuthKey));
-                instance->mf_ultralight_c_dict_context.dict_keys_current = 1;
-                s_ulc_dict_owned = true;
+                instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictUser;
             }
             if(!instance->mf_ultralight_c_dict_context.dict) {
                 instance->mf_ultralight_c_dict_context.dict = keys_dict_alloc(
                     NFC_APP_MF_ULTRALIGHT_C_DICT_SYSTEM_PATH,
                     KeysDictModeOpenExisting,
                     sizeof(MfUltralightC3DesAuthKey));
-                instance->mf_ultralight_c_dict_context.dict_keys_current = 2;
-                s_ulc_dict_owned = true;
+                instance->mf_ultralight_c_write_context.dict_state =
+                    NfcMfUltralightCWriteDictSystem;
             }
         }
         MfUltralightC3DesAuthKey key = {};
@@ -396,7 +373,8 @@ static NfcCommand
                 key.data,
                 sizeof(MfUltralightC3DesAuthKey));
         }
-        if(!got_key && instance->mf_ultralight_c_dict_context.dict_keys_current < 2) {
+        if(!got_key &&
+           instance->mf_ultralight_c_write_context.dict_state == NfcMfUltralightCWriteDictUser) {
             // Exhausted user dict, switch to system dict
             if(instance->mf_ultralight_c_dict_context.dict) {
                 keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
@@ -405,8 +383,7 @@ static NfcCommand
                 NFC_APP_MF_ULTRALIGHT_C_DICT_SYSTEM_PATH,
                 KeysDictModeOpenExisting,
                 sizeof(MfUltralightC3DesAuthKey));
-            instance->mf_ultralight_c_dict_context.dict_keys_current = 2;
-            s_ulc_dict_owned = true;
+            instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictSystem;
             if(instance->mf_ultralight_c_dict_context.dict) {
                 got_key = keys_dict_get_next_key(
                     instance->mf_ultralight_c_dict_context.dict,
@@ -444,11 +421,8 @@ static NfcCommand
                 keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
                 instance->mf_ultralight_c_dict_context.dict = NULL;
             }
-            // Sentinel: prevent the if(!dict) block from re-opening dicts on the next call.
-            // Without this, after exhaustion dict==NULL resets the state machine into
-            // an infinite loop of re-opening and re-reading both dictionaries.
-            instance->mf_ultralight_c_dict_context.dict_keys_current = 100;
-            s_ulc_dict_owned = false;
+            instance->mf_ultralight_c_write_context.dict_state =
+                NfcMfUltralightCWriteDictExhausted;
         }
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeRequestWriteData) {
         mf_ultralight_event->data->write_data =
@@ -458,12 +432,11 @@ static NfcCommand
             keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
             instance->mf_ultralight_c_dict_context.dict = NULL;
         }
-        instance->mf_ultralight_c_dict_context.dict_keys_current = 0;
-        s_ulc_dict_owned = false;
+        instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictIdle;
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeWriteKeyRequest) {
         // Apply the user's key choice - read from static, not scene state (scene manager
         // resets state to 0 on scene entry, wiping any value set before next_scene).
-        bool keep_key = !s_ulc_write_copy_key;
+        bool keep_key = !instance->mf_ultralight_c_write_context.copy_key;
         mf_ultralight_event->data->write_key_skip = keep_key;
 
         if(mf_ultralight_event->data->key_request_data.key_provided) {
@@ -491,10 +464,10 @@ static NfcCommand
         }
         FURI_LOG_D(
             "MfULC",
-            "WriteKeyRequest: decision = %s (s_ulc_write_copy_key=%d)",
+            "WriteKeyRequest: decision = %s (copy_key=%d)",
             keep_key ? "KEEP target key (pages 44-47 NOT written)" :
                        "OVERWRITE with source key (pages 44-47 WILL be written)",
-            (int)s_ulc_write_copy_key);
+            (int)instance->mf_ultralight_c_write_context.copy_key);
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeCardMismatch) {
         furi_string_set(instance->text_box_store, "Card of the same\ntype should be\n presented");
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWrongCard);
@@ -517,21 +490,15 @@ static NfcCommand
 }
 
 static void nfc_scene_write_on_enter_mf_ultralight(NfcApp* instance) {
-    // The framework stops and frees instance->poller when exiting the read/menu
-    // scenes, so we MUST allocate a fresh poller here.
-    //
-    // Zero the dict context, freeing only if WE opened the dict.
-    // After a DictAttack read, the stock scene's on_exit calls keys_dict_free() but
-    // leaves the pointer non-NULL (dangling). Freeing it here would double-free.
-    // After a previous write that needed a dict attack, the dict IS still open and
-    // MUST be freed here or we leak a file handle (leading to crash on next dict open).
-    // s_ulc_dict_owned tells us which situation we're in.
-    if(s_ulc_dict_owned && instance->mf_ultralight_c_dict_context.dict) {
+    // Free any dict the write callback opened (dict_state != Idle means we own it).
+    // After a DictAttack scene, on_exit now NULLs the pointer so a simple NULL check
+    // is safe here too — but the state enum is the authoritative ownership record.
+    if(instance->mf_ultralight_c_write_context.dict_state != NfcMfUltralightCWriteDictIdle &&
+       instance->mf_ultralight_c_dict_context.dict) {
         keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
     }
     instance->mf_ultralight_c_dict_context.dict = NULL;
-    instance->mf_ultralight_c_dict_context.dict_keys_current = 0;
-    s_ulc_dict_owned = false;
+    instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictIdle;
     furi_string_set(instance->text_box_store, "\nApply the\ntarget\ncard now");
     instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfUltralight);
     nfc_poller_start(instance->poller, nfc_scene_write_poller_callback_mf_ultralight, instance);
