@@ -136,15 +136,6 @@ NfcApp* nfc_app_alloc(void) {
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
 
-    // ULC write context — malloc does not zero-initialize.
-    instance->mf_ultralight_c_dict_context.dict = NULL;
-    instance->mf_ultralight_c_dict_context.auth_success = false;
-    instance->mf_ultralight_c_dict_context.is_card_present = false;
-    instance->mf_ultralight_c_dict_context.dict_keys_total = 0;
-    instance->mf_ultralight_c_dict_context.dict_keys_current = 0;
-    instance->mf_ultralight_c_write_context.copy_key = false;
-    instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictIdle;
-
     return instance;
 }
 
