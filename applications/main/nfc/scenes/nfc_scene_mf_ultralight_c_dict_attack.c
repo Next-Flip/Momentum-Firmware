@@ -81,7 +81,6 @@ void nfc_scene_mf_ultralight_c_dict_attack_prepare_view(NfcApp* instance) {
     // Without this, navigating write->back->read->dict-attack would open the same
     // file twice, corrupting VFS state and causing a ViewPort lockup.
     if(instance->mf_ultralight_c_dict_context.dict) {
-        FURI_LOG_W(TAG, "Stale write-phase dict handle found in prepare_view, closing");
         keys_dict_free(instance->mf_ultralight_c_dict_context.dict);
         instance->mf_ultralight_c_dict_context.dict = NULL;
         instance->mf_ultralight_c_write_context.dict_state = NfcMfUltralightCWriteDictIdle;
