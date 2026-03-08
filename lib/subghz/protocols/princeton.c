@@ -339,6 +339,10 @@ static void subghz_protocol_princeton_check_remote_controller(SubGhzBlockGeneric
     subghz_custom_btn_set_max(4);
 }
 
+static bool subghz_protocol_princeton_is_8bit_button(uint8_t btn) {
+    return (btn == 0x30 || btn == 0xC0 || btn == 0xF3 || btn == 0xFC);
+}
+
 SubGhzProtocolStatus
     subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
@@ -384,8 +388,7 @@ SubGhzProtocolStatus
             break;
         }
 
-        if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
-           instance->generic.btn == 0xF3 || instance->generic.btn == 0xFC) {
+        if(subghz_protocol_princeton_is_8bit_button(instance->generic.btn)) {
             subghz_block_generic_global.btn_length_bit = 8;
         } else {
             subghz_block_generic_global.btn_length_bit = 4;
@@ -499,8 +502,7 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
 
                         subghz_protocol_princeton_check_remote_controller(&instance->generic);
 
-                        if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
-                           instance->generic.btn == 0xF3 || instance->generic.btn == 0xFC) {
+                        if(subghz_protocol_princeton_is_8bit_button(instance->generic.btn)) {
                             subghz_block_generic_global.btn_length_bit = 8;
                             instance->generic.protocol_name = "Chuango-Security";
                         } else {
@@ -623,8 +625,7 @@ void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* out
     subghz_block_generic_global.current_btn = instance->generic.btn;
     //
 
-    if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
-       instance->generic.btn == 0xF3 || instance->generic.btn == 0xFC) {
+    if(subghz_protocol_princeton_is_8bit_button(instance->generic.btn)) {
         subghz_block_generic_global.btn_length_bit = 8;
         furi_string_cat_printf(
             output,
