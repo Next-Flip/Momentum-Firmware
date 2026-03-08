@@ -311,7 +311,7 @@ static bool
     return true;
 }
 
-/** 
+/**
  * Analysis of received data
  * @param instance Pointer to a SubGhzBlockGeneric* instance
  */
@@ -383,6 +383,15 @@ SubGhzProtocolStatus
             ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
+
+        if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
+           instance->generic.btn == 0xF3 || instance->generic.btn == 0xFC) {
+            subghz_block_generic_global.btn_length_bit = 8;
+        } else {
+            subghz_block_generic_global.btn_length_bit = 4;
+        }
+
+        instance->generic.protocol_name = instance->base.protocol->name;
 
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
@@ -486,6 +495,17 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
                         // Guard Time value should be between 15 -> 72 otherwise default value will be used
                         if((instance->guard_time < 15) || (instance->guard_time > 72)) {
                             instance->guard_time = PRINCETON_GUARD_TIME_DEFALUT;
+                        }
+
+                        subghz_protocol_princeton_check_remote_controller(&instance->generic);
+
+                        if(instance->generic.btn == 0x30 || instance->generic.btn == 0xC0 ||
+                           instance->generic.btn == 0xF3 || instance->generic.btn == 0xFC) {
+                            subghz_block_generic_global.btn_length_bit = 8;
+                            instance->generic.protocol_name = "Chuango-Security";
+                        } else {
+                            subghz_block_generic_global.btn_length_bit = 4;
+                            instance->generic.protocol_name = instance->base.protocol->name;
                         }
 
                         if(instance->base.callback)
