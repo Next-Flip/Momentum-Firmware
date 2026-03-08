@@ -1,5 +1,6 @@
 ### Added:
 - Apps:
+  - Games: Checkers (by @H4W9)
   - NFC:
     - ISO 15693-3 NFC Writer (by @ch4istO)
     - UL-C Bruteforce (by @noproto)
@@ -13,6 +14,7 @@
   - UL: Jarolift protocol full support (72bit dynamic) (with Add manually, and all button codes) (by @xMasterX & d82k & Steffen (bastelbudenbuben de))
   - UL: Treadmill37 protocol support (37bit static) (by @xMasterX)
   - UL: Ditec GOL4 protocol (with programming mode, button switch, add manually) (by @xMasterX & @zero-mega)
+  - UL: KeyFinder protocol (24bit static) (by @xMasterX & @mishamyte)
   - UL: New modulation FSK with 12KHz deviation (by @xMasterX)
   - UL: KingGates Stylo 4k Add manually and button switch support and refactoring of encoder (by @xMasterX)
   - UL: Stilmatic (R-Tech) 12bit discr. fix & button 9 support (two buttons hold simulation) (mapped on arrow keys) (by @xMasterX)
@@ -24,6 +26,7 @@
   - UL: TX Power setting (by @LeeroysHub)
   - UL: Somfy Keytis button switch and Add Manually support (by @xMasterX)
   - UL: Genius Echo/Bravo add 2 buttons hold simulation (0xB btn code) (by @xMasterX)
+- OFW: RFID: Add Indala 224-bit (long format) protocol support (by @kuzaxak)
 - UL: JS: Add IR capabilities to the JS engine (by @LuisMayo)
 - FBT: Allow apps to specify custom cflags (by @WillyJL)
 - UL: Docs: Add [full list of supported SubGHz protocols](https://github.com/Next-Flip/Momentum-Firmware/blob/dev/documentation/SubGHzSupportedSystems.md) and their frequencies/modulations that can be used for reading remotes (by @xMasterX)
@@ -63,6 +66,7 @@
   - UL: Signal Settings Improvements (by @Dmitry422)
   - UL: KeeLoq change delta size (by @xMasterX)
 - Archive: Support opening and pinning ProtoPirate files from Archive (#510 by @LeeroysHub)
+- OFW: RFID: Make FDX-B readout more descriptive (by @snowsign)
 - OFW: API: Make `view_port_send_to_back()` public (by @loftyinclination)
 
 ### Fixed:
