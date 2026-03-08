@@ -26,6 +26,7 @@
   - UL: TX Power setting (by @LeeroysHub)
   - UL: Somfy Keytis button switch and Add Manually support (by @xMasterX)
   - UL: Genius Echo/Bravo add 2 buttons hold simulation (0xB btn code) (by @xMasterX)
+- NFC: Add Mifare Ultralight C Write Support (#524 by @haw8411)
 - OFW: RFID: Add Indala 224-bit (long format) protocol support (by @kuzaxak)
 - UL: JS: Add IR capabilities to the JS engine (by @LuisMayo)
 - FBT: Allow apps to specify custom cflags (by @WillyJL)
