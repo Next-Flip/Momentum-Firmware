@@ -53,6 +53,8 @@ typedef enum {
     PrincetonDecoderStepCheckDuration,
 } PrincetonDecoderStep;
 
+void subghz_protocol_decoder_princeton_get_string_brief(void* context, FuriString* output);
+
 const SubGhzProtocolDecoder subghz_protocol_princeton_decoder = {
     .alloc = subghz_protocol_decoder_princeton_alloc,
     .free = subghz_protocol_decoder_princeton_free,
@@ -65,7 +67,7 @@ const SubGhzProtocolDecoder subghz_protocol_princeton_decoder = {
     .serialize = subghz_protocol_decoder_princeton_serialize,
     .deserialize = subghz_protocol_decoder_princeton_deserialize,
     .get_string = subghz_protocol_decoder_princeton_get_string,
-    .get_string_brief = NULL,
+    .get_string_brief = subghz_protocol_decoder_princeton_get_string_brief,
 };
 
 const SubGhzProtocolEncoder subghz_protocol_princeton_encoder = {
@@ -341,6 +343,46 @@ static void subghz_protocol_princeton_check_remote_controller(SubGhzBlockGeneric
 
 static bool subghz_protocol_princeton_is_8bit_button(uint8_t btn) {
     return (btn == 0x30 || btn == 0xC0 || btn == 0xF3 || btn == 0xFC);
+}
+
+static const char* subghz_protocol_princeton_get_button_name(uint8_t btn) {
+    switch(btn) {
+    case 0:
+        return "Test";
+    case 1:
+        return "Disarm";
+    case 2:
+        return "Alarm";
+    case 3:
+        return "Tamper";
+    case 4:
+        return "Home Mode";
+    case 5:
+        return "On";
+    case 6:
+        return "Home Mode Zone";
+    case 7:
+        return "Normal Zone";
+    case 8:
+        return "Arm";
+    case 9:
+        return "?";
+    case 10:
+        return "Single Delay Zone";
+    case 11:
+        return "24H Zone";
+    case 12:
+        return "Closing";
+    case 13:
+        return "Low Battery";
+    case 14:
+        return "?";
+    case 15:
+        return "?";
+
+    default:
+        return "?";
+    }
 }
 
 SubGhzProtocolStatus
@@ -644,6 +686,12 @@ void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* out
                 instance->generic.btn,
             instance->te,
             instance->guard_time);
+        uint8_t cmd = instance->generic.btn & 0xF;
+        furi_string_cat_printf(
+            output,
+            "CMD: %-14s CMD_ID: %u\r\n",
+            subghz_protocol_princeton_get_button_name(cmd),
+            cmd);
     } else {
         subghz_block_generic_global.btn_length_bit = 4;
         furi_string_cat_printf(
@@ -661,5 +709,25 @@ void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* out
             instance->generic.btn,
             instance->te,
             instance->guard_time);
+    }
+}
+
+void subghz_protocol_decoder_princeton_get_string_brief(void* context, FuriString* output) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPrinceton* instance = context;
+    subghz_protocol_princeton_check_remote_controller(&instance->generic);
+
+    if(subghz_protocol_princeton_is_8bit_button(instance->generic.btn)) {
+        furi_string_printf(
+            output,
+            "Chuango-Security %lu %s",
+            (unsigned long)instance->generic.serial,
+            subghz_protocol_princeton_get_button_name(instance->generic.btn & 0xF));
+    } else {
+        furi_string_printf(
+            output,
+            "%s %08lX",
+            instance->base.protocol->name,
+            (unsigned long)(instance->generic.data & 0xFFFFFF));
     }
 }
