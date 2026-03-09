@@ -199,7 +199,7 @@ jobs:
 
       - name: "Wait for deploy (Run ID ${{ steps.force-deploy.outputs.run_id }})"
         if: ${{ env.SHOULD_DEPLOY == 'true' }}
-        uses: Codex-/await-remote-run@v1
+        uses: Codex-/await-remote-run@v1.13.0
         with:
           token: ${{ github.token }}
           repo: v2.momentum-fw.dev
