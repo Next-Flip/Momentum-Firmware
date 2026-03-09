@@ -1,15 +1,15 @@
 name: "FAP: Build for multiple SDK sources"
-# This will build your app for dev and release channels on GitHub. 
+# This will build your app for dev and release channels on GitHub.
 # It will also build your app every day to make sure it's up to date with the latest SDK changes.
 # See https://github.com/marketplace/actions/build-flipper-application-package-fap for more information
 
 on:
   push:
     ## put your main branch name under "branches"
-    #branches: 
-    #  - master 
+    #branches:
+    #  - master
   pull_request:
-  schedule: 
+  schedule:
     # do a build every day
     - cron: "1 1 * * *"
 
@@ -27,7 +27,7 @@ jobs:
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.3.1
       - name: Build with ufbt
         uses: flipperdevices/flipperzero-ufbt-action@v0.1
         id: build-app
