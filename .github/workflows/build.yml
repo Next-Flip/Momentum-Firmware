@@ -113,7 +113,7 @@ jobs:
           git diff --exit-code
 
       - name: "Upload artifacts to GitHub"
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.6.2
         with:
           path: |
             dist/${{ env.TARGET }}-*/flipper-z-${{ env.TARGET }}-update-*
