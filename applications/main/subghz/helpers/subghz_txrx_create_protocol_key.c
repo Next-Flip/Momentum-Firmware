@@ -495,18 +495,17 @@ bool subghz_txrx_gen_secplus_v2_protocol(
     furi_assert(instance);
 
     bool ret = false;
-    instance->transmitter =
-        subghz_transmitter_alloc_init(instance->environment, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
     subghz_txrx_set_preset(instance, name_preset, frequency, NAN, NAN, NULL, 0);
-    if(instance->transmitter) {
-        subghz_protocol_secplus_v2_create_data(
-            subghz_transmitter_get_protocol_instance(instance->transmitter),
-            instance->fff_data,
-            serial,
-            btn,
-            cnt,
-            instance->preset);
-        ret = true;
+    subghz_encoder_plugin_manager_load(
+        instance->encoder_plugin_manager, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
+    const SubGhzEncoderPlugin* plugin =
+        subghz_encoder_plugin_manager_get(instance->encoder_plugin_manager);
+    if(plugin && plugin->create_data) {
+        void* ctx = plugin->alloc(instance->environment);
+        if(ctx) {
+            ret = plugin->create_data(ctx, instance->fff_data, serial, btn, cnt, instance->preset);
+            plugin->free(ctx);
+        }
     }
     return ret;
 }

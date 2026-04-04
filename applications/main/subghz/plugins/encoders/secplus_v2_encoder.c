@@ -449,12 +449,33 @@ static LevelDuration sp2_yield(void* ctx_) {
     return ret;
 }
 
+static bool sp2_create_data(
+    void* ctx_,
+    FlipperFormat* ff,
+    uint32_t serial,
+    uint8_t btn,
+    uint32_t cnt,
+    SubGhzRadioPreset* preset) {
+    SP2Ctx* ctx = ctx_;
+    ctx->generic.serial = serial;
+    ctx->generic.btn = btn;
+    ctx->generic.cnt = cnt;
+    ctx->generic.data_count_bit = sp2_const.min_count_bit_for_found;
+    sp2_encode(ctx);
+    if(subghz_block_generic_serialize(&ctx->generic, ff, preset) != SubGhzProtocolStatusOk)
+        return false;
+    uint8_t kd[sizeof(uint64_t)] = {0};
+    for(size_t i = 0; i < sizeof(uint64_t); i++)
+        kd[sizeof(uint64_t) - i - 1] = (ctx->secplus_packet_1 >> (i * 8)) & 0xFF;
+    return flipper_format_write_hex(ff, "Secplus_packet_1", kd, sizeof(uint64_t));
+}
 static const SubGhzEncoderPlugin sp2_plugin = {
     .alloc = sp2_alloc,
     .free = sp2_free,
     .deserialize = sp2_deserialize,
     .stop = sp2_stop,
     .yield = sp2_yield,
+    .create_data = sp2_create_data,
 };
 
 static const FlipperAppPluginDescriptor sp2_descriptor = {

@@ -31,6 +31,7 @@ typedef struct {
     SubGhzProtocolStatus (*deserialize)(void* context, FlipperFormat* flipper_format);
     void (*stop)(void* context);
     LevelDuration (*yield)(void* context);
+    bool (*create_data)(void* context, FlipperFormat* flipper_format, uint32_t serial, uint8_t btn, uint32_t cnt, SubGhzRadioPreset* preset);
 } SubGhzEncoderPlugin;
 
 #ifdef __cplusplus
