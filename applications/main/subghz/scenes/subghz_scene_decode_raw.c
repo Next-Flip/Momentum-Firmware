@@ -1,4 +1,5 @@
 #include "../subghz_i.h"
+#include "../helpers/subghz_txrx_i.h"
 
 #define TAG "SubGhzDecodeRaw"
 
@@ -85,6 +86,11 @@ static void subghz_scene_add_to_history_callback(
     }
 
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
+        if(decoder_base->protocol && !decoder_base->protocol->encoder &&
+           subghz->txrx->encoder_plugin_manager) {
+            subghz_encoder_plugin_manager_load(
+                subghz->txrx->encoder_plugin_manager, decoder_base->protocol->name);
+        }
         furi_string_reset(item_name);
         furi_string_reset(item_time);
 

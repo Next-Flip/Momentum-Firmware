@@ -3784,6 +3784,7 @@ Function,+,subghz_setting_load,void,"SubGhzSetting*, const char*"
 Function,+,subghz_setting_load_custom_preset,_Bool,"SubGhzSetting*, const char*, FlipperFormat*"
 Function,+,subghz_setting_set_default_frequency,void,"SubGhzSetting*, uint32_t"
 Function,+,subghz_transmitter_alloc_init,SubGhzTransmitter*,"SubGhzEnvironment*, const char*"
+Function,+,subghz_transmitter_alloc_init_with_encoder,SubGhzTransmitter*,"SubGhzEnvironment*, const char*, const SubGhzProtocolEncoder*"
 Function,+,subghz_transmitter_deserialize,SubGhzProtocolStatus,"SubGhzTransmitter*, FlipperFormat*"
 Function,+,subghz_transmitter_free,void,SubGhzTransmitter*
 Function,+,subghz_transmitter_get_protocol_instance,SubGhzProtocolEncoderBase*,SubGhzTransmitter*
