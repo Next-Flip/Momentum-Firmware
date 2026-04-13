@@ -12,20 +12,6 @@ void momentum_app_scene_interface_graphics_var_item_list_callback(void* context,
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void momentum_app_scene_interface_graphics_asset_pack_changed(VariableItem* item) {
-    MomentumApp* app = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(
-        item, index == 0 ? "Default" : *CharList_get(app->asset_pack_names, index - 1));
-    strlcpy(
-        momentum_settings.asset_pack,
-        index == 0 ? "" : *CharList_get(app->asset_pack_names, index - 1),
-        ASSET_PACKS_NAME_LEN);
-    app->asset_pack_index = index;
-    app->save_settings = true;
-    app->apply_pack = true;
-}
-
 const char* const anim_speed_names[] = {
     "25%",
     "50%",
@@ -121,15 +107,12 @@ void momentum_app_scene_interface_graphics_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "Asset Pack",
-        CharList_size(app->asset_pack_names) + 1,
-        momentum_app_scene_interface_graphics_asset_pack_changed,
+        0,
+        NULL,
         app);
-    variable_item_set_current_value_index(item, app->asset_pack_index);
     variable_item_set_current_value_text(
         item,
-        app->asset_pack_index == 0 ?
-            "Default" :
-            *CharList_get(app->asset_pack_names, app->asset_pack_index - 1));
+        momentum_settings.asset_pack[0] ? momentum_settings.asset_pack : "Default");
 
     item = variable_item_list_add(
         var_item_list,

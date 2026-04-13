@@ -1,11 +1,5 @@
 #include "../momentum_app.h"
 
-enum SubmenuIndex {
-    SubmenuIndexMainApp,
-    SubmenuIndexExternalApp,
-    SubmenuIndexFileDirectory,
-};
-
 static bool fap_selector_item_callback(
     FuriString* file_path,
     void* context,
@@ -24,12 +18,14 @@ static void
     scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneInterfaceMainmenuAdd, index);
 
     switch(index) {
-    case SubmenuIndexMainApp:
+    case MomentumAppMainmenuAddSourceMainApp:
         scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceMainmenuAddMain);
         break;
-    case SubmenuIndexExternalApp:
-    case SubmenuIndexFileDirectory: {
-        const bool is_file_dir = index == SubmenuIndexFileDirectory;
+    case MomentumAppMainmenuAddSourceExternalApp:
+        scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceMainmenuAddMain);
+        break;
+    case MomentumAppMainmenuAddSourceFileDirectory: {
+        const bool is_file_dir = true;
         const DialogsFileBrowserOptions browser_options = {
             .extension = is_file_dir ? "*" : ".fap",
             .icon = &I_unknown_10px,
@@ -66,21 +62,21 @@ void momentum_app_scene_interface_mainmenu_add_on_enter(void* context) {
     submenu_add_item(
         submenu,
         "Main App",
-        SubmenuIndexMainApp,
+        MomentumAppMainmenuAddSourceMainApp,
         momentum_app_scene_interface_mainmenu_add_submenu_callback,
         app);
 
     submenu_add_item(
         submenu,
         "External App",
-        SubmenuIndexExternalApp,
+        MomentumAppMainmenuAddSourceExternalApp,
         momentum_app_scene_interface_mainmenu_add_submenu_callback,
         app);
 
     submenu_add_item(
         submenu,
         "File / Directory (right btn)",
-        SubmenuIndexFileDirectory,
+        MomentumAppMainmenuAddSourceFileDirectory,
         momentum_app_scene_interface_mainmenu_add_submenu_callback,
         app);
 
