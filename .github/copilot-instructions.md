@@ -17,6 +17,7 @@ This policy is rooted in the project's core philosophy:
 1.  **Integrity of Authorship & Licensing:** To ensure all code is human-authored and respects software licenses, avoiding legal and ethical concerns associated with AI training data.
 2.  **Preservation of Craft:** To encourage deep understanding, problem-solving, and genuine expertise in software development.
 3.  **Maintainer Respect:** To protect maintainers' time from reviewing subpar, contextually ignorant, or legally risky AI-generated submissions.
+4.  **Device Operation:** To ensure the continued operation of the user's device, as vibecoding any low-level project is a bad idea as you run the risk of irrecoverably bricking the device that it is ran on.
 
 **Human contributors must:**
 *   Disable GitHub Copilot and all AI coding assistants for this repository locally.
