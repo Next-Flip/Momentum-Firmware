@@ -19,7 +19,7 @@ This policy is rooted in core principles held by the maintainers:
 
 4.  **Maintainer Respect and Productivity**: Submissions derived from AI are frequently subpar, contextually ignorant, or introduce legal risk. They disrespect the time and expertise of maintainers who must audit and reject such contributions, hindering genuine progress.
 
-5.  **Continued Device Function**: To ensure the continued operation of the user's device, due to the fact that vibecoding any low-level project is a bad idea as you run the risk of irrecoverably bricking the device that it is ran on.
+5.  **Continued Device Function**: To ensure the continued operation of the user's device due to the fact that vibecoding any low-level project is a bad idea as you run the risk of irrecoverably bricking the device that it is ran on.
 
 ## Guidelines for Human Contributors
 If you are a human contributor, you must:
