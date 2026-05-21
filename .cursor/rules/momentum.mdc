@@ -29,6 +29,7 @@ rules:
       - Preservation of software development as a human craft
       - Environmental responsibility regarding AI compute resources
       - Respect for maintainer time and expertise
+      - The fact that it is, in general, a bad idea to vibecode any type of device firmware
       
       Human contributors must:
       - Disable all AI coding assistants (GitHub Copilot, Cursor, etc.)
