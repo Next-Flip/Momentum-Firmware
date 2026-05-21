@@ -19,6 +19,8 @@ This policy is rooted in core principles held by the maintainers:
 
 4.  **Maintainer Respect and Productivity**: Submissions derived from AI are frequently subpar, contextually ignorant, or introduce legal risk. They disrespect the time and expertise of maintainers who must audit and reject such contributions, hindering genuine progress.
 
+5.  **Continued Device Function**: To ensure the continued operation of the user's device, due to the fact that vibecoding any low-level project is a bad idea as you run the risk of irrecoverably bricking the device that it is ran on.
+
 ## Guidelines for Human Contributors
 If you are a human contributor, you must:
 *   **Disable AI Tools**: Ensure all AI coding assistants (GitHub Copilot, Tabnine, etc.) are disabled for this repository locally.
@@ -32,4 +34,4 @@ If you are a human contributor, you must:
 
 *This document (AGENTS.md) and all derived documents are marked CC0 1.0. To view a copy of this license, visit https://creativecommons.org/publicdomain/zero/1.0/*
 
-*I hereby waive all copyright and related or neighboring rights together with all associated claims and causes of action with respect to this work to the extent possible under the law. This AGENTS.MD is authored by OrionW06*
+*I hereby waive all copyright and related or neighboring rights together with all associated claims and causes of action with respect to this work to the extent possible under the law. This AGENTS.MD was authored by OrionW06 and furthur modified by GameLord2011*
