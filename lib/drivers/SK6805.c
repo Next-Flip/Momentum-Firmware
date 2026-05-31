@@ -59,6 +59,7 @@ void SK6805_set_led_color(uint8_t led_index, uint8_t r, uint8_t g, uint8_t b) {
 
 void SK6805_update(void) {
     FURI_LOG_T(TAG, "update");
+    bool pin_was_high = furi_hal_gpio_read(SK6805_LED_PIN);
     SK6805_init();
     FURI_CRITICAL_ENTER();
     uint32_t end;
@@ -101,4 +102,5 @@ void SK6805_update(void) {
         }
     }
     FURI_CRITICAL_EXIT();
+    furi_hal_gpio_write(SK6805_LED_PIN, pin_was_high);
 }
