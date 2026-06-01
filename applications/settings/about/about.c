@@ -23,11 +23,13 @@ static DialogMessageButton about_screen_product(DialogsApp* dialogs, DialogMessa
         furi_hal_version_get_model_name(),
         furi_hal_version_get_model_code());
 
-    FuriString* screen_text = furi_string_alloc_printf(
-        "FCC ID: %s\n"
-        "IC: %s",
-        furi_hal_version_get_fcc_id(),
-        furi_hal_version_get_ic_id());
+    // FuriString* screen_text = furi_string_alloc_printf(
+    //     "FCC ID: %s\n"
+    //     "IC: %s",
+    //     furi_hal_version_get_fcc_id(),
+    //     furi_hal_version_get_ic_id());
+
+    FuriString* screen_text = furi_string_alloc_printf("From Tallinn with love <3");
 
     dialog_message_set_header(
         message, furi_string_get_cstr(screen_header), 0, 0, AlignLeft, AlignTop);
@@ -41,92 +43,92 @@ static DialogMessageButton about_screen_product(DialogsApp* dialogs, DialogMessa
     return result;
 }
 
-static DialogMessageButton about_screen_address(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_address(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    const char* screen_text = "Flipper Devices Inc.\n"
-                              "Suite B #551, 2803\n"
-                              "Philadelphia Pike, Claymont\n"
-                              "DE, USA 19703\n";
+//     const char* screen_text = "Flipper Devices Inc.\n"
+//                               "Suite B #551, 2803\n"
+//                               "Philadelphia Pike, Claymont\n"
+//                               "DE, USA 19703\n";
 
-    dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_compliance(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_compliance(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    const char* screen_text = "For all compliance\n"
-                              "certificates, please visit:\n"
-                              "www.flipp.dev/compliance";
+//     const char* screen_text = "For all compliance\n"
+//                               "certificates, please visit:\n"
+//                               "www.flipp.dev/compliance";
 
-    dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_icon1(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_icon1(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_Certification1_103x56, 13, 0);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_icon(message, &I_Certification1_103x56, 13, 0);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_icon2(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_icon2(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_Certification2_46x33, 15, 10);
-    dialog_message_set_text(
-        message, furi_hal_version_get_mic_id(), 63, 27, AlignLeft, AlignCenter);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_icon(message, &I_Certification2_46x33, 15, 10);
+//     dialog_message_set_text(
+//         message, furi_hal_version_get_mic_id(), 63, 27, AlignLeft, AlignCenter);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_cert_china_0(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_cert_china_0(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_CertificationChina0_121x41, 3, 3);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_icon(message, &I_CertificationChina0_121x41, 3, 3);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_cert_china_1(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_cert_china_1(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_CertificationChina1_124x47, 3, 3);
-    dialog_message_set_text(
-        message, furi_hal_version_get_srrc_id(), 55, 11, AlignLeft, AlignBottom);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_icon(message, &I_CertificationChina1_124x47, 3, 3);
+//     dialog_message_set_text(
+//         message, furi_hal_version_get_srrc_id(), 55, 11, AlignLeft, AlignBottom);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_cert_taiwan(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_cert_taiwan(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_CertificationTaiwan_33x32, 3, 10);
-    dialog_message_set_text(
-        message, furi_hal_version_get_ncc_id(), 39, 30, AlignLeft, AlignBottom);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_icon(message, &I_CertificationTaiwan_33x32, 3, 10);
+//     dialog_message_set_text(
+//         message, furi_hal_version_get_ncc_id(), 39, 30, AlignLeft, AlignBottom);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
-static DialogMessageButton about_screen_cert_mexico(DialogsApp* dialogs, DialogMessage* message) {
-    DialogMessageButton result;
+// static DialogMessageButton about_screen_cert_mexico(DialogsApp* dialogs, DialogMessage* message) {
+//     DialogMessageButton result;
 
-    dialog_message_set_icon(message, &I_CertificationMexico_98x41, 17, 4);
-    result = dialog_message_show(dialogs, message);
+//     dialog_message_set_icon(message, &I_CertificationMexico_98x41, 17, 4);
+//     result = dialog_message_show(dialogs, message);
 
-    return result;
-}
+//     return result;
+// }
 
 static DialogMessageButton about_screen_hw_version(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
@@ -206,14 +208,6 @@ const AboutDialogScreen about_screens[] = {
     about_screen_product,
     about_screen_hw_version,
     about_screen_fw_version,
-    about_screen_compliance,
-    about_screen_address,
-    about_screen_icon1,
-    about_screen_icon2,
-    about_screen_cert_china_0,
-    about_screen_cert_china_1,
-    about_screen_cert_taiwan,
-    about_screen_cert_mexico,
 };
 
 int32_t about_settings_app(void* p) {

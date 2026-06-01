@@ -2,8 +2,18 @@
 
 #include <flipper_format/flipper_format.h>
 #include <furi_hal_version.h>
+#include <furi_hal_random.h>
 
 #define TAG "NameSpoof"
+
+const char* const cat_names[] = {
+    "Manx",     "York",     "Dwelf",    "Korat",    "Lykoi",    "Asian",    "Devon",    "Aegean",
+    "Bengal",   "Birman",   "Bombay",   "Cymric",   "Cyprus",   "LaPerm",   "Ocicat",   "Sokoke",
+    "Somali",   "Sphynx",   "Toyger",   "Havana",   "Angora",   "Levkoy",   "Bambino",  "Burmese",
+    "Chausie",  "Cheetoh",  "Donskoy",  "Elf cat",  "Minskin",  "Persian",  "Ragdoll",  "Siamese",
+    "Arabian",  "Cornish",  "Selkirk",  "Turkish",  "Bobtail",  "Balinese", "Burmilla", "Javanese",
+    "Munchkin", "Nebelung", "Oriental", "Savannah", "Siberian", "Snowshoe", "Thai cat", "Pixiebob",
+    "Egyptian", "Napoleon", "Scottish"};
 
 void namespoof_init(void) {
     FuriString* str = furi_string_alloc();
@@ -25,6 +35,15 @@ void namespoof_init(void) {
         furi_hal_version_set_name(NULL);
         applied_new_name = true;
     } while(false);
+
+    if(!applied_new_name) {
+        //Custom name is not set, so make a random one
+        // furi_hal_random_init();
+        uint32_t lucky_cat = furi_hal_random_get() % COUNT_OF(cat_names);
+        version_set_custom_name(NULL, cat_names[lucky_cat]);
+        furi_hal_version_set_name(version_get_custom_name(NULL));
+        applied_new_name = true;
+    }
 
     if(prev_custom_name) {
         if(!applied_new_name) {

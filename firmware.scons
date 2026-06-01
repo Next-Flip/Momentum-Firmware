@@ -121,6 +121,7 @@ lib_targets = env.BuildModules(
 env.Append(
     CPPDEFINES=[
         env.subst("FW_ORIGIN_${FIRMWARE_ORIGIN}"),
+        "KIISU",
     ]
 )
 

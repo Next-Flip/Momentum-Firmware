@@ -130,9 +130,9 @@ void furi_hal_i2c_bus_handle_external_event(
     FuriHalI2cBusHandleEvent event) {
     if(event == FuriHalI2cBusHandleEventActivate) {
         furi_hal_gpio_init_ex(
-            &gpio_ext_pc0, GpioModeAltFunctionOpenDrain, GpioPullNo, GpioSpeedLow, GpioAltFn4I2C3);
+            &gpio_ext_pc0, GpioModeAltFunctionOpenDrain, GpioPullUp, GpioSpeedLow, GpioAltFn4I2C3);
         furi_hal_gpio_init_ex(
-            &gpio_ext_pc1, GpioModeAltFunctionOpenDrain, GpioPullNo, GpioSpeedLow, GpioAltFn4I2C3);
+            &gpio_ext_pc1, GpioModeAltFunctionOpenDrain, GpioPullUp, GpioSpeedLow, GpioAltFn4I2C3);
 
         LL_I2C_InitTypeDef I2C_InitStruct;
         I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
