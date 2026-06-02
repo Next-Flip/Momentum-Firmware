@@ -641,11 +641,15 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
             // so a default read on an auth-supported NTAG is never complete.
             MfUltralightConfigPages* config = NULL;
             if(mf_ultralight_get_config_page(data, &config)) {
-                uint32_t pass = bit_lib_bytes_to_num_be(
-                    config->password.data, sizeof(MfUltralightAuthPassword));
-                uint16_t pack =
-                    bit_lib_bytes_to_num_be(config->pack.data, sizeof(MfUltralightAuthPack));
-                all_read = ((pass != 0) || (pack != 0));
+                if(config->auth0 == 0xFF) {
+                    all_read = true;
+                } else {
+                    uint32_t pass = bit_lib_bytes_to_num_be(
+                        config->password.data, sizeof(MfUltralightAuthPassword));
+                    uint16_t pack =
+                        bit_lib_bytes_to_num_be(config->pack.data, sizeof(MfUltralightAuthPack));
+                    all_read = ((pass != 0) || (pack != 0));
+                }
             }
         }
     }

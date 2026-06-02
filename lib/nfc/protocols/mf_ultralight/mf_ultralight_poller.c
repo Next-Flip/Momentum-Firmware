@@ -714,7 +714,10 @@ static NfcCommand mf_ultralight_poller_handler_request_write_data(MfUltralightPo
         }
 
         if(mf_ultralight_support_feature(features, MfUltralightFeatureSupportPasswordAuth)) {
-            if(!instance->auth_context.auth_success) {
+            MfUltralightConfigPages* config = NULL;
+            bool auth0_disabled =
+                mf_ultralight_get_config_page(tag_data, &config) && config->auth0 == 0xFF;
+            if(!instance->auth_context.auth_success && !auth0_disabled) {
                 FURI_LOG_D(TAG, "Unknown password");
                 instance->mfu_event.type = MfUltralightPollerEventTypeCardLocked;
                 break;
