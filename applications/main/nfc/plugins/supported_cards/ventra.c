@@ -3,6 +3,9 @@
 // Based on my own research, with...
 // Credit to https://www.lenrek.net/experiments/compass-tickets/ & MetroDroid project for underlying info
 //
+// Deprecated: Ventra parsing has moved to the Metroflip application.
+// This legacy parser may be removed in a future release.
+//
 // This parser can decode the paper single-use and single/multi-day paper passes using Ultralight EV1
 // The plastic cards are DESFire and fully locked down, not much useful info extractable
 // TODO:
