@@ -336,6 +336,7 @@ def _validate_app_imports(target, source, env):
             "troika_plugin",
             "trt_plugin",
             "two_cities_plugin",
+            "ventra_plugin",
         ): (
             "metroflip_",
             "bit_slice_to_dec",
