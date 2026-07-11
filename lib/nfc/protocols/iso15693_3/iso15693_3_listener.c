@@ -14,6 +14,8 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     Iso15693_3Listener* instance = malloc(sizeof(Iso15693_3Listener));
     instance->nfc = nfc;
     instance->data = data;
+    instance->state = Iso15693_3ListenerStateReady;
+    instance->session_state = (Iso15693_3ListenerSessionState){0};
 
     instance->tx_buffer = bit_buffer_alloc(ISO15693_3_LISTENER_BUFFER_SIZE);
 
@@ -62,10 +64,23 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
     NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
-    if(nfc_event->type == NfcEventTypeRxEnd) {
+    if(nfc_event->type == NfcEventTypeFieldOn) {
+        if(instance->callback) {
+            instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeFieldOn;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(nfc_event->type == NfcEventTypeFieldOff) {
+        instance->session_state = (Iso15693_3ListenerSessionState){0};
+        if(instance->callback) {
+            instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeFieldOff;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(nfc_event->type == NfcEventTypeRxEnd) {
         BitBuffer* rx_buffer = nfc_event->data.buffer;
 
-        bit_buffer_reset(instance->tx_buffer);
+        if(bit_buffer_get_size(rx_buffer) != 0) {
+            bit_buffer_reset(instance->tx_buffer);
+        }
         if(iso13239_crc_check(Iso13239CrcTypeDefault, rx_buffer)) {
             iso13239_crc_trim(rx_buffer);
 
@@ -82,16 +97,47 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
                 iso15693_3_listener_process_uid_mismatch(instance, rx_buffer);
             }
 
+            if(instance->callback) {
+                const NfcCommand prev_command = command;
+                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeRequest;
+                instance->iso15693_3_event.data->buffer = rx_buffer;
+                command = instance->callback(instance->generic_event, instance->context);
+                if(prev_command != NfcCommandContinue) {
+                    command = prev_command;
+                }
+            }
+            if(instance->callback && bit_buffer_get_size(instance->tx_buffer) &&
+               !instance->session_state.wait_for_eof) {
+                const NfcCommand prev_command = command;
+                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeResponse;
+                instance->iso15693_3_event.data->buffer = instance->tx_buffer;
+                command = instance->callback(instance->generic_event, instance->context);
+                if(prev_command != NfcCommandContinue) {
+                    command = prev_command;
+                }
+            }
+
         } else if(bit_buffer_get_size(rx_buffer) == 0) {
             // Special case: Single EOF
             const Iso15693_3Error error = iso15693_3_listener_process_single_eof(instance);
-            if(error == Iso15693_3ErrorUnexpectedResponse) {
+            if(error == Iso15693_3ErrorNone) {
+                if(instance->callback && bit_buffer_get_size(instance->tx_buffer)) {
+                    instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeResponse;
+                    instance->iso15693_3_event.data->buffer = instance->tx_buffer;
+                    command = instance->callback(instance->generic_event, instance->context);
+                }
+            } else if(error == Iso15693_3ErrorUnexpectedResponse) {
                 if(instance->callback) {
                     instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeSingleEof;
                     command = instance->callback(instance->generic_event, instance->context);
                 }
             }
         } else {
+            if(instance->callback) {
+                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeRequestError;
+                instance->iso15693_3_event.data->buffer = rx_buffer;
+                command = instance->callback(instance->generic_event, instance->context);
+            }
             FURI_LOG_D(
                 TAG, "Wrong CRC, buffer size: %zu", bit_buffer_get_size(nfc_event->data.buffer));
         }

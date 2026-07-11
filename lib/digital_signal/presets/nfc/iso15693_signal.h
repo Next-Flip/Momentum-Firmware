@@ -66,7 +66,9 @@ void iso15693_signal_tx(
  * @param[in] instance pointer to the instance used in transmission.
  * @param[in] data_rate data rate to transmit at.
  */
-void iso15693_signal_tx_sof(Iso15693Signal* instance, Iso15693SignalDataRate data_rate);
+void iso15693_signal_tx_sof(
+    Iso15693Signal* instance,
+    Iso15693SignalDataRate data_rate);
 
 #ifdef __cplusplus
 }

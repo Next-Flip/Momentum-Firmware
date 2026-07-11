@@ -32,6 +32,8 @@ typedef struct {
     bool selected;
     bool addressed;
     bool wait_for_eof;
+    bool inventory_wait_for_slot;
+    uint8_t inventory_slot;
 } Iso15693_3ListenerSessionState;
 
 typedef Iso15693_3Error (*Iso15693_3ExtensionHandler)(void* context, va_list args);

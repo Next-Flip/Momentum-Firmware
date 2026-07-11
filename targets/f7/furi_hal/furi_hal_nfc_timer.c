@@ -6,6 +6,7 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_bus.h>
+#include <momentum/momentum.h>
 
 #define TAG "FuriHalNfcTimer"
 
@@ -123,7 +124,13 @@ static int32_t furi_hal_nfc_timer_get_compensation(FuriHalNfcTimer timer) {
 
     } else if(furi_hal_nfc.mode == FuriHalNfcModeListener) {
         const FuriHalNfcListenerCompensation* comp = &current_tech->listener.compensation;
-        if(timer == FuriHalNfcTimerBlockTx) return comp->fdt;
+        if(timer == FuriHalNfcTimerBlockTx) {
+            if((furi_hal_nfc.tech == FuriHalNfcTechIso15693) &&
+               momentum_settings.nfcv_fast_timing) {
+                return INT32_MAX;
+            }
+            return comp->fdt;
+        }
     }
 
     return 0;

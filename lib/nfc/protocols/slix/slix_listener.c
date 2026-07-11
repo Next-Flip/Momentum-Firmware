@@ -60,7 +60,35 @@ static NfcCommand slix_listener_run(NfcGenericEvent event, void* context) {
     BitBuffer* rx_buffer = iso15693_3_event->data->buffer;
     NfcCommand command = NfcCommandContinue;
 
-    if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
+    if(iso15693_3_event->type == Iso15693_3ListenerEventTypeFieldOn) {
+        if(instance->callback) {
+            instance->slix_event.type = SlixListenerEventTypeFieldOn;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeFieldOff) {
+        if(instance->callback) {
+            instance->slix_event.type = SlixListenerEventTypeFieldOff;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeRequest) {
+        if(instance->callback) {
+            instance->slix_event.type = SlixListenerEventTypeRequest;
+            instance->slix_event.data->buffer = rx_buffer;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeRequestError) {
+        if(instance->callback) {
+            instance->slix_event.type = SlixListenerEventTypeRequestError;
+            instance->slix_event.data->buffer = rx_buffer;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeResponse) {
+        if(instance->callback) {
+            instance->slix_event.type = SlixListenerEventTypeResponse;
+            instance->slix_event.data->buffer = rx_buffer;
+            command = instance->callback(instance->generic_event, instance->context);
+        }
+    } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
         const SlixError error = slix_listener_process_request(instance, rx_buffer);
         if(error == SlixErrorWrongPassword) {
             command = NfcCommandSleep;

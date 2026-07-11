@@ -3,6 +3,7 @@
 #include <nfc/helpers/iso13239_crc.h>
 
 #define TAG "Iso15693_3Listener"
+#define BITS_IN_BYTE (8U)
 
 typedef Iso15693_3Error (*Iso15693_3RequestHandler)(
     Iso15693_3Listener* instance,
@@ -14,6 +15,50 @@ typedef struct {
     Iso15693_3RequestHandler mandatory[ISO15693_3_MANDATORY_COUNT];
     Iso15693_3RequestHandler optional[ISO15693_3_OPTIONAL_COUNT];
 } Iso15693_3ListenerHandlerTable;
+
+static bool iso15693_3_listener_inventory_mask_matches(
+    const Iso15693_3Data* data,
+    const uint8_t* mask,
+    uint8_t mask_bits) {
+    furi_assert(data);
+    furi_assert(mask);
+
+    bool matches = true;
+
+    for(uint8_t i = 0; i < mask_bits; ++i) {
+        const uint8_t mask_bit = (mask[i / 8] >> (i % 8)) & 1U;
+        const uint8_t uid_air_byte = data->uid[ISO15693_3_UID_SIZE - 1 - (i / 8)];
+        const uint8_t uid_bit = (uid_air_byte >> (i % 8)) & 1U;
+
+        if(mask_bit != uid_bit) {
+            matches = false;
+            break;
+        }
+    }
+
+    return matches;
+}
+
+static uint8_t iso15693_3_listener_get_uid_air_bit(const Iso15693_3Data* data, uint8_t bit_num) {
+    furi_assert(data);
+    furi_assert(bit_num < ISO15693_3_UID_SIZE * BITS_IN_BYTE);
+
+    const uint8_t uid_air_byte = data->uid[ISO15693_3_UID_SIZE - 1 - (bit_num / BITS_IN_BYTE)];
+    return (uid_air_byte >> (bit_num % BITS_IN_BYTE)) & 1U;
+}
+
+static uint8_t
+    iso15693_3_listener_get_inventory_slot(const Iso15693_3Data* data, uint8_t mask_bits) {
+    uint8_t slot = 0;
+
+    for(uint8_t i = 0; i < 4; ++i) {
+        const uint8_t uid_bit_num = mask_bits + i;
+        if(uid_bit_num >= ISO15693_3_UID_SIZE * BITS_IN_BYTE) break;
+        slot |= iso15693_3_listener_get_uid_air_bit(data, uid_bit_num) << i;
+    }
+
+    return slot;
+}
 
 static Iso15693_3Error
     iso15693_3_listener_extension_handler(Iso15693_3Listener* instance, uint32_t command, ...) {
@@ -65,20 +110,43 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
             const uint8_t afi = *data++;
             // When AFI flag is set, ignore non-matching requests
             if(afi != 0) {
-                if(afi != instance->data->system_info.afi) break;
+                if(afi != instance->data->system_info.afi) {
+                    error = Iso15693_3ErrorIgnore;
+                    break;
+                }
             }
         }
 
-        const uint8_t mask_len = *data++;
-        const size_t data_size_required = data_size_min + mask_len;
+        const uint8_t mask_len_bits = *data++;
+        const size_t mask_len_bytes = (mask_len_bits + BITS_IN_BYTE - 1) / BITS_IN_BYTE;
+        const size_t data_size_required = data_size_min + mask_len_bytes;
 
-        if(data_size != data_size_required) {
+        if(mask_len_bits > ISO15693_3_UID_SIZE * BITS_IN_BYTE) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        } else if(data_size != data_size_required) {
             error = Iso15693_3ErrorFormat;
             break;
         }
 
-        if(mask_len != 0) {
-            // TODO FL-3633: Take mask_len and mask_value into account (if present)
+        if(mask_len_bits != 0) {
+            if(!iso15693_3_listener_inventory_mask_matches(instance->data, data, mask_len_bits)) {
+                error = Iso15693_3ErrorIgnore;
+                break;
+            }
+        }
+
+        instance->session_state.wait_for_eof = false;
+        instance->session_state.inventory_wait_for_slot = false;
+        const bool single_slot = flags & ISO15693_3_REQ_FLAG_T5_N_SLOTS_1;
+        if(!single_slot) {
+            const uint8_t slot = iso15693_3_listener_get_inventory_slot(
+                instance->data, mask_len_bits);
+            if(slot != 0) {
+                instance->session_state.wait_for_eof = true;
+                instance->session_state.inventory_wait_for_slot = true;
+                instance->session_state.inventory_slot = slot;
+            }
         }
 
         error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_INVENTORY);
@@ -780,6 +848,8 @@ Iso15693_3Error
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         Iso15693_3ListenerSessionState* session_state = &instance->session_state;
+        session_state->wait_for_eof = false;
+        session_state->inventory_wait_for_slot = false;
 
         if((request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5) == 0) {
             session_state->selected = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
@@ -858,6 +928,15 @@ Iso15693_3Error iso15693_3_listener_process_single_eof(Iso15693_3Listener* insta
         if(!instance->session_state.wait_for_eof) {
             error = Iso15693_3ErrorUnexpectedResponse;
             break;
+        }
+
+        if(instance->session_state.inventory_wait_for_slot) {
+            if(instance->session_state.inventory_slot > 1) {
+                instance->session_state.inventory_slot--;
+                error = Iso15693_3ErrorIgnore;
+                break;
+            }
+            instance->session_state.inventory_wait_for_slot = false;
         }
 
         instance->session_state.wait_for_eof = false;

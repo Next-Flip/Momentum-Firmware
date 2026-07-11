@@ -85,9 +85,24 @@ static NfcCommand nfc_scene_emulate_listener_callback_slix(NfcGenericEvent event
     NfcApp* instance = context;
     SlixListenerEvent* slix_event = event.event_data;
 
-    if(slix_event->type == SlixListenerEventTypeCustomCommand) {
-        if(furi_string_size(instance->text_box_store) < NFC_LOG_SIZE_MAX) {
-            furi_string_cat_printf(instance->text_box_store, "R:");
+    if(furi_string_size(instance->text_box_store) < NFC_LOG_SIZE_MAX) {
+        if(slix_event->type == SlixListenerEventTypeFieldOn) {
+            furi_string_cat_str(instance->text_box_store, "FIELD ON\n");
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventListenerUpdate);
+        } else if(slix_event->type == SlixListenerEventTypeFieldOff) {
+            furi_string_cat_str(instance->text_box_store, "FIELD OFF\n");
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventListenerUpdate);
+        } else if(
+            slix_event->type == SlixListenerEventTypeRequest ||
+            slix_event->type == SlixListenerEventTypeRequestError ||
+            slix_event->type == SlixListenerEventTypeResponse) {
+            furi_string_cat_printf(
+                instance->text_box_store,
+                slix_event->type == SlixListenerEventTypeRequest       ? "R:" :
+                slix_event->type == SlixListenerEventTypeRequestError  ? "E:" :
+                                                                          "T:");
             for(size_t i = 0; i < bit_buffer_get_size_bytes(slix_event->data->buffer); i++) {
                 furi_string_cat_printf(
                     instance->text_box_store,

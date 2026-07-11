@@ -2,6 +2,7 @@
 #include "furi_hal_nfc_tech_i.h"
 
 #include <digital_signal/presets/nfc/iso15693_signal.h>
+#include <nfc/protocols/iso15693_3/iso15693_3.h>
 #include <signal_reader/parsers/iso15693/iso15693_parser.h>
 
 #include <furi_hal_resources.h>
@@ -31,6 +32,7 @@
 typedef struct {
     Iso15693Signal* signal;
     Iso15693Parser* parser;
+    Iso15693SignalDataRate response_data_rate;
 } FuriHalNfcIso15693Listener;
 
 typedef struct {
@@ -50,6 +52,7 @@ static FuriHalNfcIso15693Listener* furi_hal_nfc_iso15693_listener_alloc(void) {
     instance->signal = iso15693_signal_alloc(&gpio_spi_r_mosi);
     instance->parser =
         iso15693_parser_alloc(&gpio_nfc_irq_rfid_pull, FURI_HAL_NFC_ISO15693_MAX_FRAME_SIZE);
+    instance->response_data_rate = Iso15693SignalDataRateHi;
 
     return instance;
 }
@@ -345,7 +348,10 @@ static FuriHalNfcError furi_hal_nfc_iso15693_listener_deinit(const FuriHalSpiBus
 static FuriHalNfcError
     furi_hal_nfc_iso15693_listener_tx_transparent(const uint8_t* data, size_t data_size) {
     iso15693_signal_tx(
-        furi_hal_nfc_iso15693_listener->signal, Iso15693SignalDataRateHi, data, data_size);
+        furi_hal_nfc_iso15693_listener->signal,
+        furi_hal_nfc_iso15693_listener->response_data_rate,
+        data,
+        data_size);
 
     return FuriHalNfcErrorNone;
 }
@@ -404,7 +410,9 @@ static FuriHalNfcError furi_hal_nfc_iso15693_listener_tx(
 }
 
 FuriHalNfcError furi_hal_nfc_iso15693_listener_tx_sof(void) {
-    iso15693_signal_tx_sof(furi_hal_nfc_iso15693_listener->signal, Iso15693SignalDataRateHi);
+    iso15693_signal_tx_sof(
+        furi_hal_nfc_iso15693_listener->signal,
+        furi_hal_nfc_iso15693_listener->response_data_rate);
 
     return FuriHalNfcErrorNone;
 }
@@ -424,6 +432,13 @@ static FuriHalNfcError furi_hal_nfc_iso15693_listener_rx(
 
     iso15693_parser_get_data(
         furi_hal_nfc_iso15693_listener->parser, rx_data, rx_data_size, rx_bits);
+
+    if(*rx_bits >= BITS_IN_BYTE) {
+        const uint8_t flags = rx_data[0];
+        furi_hal_nfc_iso15693_listener->response_data_rate =
+            (flags & ISO15693_3_REQ_FLAG_DATA_RATE_HI) ? Iso15693SignalDataRateHi :
+                                                         Iso15693SignalDataRateLo;
+    }
 
     return FuriHalNfcErrorNone;
 }
