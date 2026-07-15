@@ -43,6 +43,7 @@ MomentumSettings momentum_settings = {
     .spi_nrf24_handle = SpiDefault, // &furi_hal_spi_bus_handle_external
     .uart_esp_channel = FuriHalSerialIdUsart, // pin 13,14
     .uart_nmea_channel = FuriHalSerialIdUsart, // pin 13,14
+    .nfcv_fast_timing = true, // Fast
     .file_naming_prefix_after = false, // Before
     .spoof_color = FuriHalVersionColorUnknown, // Real
     .rpc_color_fg = {{ScreenColorModeDefault, {.value = 0x000000}}}, // Default Black
@@ -117,6 +118,7 @@ static const struct {
     {setting_enum(spi_nrf24_handle, SpiCount)},
     {setting_enum(uart_esp_channel, FuriHalSerialIdMax)},
     {setting_enum(uart_nmea_channel, FuriHalSerialIdMax)},
+    {setting_bool(nfcv_fast_timing)},
     {setting_bool(file_naming_prefix_after)},
     {setting_enum(spoof_color, FuriHalVersionColorCount)},
     {setting_uint(rpc_color_fg, 0x000000, 0xFFFFFF)},

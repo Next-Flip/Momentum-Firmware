@@ -848,8 +848,6 @@ Iso15693_3Error
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         Iso15693_3ListenerSessionState* session_state = &instance->session_state;
-        session_state->wait_for_eof = false;
-        session_state->inventory_wait_for_slot = false;
 
         if((request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5) == 0) {
             session_state->selected = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
