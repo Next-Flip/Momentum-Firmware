@@ -12,9 +12,20 @@
 #define DOLPHIN_STATE_HEADER_MAGIC   0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 
-const uint32_t DOLPHIN_LEVELS[] = {100,  200,  300,  450,  600,  750,  950,  1150, 1350, 1600,
-                                   1850, 2100, 2400, 2700, 3000, 3350, 3700, 4050, 4450, 4850,
-                                   5250, 5700, 6150, 6600, 7100, 7600, 8100, 8650, 9999};
+/*
+ * The original Momentum/Flipper thresholds through level 30 are preserved.
+ * Level99 extends progression in conservative 600-XP steps. A value above
+ * the final threshold is level 99, matching the existing calculation model.
+ */
+const uint32_t DOLPHIN_LEVELS[] = {
+    100,   200,   300,   450,   600,   750,   950,   1150,  1350,  1600,  1850,  2100,  2400,
+    2700,  3000,  3350,  3700,  4050,  4450,  4850,  5250,  5700,  6150,  6600,  7100,  7600,
+    8100,  8650,  9999,  10599, 11199, 11799, 12399, 12999, 13599, 14199, 14799, 15399, 15999,
+    16599, 17199, 17799, 18399, 18999, 19599, 20199, 20799, 21399, 21999, 22599, 23199, 23799,
+    24399, 24999, 25599, 26199, 26799, 27399, 27999, 28599, 29199, 29799, 30399, 30999, 31599,
+    32199, 32799, 33399, 33999, 34599, 35199, 35799, 36399, 36999, 37599, 38199, 38799, 39399,
+    39999, 40599, 41199, 41799, 42399, 42999, 43599, 44199, 44799, 45399, 45999, 46599, 47199,
+    47799, 48399, 48999, 49599, 50199, 50799, 51399};
 const size_t DOLPHIN_LEVEL_COUNT = COUNT_OF(DOLPHIN_LEVELS);
 
 DolphinState* dolphin_state_alloc(void) {
@@ -65,6 +76,7 @@ void dolphin_state_load(DolphinState* dolphin_state) {
         FURI_LOG_W(TAG, "Reset Dolphin state");
         memset(dolphin_state, 0, sizeof(DolphinState));
 
+        dolphin_state->data.icounter = dolphin_state_level_minimum_xp(99);
         dolphin_state->dirty = true;
         // dolphin_state_save(dolphin_state);
     }
@@ -92,6 +104,19 @@ uint8_t dolphin_get_level(uint32_t icounter) {
         }
     }
     return DOLPHIN_LEVEL_COUNT + 1;
+}
+
+uint32_t dolphin_state_level_minimum_xp(uint8_t level) {
+    if(level <= 1U) {
+        return 0U;
+    }
+
+    const size_t previous_level_index = (size_t)level - 2U;
+    if(previous_level_index >= DOLPHIN_LEVEL_COUNT) {
+        return DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT - 1U] + 1U;
+    }
+
+    return DOLPHIN_LEVELS[previous_level_index] + 1U;
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
