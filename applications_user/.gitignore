@@ -1,1 +1,4 @@
 *
+!.gitignore
+!level99_can/
+!level99_can/**

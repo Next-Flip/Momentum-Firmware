@@ -1,0 +1,21 @@
+App(
+    appid="level99_can",
+    name="Level99 CAN",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="level99_can_app",
+    requires=["gui", "storage", "dialogs"],
+    stack_size=4 * 1024,
+    fap_category="GPIO",
+    fap_icon="level99_can.png",
+    fap_version=(1, 0),
+    fap_description="Passive-first Classic CAN monitor for MCP2515",
+    fap_author="snaximuscs; CAN Commander concepts by Matthew KuKanich",
+    fap_weburl="https://github.com/snaximuscs/Momentum-Firmware",
+    sources=[
+        "level99_can.c",
+        "mcp2515.c",
+        "level99_can_config.c",
+        "level99_can_logger.c",
+        "level99_can_worker.c",
+    ],
+)
