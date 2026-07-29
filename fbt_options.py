@@ -33,10 +33,11 @@ if not os.environ.get("DIST_SUFFIX"):
         # For tags, dist name is just the tag name: mntm-(ver)
         DIST_SUFFIX = git("describe", "--tags", "--abbrev=0", "--exact-match")
     except Exception:
-        # If not a tag, dist name is: mntm-(branch)-(commmit)
+        # Level99 keeps Momentum's internal firmware origin for compatibility,
+        # while using an unmistakably unofficial distribution artifact name.
         branch_name = git("rev-parse", "--abbrev-ref", "HEAD").removeprefix("mntm-")
         commit_sha = git("rev-parse", "HEAD")[:8]
-        DIST_SUFFIX = f"mntm-{branch_name}-{commit_sha}"
+        DIST_SUFFIX = f"lvl99-{branch_name}-{commit_sha}"
     # Dist name is only for naming of output files
     DIST_SUFFIX = DIST_SUFFIX.replace("/", "-")
     # Instead, FW version uses tag name (mntm-xxx), or "mntm-dev" if not a tag (see scripts/version.py)

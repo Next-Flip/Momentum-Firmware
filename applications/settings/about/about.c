@@ -14,6 +14,17 @@
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
 
+static DialogMessageButton about_screen_level99(DialogsApp* dialogs, DialogMessage* message) {
+    const char* screen_text = "LEVEL99\n"
+                              "Level99 Firmware\n"
+                              "Unofficial personal fork\n"
+                              "based on Momentum FW and\n"
+                              "official Flipper firmware.";
+
+    dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
+    return dialog_message_show(dialogs, message);
+}
+
 static DialogMessageButton about_screen_product(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
@@ -185,12 +196,12 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
             api_minor,
             c2_ver ? c2_ver->StackTypeString : "<none>",
             version_get_target(ver));
-        if(!strcmp(version_get_version(ver), "mntm-dev") &&
+        if(!strcmp(version_get_version(ver), "lvl99-dev") &&
            strcmp(version_get_gitbranch(ver), "dev")) {
             // Not a tag but not dev branch, show custom branch
             furi_string_cat(buffer, version_get_gitbranch(ver));
         } else {
-            furi_string_cat(buffer, "momentum-fw.dev");
+            furi_string_cat(buffer, "Level99 / LVL99");
         }
     }
 
@@ -203,6 +214,7 @@ static DialogMessageButton about_screen_fw_version(DialogsApp* dialogs, DialogMe
 }
 
 const AboutDialogScreen about_screens[] = {
+    about_screen_level99,
     about_screen_product,
     about_screen_hw_version,
     about_screen_fw_version,

@@ -41,7 +41,9 @@ class GitVersion:
             or "unknown"
         )
 
-        version = tag or "mntm-dev"
+        # Keep FIRMWARE_ORIGIN as Momentum for ABI/feature compatibility, but
+        # identify this personal derivative in user-visible version metadata.
+        version = tag or "lvl99-dev"
 
         if "SOURCE_DATE_EPOCH" in os.environ:
             commit_date = datetime.utcfromtimestamp(

@@ -1,10 +1,11 @@
 App(
     appid="momentum_app",
-    name="Momentum",
+    name="Level99",
     apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="momentum_app",
     stack_size=2 * 1024,
     flags=["InsomniaSafe"],
+    # Keep the stable internal asset identifier; the source artwork is Level99.
     icon="A_Momentum_14",
     order=90,
     fap_category="assets",

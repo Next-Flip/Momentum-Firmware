@@ -111,6 +111,7 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
             enabled = m->lock_menu->bt->bt_settings.enabled;
             break;
         case DesktopLockMenuIndexMomentum:
+            /* Stable internal identifier, Level99-branded source artwork. */
             icon = &I_CC_Momentum_16x16;
             break;
         case DesktopLockMenuIndexBrightness:
