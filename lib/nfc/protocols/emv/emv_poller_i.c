@@ -77,6 +77,11 @@ static void emv_trace(EmvPoller* instance, const char* message) {
     }
 }
 
+// active_tr is driven by the card, so it can end up one past the end of trans[]
+static bool emv_trans_writable(const EmvApplication* app) {
+    return app->saving_trans_list && app->active_tr < COUNT_OF(app->trans);
+}
+
 static bool
     emv_decode_tlv_tag(const uint8_t* buff, uint16_t tag, uint8_t tlen, EmvApplication* app) {
     uint8_t i = 0;
@@ -112,6 +117,7 @@ static bool
         FURI_LOG_RAW_T("\r\n");
         break;
     case EMV_TAG_PRIORITY:
+        if(tlen != sizeof(app->priority)) break;
         memcpy(&app->priority, &buff[i], tlen);
         success = true;
         FURI_LOG_T(TAG, "found EMV_TAG_APP_PRIORITY %X: %d", tag, app->priority);
@@ -262,32 +268,34 @@ static bool
         success = true;
         break;
     case EMV_TAG_ATC:
-        if(app->saving_trans_list)
+        if(emv_trans_writable(app))
             app->trans[app->active_tr].atc = (buff[i] << 8 | buff[i + 1]);
         else
             app->transaction_counter = (buff[i] << 8 | buff[i + 1]);
         success = true;
         break;
     case EMV_TAG_LOG_AMOUNT:
-        if(tlen > sizeof(app->trans[app->active_tr].amount)) break;
+        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].amount)) break;
         memcpy(&app->trans[app->active_tr].amount, &buff[i], tlen);
         success = true;
         break;
     case EMV_TAG_LOG_COUNTRY:
+        if(!emv_trans_writable(app)) break;
         app->trans[app->active_tr].country = (buff[i] << 8 | buff[i + 1]);
         success = true;
         break;
     case EMV_TAG_LOG_CURRENCY:
+        if(!emv_trans_writable(app)) break;
         app->trans[app->active_tr].currency = (buff[i] << 8 | buff[i + 1]);
         success = true;
         break;
     case EMV_TAG_LOG_DATE:
-        if(tlen > sizeof(app->trans[app->active_tr].date)) break;
+        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].date)) break;
         memcpy(&app->trans[app->active_tr].date, &buff[i], tlen);
         success = true;
         break;
     case EMV_TAG_LOG_TIME:
-        if(tlen > sizeof(app->trans[app->active_tr].time)) break;
+        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].time)) break;
         memcpy(&app->trans[app->active_tr].time, &buff[i], tlen);
         success = true;
         break;
@@ -364,12 +372,6 @@ static bool
     }
     i++;
 
-    // A tag may not claim more value bytes than the card actually sent.
-    if((uint16_t)i + tlen > len) {
-        FURI_LOG_T(TAG, " TLV length %d overruns response length %d", tlen, len);
-        return success;
-    }
-
     *off = i;
     *t = tag;
     *tl = tlen;
@@ -394,10 +396,11 @@ static bool emv_decode_tl(
     while(f < fmt_len && i < len) {
         success = emv_parse_tag(fmt, fmt_len, &tag, &tlen, &f);
         if(!success) return success;
+        // The format only names tags and lengths; the values live in the record
+        if((uint16_t)i + tlen > len) return false;
         emv_decode_tlv_tag(&buff[i], tag, tlen, app);
         i += tlen;
     }
-    success = true;
     return success;
 }
 
@@ -413,6 +416,9 @@ static bool emv_decode_response_tlv(const uint8_t* buff, uint8_t len, EmvApplica
 
         success = emv_parse_tag(buff, len, &tag, &tlen, &i);
         if(!success) return success;
+
+        // A tag may not claim more value bytes than the card actually sent
+        if((uint16_t)i + tlen > len) return false;
 
         if((first_byte & 32) == 32) { // "Constructed" -- contains more TLV data to parse
             FURI_LOG_T(TAG, "Constructed TLV %x", tag);
