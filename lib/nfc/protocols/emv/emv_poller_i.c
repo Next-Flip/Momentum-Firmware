@@ -3,30 +3,41 @@
 
 #define TAG "EMVPoller"
 
+// 256 B ISO14443-4 poller buffer, less 1 PCB + 4 header + Lc + 83 + len + Le
+#define EMV_PDOL_MAX_SIZE (256U - 9U)
+
 // "Terminal" parameters, which could be requested by card
-const PDOLValue pdol_term_info = {0x9F59, {0xC8, 0x80, 0x00}}; // Terminal transaction information
-const PDOLValue pdol_term_type = {0x9F5A, {0x00}}; // Terminal transaction type
-const PDOLValue pdol_merchant_type = {0x9F58, {0x01}}; // Merchant type indicator
+const PDOLValue pdol_term_info = {
+    0x9F59,
+    3,
+    {0xC8, 0x80, 0x00}}; // Terminal transaction information
+const PDOLValue pdol_term_type = {0x9F5A, 1, {0x00}}; // Terminal transaction type
+const PDOLValue pdol_merchant_type = {0x9F58, 1, {0x01}}; // Merchant type indicator
 const PDOLValue pdol_term_trans_qualifies = {
     0x9F66,
+    4,
     {0x79, 0x00, 0x40, 0x80}}; // Terminal transaction qualifiers
-const PDOLValue pdol_addtnl_term_qualifies = {
-    0x9F40,
-    {0x79, 0x00, 0x40, 0x80}}; // Terminal transaction qualifiers
+// EMV gives 9F40 five bytes; the terminal holds four, so the fifth is zero-filled
+const PDOLValue pdol_addtnl_term_qualifies = {0x9F40, 4, {0x79, 0x00, 0x40, 0x80}};
 const PDOLValue pdol_amount_authorise = {
     0x9F02,
+    6,
     {0x00, 0x00, 0x00, 0x10, 0x00, 0x00}}; // Amount, authorised
-const PDOLValue pdol_amount = {0x9F03, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; // Amount
-const PDOLValue pdol_country_code = {0x9F1A, {0x01, 0x24}}; // Terminal country code
-const PDOLValue pdol_currency_code = {0x5F2A, {0x01, 0x24}}; // Transaction currency code
+const PDOLValue pdol_amount = {0x9F03, 6, {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; // Amount
+const PDOLValue pdol_country_code = {0x9F1A, 2, {0x01, 0x24}}; // Terminal country code
+const PDOLValue pdol_currency_code = {0x5F2A, 2, {0x01, 0x24}}; // Transaction currency code
 const PDOLValue pdol_term_verification = {
     0x95,
+    5,
     {0x00, 0x00, 0x00, 0x00, 0x00}}; // Terminal verification results
-const PDOLValue pdol_transaction_date = {0x9A, {0x19, 0x01, 0x01}}; // Transaction date
-const PDOLValue pdol_transaction_type = {0x9C, {0x00}}; // Transaction type
-const PDOLValue pdol_transaction_cert = {0x98, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}; // Transaction cert
-const PDOLValue pdol_unpredict_number = {0x9F37, {0x82, 0x3D, 0xDE, 0x7A}}; // Unpredictable number
+const PDOLValue pdol_transaction_date = {0x9A, 3, {0x19, 0x01, 0x01}}; // Transaction date
+const PDOLValue pdol_transaction_type = {0x9C, 1, {0x00}}; // Transaction type
+const PDOLValue pdol_transaction_cert = {0x98, 20, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                                    0, 0, 0, 0, 0, 0, 0, 0, 0}}; // Transaction cert
+const PDOLValue pdol_unpredict_number = {
+    0x9F37,
+    4,
+    {0x82, 0x3D, 0xDE, 0x7A}}; // Unpredictable number
 
 const PDOLValue* const pdol_values[] = {
     &pdol_term_info,
@@ -448,10 +459,18 @@ static void emv_prepare_pdol(APDU* dest, APDU* src) {
             return;
         }
 
-        furi_check(dest->size + tlen < sizeof(dest->data));
+        // The GPO is re-encoded into the ISO14443-4 poller buffer, the narrower of the two
+        if((uint16_t)dest->size + tlen > EMV_PDOL_MAX_SIZE) {
+            dest->size = 0;
+            return;
+        }
+
         for(uint8_t j = 0; j < COUNT_OF(pdol_values); j++) {
             if(tag == pdol_values[j]->tag) {
-                memcpy(dest->data + dest->size, pdol_values[j]->data, tlen);
+                // The card names the length it wants, which is not what the terminal holds
+                uint8_t copy_len = MIN(tlen, pdol_values[j]->size);
+                memcpy(dest->data + dest->size, pdol_values[j]->data, copy_len);
+                memset(dest->data + dest->size + copy_len, 0, tlen - copy_len);
                 dest->size += tlen;
                 tag_found = true;
                 break;

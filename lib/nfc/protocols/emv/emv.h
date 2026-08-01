@@ -54,6 +54,7 @@ extern "C" {
 
 typedef struct {
     uint16_t tag;
+    uint8_t size;
     uint8_t data[];
 } PDOLValue;
 
