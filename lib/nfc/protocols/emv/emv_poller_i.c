@@ -88,6 +88,12 @@ static void emv_trace(EmvPoller* instance, const char* message) {
     }
 }
 
+// FURI_LOG_T and FURI_LOG_D are compiled out in release builds, so rejections use _W
+static bool emv_tag_rejected(uint16_t tag, uint8_t tlen) {
+    FURI_LOG_W(TAG, "Rejected tag %04X of length %d", tag, tlen);
+    return false;
+}
+
 // active_tr is driven by the card, so it can end up one past the end of trans[]
 static bool emv_trans_writable(const EmvApplication* app) {
     return app->saving_trans_list && app->active_tr < COUNT_OF(app->trans);
@@ -100,7 +106,7 @@ static bool
 
     switch(tag) {
     case EMV_TAG_LOG_FMT:
-        if(tlen > sizeof(app->log_fmt)) break;
+        if(tlen > sizeof(app->log_fmt)) return emv_tag_rejected(tag, tlen);
         memcpy(app->log_fmt, &buff[i], tlen);
         app->log_fmt_len = tlen;
         success = true;
@@ -108,7 +114,7 @@ static bool
         break;
     case EMV_TAG_GPO_FMT1:
         // skip AIP
-        if(tlen < 2) break;
+        if(tlen < 2) return emv_tag_rejected(tag, tlen);
         i += 2;
         tlen -= 2;
         memcpy(app->afl.data, &buff[i], tlen);
@@ -117,7 +123,7 @@ static bool
         FURI_LOG_T(TAG, "found EMV_TAG_GPO_FMT1 %X: ", tag);
         break;
     case EMV_TAG_AID:
-        if(tlen > sizeof(app->aid)) break;
+        if(tlen > sizeof(app->aid)) return emv_tag_rejected(tag, tlen);
         app->aid_len = tlen;
         memcpy(app->aid, &buff[i], tlen);
         success = true;
@@ -128,13 +134,14 @@ static bool
         FURI_LOG_RAW_T("\r\n");
         break;
     case EMV_TAG_PRIORITY:
-        if(tlen != sizeof(app->priority)) break;
+        if(tlen != sizeof(app->priority)) return emv_tag_rejected(tag, tlen);
         memcpy(&app->priority, &buff[i], tlen);
         success = true;
         FURI_LOG_T(TAG, "found EMV_TAG_APP_PRIORITY %X: %d", tag, app->priority);
         break;
     case EMV_TAG_APPL_INTERCHANGE_PROFILE:
-        if(tlen != sizeof(app->application_interchange_profile)) break;
+        if(tlen != sizeof(app->application_interchange_profile))
+            return emv_tag_rejected(tag, tlen);
         memcpy(app->application_interchange_profile, &buff[i], tlen);
         success = true;
         FURI_LOG_T(TAG, "found EMV_TAG_APPL_INTERCHANGE_PROFILE %x: ", tag);
@@ -144,14 +151,14 @@ static bool
         FURI_LOG_RAW_T("\r\n");
         break;
     case EMV_TAG_APPL_LABEL:
-        if(tlen >= sizeof(app->application_label)) break;
+        if(tlen >= sizeof(app->application_label)) return emv_tag_rejected(tag, tlen);
         memcpy(app->application_label, &buff[i], tlen);
         app->application_label[tlen] = '\0';
         success = true;
         FURI_LOG_T(TAG, "found EMV_TAG_APPL_LABEL %x: %s", tag, app->application_label);
         break;
     case EMV_TAG_APPL_NAME:
-        if(tlen >= sizeof(app->application_name)) break;
+        if(tlen >= sizeof(app->application_name)) return emv_tag_rejected(tag, tlen);
         memcpy(app->application_name, &buff[i], tlen);
         app->application_name[tlen] = '\0';
         success = true;
@@ -180,7 +187,7 @@ static bool
     case EMV_TAG_TRACK_1_EQUIV: {
         // Contain PAN and expire date
         char track_1_equiv[80];
-        if(tlen >= sizeof(track_1_equiv)) break;
+        if(tlen >= sizeof(track_1_equiv)) return emv_tag_rejected(tag, tlen);
         memcpy(track_1_equiv, &buff[i], tlen);
         track_1_equiv[tlen] = '\0';
         success = true;
@@ -224,7 +231,7 @@ static bool
     }
     case EMV_TAG_CARDHOLDER_NAME: {
         // The previous contents' length says nothing about how much room is left.
-        if(tlen >= sizeof(app->cardholder_name)) break;
+        if(tlen >= sizeof(app->cardholder_name)) return emv_tag_rejected(tag, tlen);
         // A bruteforced read sees 5F20 in several records; keep the longest
         if(strlen(app->cardholder_name) > tlen) break;
         memcpy(app->cardholder_name, &buff[i], tlen);
@@ -242,7 +249,7 @@ static bool
         break;
     }
     case EMV_TAG_PAN:
-        if(tlen > sizeof(app->pan)) break;
+        if(tlen > sizeof(app->pan)) return emv_tag_rejected(tag, tlen);
         memcpy(app->pan, &buff[i], tlen);
         app->pan_len = tlen;
         success = true;
@@ -288,27 +295,30 @@ static bool
         success = true;
         break;
     case EMV_TAG_LOG_AMOUNT:
-        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].amount)) break;
+        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].amount))
+            return emv_tag_rejected(tag, tlen);
         memcpy(&app->trans[app->active_tr].amount, &buff[i], tlen);
         success = true;
         break;
     case EMV_TAG_LOG_COUNTRY:
-        if(!emv_trans_writable(app)) break;
+        if(!emv_trans_writable(app)) return emv_tag_rejected(tag, tlen);
         app->trans[app->active_tr].country = (buff[i] << 8 | buff[i + 1]);
         success = true;
         break;
     case EMV_TAG_LOG_CURRENCY:
-        if(!emv_trans_writable(app)) break;
+        if(!emv_trans_writable(app)) return emv_tag_rejected(tag, tlen);
         app->trans[app->active_tr].currency = (buff[i] << 8 | buff[i + 1]);
         success = true;
         break;
     case EMV_TAG_LOG_DATE:
-        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].date)) break;
+        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].date))
+            return emv_tag_rejected(tag, tlen);
         memcpy(&app->trans[app->active_tr].date, &buff[i], tlen);
         success = true;
         break;
     case EMV_TAG_LOG_TIME:
-        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].time)) break;
+        if(!emv_trans_writable(app) || tlen > sizeof(app->trans[app->active_tr].time))
+            return emv_tag_rejected(tag, tlen);
         memcpy(&app->trans[app->active_tr].time, &buff[i], tlen);
         success = true;
         break;
@@ -410,7 +420,11 @@ static bool emv_decode_tl(
         success = emv_parse_tag(fmt, fmt_len, &tag, &tlen, &f);
         if(!success) return success;
         // The format only names tags and lengths; the values live in the record
-        if((uint16_t)i + tlen > len) return false;
+        if((uint16_t)i + tlen > len) {
+            FURI_LOG_W(
+                TAG, "Log record too short for tag %04X: %d bytes at %d of %d", tag, tlen, i, len);
+            return false;
+        }
         emv_decode_tlv_tag(&buff[i], tag, tlen, app);
         i += tlen;
     }
@@ -431,7 +445,7 @@ static bool emv_decode_response_tlv(const uint8_t* buff, uint8_t len, EmvApplica
         if(!success) return success;
 
         // A tag may not claim more value bytes than the card actually sent
-        if((uint16_t)i + tlen > len) return false;
+        if((uint16_t)i + tlen > len) return emv_tag_rejected(tag, tlen);
 
         if((first_byte & 32) == 32) { // "Constructed" -- contains more TLV data to parse
             FURI_LOG_T(TAG, "Constructed TLV %x", tag);
@@ -456,13 +470,14 @@ static void emv_prepare_pdol(APDU* dest, APDU* src) {
     while(i < src->size) {
         bool tag_found = false;
         if(!emv_parse_tag(src->data, src->size, &tag, &tlen, &i)) {
-            FURI_LOG_T(TAG, "Parsing PDOL failed at 0x%x", i);
+            FURI_LOG_W(TAG, "Parsing PDOL failed at 0x%x", i);
             dest->size = 0;
             return;
         }
 
         // The GPO is re-encoded into the ISO14443-4 poller buffer, the narrower of the two
         if((uint16_t)dest->size + tlen > EMV_PDOL_MAX_SIZE) {
+            emv_tag_rejected(tag, tlen);
             dest->size = 0;
             return;
         }
