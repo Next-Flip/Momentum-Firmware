@@ -234,7 +234,6 @@ static Type4TagError type_4_tag_listener_iso_write(
         offset -= sizeof(uint16_t);
 
         ndef_file_len_new = MAX(ndef_file_len_new, offset + lc);
-
         // NLEN is reader-supplied and unconstrained by the bounds check above
         if(ndef_file_len_new > ndef_max_len) {
             bit_buffer_append_bytes(
@@ -243,6 +242,7 @@ static Type4TagError type_4_tag_listener_iso_write(
                 sizeof(type_4_tag_offset_error_apdu));
             return Type4TagErrorWrongFormat;
         }
+
         if(ndef_file_len_new != ndef_file_len) {
             SimpleArray* ndef_data_temp = simple_array_alloc(&simple_array_config_uint8_t);
             if(ndef_file_len_new > 0) {
