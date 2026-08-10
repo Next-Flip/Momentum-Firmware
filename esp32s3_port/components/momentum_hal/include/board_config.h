@@ -1,19 +1,30 @@
 /**
  * @file board_config.h
  *
- * Pin assignments for the ESP32-S3-N16R8 + 1.9" ST7789 320x170 board this
- * port targets. These are NOT verified against real hardware (this
- * environment has no ESP32-S3 attached to flash-test against) - they're a
- * conventional, commonly-used assignment for ESP32-S3-DevKitC-1-style
- * boards paired with this exact display module (same SPI panel used by
- * Sor3nt's ESP32 Flipper port and most "cheap ESP32-S3 1.9in TFT" kits).
- * Cross-check against your specific board's silkscreen/schematic before
- * flashing, and adjust here - everything that touches hardware pins reads
- * from this one file.
+ * Pin assignments for a genuine ESP32-S3-DevKitC-1 (N16R8) + 1.9" ST7789
+ * 320x170 module wired on a breadboard. Still not flash-tested (no
+ * hardware in the sandbox that wrote this), but the pins themselves are
+ * chosen deliberately for this exact board, not arbitrary:
+ *
+ * - MOSI/SCLK/CS (11/12/10) are the chip's default hardware IOMUX pins for
+ *   SPI2 on ESP32-S3 - using them (instead of routing through the GPIO
+ *   matrix) gets the display its full SPI clock headroom "for free". DC/
+ *   RST/BL (9/8/7) are adjacent, ordinary GPIOs with no special function.
+ * - None of 7-12 collide with: the four strapping pins (0, 3, 45, 46 -
+ *   sampled at boot, wiring anything else to them can prevent the board
+ *   from booting/flashing), the native-USB pins (19, 20), the console
+ *   UART (43, 44), or - specific to the N16R8 variant - GPIO 26-37, which
+ *   its octal PSRAM uses internally and which are not broken out to
+ *   headers on this board for exactly that reason.
+ * - Buttons (4, 5, 6, 15, 16, 17) sit in the same safe range.
+ *
+ * If you're on a different board than an ESP32-S3-DevKitC-1, re-check all
+ * of the above against its silkscreen/schematic - everything that touches
+ * hardware pins reads from this one file.
  */
 #pragma once
 
-// --- ST7789 display (SPI2/HSPI) ---
+// --- ST7789 display (SPI2, default IOMUX pins) ---
 #define MTM_LCD_PIN_MOSI 11
 #define MTM_LCD_PIN_SCLK 12
 #define MTM_LCD_PIN_CS   10
