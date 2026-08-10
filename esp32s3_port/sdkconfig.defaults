@@ -1,0 +1,28 @@
+# Target
+CONFIG_IDF_TARGET="esp32s3"
+
+# N16R8: 16MB flash, 8MB octal PSRAM
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="16MB"
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_USE_MALLOC=y
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+
+# Momentum's furi kernel wants a real FreeRTOS tick and a decently
+# sized default stack for the "main" task since app render callbacks
+# used to run on Cortex-M4 stacks sized for that ISA, not Xtensa's
+# wider windowed-register spill area.
+CONFIG_FREERTOS_HZ=1000
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# Flash SPI bus that the LCD is NOT allowed to also use is freed up by
+# disabling the default VFS console UART wiring conflicts; left default
+# here, real board pin assignments live in momentum_hal_board.h.
+
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"

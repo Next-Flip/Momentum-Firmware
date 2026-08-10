@@ -52,7 +52,16 @@ size_t memmgr_get_free_heap(void) {
 }
 
 size_t memmgr_get_total_heap(void) {
+#ifdef configTOTAL_HEAP_SIZE
     return configTOTAL_HEAP_SIZE;
+#else
+    // Ports (e.g. ESP-IDF) that manage heap across multiple capability
+    // regions (internal RAM + PSRAM) instead of one static array don't
+    // define a single configTOTAL_HEAP_SIZE. Diagnostics screens that want
+    // an accurate figure here should call into heap_caps_get_total_size()
+    // via momentum_hal instead; this is an intentionally conservative stub.
+    return xPortGetFreeHeapSize();
+#endif
 }
 
 size_t memmgr_get_minimum_free_heap(void) {

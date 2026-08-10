@@ -15,7 +15,7 @@ __FuriCriticalInfo __furi_critical_enter(void) {
     } else if(info.kernel_running) {
         taskENTER_CRITICAL();
     } else {
-        __disable_irq();
+        FURI_DISABLE_IRQ();
     }
 
     return info;
@@ -27,6 +27,6 @@ void __furi_critical_exit(__FuriCriticalInfo info) {
     } else if(info.kernel_running) {
         taskEXIT_CRITICAL();
     } else {
-        __enable_irq();
+        FURI_ENABLE_IRQ();
     }
 }

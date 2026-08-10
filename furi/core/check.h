@@ -34,6 +34,15 @@ extern "C" {
 #define __FURI_CHECK_MESSAGE_FLAG  __FILE__
 #endif
 
+// The r12-smuggling trick below only exists to preserve register state across
+// the crash path on Cortex-M (see file header). It relies on ARM inline-asm
+// register variables and does not apply to other architectures (e.g. Xtensa
+// on the ESP32-S3 port), which get a plain function-call implementation
+// instead - there's no register-preservation benefit to replicate there since
+// nothing on that port inspects r0-r11 from a debugger the way OpenOCD/GDB
+// does for the STM32 target.
+#if defined(__arm__)
+
 /** Crash system */
 FURI_NORETURN void __furi_crash_implementation(void);
 
@@ -48,12 +57,6 @@ FURI_NORETURN void __furi_halt_implementation(void);
         __furi_crash_implementation();                        \
     } while(0)
 
-/** Crash system
- *
- * @param      ... optional  message (const char*)
- */
-#define furi_crash(...) M_APPLY(__furi_crash, M_IF_EMPTY(__VA_ARGS__)((NULL), (__VA_ARGS__)))
-
 /** Halt system with message. */
 #define __furi_halt(message)                                  \
     do {                                                      \
@@ -61,6 +64,26 @@ FURI_NORETURN void __furi_halt_implementation(void);
         asm volatile("sukima%=:" : : "r"(r12));               \
         __furi_halt_implementation();                         \
     } while(0)
+
+#else /* !__arm__ */
+
+/** Crash system with message. Show message after reboot. */
+FURI_NORETURN void __furi_crash_implementation(const void* message);
+
+/** Halt system with message. */
+FURI_NORETURN void __furi_halt_implementation(const void* message);
+
+#define __furi_crash(message) __furi_crash_implementation((const void*)(message))
+
+#define __furi_halt(message) __furi_halt_implementation((const void*)(message))
+
+#endif /* __arm__ */
+
+/** Crash system
+ *
+ * @param      ... optional  message (const char*)
+ */
+#define furi_crash(...) M_APPLY(__furi_crash, M_IF_EMPTY(__VA_ARGS__)((NULL), (__VA_ARGS__)))
 
 /** Halt system
  *
@@ -108,11 +131,17 @@ FURI_NORETURN void __furi_halt_implementation(void);
 #define furi_assert(...) \
     M_APPLY(__furi_assert, M_DEFAULT_ARGS(2, (__FURI_ASSERT_MESSAGE_FLAG), __VA_ARGS__))
 
-#define furi_break(__e)             \
-    do {                            \
-        if(!(__e)) {                \
-            asm volatile("bkpt 0"); \
-        }                           \
+#if defined(__arm__)
+#define __furi_break_instruction() asm volatile("bkpt 0")
+#else
+#define __furi_break_instruction() __builtin_trap()
+#endif
+
+#define furi_break(__e)              \
+    do {                             \
+        if(!(__e)) {                 \
+            __furi_break_instruction(); \
+        }                            \
     } while(0)
 
 #ifdef __cplusplus

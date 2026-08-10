@@ -1,18 +1,24 @@
 #include "check.h"
 #include "common_defines.h"
 
+#include <FreeRTOS.h>
+#include <task.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// The Cortex-M implementation below inspects register state saved via the
+// r12-smuggling trick (see check.h) and Cortex-M-specific debug registers
+// (CoreDebug->DHCSR). None of that exists on non-ARM targets (e.g. the
+// ESP32-S3 port's Xtensa cores), so that build gets a separate, simpler
+// implementation further down in this file.
+#if defined(__arm__)
+
 #include <stm32wbxx.h>
 #include <furi_hal_power.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_debug.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_interrupt.h>
-#include <stdio.h>
-
-#include <FreeRTOS.h>
-#include <task.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 PLACE_IN_SECTION("MB_MEM2") const char* __furi_check_message = NULL;
 PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[13] = {0};
@@ -210,3 +216,87 @@ FURI_NORETURN void __furi_halt_implementation(void) {
 
     __builtin_unreachable();
 }
+
+#else /* !__arm__ */
+
+// Portable (non-Cortex-M) crash/halt path, used by the ESP32-S3 port.
+// There's no register-preservation trick to replicate here (see check.h) -
+// the message is just a normal function argument. Diagnostics that on the
+// STM32 target come from Cortex-M debug registers or the ST BLE
+// coprocessor (ble_glue_get_hardfault_info) have no equivalent and are
+// skipped; furi_hal_power_reset() is the only furi_hal call required, so
+// this file stays buildable without pulling in the rest of the STM32-only
+// furi_hal surface. log.h is included explicitly here because, unlike the
+// __arm__ branch above, nothing else pulled in transitively declares
+// furi_log_puts() for this port.
+#include "log.h"
+#include <furi_hal_power.h>
+
+static void __furi_print_heap_info(void) {
+    char tmp[12];
+    // No single configTOTAL_HEAP_SIZE on ports with multiple heap regions
+    // (ESP-IDF: internal RAM + PSRAM) - see the same caveat in
+    // furi/core/memmgr.c's memmgr_get_total_heap(). Free heap only here.
+    furi_log_puts("\r\n\t      heap free: ");
+    itoa((int)xPortGetFreeHeapSize(), tmp, 10);
+    furi_log_puts(tmp);
+}
+
+static void __furi_print_name(void) {
+    if(FURI_IS_IRQ_MODE()) {
+        furi_log_puts("[ISR] ");
+    } else {
+        const char* name = pcTaskGetName(NULL);
+        furi_log_puts("[");
+        furi_log_puts(name ? name : "main");
+        furi_log_puts("] ");
+    }
+}
+
+static const char* __furi_resolve_message(const void* message) {
+    if(message == NULL) {
+        return "Fatal Error";
+#ifndef __FURI_TRACE
+    } else if(message == (void*)__FURI_ASSERT_MESSAGE_FLAG) {
+        return "furi_assert failed";
+    } else if(message == (void*)__FURI_CHECK_MESSAGE_FLAG) {
+        return "furi_check failed";
+#endif
+    }
+    return (const char*)message;
+}
+
+FURI_NORETURN void __furi_crash_implementation(const void* message) {
+    portDISABLE_INTERRUPTS();
+
+    const char* text = __furi_resolve_message(message);
+
+    furi_log_puts("\r\n\033[0;31m[CRASH] ");
+    __furi_print_name();
+    furi_log_puts(text);
+    __furi_print_heap_info();
+    furi_log_puts("\r\nRebooting system.\r\n\033[0m\r\n");
+
+    furi_hal_power_reset();
+
+    __builtin_unreachable();
+}
+
+FURI_NORETURN void __furi_halt_implementation(const void* message) {
+    portDISABLE_INTERRUPTS();
+
+    const char* text = message ? (const char*)message : "System halt requested.";
+
+    furi_log_puts("\r\n\033[0;31m[HALT] ");
+    __furi_print_name();
+    furi_log_puts(text);
+    furi_log_puts("\r\nSystem halted. Bye-bye!\r\n\033[0m\r\n");
+
+    for(;;) {
+        __furi_break_instruction();
+    }
+
+    __builtin_unreachable();
+}
+
+#endif /* __arm__ */

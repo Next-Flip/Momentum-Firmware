@@ -1,0 +1,26 @@
+{
+    "_comment": "Documentation-only target descriptor. ESP32-S3 is a Xtensa LX7 part and CANNOT be built through fbt/SConstruct, which hardcodes the ARM GCC toolchain and STM32 linker/startup files used by f7/f18. There is no 'inherit' relationship possible at the toolchain level. The actual buildable project for this target lives in /esp32s3_port (a standalone ESP-IDF/CMake project) and vendors furi/core sources directly. This file exists only to document pin mapping / hardware profile in the same place other targets keep it, and as a placeholder for a real fbt cross-target entry if a future contributor teaches site_scons about a second toolchain.",
+    "hardware": {
+        "mcu": "ESP32-S3 (N16R8: 16MB flash, 8MB octal PSRAM)",
+        "cpu": "Xtensa LX7 dual-core @ 240MHz",
+        "display": {
+            "controller": "ST7789",
+            "resolution": "320x170",
+            "interface": "SPI",
+            "diagonal_inches": 1.9
+        },
+        "buttons": ["Up", "Down", "Left", "Right", "OK", "Back"],
+        "unavailable_on_this_board": [
+            "CC1101 sub-GHz radio (no equivalent silicon on ESP32-S3; needs external module + full furi_hal_subghz rewrite)",
+            "ST25R3916 NFC/RFID front-end (needs external module + full furi_hal_nfc rewrite)",
+            "iButton 1-Wire analog front-end (needs external circuit)",
+            "Infrared (needs external IR LED + carrier-PWM driver; ESP32-S3 RMT peripheral is a plausible replacement, not yet implemented)",
+            "Flipper's ST-proprietary BLE stack (ESP32-S3 has its own Bluetooth LE controller/stack; profiles must be reimplemented against esp-idf's NimBLE, not ported)",
+            "SD card slot wiring (board-dependent; not assumed present)"
+        ]
+    },
+    "build": {
+        "toolchain": "xtensa-esp32s3-elf (ESP-IDF v5.x)",
+        "project_root": "esp32s3_port/"
+    }
+}
