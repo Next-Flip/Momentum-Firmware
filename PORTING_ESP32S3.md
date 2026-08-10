@@ -132,14 +132,29 @@ a real toolchain is available:
   on them.
 - Display gap/mirror/invert settings in `board_config.h` are the common
   default for this panel family, not measured on your specific module.
-- Button GPIO numbers in `board_config.h` are placeholders — wire them to
-  match your actual board.
+- Button/display GPIO numbers in `board_config.h` target a genuine
+  ESP32-S3-DevKitC-1 (N16R8) and are chosen to avoid that board's strapping
+  pins, native-USB pins, console UART, and (N16R8-specific) the GPIO 26-37
+  range its octal PSRAM uses internally — see the rationale comment at the
+  top of that file. Still unflashed, but not arbitrary.
 
-## Next steps to actually build and flash this
+## CI build
+
+`.github/workflows/build-esp32s3.yml` builds `esp32s3_port/` on every push
+to this branch using `espressif/esp-idf-ci-action` (runs in a Docker
+container with the real toolchain — GitHub Actions runners have normal
+internet access, unlike the sandbox that wrote this port) and uploads the
+resulting `.bin` files (bootloader, partition table, app, and a merged
+single-file image) as a workflow artifact. This is the first real
+compile-verification pass this code gets; check the Actions tab for
+results and fix forward from actual compiler errors rather than the
+"probably right" reasoning in this document.
+
+## Next steps to actually build and flash this locally
 
 1. Install ESP-IDF v5.x (`xtensa-esp32s3-elf` toolchain) — this environment
-   couldn't reach Espressif's download servers; do this on a machine/CI
-   runner with normal internet access.
+   couldn't reach Espressif's download servers; do this on a machine with
+   normal internet access, or just use the CI build above.
 2. `git submodule update --init lib/mlib` (needed for `m-core.h`, used by
    `furi/core/check.h` and `string.c`).
 3. `cd esp32s3_port && idf.py set-target esp32s3 && idf.py build`. Fix

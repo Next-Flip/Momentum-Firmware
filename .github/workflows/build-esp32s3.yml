@@ -1,0 +1,60 @@
+name: Build ESP32-S3 port
+
+# Compiles esp32s3_port/ with the real ESP-IDF toolchain and uploads
+# flashable .bin files as workflow artifacts.
+#
+# This exists because the sandbox that wrote esp32s3_port/ has no route to
+# dl.espressif.com (blocked by that environment's egress policy) and no
+# ESP32-S3 hardware, so none of that code had ever been run through a real
+# compiler before this workflow was added - see PORTING_ESP32S3.md. GitHub
+# Actions runners have normal internet access, so this is the actual first
+# compile-verification pass; expect it to surface real issues on the first
+# few runs (PORTING_ESP32S3.md flags the spots most likely to need fixing,
+# e.g. ESP-IDF-version-dependent struct fields in the ST7789 driver).
+
+on:
+  push:
+    branches:
+      - claude/flipper-esp32-s3-port-9e8hiq
+    paths:
+      - "esp32s3_port/**"
+      - "furi/**"
+      - ".github/workflows/build-esp32s3.yml"
+  pull_request:
+    paths:
+      - "esp32s3_port/**"
+      - "furi/**"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build with ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.3
+          target: esp32s3
+          path: "esp32s3_port"
+
+      - name: Merge into a single flashable .bin
+        run: |
+          cd esp32s3_port/build
+          python -m pip install --quiet esptool || true
+          python -m esptool --chip esp32s3 merge_bin -o momentum-esp32s3-merged.bin @flash_args
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: momentum-esp32s3-firmware
+          path: |
+            esp32s3_port/build/*.bin
+            esp32s3_port/build/bootloader/bootloader.bin
+            esp32s3_port/build/partition_table/partition-table.bin
+            esp32s3_port/build/flash_args
+          if-no-files-found: error
