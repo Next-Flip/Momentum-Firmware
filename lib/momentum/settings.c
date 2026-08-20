@@ -12,6 +12,11 @@ MomentumSettings momentum_settings = {
     .cycle_anims = 0, // Meta.txt
     .unlock_anims = false, // OFF
     .menu_style = MenuStyleDsi, // DSi
+    .menu_name = true, // ON
+    .menu_level = true, // ON
+    .menu_time = true, // ON
+    .menu_battery = true, // ON
+    .menu_otg = false, // OFF
     .lock_on_boot = true, // ON
     .bad_pins_format = false, // OFF
     .allow_locked_rpc_usb = false, // OFF
@@ -32,6 +37,7 @@ MomentumSettings momentum_settings = {
     .show_hidden_files = false, // OFF
     .show_internal_tab = false, // OFF
     .browser_path_mode = BrowserPathOff, // OFF
+    .selection_indicator_style = SelectionIndicatorStylePlus, // +
     .favorite_timeout = 0, // OFF
     .scroll_marquee = false, // OFF
     .dark_mode = false, // OFF
@@ -86,6 +92,11 @@ static const struct {
     {setting_int(cycle_anims, -1, 86400)},
     {setting_bool(unlock_anims)},
     {setting_enum(menu_style, MenuStyleCount)},
+    {setting_bool(menu_name)},
+    {setting_bool(menu_level)},
+    {setting_bool(menu_time)},
+    {setting_bool(menu_battery)},
+    {setting_bool(menu_otg)},
     {setting_bool(bad_pins_format)},
     {setting_bool(allow_locked_rpc_usb)},
     {setting_bool(allow_locked_rpc_ble)},
@@ -106,6 +117,7 @@ static const struct {
     {setting_bool(show_hidden_files)},
     {setting_bool(show_internal_tab)},
     {setting_enum(browser_path_mode, BrowserPathModeCount)},
+    {setting_enum(selection_indicator_style, SelectionIndicatorStyleCount)},
     {setting_uint(favorite_timeout, 0, 60)},
     {setting_bool(scroll_marquee)},
     {setting_bool(dark_mode)},

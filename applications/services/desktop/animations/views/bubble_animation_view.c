@@ -84,7 +84,11 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
         if((model->current_frame >= bubble->start_frame) &&
            (model->current_frame <= bubble->end_frame)) {
             const Bubble* b = &bubble->bubble;
-            elements_bubble_str(canvas, b->x, b->y, b->text, b->align_h, b->align_v);
+            const CanvasFontParameters* font_params =
+                canvas_get_font_params(canvas, FontSecondary);
+            int32_t y_offset =
+                font_params != &canvas_font_params[FontSecondary] ? (font_params->height / 2) : 0;
+            elements_bubble_str(canvas, b->x, b->y, y_offset, b->text, b->align_h, b->align_v);
         }
     }
 }

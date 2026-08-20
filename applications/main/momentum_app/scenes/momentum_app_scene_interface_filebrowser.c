@@ -14,6 +14,12 @@ const char* const browser_path_names[BrowserPathModeCount] = {
     "Full",
 };
 
+const char* const selection_indicator_styles[SelectionIndicatorStyleCount] = {
+    "+",
+    "*",
+    "-",
+};
+
 void momentum_app_scene_interface_filebrowser_var_item_list_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -51,6 +57,15 @@ static void
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, browser_path_names[index]);
     momentum_settings.browser_path_mode = index;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_filebrowser_selection_indicator_style_changed(
+    VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, selection_indicator_styles[index]);
+    momentum_settings.selection_indicator_style = index;
     app->save_settings = true;
 }
 
@@ -105,6 +120,16 @@ void momentum_app_scene_interface_filebrowser_on_enter(void* context) {
     variable_item_set_current_value_index(item, momentum_settings.browser_path_mode);
     variable_item_set_current_value_text(
         item, browser_path_names[momentum_settings.browser_path_mode]);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Selection Indicator",
+        SelectionIndicatorStyleCount,
+        momentum_app_scene_interface_filebrowser_selection_indicator_style_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.selection_indicator_style);
+    variable_item_set_current_value_text(
+        item, selection_indicator_styles[momentum_settings.selection_indicator_style]);
 
     item = variable_item_list_add(
         var_item_list,

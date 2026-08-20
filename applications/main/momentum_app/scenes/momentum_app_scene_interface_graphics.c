@@ -2,10 +2,28 @@
 
 enum VarItemListIndex {
     VarItemListIndexAssetPack,
+    VarItemListIndexPackWarning,
     VarItemListIndexAnimSpeed,
     VarItemListIndexCycleAnims,
     VarItemListIndexUnlockAnims,
 };
+
+static bool check_asset_pack_folders(const char* pack_name) {
+    if(pack_name == NULL) return false;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* path = furi_string_alloc();
+    bool result = false;
+
+    furi_string_printf(path, "%s/%s/Icons", ASSET_PACKS_PATH, pack_name);
+    if(storage_dir_exists(storage, furi_string_get_cstr(path))) result = true;
+    if(!result) {
+        furi_string_printf(path, "%s/%s/Fonts", ASSET_PACKS_PATH, pack_name);
+        if(storage_dir_exists(storage, furi_string_get_cstr(path))) result = true;
+    }
+
+    furi_string_free(path);
+    return result;
+}
 
 void momentum_app_scene_interface_graphics_var_item_list_callback(void* context, uint32_t index) {
     MomentumApp* app = context;
@@ -24,6 +42,12 @@ static void momentum_app_scene_interface_graphics_asset_pack_changed(VariableIte
     app->asset_pack_index = index;
     app->save_settings = true;
     app->apply_pack = true;
+
+    // Workaround to force scene reload to rebuild the list with/without pack warning and
+    // return to 0 index ("Asset Pack").
+    scene_manager_previous_scene(app->scene_manager);
+    scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceGraphics);
+    scene_manager_set_scene_state(app->scene_manager, MomentumAppSceneInterfaceGraphics, 0);
 }
 
 const char* const anim_speed_names[] = {
@@ -118,6 +142,10 @@ void momentum_app_scene_interface_graphics_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
+    const char* selected_asset_pack =
+        app->asset_pack_index == 0 ?
+            "Default" :
+            *CharList_get(app->asset_pack_names, app->asset_pack_index - 1);
     item = variable_item_list_add(
         var_item_list,
         "Asset Pack",
@@ -125,11 +153,14 @@ void momentum_app_scene_interface_graphics_on_enter(void* context) {
         momentum_app_scene_interface_graphics_asset_pack_changed,
         app);
     variable_item_set_current_value_index(item, app->asset_pack_index);
-    variable_item_set_current_value_text(
-        item,
-        app->asset_pack_index == 0 ?
-            "Default" :
-            *CharList_get(app->asset_pack_names, app->asset_pack_index - 1));
+    variable_item_set_current_value_text(item, selected_asset_pack);
+
+    if(app->asset_pack_index > 0) {
+        if(check_asset_pack_folders(selected_asset_pack)) {
+            item = variable_item_list_add(var_item_list, "Size Warning", 0, NULL, app);
+            variable_item_set_current_value_text(item, ">");
+        }
+    }
 
     item = variable_item_list_add(
         var_item_list,
@@ -183,6 +214,11 @@ bool momentum_app_scene_interface_graphics_on_event(void* context, SceneManagerE
         switch(event.event) {
         case VarItemListIndexAssetPack:
             scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceGraphicsPack);
+            break;
+        case VarItemListIndexPackWarning:
+            scene_manager_next_scene(
+                app->scene_manager, MomentumAppSceneInterfaceGraphicsPackWarning);
+            break;
         default:
             break;
         }

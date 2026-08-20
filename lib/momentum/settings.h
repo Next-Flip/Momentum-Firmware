@@ -63,12 +63,24 @@ typedef enum {
     BrowserPathModeCount,
 } BrowserPathMode;
 
+typedef enum {
+    SelectionIndicatorStylePlus,
+    SelectionIndicatorStyleStar,
+    SelectionIndicatorStyleDash,
+    SelectionIndicatorStyleCount,
+} SelectionIndicatorStyle;
+
 typedef struct {
     char asset_pack[ASSET_PACKS_NAME_LEN];
     uint32_t anim_speed;
     int32_t cycle_anims;
     bool unlock_anims;
     MenuStyle menu_style;
+    bool menu_name;
+    bool menu_level;
+    bool menu_time;
+    bool menu_battery;
+    bool menu_otg;
     bool lock_on_boot;
     bool bad_pins_format;
     bool allow_locked_rpc_usb;
@@ -89,6 +101,7 @@ typedef struct {
     bool show_hidden_files;
     bool show_internal_tab;
     BrowserPathMode browser_path_mode;
+    SelectionIndicatorStyle selection_indicator_style;
     uint32_t favorite_timeout;
     bool scroll_marquee;
     bool dark_mode;

@@ -230,6 +230,7 @@ void elements_bubble(Canvas* canvas, int32_t x, int32_t y, size_t width, size_t 
  * @param   canvas      Canvas instance
  * @param   x           left x coordinates
  * @param   y           top y coordinate
+ * @param   y_offset    y offset used for custom font ascent
  * @param   text        text to display
  * @param   horizontal  horizontal aligning
  * @param   vertical    aligning
@@ -238,6 +239,7 @@ void elements_bubble_str(
     Canvas* canvas,
     int32_t x,
     int32_t y,
+    int32_t y_offset,
     const char* text,
     Align horizontal,
     Align vertical);

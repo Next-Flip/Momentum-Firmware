@@ -1042,7 +1042,7 @@ Function,-,drem,double,"double, double"
 Function,-,dremf,float,"float, float"
 Function,+,elements_bold_rounded_frame,void,"Canvas*, int32_t, int32_t, size_t, size_t"
 Function,+,elements_bubble,void,"Canvas*, int32_t, int32_t, size_t, size_t"
-Function,+,elements_bubble_str,void,"Canvas*, int32_t, int32_t, const char*, Align, Align"
+Function,+,elements_bubble_str,void,"Canvas*, int32_t, int32_t, int32_t, const char*, Align, Align"
 Function,+,elements_button_center,void,"Canvas*, const char*"
 Function,+,elements_button_down,void,"Canvas*, const char*"
 Function,+,elements_button_left,void,"Canvas*, const char*"
@@ -3505,6 +3505,7 @@ Function,+,storage_get_next_filename,void,"Storage*, const char*, const char*, c
 Function,+,storage_get_pubsub,FuriPubSub*,Storage*
 Function,+,storage_int_backup,FS_Error,"Storage*, const char*"
 Function,+,storage_int_restore,FS_Error,"Storage*, const char*, StorageNameConverter"
+Function,+,storage_list_dir,_Bool,"Storage*, const char*, FuriString***, size_t*, _Bool, const char**, size_t"
 Function,+,storage_sd_format,FS_Error,Storage*
 Function,+,storage_sd_info,FS_Error,"Storage*, SDInfo*"
 Function,+,storage_sd_mount,FS_Error,Storage*
@@ -4034,6 +4035,7 @@ Function,-,wcstombs,size_t,"char*, const wchar_t*, size_t"
 Function,-,wctomb,int,"char*, wchar_t"
 Function,+,widget_add_button_element,void,"Widget*, GuiButtonType, const char*, ButtonCallback, void*"
 Function,+,widget_add_circle_element,void,"Widget*, uint8_t, uint8_t, uint8_t, _Bool"
+Function,+,widget_add_file_list_element,WidgetElement*,"Widget*, uint8_t, uint8_t, uint8_t, FuriString**, size_t, uint8_t, uint8_t, _Bool"
 Function,+,widget_add_icon_element,void,"Widget*, uint8_t, uint8_t, const Icon*"
 Function,+,widget_add_line_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,widget_add_rect_element,void,"Widget*, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, _Bool"
@@ -4375,6 +4377,7 @@ Variable,-,_sys_errlist,const char* const[],
 Variable,-,_sys_nerr,int,
 Variable,-,ble_profile_hid,const FuriHalBleProfileTemplate*,
 Variable,+,ble_profile_serial,const FuriHalBleProfileTemplate* const,
+Variable,+,canvas_font_params,const CanvasFontParameters[FontTotalNumber],
 Variable,+,compress_config_heatshrink_default,const CompressConfigHeatshrink,
 Variable,+,firmware_api_interface,const ElfApiInterface* const,
 Variable,+,furi_hal_i2c_bus_external,FuriHalI2cBus,

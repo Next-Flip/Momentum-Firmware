@@ -19,6 +19,18 @@ typedef enum {
     PowerStateCharged,
 } PowerState;
 
+static inline uint8_t power_off_timeout_seconds(PowerOffTimeout t) {
+    switch(t) {
+    case PowerOffTimeout30:
+        return 30;
+    case PowerOffTimeout60:
+        return 60;
+    case PowerOffTimeout90:
+    default:
+        return 90;
+    }
+}
+
 struct Power {
     ViewHolder* view_holder;
     FuriPubSub* event_pubsub;
@@ -35,6 +47,8 @@ struct Power {
 
     bool battery_low;
     bool show_battery_low_warning;
+    bool auto_poweroff_warning;
+    uint8_t auto_poweroff_next_warning;
     bool is_otg_requested;
     uint8_t battery_level;
     uint8_t power_off_timeout;
@@ -65,6 +79,8 @@ typedef enum {
     PowerMessageTypeGetSettings,
     PowerMessageTypeSetSettings,
     PowerMessageTypeReloadSettings,
+
+    PowerMessageTypeTestWarning,
 } PowerMessageType;
 
 typedef struct {

@@ -45,6 +45,7 @@ typedef enum {
     ArchiveBrowserEventFileMenuRun,
     ArchiveBrowserEventFileMenuFavorite,
     ArchiveBrowserEventFileMenuInfo,
+    ArchiveBrowserEventFileMenuSelectMode,
     ArchiveBrowserEventFileMenuShow,
     ArchiveBrowserEventFileMenuPaste,
     ArchiveBrowserEventFileMenuCut,
@@ -53,6 +54,8 @@ typedef enum {
     ArchiveBrowserEventFileMenuRename,
     ArchiveBrowserEventFileMenuDelete,
     ArchiveBrowserEventFileMenuClose,
+    ArchiveBrowserEventFileSelect,
+    ArchiveBrowserEventFileDeselect,
 
     ArchiveBrowserEventEnterDir,
 
@@ -107,7 +110,11 @@ typedef struct {
     bool menu;
     bool menu_manage;
     bool menu_can_switch;
-    char* clipboard;
+    bool select_mode;
+    FuriString** selected_files;
+    size_t selected_count;
+    char** clipboard;
+    size_t clipboard_count;
     bool clipboard_copy;
     menu_array_t context_menu;
 

@@ -440,6 +440,79 @@ bool storage_dir_exists(Storage* storage, const char* path) {
 
     return exist;
 }
+
+bool storage_list_dir(
+    Storage* storage,
+    const char* path,
+    FuriString*** files,
+    size_t* num_files,
+    bool ignore_dirs,
+    const char** include_ext,
+    size_t ext_count) {
+    furi_check(storage);
+    furi_check(path);
+    furi_check(files);
+    furi_check(num_files);
+
+    FileInfo fileinfo;
+    bool result = false;
+    char* name = malloc(MAX_NAME_LENGTH);
+    File* dir = storage_file_alloc(storage);
+
+    do {
+        if(!storage_dir_open(dir, path)) break;
+
+        while(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
+            if(strcmp(name, ".") == 0 || strcmp(name, "..") == 0) continue;
+
+            if(file_info_is_dir(&fileinfo)) {
+                if(!ignore_dirs) {
+                    *files = realloc(*files, (*num_files + 1) * sizeof(FuriString*));
+                    (*files)[*num_files] = furi_string_alloc_printf("%s/%s", path, name);
+                    (*num_files)++;
+                }
+                FuriString* subpath = furi_string_alloc_printf("%s/%s", path, name);
+                storage_list_dir(
+                    storage,
+                    furi_string_get_cstr(subpath),
+                    files,
+                    num_files,
+                    ignore_dirs,
+                    include_ext,
+                    ext_count);
+                furi_string_free(subpath);
+            } else {
+                bool add_file = (include_ext == NULL || ext_count == 0);
+
+                if(!add_file) {
+                    const char* ext = strrchr(name, '.');
+                    if(ext != NULL) {
+                        for(size_t i = 0; i < ext_count; i++) {
+                            if(strcasecmp(ext, include_ext[i]) == 0) {
+                                add_file = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(add_file) {
+                    *files = realloc(*files, (*num_files + 1) * sizeof(FuriString*));
+                    (*files)[*num_files] = furi_string_alloc_printf("%s/%s", path, name);
+                    (*num_files)++;
+                }
+            }
+        }
+        result = true;
+    } while(false);
+
+    storage_dir_close(dir);
+    storage_file_free(dir);
+    free(name);
+
+    return result;
+}
+
 /****************** COMMON ******************/
 
 FS_Error storage_common_timestamp(Storage* storage, const char* path, uint32_t* timestamp) {

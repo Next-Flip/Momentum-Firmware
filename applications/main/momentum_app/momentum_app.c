@@ -322,6 +322,10 @@ MomentumApp* momentum_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, MomentumAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MomentumAppViewWidget, widget_get_view(app->widget));
+
     // Settings init
 
     app->asset_pack_index = 0;
@@ -450,6 +454,8 @@ void momentum_app_free(MomentumApp* app) {
     popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewDialogEx);
     dialog_ex_free(app->dialog_ex);
+    view_dispatcher_remove_view(app->view_dispatcher, MomentumAppViewWidget);
+    widget_free(app->widget);
 
     // View Dispatcher and Scene Manager
     view_dispatcher_free(app->view_dispatcher);

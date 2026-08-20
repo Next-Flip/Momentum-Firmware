@@ -1,6 +1,7 @@
 #include "menu.h"
 
 #include "locale/locale.h"
+#include "locale/locale.h"
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <gui/icon_i.h>
@@ -16,8 +17,8 @@
 
 struct Menu {
     View* view;
-
     FuriTimer* scroll_timer;
+    FuriTimer* info_timer;
 };
 
 typedef struct {
@@ -35,9 +36,10 @@ ARRAY_DEF(MenuItemArray, MenuItem, M_POD_OPLIST); //-V658
 typedef struct {
     MenuItemArray_t items;
     size_t position;
-
     size_t scroll_counter;
     size_t vertical_offset;
+    uint8_t battery_pct;
+    DateTime current_time;
 } MenuModel;
 
 static void menu_process_up(Menu* menu);
@@ -45,6 +47,21 @@ static void menu_process_down(Menu* menu);
 static void menu_process_left(Menu* menu);
 static void menu_process_right(Menu* menu);
 static void menu_process_ok(Menu* menu);
+
+static void menu_get_time_str(DateTime* dt, char* clk, size_t size) {
+    uint8_t hour = dt->hour;
+    uint8_t min = dt->minute;
+    LocaleTimeFormat time_format = locale_get_time_format();
+    if(time_format == LocaleTimeFormat12h) {
+        if(hour > 12) {
+            hour -= 12;
+        }
+        if(hour == 0) {
+            hour = (momentum_settings.midnight_format_00 ? 0 : 12);
+        }
+    }
+    snprintf(clk, size, "%02u:%02u", hour, min);
+}
 
 static void menu_get_name(MenuItem* item, FuriString* name, bool shorter) {
     furi_string_set(name, item->label);
@@ -228,13 +245,52 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         }
         case MenuStylePs4: {
             canvas_set_font(canvas, FontSecondary);
-            canvas_draw_str_aligned(
-                canvas, 1, 1, AlignLeft, AlignTop, furi_hal_version_get_name_ptr());
-            char str[10];
+            uint8_t name_w = 1;
+            if(momentum_settings.menu_name) {
+                const char* dev_name = furi_hal_version_get_name_ptr();
+                name_w = canvas_string_width(canvas, dev_name);
+                canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, dev_name);
+                name_w += 6;
+            }
+
             Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
-            snprintf(str, 10, "Level %i", dolphin_get_level(dolphin->state->data.icounter));
+            uint8_t lvl = dolphin_get_level(dolphin->state->data.icounter);
             furi_record_close(RECORD_DOLPHIN);
-            canvas_draw_str_aligned(canvas, 127, 1, AlignRight, AlignTop, str);
+            size_t lvl_x = 127;
+            bool show_time = momentum_settings.menu_time;
+            bool show_battery = momentum_settings.menu_battery;
+
+            if(show_battery || show_time) {
+                size_t time_x = 127;
+                lvl_x = name_w;
+                if(show_battery) {
+                    uint8_t battery_percent = model->battery_pct;
+                    char bat_display[9];
+                    snprintf(bat_display, sizeof(bat_display), "%d%%", battery_percent);
+                    uint8_t bat_w = canvas_string_width(canvas, bat_display);
+                    canvas_draw_str_aligned(canvas, 127, 1, AlignRight, AlignTop, bat_display);
+                    time_x = 127 - bat_w - 5;
+                }
+
+                if(show_time) {
+                    char clk[9];
+                    menu_get_time_str(&model->current_time, clk, sizeof(clk));
+                    canvas_draw_str_aligned(canvas, time_x, 1, AlignRight, AlignTop, clk);
+                }
+            }
+
+            if(momentum_settings.menu_level) {
+                char lvl_str[10];
+                snprintf(lvl_str, 10, "%s%i", show_time && show_battery ? "Lv" : "Level ", lvl);
+                canvas_draw_str_aligned(
+                    canvas,
+                    lvl_x,
+                    1,
+                    show_time || show_battery ? AlignLeft : AlignRight,
+                    AlignTop,
+                    lvl_str);
+            }
+
             for(int8_t i = -1; i <= 4; i++) {
                 shift_position = position + i;
                 if(shift_position >= items_count) continue;
@@ -276,22 +332,39 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         }
         case MenuStyleVertical: {
             canvas_set_orientation(canvas, CanvasOrientationVertical);
+            bool time_or_battery = momentum_settings.menu_time || momentum_settings.menu_battery;
+            uint8_t cells = time_or_battery ? 7 : 8;
             shift_position = model->vertical_offset;
-            if(shift_position >= position || shift_position + 7 <= position) {
+            if(shift_position >= position || shift_position + cells <= position) {
                 // In case vertical_offset is out of sync due to changing menu styles
                 shift_position = CLAMP(
-                    MAX((int32_t)position - 4, 0),
-                    MAX((int32_t)MenuItemArray_size(model->items) - 8, 0),
+                    MAX((uint8_t)position - 4, 0),
+                    MAX((uint8_t)MenuItemArray_size(model->items) - cells, 0),
                     0);
                 model->vertical_offset = shift_position;
             }
             canvas_set_font(canvas, FontSecondary);
             size_t item_i;
             size_t y_off;
-            for(size_t i = 0; i < 8; i++) {
+            size_t ext_off = 0;
+            if(time_or_battery) {
+                ext_off = 16;
+                if(momentum_settings.menu_battery) {
+                    uint8_t battery_percent = model->battery_pct;
+                    char bat_display[9];
+                    snprintf(bat_display, sizeof(bat_display), "%d%%", battery_percent);
+                    canvas_draw_str_aligned(canvas, 63, 1, AlignRight, AlignTop, bat_display);
+                }
+                if(momentum_settings.menu_time) {
+                    char clk[9];
+                    menu_get_time_str(&model->current_time, clk, sizeof(clk));
+                    canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, clk);
+                }
+            }
+            for(size_t i = 0; i < cells; i++) {
                 item_i = shift_position + i;
                 if(item_i >= items_count) continue;
-                y_off = 16 * i;
+                y_off = 16 * i + ext_off;
                 bool selected = item_i == position;
                 if(selected) {
                     elements_slightly_rounded_box(canvas, 0, y_off, 64, 16);
@@ -392,52 +465,63 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             canvas_draw_line(canvas, 5, 15, 59, 15);
             canvas_draw_line(canvas, 7, 17, 61, 17);
             canvas_draw_line(canvas, 10, 19, 63, 19);
-            char title[20];
-            snprintf(title, sizeof(title), "%s", furi_hal_version_get_name_ptr());
-            canvas_draw_str(canvas, 5, 12, title);
-            DateTime curr_dt;
-            furi_hal_rtc_get_datetime(&curr_dt);
-            uint8_t hour = curr_dt.hour;
-            uint8_t min = curr_dt.minute;
-            LocaleTimeFormat time_format = locale_get_time_format();
-            if(time_format == LocaleTimeFormat12h) {
-                if(hour > 12) {
-                    hour -= 12;
-                }
-                if(hour == 0) {
-                    hour = (momentum_settings.midnight_format_00 ? 0 : 12);
-                }
+
+            if(momentum_settings.menu_name) {
+                char title[9];
+                snprintf(title, sizeof(title), "%s", furi_hal_version_get_name_ptr());
+                FuriString* title_str = furi_string_alloc();
+                furi_string_set(title_str, title);
+                size_t scroll_counter = menu_scroll_counter(model, true);
+                elements_scrollable_text_line(canvas, 5, 12, 60, title_str, scroll_counter, false);
+                furi_string_free(title_str);
             }
+
             canvas_set_font(canvas, FontSecondary);
-            char clk[20];
-            snprintf(clk, sizeof(clk), "%02u:%02u", hour, min);
-            canvas_draw_str(canvas, 5, 34, clk);
+            uint8_t info_y = 56;
 
-            bool ext5v = furi_hal_power_is_otg_enabled();
-            uint8_t battery_percent = furi_hal_power_get_pct();
-            bool charge_state = false;
+            if(momentum_settings.menu_otg) {
+                // Display OTG state
+                char ext5v_display[9];
+                bool ext5v = furi_hal_power_is_otg_enabled();
+                snprintf(ext5v_display, sizeof(ext5v_display), "5v: %s", ext5v ? "On" : "Off");
+                canvas_draw_str(canvas, 5, info_y, ext5v_display);
+                info_y -= 11;
+            }
 
-            // Determine charge state
-            if(furi_hal_power_is_charging()) {
-                if(battery_percent < 100 && !furi_hal_power_is_charging_done()) {
-                    charge_state = true;
+            if(momentum_settings.menu_battery) {
+                uint8_t battery_percent = model->battery_pct;
+                bool charge_state = false;
+
+                if(furi_hal_power_is_charging()) {
+                    if(battery_percent < 100 && !furi_hal_power_is_charging_done()) {
+                        charge_state = true;
+                    }
+                }
+                char bat_display[9];
+                snprintf(bat_display, sizeof(bat_display), "%d%%", battery_percent);
+                canvas_draw_str(canvas, 5, info_y, bat_display);
+                info_y -= 11;
+
+                if(charge_state) {
+                    canvas_draw_icon(canvas, 28, 33, &I_Voltage_16x16);
                 }
             }
 
-            // Display battery percentage
-            char bat_display[20];
-            snprintf(bat_display, sizeof(bat_display), "%d%%", battery_percent);
-            canvas_draw_str(canvas, 5, 45, bat_display);
-
-            // Display charge state icon
-            if(charge_state) {
-                canvas_draw_icon(canvas, 28, 33, &I_Voltage_16x16);
+            if(momentum_settings.menu_time) {
+                char clk[9];
+                menu_get_time_str(&model->current_time, clk, sizeof(clk));
+                canvas_draw_str(canvas, 5, info_y, clk);
+                info_y -= 11;
             }
 
-            // Display OTG state
-            char ext5v_display[20];
-            snprintf(ext5v_display, sizeof(ext5v_display), "5v: %s", ext5v ? "On" : "Off");
-            canvas_draw_str(canvas, 5, 56, ext5v_display);
+            if(!momentum_settings.menu_otg && momentum_settings.menu_level) {
+                Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+                uint8_t lvl = dolphin_get_level(dolphin->state->data.icounter);
+                furi_record_close(RECORD_DOLPHIN);
+                char lvl_str[10];
+                snprintf(lvl_str, 10, "%s%i", lvl >= 10 ? "Lvl " : "Level ", lvl);
+                canvas_draw_str(canvas, 5, info_y, lvl_str);
+            }
 
             MenuItem* item = MenuItemArray_get(model->items, position);
             menu_get_name(item, name, true);
@@ -627,6 +711,18 @@ static void menu_scroll_timer_callback(void* context) {
     with_view_model(menu->view, MenuModel * model, { model->scroll_counter++; }, true);
 }
 
+static void menu_status_timer_callback(void* context) {
+    Menu* menu = context;
+    with_view_model(
+        menu->view,
+        MenuModel * model,
+        {
+            if(momentum_settings.menu_battery) model->battery_pct = furi_hal_power_get_pct();
+            if(momentum_settings.menu_time) furi_hal_rtc_get_datetime(&model->current_time);
+        },
+        true);
+}
+
 static void menu_enter(void* context) {
     Menu* menu = context;
     with_view_model(
@@ -641,6 +737,7 @@ static void menu_enter(void* context) {
         },
         true);
     furi_timer_start(menu->scroll_timer, 333);
+    if(menu->info_timer) furi_timer_start(menu->info_timer, furi_kernel_get_tick_frequency());
 }
 
 static void menu_exit(void* context) {
@@ -656,6 +753,7 @@ static void menu_exit(void* context) {
         },
         false);
     furi_timer_stop(menu->scroll_timer);
+    if(menu->info_timer) furi_timer_stop(menu->info_timer);
 }
 
 Menu* menu_alloc(void) {
@@ -669,6 +767,16 @@ Menu* menu_alloc(void) {
     view_set_exit_callback(menu->view, menu_exit);
 
     menu->scroll_timer = furi_timer_alloc(menu_scroll_timer_callback, FuriTimerTypePeriodic, menu);
+    menu->info_timer = NULL;
+    // Settings could be set to true from other styles but we don't want a timer
+    // going if the style doesn't support it (locked in MNTM > Interface > Main Menu > Show ...)
+    bool allowed_style = momentum_settings.menu_style == MenuStylePs4 ||
+                         momentum_settings.menu_style == MenuStyleVertical ||
+                         momentum_settings.menu_style == MenuStyleMNTM;
+    if(allowed_style && (momentum_settings.menu_time || momentum_settings.menu_battery)) {
+        menu->info_timer =
+            furi_timer_alloc(menu_status_timer_callback, FuriTimerTypePeriodic, menu);
+    }
 
     with_view_model(
         menu->view,
@@ -676,6 +784,8 @@ Menu* menu_alloc(void) {
         {
             MenuItemArray_init(model->items);
             model->position = 0;
+            if(momentum_settings.menu_battery) model->battery_pct = furi_hal_power_get_pct();
+            if(momentum_settings.menu_time) furi_hal_rtc_get_datetime(&model->current_time);
         },
         true);
 
@@ -689,6 +799,7 @@ void menu_free(Menu* menu) {
     with_view_model(menu->view, MenuModel * model, { MenuItemArray_clear(model->items); }, false);
     view_free(menu->view);
     furi_timer_free(menu->scroll_timer);
+    if(menu->info_timer) furi_timer_free(menu->info_timer);
 
     free(menu);
 }

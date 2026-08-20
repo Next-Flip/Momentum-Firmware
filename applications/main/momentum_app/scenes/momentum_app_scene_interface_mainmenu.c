@@ -1,5 +1,8 @@
 #include "../momentum_app.h"
 
+#define ONLY_MSG "Only in PS4,\nVertical and\nMNTM styles!"
+#define CANT_MSG "Can't show in\nthe selected\nstyle!"
+
 enum VarItemListIndex {
     VarItemListIndexMenuStyle,
     VarItemListIndexResetMenu,
@@ -30,6 +33,51 @@ static void momentum_app_scene_interface_mainmenu_menu_style_changed(VariableIte
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, menu_style_names[index]);
     momentum_settings.menu_style = index;
+    app->save_settings = true;
+
+    // Quick and dirty work around to refresh the list to update the locked items,
+    // and isn't noticeable at all.
+    scene_manager_previous_scene(app->scene_manager);
+    scene_manager_next_scene(app->scene_manager, MomentumAppSceneInterfaceMainmenu);
+}
+
+static void momentum_app_scene_interface_mainmenu_name_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.menu_name = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_mainmenu_level_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.menu_level = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_mainmenu_time_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.menu_time = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_mainmenu_battery_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.menu_battery = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_interface_mainmenu_otg_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "ON" : "OFF");
+    momentum_settings.menu_otg = value;
     app->save_settings = true;
 }
 
@@ -70,6 +118,7 @@ void momentum_app_scene_interface_mainmenu_on_enter(void* context) {
     MomentumApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
+    MenuStyle style = momentum_settings.menu_style;
 
     item = variable_item_list_add(
         var_item_list,
@@ -107,6 +156,45 @@ void momentum_app_scene_interface_mainmenu_on_enter(void* context) {
     variable_item_set_locked(item, count < 2, "Can't move\nwith less\nthan 2 apps!");
 
     variable_item_list_add(var_item_list, "Remove Item", 0, NULL, app);
+
+    bool lock_all = style != MenuStylePs4 && style != MenuStyleVertical && style != MenuStyleMNTM;
+    bool lock_vertical = style == MenuStyleVertical;
+    bool lock_ps4_vertical = style == MenuStylePs4 || style == MenuStyleVertical;
+
+    item = variable_item_list_add(
+        var_item_list, "Show Name", 2, momentum_app_scene_interface_mainmenu_name_changed, app);
+    variable_item_set_current_value_index(item, momentum_settings.menu_name);
+    variable_item_set_current_value_text(item, momentum_settings.menu_name ? "ON" : "OFF");
+    variable_item_set_locked(item, lock_all || lock_vertical, lock_vertical ? CANT_MSG : ONLY_MSG);
+
+    item = variable_item_list_add(
+        var_item_list, "Show Level", 2, momentum_app_scene_interface_mainmenu_level_changed, app);
+    variable_item_set_current_value_index(item, momentum_settings.menu_level);
+    variable_item_set_current_value_text(item, momentum_settings.menu_level ? "ON" : "OFF");
+    variable_item_set_locked(item, lock_all || lock_vertical, lock_vertical ? CANT_MSG : ONLY_MSG);
+
+    item = variable_item_list_add(
+        var_item_list, "Show Time", 2, momentum_app_scene_interface_mainmenu_time_changed, app);
+    variable_item_set_current_value_index(item, momentum_settings.menu_time);
+    variable_item_set_current_value_text(item, momentum_settings.menu_time ? "ON" : "OFF");
+    variable_item_set_locked(item, lock_all, ONLY_MSG);
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Show Battery",
+        2,
+        momentum_app_scene_interface_mainmenu_battery_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.menu_battery);
+    variable_item_set_current_value_text(item, momentum_settings.menu_battery ? "ON" : "OFF");
+    variable_item_set_locked(item, lock_all, ONLY_MSG);
+
+    item = variable_item_list_add(
+        var_item_list, "Show OTG (5v)", 2, momentum_app_scene_interface_mainmenu_otg_changed, app);
+    variable_item_set_current_value_index(item, momentum_settings.menu_otg);
+    variable_item_set_current_value_text(item, momentum_settings.menu_otg ? "ON" : "OFF");
+    variable_item_set_locked(
+        item, lock_all || lock_ps4_vertical, lock_ps4_vertical ? CANT_MSG : ONLY_MSG);
 
     variable_item_list_set_enter_callback(
         var_item_list, momentum_app_scene_interface_mainmenu_var_item_list_callback, app);

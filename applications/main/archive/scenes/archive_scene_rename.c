@@ -69,10 +69,7 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_RENAME_CUSTOM_EVENT) {
             const char* path_src = archive_get_name(archive->browser);
-
-            FuriString* path_dst;
-
-            path_dst = furi_string_alloc();
+            FuriString* path_dst = furi_string_alloc();
 
             path_extract_dirname(path_src, path_dst);
             furi_string_cat_printf(
@@ -89,8 +86,7 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
             archive_show_loading_popup(archive, false);
 
             if(error != FSE_OK) {
-                FuriString* dialog_msg;
-                dialog_msg = furi_string_alloc();
+                FuriString* dialog_msg = furi_string_alloc();
                 furi_string_cat_printf(
                     dialog_msg, "Cannot rename:\n%s", storage_error_get_desc(error));
                 dialog_message_show_storage_error(
@@ -98,7 +94,21 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
                 furi_string_free(dialog_msg);
             } else {
                 ArchiveFile_t* current = archive_get_current_file(archive->browser);
-                if(current != NULL) furi_string_set(current->path, path_dst);
+                if(current->selected) {
+                    with_view_model(
+                        archive->browser->view,
+                        ArchiveBrowserViewModel * model,
+                        {
+                            for(size_t i = 0; i < model->selected_count; i++) {
+                                if(furi_string_equal(model->selected_files[i], current->path)) {
+                                    furi_string_set(model->selected_files[i], path_dst);
+                                    break;
+                                }
+                            }
+                        },
+                        false);
+                }
+                furi_string_set(current->path, path_dst);
             }
 
             furi_string_free(path_dst);
