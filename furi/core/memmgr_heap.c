@@ -500,7 +500,7 @@ void vPortFree(void* pv) {
                      * overwritten in a heap block. */
                     if(heapSUBTRACT_WILL_UNDERFLOW(pxLink->xBlockSize, xHeapStructSize) == 0) {
                         (void)memset(
-                            puc + xHeapStructSize, 0, pxLink->xBlockSize - xHeapStructSize);
+                            puc + xHeapStructSize, 0xDD, pxLink->xBlockSize - xHeapStructSize);
                     }
                 }
 #endif

@@ -314,6 +314,8 @@ void MemManage_Handler(void) {
 }
 
 void BusFault_Handler(void) {
+    const char* crash_msg = "BusFault";
+
     furi_log_puts("\r\n" _FURI_LOG_CLR_E "Bus fault:\r\n");
     if(FURI_BIT(SCB->CFSR, SCB_CFSR_LSPERR_Pos)) {
         furi_log_puts(" - lazy stacking for exception entry\r\n");
@@ -351,11 +353,13 @@ void BusFault_Handler(void) {
 
         if(busfault_address == (uint32_t)NULL) {
             furi_log_puts(" -- NULL pointer dereference\r\n");
+        } else if(busfault_address >= 0xDDDDDDDD && busfault_address <= 0xDDDEDDDD) {
+            crash_msg = "Possible use-after-free";
         }
     }
     furi_log_puts(_FURI_LOG_CLR_RESET);
 
-    furi_crash("BusFault");
+    furi_crash(crash_msg);
 }
 
 void UsageFault_Handler(void) {
