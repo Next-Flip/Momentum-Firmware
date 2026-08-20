@@ -66,9 +66,11 @@ typedef struct {
 
     CharList_t asset_pack_names;
     uint8_t asset_pack_index;
+    bool asset_pack_names_loaded;
     CharList_t mainmenu_app_labels;
     CharList_t mainmenu_app_exes;
     uint8_t mainmenu_app_index;
+    bool mainmenu_apps_loaded;
     DesktopSettings desktop_settings;
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_freqs;
@@ -109,8 +111,17 @@ typedef enum {
     MomentumAppViewDialogEx,
 } MomentumAppView;
 
+typedef enum {
+    MomentumAppMainmenuAddSourceMainApp,
+    MomentumAppMainmenuAddSourceExternalApp,
+    MomentumAppMainmenuAddSourceFileDirectory,
+} MomentumAppMainmenuAddSource;
+
 bool momentum_app_apply(MomentumApp* app);
 
 void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* exe);
+void momentum_app_load_asset_pack_names(MomentumApp* app);
+void momentum_app_unload_asset_pack_names(MomentumApp* app);
 void momentum_app_load_mainmenu_apps(MomentumApp* app);
 void momentum_app_empty_mainmenu_apps(MomentumApp* app);
+void momentum_app_unload_mainmenu_apps(MomentumApp* app);

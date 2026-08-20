@@ -210,7 +210,61 @@ void momentum_app_push_mainmenu_app(MomentumApp* app, FuriString* exe) {
     furi_string_free(label);
 }
 
+void momentum_app_load_asset_pack_names(MomentumApp* app) {
+    if(app->asset_pack_names_loaded) {
+        return;
+    }
+
+    app->asset_pack_index = 0;
+    File* folder = storage_file_alloc(app->storage);
+    FileInfo info;
+    char* name = malloc(ASSET_PACKS_NAME_LEN);
+    if(storage_dir_open(folder, ASSET_PACKS_PATH)) {
+        while(storage_dir_read(folder, &info, name, ASSET_PACKS_NAME_LEN)) {
+            if(info.flags & FSF_DIRECTORY && name[0] != '.') {
+                char* copy = strdup(name);
+                size_t idx = 0;
+                for(; idx < CharList_size(app->asset_pack_names); idx++) {
+                    char* comp = *CharList_get(app->asset_pack_names, idx);
+                    if(strcasecmp(copy, comp) < 0) {
+                        break;
+                    }
+                }
+                CharList_push_at(app->asset_pack_names, idx, copy);
+                if(app->asset_pack_index != 0) {
+                    if(idx < app->asset_pack_index) app->asset_pack_index++;
+                } else if(strcmp(copy, momentum_settings.asset_pack) == 0) {
+                    app->asset_pack_index = idx + 1;
+                }
+            }
+        }
+        storage_file_close(folder);
+    }
+    free(name);
+    storage_file_free(folder);
+
+    app->asset_pack_names_loaded = true;
+}
+
+void momentum_app_unload_asset_pack_names(MomentumApp* app) {
+    if(!app->asset_pack_names_loaded) {
+        return;
+    }
+
+    CharList_it_t it;
+    for(CharList_it(it, app->asset_pack_names); !CharList_end_p(it); CharList_next(it)) {
+        free(*CharList_cref(it));
+    }
+    CharList_reset(app->asset_pack_names);
+    app->asset_pack_index = 0;
+    app->asset_pack_names_loaded = false;
+}
+
 void momentum_app_load_mainmenu_apps(MomentumApp* app) {
+    if(app->mainmenu_apps_loaded) {
+        return;
+    }
+
     // Loading logic mimics applications/services/loader/loader_menu.c
     Stream* stream = file_stream_alloc(app->storage);
     FuriString* line = furi_string_alloc();
@@ -252,6 +306,7 @@ void momentum_app_load_mainmenu_apps(MomentumApp* app) {
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
+    app->mainmenu_apps_loaded = true;
 }
 
 void momentum_app_empty_mainmenu_apps(MomentumApp* app) {
@@ -264,6 +319,16 @@ void momentum_app_empty_mainmenu_apps(MomentumApp* app) {
         free(*CharList_cref(it));
     }
     CharList_reset(app->mainmenu_app_exes);
+}
+
+void momentum_app_unload_mainmenu_apps(MomentumApp* app) {
+    if(!app->mainmenu_apps_loaded) {
+        return;
+    }
+
+    momentum_app_empty_mainmenu_apps(app);
+    app->mainmenu_app_index = 0;
+    app->mainmenu_apps_loaded = false;
 }
 
 MomentumApp* momentum_app_alloc() {
@@ -324,38 +389,14 @@ MomentumApp* momentum_app_alloc() {
 
     // Settings init
 
-    app->asset_pack_index = 0;
     CharList_init(app->asset_pack_names);
-    File* folder = storage_file_alloc(app->storage);
-    FileInfo info;
-    char* name = malloc(ASSET_PACKS_NAME_LEN);
-    if(storage_dir_open(folder, ASSET_PACKS_PATH)) {
-        while(storage_dir_read(folder, &info, name, ASSET_PACKS_NAME_LEN)) {
-            if(info.flags & FSF_DIRECTORY && name[0] != '.') {
-                char* copy = strdup(name);
-                size_t idx = 0;
-                for(; idx < CharList_size(app->asset_pack_names); idx++) {
-                    char* comp = *CharList_get(app->asset_pack_names, idx);
-                    if(strcasecmp(copy, comp) < 0) {
-                        break;
-                    }
-                }
-                CharList_push_at(app->asset_pack_names, idx, copy);
-                if(app->asset_pack_index != 0) {
-                    if(idx < app->asset_pack_index) app->asset_pack_index++;
-                } else {
-                    if(strcmp(copy, momentum_settings.asset_pack) == 0)
-                        app->asset_pack_index = idx + 1;
-                }
-            }
-        }
-    }
-    free(name);
-    storage_file_free(folder);
+    app->asset_pack_index = 0;
+    app->asset_pack_names_loaded = false;
 
     CharList_init(app->mainmenu_app_labels);
     CharList_init(app->mainmenu_app_exes);
-    momentum_app_load_mainmenu_apps(app);
+    app->mainmenu_app_index = 0;
+    app->mainmenu_apps_loaded = false;
 
     desktop_api_get_settings(app->desktop, &app->desktop_settings);
 
@@ -457,13 +498,10 @@ void momentum_app_free(MomentumApp* app) {
 
     // Settings deinit
 
-    CharList_it_t it;
-    for(CharList_it(it, app->asset_pack_names); !CharList_end_p(it); CharList_next(it)) {
-        free(*CharList_cref(it));
-    }
+    momentum_app_unload_asset_pack_names(app);
     CharList_clear(app->asset_pack_names);
 
-    momentum_app_empty_mainmenu_apps(app);
+    momentum_app_unload_mainmenu_apps(app);
     CharList_clear(app->mainmenu_app_labels);
     CharList_clear(app->mainmenu_app_exes);
 

@@ -71,6 +71,8 @@ void momentum_app_scene_interface_mainmenu_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
 
+    momentum_app_load_mainmenu_apps(app);
+
     item = variable_item_list_add(
         var_item_list,
         "Menu Style",
