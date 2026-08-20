@@ -27,5 +27,7 @@ struct SubGhzTxRx {
     SubGhzTxRxNeedSaveCallback need_save_callback;
     void* need_save_context;
 
+    size_t tx_min_heap_required;
+
     bool debug_pin_state;
 };

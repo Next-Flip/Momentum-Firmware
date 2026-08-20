@@ -129,11 +129,11 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
                     int32_t tmp_counter = furi_hal_subghz_get_rolling_counter_mult();
                     furi_hal_subghz_set_rolling_counter_mult(0);
                     // Calling restore!
-                    subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
+                    subghz_txrx_tx_start(subghz->txrx, subghz_txrx_get_fff_data(subghz->txrx));
                     subghz_txrx_stop(subghz->txrx);
                     // Calling restore 2nd time special for FAAC SLH!
                     // TODO: Find better way to restore after custom button is used!!!
-                    subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx));
+                    subghz_txrx_tx_start(subghz->txrx, subghz_txrx_get_fff_data(subghz->txrx));
                     subghz_txrx_stop(subghz->txrx);
                     furi_hal_subghz_set_rolling_counter_mult(tmp_counter);
                 }

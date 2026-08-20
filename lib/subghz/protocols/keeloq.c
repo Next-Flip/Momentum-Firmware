@@ -121,8 +121,8 @@ void* subghz_protocol_encoder_keeloq_alloc(SubGhzEnvironment* environment) {
     instance->keystore = subghz_environment_get_keystore(environment);
 
     instance->encoder.repeat = 3;
-    instance->encoder.size_upload = 1100;
-    instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->encoder.size_upload = 0;
+    instance->encoder.upload = NULL;
     instance->encoder.is_running = false;
 
     instance->manufacture_from_file = furi_string_alloc();
@@ -643,13 +643,17 @@ static bool
     instance->encoder.size_upload = 0;
     size_t upindex = 0;
 
-    // if we change counter/button in SignalSettings menu then we must bypass counter_modes, just gen and save signal file.
     if(subghz_block_generic_global.cnt_need_override ||
        subghz_block_generic_global.btn_need_override)
         bypass = true;
 
-    // Create mode7 upload only if counter and button was not changed by SignalSettings menu
-    if(keeloq_counter_mode == 7 && !bypass) {
+    const bool mode7 = (keeloq_counter_mode == 7 && !bypass);
+    const size_t frame_max = 11 * 2 + 2 + (size_t)instance->generic.data_count_bit * 2 + 2 + 2;
+    const size_t need = frame_max * (mode7 ? 7 : 1);
+    if(instance->encoder.upload) free(instance->encoder.upload);
+    instance->encoder.upload = malloc(need * sizeof(LevelDuration));
+
+    if(mode7) {
         uint16_t temp_cnt = instance->generic.cnt;
         instance->encoder.repeat = 1;
         for(uint8_t i = 7; i > 0; i--) {
@@ -672,6 +676,7 @@ static bool
             upindex = subghz_protocol_encoder_keeloq_encode_to_timings(
                 instance, (uint8_t)0x00, true, upindex);
         }
+        furi_check(upindex <= need);
         instance->encoder.size_upload = upindex;
         return true;
     } else {
@@ -680,6 +685,7 @@ static bool
             subghz_protocol_encoder_keeloq_encode_to_timings(instance, btn, true, upindex);
     }
 
+    furi_check(instance->encoder.size_upload <= need);
     return true;
 }
 

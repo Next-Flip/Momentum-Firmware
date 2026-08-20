@@ -1,6 +1,13 @@
 #include "../subghz_i.h"
+#include <furi/core/memmgr.h>
+#include <furi/core/memmgr_heap.h>
 
 #define TAG "SubGhzDecodeRaw"
+
+#define SUBGHZ_DECODE_RAW_MIN_HEAP  (12u * 1024u)
+// The decode worker allocates two large contiguous buffers (stream ~4 KB and the
+// pre-reserved line buffer ~4.6 KB). Require the largest free block to hold both,
+#define SUBGHZ_DECODE_RAW_MIN_BLOCK (9u * 1024u)
 
 #define SAMPLES_TO_READ_PER_TICK 400
 
@@ -145,6 +152,14 @@ bool subghz_scene_decode_raw_start(SubGhz* subghz) {
     } while(false);
 
     if(success) {
+        if(memmgr_get_free_heap() < SUBGHZ_DECODE_RAW_MIN_HEAP ||
+           memmgr_heap_get_max_free_block() < SUBGHZ_DECODE_RAW_MIN_BLOCK) {
+            FURI_LOG_E(TAG, "Not enough memory to decode");
+            subghz->decode_raw_file_worker_encoder = NULL;
+            furi_string_free(file_name);
+            return false;
+        }
+
         //FURI_LOG_I(TAG, "Listening at \033[0;33m%s\033[0m.", furi_string_get_cstr(file_name));
 
         subghz->decode_raw_file_worker_encoder = subghz_file_encoder_worker_alloc();
@@ -160,6 +175,7 @@ bool subghz_scene_decode_raw_start(SubGhz* subghz) {
 
         if(!success) {
             subghz_file_encoder_worker_free(subghz->decode_raw_file_worker_encoder);
+            subghz->decode_raw_file_worker_encoder = NULL;
         }
     }
 
@@ -189,6 +205,14 @@ bool subghz_scene_decode_raw_next(SubGhz* subghz) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzDecodeRawStateLoaded);
             subghz->state_notifications = SubGhzNotificationStateIDLE;
+
+            if(subghz->decode_raw_file_worker_encoder) {
+                if(subghz_file_encoder_worker_is_running(subghz->decode_raw_file_worker_encoder)) {
+                    subghz_file_encoder_worker_stop(subghz->decode_raw_file_worker_encoder);
+                }
+                subghz_file_encoder_worker_free(subghz->decode_raw_file_worker_encoder);
+                subghz->decode_raw_file_worker_encoder = NULL;
+            }
 
             subghz_view_receiver_add_data_progress(subghz->subghz_receiver, "Done!");
             return false; // No more samples available
@@ -269,10 +293,13 @@ bool subghz_scene_decode_raw_on_event(void* context, SceneManagerEvent event) {
 
             subghz_txrx_set_rx_callback(subghz->txrx, NULL, subghz);
 
-            if(subghz_file_encoder_worker_is_running(subghz->decode_raw_file_worker_encoder)) {
-                subghz_file_encoder_worker_stop(subghz->decode_raw_file_worker_encoder);
+            if(subghz->decode_raw_file_worker_encoder) {
+                if(subghz_file_encoder_worker_is_running(subghz->decode_raw_file_worker_encoder)) {
+                    subghz_file_encoder_worker_stop(subghz->decode_raw_file_worker_encoder);
+                }
+                subghz_file_encoder_worker_free(subghz->decode_raw_file_worker_encoder);
+                subghz->decode_raw_file_worker_encoder = NULL;
             }
-            subghz_file_encoder_worker_free(subghz->decode_raw_file_worker_encoder);
 
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             scene_manager_set_scene_state(

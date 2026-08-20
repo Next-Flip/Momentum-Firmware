@@ -152,11 +152,20 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
                (subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateBack)) {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
-                if(subghz_scene_read_raw_update_filename(subghz)) {
+                FuriString* temp_raw_path = furi_string_alloc();
+                furi_string_printf(
+                    temp_raw_path,
+                    "%s/%s%s",
+                    SUBGHZ_RAW_FOLDER,
+                    RAW_FILE_NAME,
+                    SUBGHZ_APP_FILENAME_EXTENSION);
+                if(subghz_scene_read_raw_update_filename(subghz) &&
+                   furi_string_equal(subghz->file_path, temp_raw_path)) {
                     furi_string_set(subghz->file_path_tmp, subghz->file_path);
                 } else {
                     furi_string_reset(subghz->file_path_tmp);
                 }
+                furi_string_free(temp_raw_path);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
@@ -231,7 +240,10 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
                 if(!subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx))) {
-                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateBack);
+                    if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateRAWLoad &&
+                       subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateRAWMore) {
+                        subghz_rx_key_state_set(subghz, SubGhzRxKeyStateBack);
+                    }
                     subghz_read_raw_set_status(
                         subghz->subghz_read_raw,
                         SubGhzReadRAWStatusIDLE,

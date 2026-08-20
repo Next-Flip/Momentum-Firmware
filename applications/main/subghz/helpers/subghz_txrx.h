@@ -17,7 +17,17 @@ typedef enum {
     SubGhzTxRxStartTxStateOk,
     SubGhzTxRxStartTxStateErrorOnlyRx,
     SubGhzTxRxStartTxStateErrorParserOthers,
+    SubGhzTxRxStartTxStateErrorMemory,
 } SubGhzTxRxStartTxState;
+
+#define SUBGHZ_TX_MIN_HEAP      (8u * 1024u)
+#define SUBGHZ_TX_MIN_BLOCK     (5u * 1024u)
+#define SUBGHZ_TX_MIN_HEAP_RAW  (14u * 1024u)
+// RAW streaming allocates two large contiguous buffers (stream ~4 KB and the
+// pre-reserved line buffer ~4.6 KB). Require the largest free block to hold both
+#define SUBGHZ_TX_MIN_BLOCK_RAW (9u * 1024u)
+
+size_t subghz_txrx_get_tx_min_heap_required(SubGhzTxRx* instance);
 
 /**
  * Allocate SubGhzTxRx

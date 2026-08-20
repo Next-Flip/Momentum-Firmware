@@ -3,6 +3,7 @@
 #include "assets_icons.h"
 #include "subghz/types.h"
 #include <furi.h>
+#include <furi/core/memmgr_heap.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <flipper_format/flipper_format.h>
@@ -32,6 +33,19 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
         SubGhzTx can_tx = subghz_txrx_radio_device_check_tx(subghz->txrx, frequency);
         subghz_dialog_message_freq_error(subghz, can_tx);
         break;
+
+    case SubGhzTxRxStartTxStateErrorMemory: {
+        FuriString* msg = furi_string_alloc();
+        furi_string_printf(
+            msg,
+            "Not enough memory\nFree %u B, block %u B\nNeed %u B",
+            (unsigned)memmgr_get_free_heap(),
+            (unsigned)memmgr_heap_get_max_free_block(),
+            (unsigned)subghz_txrx_get_tx_min_heap_required(subghz->txrx));
+        dialog_message_show_storage_error(subghz->dialogs, furi_string_get_cstr(msg));
+        furi_string_free(msg);
+        break;
+    }
 
     default:
         return true;

@@ -86,7 +86,7 @@ SubGhzWorker* subghz_worker_alloc(void) {
         furi_thread_alloc_ex("SubGhzWorker", 2048, subghz_worker_thread_callback, instance);
 
     instance->stream =
-        furi_stream_buffer_alloc(sizeof(LevelDuration) * 4096, sizeof(LevelDuration));
+        furi_stream_buffer_alloc(sizeof(LevelDuration) * 2048, sizeof(LevelDuration));
 
     //setting default filter in us
     instance->filter_duration = 30;

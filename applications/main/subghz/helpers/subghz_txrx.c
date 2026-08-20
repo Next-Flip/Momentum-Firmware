@@ -7,6 +7,9 @@
 
 #include <power/power_service/power.h>
 
+#include <furi/core/memmgr.h>
+#include <furi/core/memmgr_heap.h>
+
 #define TAG "SubGhzTxRx"
 
 static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
@@ -322,6 +325,21 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
         }
+
+        size_t need_heap = SUBGHZ_TX_MIN_HEAP;
+        size_t need_block = SUBGHZ_TX_MIN_BLOCK;
+        if(furi_string_equal(temp_str, "RAW")) {
+            need_heap = SUBGHZ_TX_MIN_HEAP_RAW;
+            need_block = SUBGHZ_TX_MIN_BLOCK_RAW;
+        }
+        instance->tx_min_heap_required = need_heap;
+        if(memmgr_get_free_heap() < need_heap ||
+           memmgr_heap_get_max_free_block() < need_block) {
+            FURI_LOG_E(TAG, "Not enough memory to start TX");
+            ret = SubGhzTxRxStartTxStateErrorMemory;
+            break;
+        }
+
         ret = SubGhzTxRxStartTxStateOk;
 
         SubGhzRadioPreset* preset = instance->preset;
@@ -414,6 +432,11 @@ static void subghz_txrx_tx_stop(SubGhzTxRx* instance) {
 FlipperFormat* subghz_txrx_get_fff_data(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->fff_data;
+}
+
+size_t subghz_txrx_get_tx_min_heap_required(SubGhzTxRx* instance) {
+    furi_assert(instance);
+    return instance->tx_min_heap_required;
 }
 
 SubGhzSetting* subghz_txrx_get_setting(SubGhzTxRx* instance) {
