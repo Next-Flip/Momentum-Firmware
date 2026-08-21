@@ -16,9 +16,10 @@
 
 #define MCHECK(expr) furi_check((expr) == 0)
 
-#define U2F_CMD_REGISTER     0x01
-#define U2F_CMD_AUTHENTICATE 0x02
-#define U2F_CMD_VERSION      0x03
+#define U2F_CMD_REGISTER         0x01
+#define U2F_CMD_AUTHENTICATE     0x02
+#define U2F_CMD_VERSION          0x03
+#define U2F_CMD_APPLET_SELECTION 0xA4
 
 typedef enum {
     U2fCheckOnly = 0x07, // "check-only" - only check key handle, don't send auth response
@@ -85,10 +86,12 @@ typedef struct {
 
 static const uint8_t ver_str[] = {"U2F_V2"};
 
+static const uint8_t rid_ac_ax[] = {0xA0, 0x00, 0x00, 0x06, 0x47, 0x2F, 0x00, 0x01};
 static const uint8_t state_no_error[] = {0x90, 0x00};
 static const uint8_t state_not_supported[] = {0x6D, 0x00};
 static const uint8_t state_user_missing[] = {0x69, 0x85};
 static const uint8_t state_wrong_data[] = {0x6A, 0x80};
+static const uint8_t state_app_not_found[] = {0x6A, 0x82};
 
 struct U2fData {
     uint8_t device_key[U2F_EC_KEY_SIZE];
@@ -421,6 +424,17 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     return sizeof(U2fAuthResp) + signature_len + 2;
 }
 
+uint16_t u2f_applet_selection(uint8_t* buf) {
+    if(buf[6] != 8 || memcmp(rid_ac_ax, &buf[7], 8) != 0) {
+        memcpy(&buf[0], state_app_not_found, 2);
+        return 2;
+    }
+
+    memcpy(&buf[0], ver_str, 6);
+    memcpy(&buf[6], state_no_error, 2);
+    return 8;
+}
+
 uint16_t u2f_msg_parse(U2fData* U2F, uint8_t* buf, uint16_t len) {
     furi_assert(U2F);
     if(!U2F->ready) return 0;
@@ -435,6 +449,8 @@ uint16_t u2f_msg_parse(U2fData* U2F, uint8_t* buf, uint16_t len) {
         memcpy(&buf[0], ver_str, 6);
         memcpy(&buf[6], state_no_error, 2);
         return 8;
+    } else if(buf[1] == U2F_CMD_APPLET_SELECTION) { // Applet selection
+        return u2f_applet_selection(buf);
     } else {
         memcpy(&buf[0], state_not_supported, 2);
         return 2;
