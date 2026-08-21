@@ -130,6 +130,16 @@ void subghz_scene_receiver_info_on_enter(void* context) {
 
     subghz_custom_btns_reset();
 
+    const char* proto_name =
+        subghz_history_get_protocol_name(subghz->history, subghz->idx_menu_chosen);
+    if(proto_name && subghz->txrx->encoder_plugin_manager) {
+        const SubGhzProtocol* _ep = subghz_protocol_registry_get_by_name(
+            subghz_environment_get_protocol_registry(subghz->txrx->environment), proto_name);
+        if(_ep && !_ep->encoder) {
+            subghz_encoder_plugin_manager_load(subghz->txrx->encoder_plugin_manager, proto_name);
+        }
+    }
+
     subghz_scene_receiver_info_draw_widget(subghz);
 
     if(!subghz_history_full(subghz->history) &&

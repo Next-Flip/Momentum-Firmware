@@ -1,5 +1,6 @@
 #include "subghz_txrx_i.h" // IWYU pragma: keep
 
+#include <lib/subghz/protocols/subghz_encoder_plugin_manager.h>
 #include <lib/subghz/protocols/protocol_items.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
@@ -67,6 +68,8 @@ SubGhzTxRx* subghz_txrx_alloc(void) {
         subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceTypeExternalCC1101);
 #endif
 
+    instance->encoder_plugin_manager = subghz_encoder_plugin_manager_alloc();
+
     return instance;
 }
 
@@ -88,6 +91,7 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     flipper_format_free(instance->fff_data);
     furi_string_free(instance->preset->name);
     subghz_setting_free(instance->setting);
+    subghz_encoder_plugin_manager_free(instance->encoder_plugin_manager);
 
     free(instance->preset);
     free(instance);
@@ -325,8 +329,28 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
         ret = SubGhzTxRxStartTxStateOk;
 
         SubGhzRadioPreset* preset = instance->preset;
-        instance->transmitter =
-            subghz_transmitter_alloc_init(instance->environment, furi_string_get_cstr(temp_str));
+        {
+            const char* _pname = furi_string_get_cstr(temp_str);
+            const SubGhzProtocol* _proto = subghz_protocol_registry_get_by_name(
+                subghz_environment_get_protocol_registry(instance->environment), _pname);
+            if(_proto && !_proto->encoder) {
+                if(!subghz_encoder_plugin_manager_is_loaded(instance->encoder_plugin_manager)) {
+                    subghz_encoder_plugin_manager_load(instance->encoder_plugin_manager, _pname);
+                }
+                if(subghz_encoder_plugin_manager_is_loaded(instance->encoder_plugin_manager)) {
+                    instance->transmitter = subghz_transmitter_alloc_init_with_encoder(
+                        instance->environment,
+                        _pname,
+                        (const SubGhzProtocolEncoder*)subghz_encoder_plugin_manager_get(
+                            instance->encoder_plugin_manager));
+                } else {
+                    instance->transmitter = NULL;
+                }
+            } else {
+                instance->transmitter =
+                    subghz_transmitter_alloc_init(instance->environment, _pname);
+            }
+        }
 
         if(instance->transmitter) {
             if(subghz_transmitter_deserialize(instance->transmitter, flipper_format) ==
@@ -611,12 +635,13 @@ bool subghz_txrx_protocol_is_serializable(SubGhzTxRx* instance) {
 bool subghz_txrx_protocol_is_transmittable(SubGhzTxRx* instance, bool check_type) {
     furi_assert(instance);
     const SubGhzProtocol* protocol = instance->decoder_result->protocol;
+    bool has_encoder = protocol->encoder != NULL ||
+                       subghz_encoder_plugin_manager_is_loaded(instance->encoder_plugin_manager);
     if(check_type) {
         return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
-               protocol->encoder->deserialize && protocol->type == SubGhzProtocolTypeStatic;
+               has_encoder && protocol->type == SubGhzProtocolTypeStatic;
     }
-    return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
-           protocol->encoder->deserialize;
+    return ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) && has_encoder;
 }
 
 void subghz_txrx_receiver_set_filter(SubGhzTxRx* instance, SubGhzProtocolFlag filter) {

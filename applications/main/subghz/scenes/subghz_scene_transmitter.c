@@ -61,6 +61,23 @@ void subghz_scene_transmitter_on_enter(void* context) {
 
     subghz_custom_btns_reset();
 
+    do {
+        FlipperFormat* fff = subghz_txrx_get_fff_data(subghz->txrx);
+        if(!fff) break;
+        FuriString* pname = furi_string_alloc();
+        if(!flipper_format_rewind(fff) || !flipper_format_read_string(fff, "Protocol", pname)) {
+            furi_string_free(pname);
+            break;
+        }
+        const SubGhzProtocol* _p = subghz_protocol_registry_get_by_name(
+            subghz_environment_get_protocol_registry(subghz->txrx->environment),
+            furi_string_get_cstr(pname));
+        if(_p && !_p->encoder && subghz->txrx->encoder_plugin_manager)
+            subghz_encoder_plugin_manager_load(
+                subghz->txrx->encoder_plugin_manager, furi_string_get_cstr(pname));
+        furi_string_free(pname);
+    } while(false);
+
     if(!subghz_scene_transmitter_update_data_show(subghz)) {
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventViewTransmitterError);

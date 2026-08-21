@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "types.h"
 #include "environment.h"
@@ -50,6 +50,11 @@ SubGhzProtocolStatus
  * @return LevelDuration 
  */
 LevelDuration subghz_transmitter_yield(void* context);
+
+SubGhzTransmitter* subghz_transmitter_alloc_init_with_encoder(
+    SubGhzEnvironment* environment,
+    const char* protocol_name,
+    const SubGhzProtocolEncoder* encoder_vtable);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,5 @@
 #include "../subghz_i.h"
+#include "../helpers/subghz_txrx_i.h"
 #include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/bin_raw.h>
 #include <toolbox/name_generator.h>
@@ -161,6 +162,11 @@ static void subghz_scene_add_to_history_callback(
     }
 
     if(subghz_history_add_to_history(history, decoder_base, &preset)) {
+        if(decoder_base->protocol && !decoder_base->protocol->encoder &&
+           subghz->txrx->encoder_plugin_manager) {
+            subghz_encoder_plugin_manager_load(
+                subghz->txrx->encoder_plugin_manager, decoder_base->protocol->name);
+        }
         furi_string_reset(item_name);
         furi_string_reset(item_time);
 
@@ -267,6 +273,8 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->tx_power = subghz->last_settings->tx_power;
 
         subghz_history_reset(history);
+        if(subghz->txrx->encoder_plugin_manager)
+            subghz_encoder_plugin_manager_unload(subghz->txrx->encoder_plugin_manager);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
         subghz->idx_menu_chosen = 0;
     }

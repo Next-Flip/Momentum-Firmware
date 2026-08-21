@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "subghz_txrx.h"
+#include <subghz/protocols/subghz_encoder_plugin_manager.h>
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -20,6 +21,7 @@ struct SubGhzTxRx {
     SubGhzHopperState hopper_state;
 
     SubGhzTxRxState txrx_state;
+    SubGhzEncoderPluginManager* encoder_plugin_manager;
     SubGhzSpeakerState speaker_state;
     const SubGhzDevice* radio_device;
     SubGhzRadioDeviceType radio_device_type;

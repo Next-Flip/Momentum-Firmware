@@ -99,3 +99,13 @@ App(
     sources=["subghz_extended_freq.c"],
     order=650,
 )
+
+App(
+    appid="subghz_encoder_secplus_v2",
+    name="Security+ 2.0 Encoder",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="secplus_v2_encoder_plugin_ep",
+    targets=["f7"],
+    requires=["subghz"],
+    sources=["plugins/encoders/secplus_v2_encoder.c"],
+)

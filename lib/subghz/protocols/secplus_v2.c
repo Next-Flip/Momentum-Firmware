@@ -68,6 +68,7 @@ const SubGhzProtocolDecoder subghz_protocol_secplus_v2_decoder = {
     .get_string_brief = NULL,
 };
 
+#ifndef SUBGHZ_SECPLUS_V2_ENCODER_IN_FLASH
 const SubGhzProtocolEncoder subghz_protocol_secplus_v2_encoder = {
     .alloc = subghz_protocol_encoder_secplus_v2_alloc,
     .free = subghz_protocol_encoder_secplus_v2_free,
@@ -77,6 +78,8 @@ const SubGhzProtocolEncoder subghz_protocol_secplus_v2_encoder = {
     .yield = subghz_protocol_encoder_secplus_v2_yield,
 };
 
+#endif
+
 const SubGhzProtocol subghz_protocol_secplus_v2 = {
     .name = SUBGHZ_PROTOCOL_SECPLUS_V2_NAME,
     .type = SubGhzProtocolTypeDynamic,
@@ -84,9 +87,10 @@ const SubGhzProtocol subghz_protocol_secplus_v2 = {
             SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_secplus_v2_decoder,
-    .encoder = &subghz_protocol_secplus_v2_encoder,
+    .encoder = NULL,
 };
 
+#ifndef SUBGHZ_SECPLUS_V2_ENCODER_IN_FLASH
 void* subghz_protocol_encoder_secplus_v2_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
     SubGhzProtocolEncoderSecPlus_v2* instance = malloc(sizeof(SubGhzProtocolEncoderSecPlus_v2));
@@ -636,6 +640,8 @@ LevelDuration subghz_protocol_encoder_secplus_v2_yield(void* context) {
     return ret;
 }
 
+#endif
+
 bool subghz_protocol_secplus_v2_create_data(
     void* context,
     FlipperFormat* flipper_format,
@@ -644,28 +650,12 @@ bool subghz_protocol_secplus_v2_create_data(
     uint32_t cnt,
     SubGhzRadioPreset* preset) {
     furi_check(context);
-
-    SubGhzProtocolEncoderSecPlus_v2* instance = context;
-    instance->generic.serial = serial;
-    instance->generic.cnt = cnt;
-    instance->generic.btn = btn;
-    instance->generic.data_count_bit =
-        (uint8_t)subghz_protocol_secplus_v2_const.min_count_bit_for_found;
-    subghz_protocol_secplus_v2_encode(instance);
-    SubGhzProtocolStatus res =
-        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
-
-    uint8_t key_data[sizeof(uint64_t)] = {0};
-    for(size_t i = 0; i < sizeof(uint64_t); i++) {
-        key_data[sizeof(uint64_t) - i - 1] = (instance->secplus_packet_1 >> (i * 8)) & 0xFF;
-    }
-
-    if((res == SubGhzProtocolStatusOk) &&
-       !flipper_format_write_hex(flipper_format, "Secplus_packet_1", key_data, sizeof(uint64_t))) {
-        FURI_LOG_E(TAG, "Unable to add Secplus_packet_1");
-        res = SubGhzProtocolStatusErrorParserOthers;
-    }
-    return res == SubGhzProtocolStatusOk;
+    UNUSED(flipper_format);
+    UNUSED(serial);
+    UNUSED(btn);
+    UNUSED(cnt);
+    UNUSED(preset);
+    return false;
 }
 
 void* subghz_protocol_decoder_secplus_v2_alloc(SubGhzEnvironment* environment) {
