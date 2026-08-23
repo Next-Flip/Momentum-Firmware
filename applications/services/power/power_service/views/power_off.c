@@ -9,34 +9,61 @@ struct PowerOff {
 
 typedef struct {
     PowerOffResponse response;
+    PowerOffVariant variant;
     uint32_t time_left_sec;
 } PowerOffModel;
 
 static void power_off_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(_model);
     PowerOffModel* model = _model;
+
+    static const struct {
+        const char* header;
+        const char* bubble_primary;
+        const char* bubble_secondary;
+        const char* bottom_hint;
+    } strings[2] = {
+        [PowerOffVariantLowBattery] =
+            {.header = "Battery low!",
+             .bubble_primary = "Charge me!",
+             .bubble_secondary = "Don't forget!",
+             .bottom_hint = "Hold a second..."},
+        [PowerOffVariantAutoPoweroff] =
+            {.header = "Auto PowerOff",
+             .bubble_primary = "Battery low!",
+             .bubble_secondary = "Cancelled",
+             .bottom_hint = "Charge to reset"},
+    };
+    const char* header = strings[model->variant].header;
+    const char* bubble_primary = strings[model->variant].bubble_primary;
+    const char* bubble_secondary = strings[model->variant].bubble_secondary;
+    const char* bottom_hint = strings[model->variant].bottom_hint;
+
     char buff[32];
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 1, AlignCenter, AlignTop, "Battery low!");
+    canvas_draw_str_aligned(canvas, 64, 1, AlignCenter, AlignTop, header);
     canvas_draw_icon(canvas, 0, 18, &I_BatteryBody_52x28);
     canvas_draw_icon(canvas, 16, 25, &I_FaceNopower_29x14);
     elements_bubble(canvas, 54, 17, 70, 30);
 
     canvas_set_font(canvas, FontSecondary);
     if(model->response == PowerOffResponseDefault) {
-        snprintf(buff, sizeof(buff), "Charge me!\nOff in %lus!", model->time_left_sec);
+        snprintf(buff, sizeof(buff), "%s\nOff in %lus", bubble_primary, model->time_left_sec);
         elements_multiline_text_aligned(canvas, 70, 23, AlignLeft, AlignTop, buff);
 
         elements_button_left(canvas, "Cancel");
         elements_button_center(canvas, "OK");
-        elements_button_right(canvas, "Hide");
+
+        if(model->variant == PowerOffVariantLowBattery) {
+            elements_button_right(canvas, "Hide");
+        }
     } else {
-        snprintf(buff, sizeof(buff), "Charge me!\nDon't forget!");
+        snprintf(buff, sizeof(buff), "%s\n%s", bubble_primary, bubble_secondary);
         elements_multiline_text_aligned(canvas, 70, 23, AlignLeft, AlignTop, buff);
 
-        canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignBottom, "Hold a second...");
+        canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignBottom, bottom_hint);
     }
 }
 
@@ -71,6 +98,12 @@ PowerOff* power_off_alloc(void) {
     view_set_draw_callback(power_off->view, power_off_draw_callback);
     view_set_input_callback(power_off->view, power_off_input_callback);
 
+    with_view_model(
+        power_off->view,
+        PowerOffModel * model,
+        { model->variant = PowerOffVariantLowBattery; },
+        false);
+
     return power_off;
 }
 
@@ -89,6 +122,19 @@ void power_off_set_time_left(PowerOff* power_off, uint8_t time_left) {
     furi_assert(power_off);
     with_view_model(
         power_off->view, PowerOffModel * model, { model->time_left_sec = time_left; }, true);
+}
+
+void power_off_set_variant(PowerOff* power_off, PowerOffVariant variant) {
+    furi_assert(power_off);
+    with_view_model(
+        power_off->view,
+        PowerOffModel * model,
+        {
+            model->variant = variant;
+            // Reset response so the warning UI shows the countdown on each new trigger
+            model->response = PowerOffResponseDefault;
+        },
+        true);
 }
 
 PowerOffResponse power_off_get_response(PowerOff* power_off) {
