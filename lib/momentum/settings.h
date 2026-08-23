@@ -100,6 +100,7 @@ typedef struct {
     SpiHandle spi_nrf24_handle;
     FuriHalSerialId uart_esp_channel;
     FuriHalSerialId uart_nmea_channel;
+    bool nfcv_fast_timing;
     bool file_naming_prefix_after;
     FuriHalVersionColor spoof_color;
     ScreenFrameColor rpc_color_fg;

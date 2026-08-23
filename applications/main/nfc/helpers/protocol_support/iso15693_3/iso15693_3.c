@@ -83,9 +83,24 @@ static NfcCommand
     NfcApp* instance = context;
     Iso15693_3ListenerEvent* iso15693_3_event = event.event_data;
 
-    if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
-        if(furi_string_size(instance->text_box_store) < NFC_LOG_SIZE_MAX) {
-            furi_string_cat_printf(instance->text_box_store, "R:");
+    if(furi_string_size(instance->text_box_store) < NFC_LOG_SIZE_MAX) {
+        if(iso15693_3_event->type == Iso15693_3ListenerEventTypeFieldOn) {
+            furi_string_cat_str(instance->text_box_store, "FIELD ON\n");
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventListenerUpdate);
+        } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeFieldOff) {
+            furi_string_cat_str(instance->text_box_store, "FIELD OFF\n");
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventListenerUpdate);
+        } else if(
+            iso15693_3_event->type == Iso15693_3ListenerEventTypeRequest ||
+            iso15693_3_event->type == Iso15693_3ListenerEventTypeRequestError ||
+            iso15693_3_event->type == Iso15693_3ListenerEventTypeResponse) {
+            furi_string_cat_printf(
+                instance->text_box_store,
+                iso15693_3_event->type == Iso15693_3ListenerEventTypeRequest       ? "R:" :
+                iso15693_3_event->type == Iso15693_3ListenerEventTypeRequestError  ? "E:" :
+                                                                                      "T:");
             for(size_t i = 0; i < bit_buffer_get_size_bytes(iso15693_3_event->data->buffer); i++) {
                 furi_string_cat_printf(
                     instance->text_box_store,

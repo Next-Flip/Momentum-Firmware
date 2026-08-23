@@ -5,6 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexSubghzBypass,
     VarItemListIndexSubghzExtend,
     VarItemListIndexGpioPins,
+    VarItemListIndexNfcvTiming,
     VarItemListIndexFileNamingPrefix,
 };
 
@@ -28,6 +29,14 @@ static void momentum_app_scene_protocols_file_naming_prefix_changed(VariableItem
     bool value = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, value ? "After" : "Before");
     momentum_settings.file_naming_prefix_after = value;
+    app->save_settings = true;
+}
+
+static void momentum_app_scene_protocols_nfcv_timing_changed(VariableItem* item) {
+    MomentumApp* app = variable_item_get_context(item);
+    bool value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, value ? "Fast" : "Compat");
+    momentum_settings.nfcv_fast_timing = value;
     app->save_settings = true;
 }
 
@@ -60,6 +69,16 @@ void momentum_app_scene_protocols_on_enter(void* context) {
 
     item = variable_item_list_add(var_item_list, "GPIO Pins", 0, NULL, app);
     variable_item_set_current_value_text(item, ">");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "NFC-V Timing",
+        2,
+        momentum_app_scene_protocols_nfcv_timing_changed,
+        app);
+    variable_item_set_current_value_index(item, momentum_settings.nfcv_fast_timing);
+    variable_item_set_current_value_text(
+        item, momentum_settings.nfcv_fast_timing ? "Fast" : "Compat");
 
     item = variable_item_list_add(
         var_item_list,

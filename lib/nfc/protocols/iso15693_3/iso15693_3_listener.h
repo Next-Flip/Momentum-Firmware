@@ -11,7 +11,11 @@ extern "C" {
 typedef struct Iso15693_3Listener Iso15693_3Listener;
 
 typedef enum {
+    Iso15693_3ListenerEventTypeFieldOn,
     Iso15693_3ListenerEventTypeFieldOff,
+    Iso15693_3ListenerEventTypeRequest,
+    Iso15693_3ListenerEventTypeRequestError,
+    Iso15693_3ListenerEventTypeResponse,
     Iso15693_3ListenerEventTypeCustomCommand,
     Iso15693_3ListenerEventTypeSingleEof,
 } Iso15693_3ListenerEventType;

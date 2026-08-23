@@ -11,7 +11,11 @@ extern "C" {
 typedef struct SlixListener SlixListener;
 
 typedef enum {
+    SlixListenerEventTypeFieldOn,
     SlixListenerEventTypeFieldOff,
+    SlixListenerEventTypeRequest,
+    SlixListenerEventTypeRequestError,
+    SlixListenerEventTypeResponse,
     SlixListenerEventTypeCustomCommand,
 } SlixListenerEventType;
 
