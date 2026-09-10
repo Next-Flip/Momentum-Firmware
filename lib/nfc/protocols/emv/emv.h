@@ -54,6 +54,7 @@ extern "C" {
 
 typedef struct {
     uint16_t tag;
+    uint8_t size;
     uint8_t data[];
 } PDOLValue;
 
@@ -85,7 +86,8 @@ typedef struct {
     uint8_t application_interchange_profile[2];
     char application_name[16 + 1];
     char application_label[16 + 1];
-    char cardholder_name[24 + 1];
+    // EMV Book 3 Annex A gives 5F20 an ans length of 2-26
+    char cardholder_name[26 + 1];
     uint8_t pan[10]; // card_number
     uint8_t pan_len;
     uint8_t exp_day;
