@@ -195,7 +195,19 @@ $ ./fbt launch APPSRC=your_appid
 
 <h2 align="center">Stargazers over time</h2>
 
-[![Stargazers over time](https://starchart.cc/Next-Flip/Momentum-Firmware.svg?variant=adaptive)](https://starchart.cc/Next-Flip/Momentum-Firmware)
+<p align="center">
+  <a href="https://www.star-history.com/#Next-Flip/Momentum-Firmware&Date">
+    <picture>
+      <source
+        media="(prefers-color-scheme: dark)"
+        srcset="https://api.star-history.com/svg?repos=Next-Flip/Momentum-Firmware&amp;type=Date&amp;theme=dark">
+      <img
+        src="https://api.star-history.com/svg?repos=Next-Flip/Momentum-Firmware&amp;type=Date"
+        alt="Stargazers over time — Momentum Firmware"
+        width="800">
+    </picture>
+  </a>
+</p>
 
 <h2 align="center">❤️ Support</h2>
 
