@@ -233,6 +233,8 @@ void subghz_cli_command_tx(PipeSide* pipe, FuriString* args, void* context) {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
 
+    // Start from a clean custom button state, otherwise a previous key's button is sent
+    subghz_custom_btns_reset();
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
     subghz_transmitter_deserialize(transmitter, flipper_format);
 
@@ -266,6 +268,7 @@ void subghz_cli_command_tx(PipeSide* pipe, FuriString* args, void* context) {
     flipper_format_free(flipper_format);
     subghz_transmitter_free(transmitter);
     subghz_environment_free(environment);
+    subghz_custom_btns_reset();
 }
 
 typedef struct {
@@ -602,6 +605,8 @@ void subghz_cli_command_tx_from_file(PipeSide* pipe, FuriString* args, void* con
     subghz_devices_init();
 
     SubGhzEnvironment* environment = subghz_cli_environment_init();
+    // Start from a clean custom button state, otherwise a previous key's button is sent
+    subghz_custom_btns_reset();
 
     do {
         if(furi_string_size(args)) {

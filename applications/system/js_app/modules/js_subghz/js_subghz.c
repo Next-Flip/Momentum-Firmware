@@ -2,6 +2,7 @@
 #include "radio_device_loader.h"
 
 #include <lib/subghz/transmitter.h>
+#include <lib/subghz/blocks/custom_btn.h>
 #include <lib/subghz/devices/devices.h>
 #include <lib/subghz/protocols/protocol_items.h>
 
@@ -359,6 +360,8 @@ static void js_subghz_transmit_file(struct mjs* mjs) {
             repeat = 1;
         }
 
+        // Start from a clean custom button state, otherwise a previous key's button is sent
+        subghz_custom_btns_reset();
         transmitter = subghz_transmitter_alloc_init(environment, furi_string_get_cstr(temp_str));
         if(!transmitter) {
             mjs_prepend_errorf(mjs, MJS_INTERNAL_ERROR, "Failed to init transmitter");
@@ -418,6 +421,7 @@ static void js_subghz_transmit_file(struct mjs* mjs) {
     }
     furi_string_free(temp_str);
     subghz_environment_free(environment);
+    subghz_custom_btns_reset();
 
     if(fff_raw) {
         flipper_format_free(fff_raw);
